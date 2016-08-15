@@ -21,16 +21,27 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, verbose = F){
   # Remove smaller loops
   loop.bed <- loop.bed[abs(loop.bed[,6]-loop.bed[,2]) >= smallTreshold ,]
   # Is BED 1 upstream of BED2?
+  #Elzo maybe do something like this
+  loop.bed[loop.bed[,2] > loop.bed[,5],] <- loop.bed[loop.bed[,2] > loop.bed[,5],c(4,5,6,1,2,3)]
+  
   for(i in 1:length(loop.bed[,1])){
     if( loop.bed[i,2] > loop.bed[i,5]){
       loop.bed <- loop.bed[i,c(4,5,6,1,2,3)]
     }
   }
   # Prune NA-rows
-  loop.bed <- na.exclude(loop.bed[1:6])
+  #Elzo comma before 1:6
+  loop.bed <- na.exclude(loop.bed[,1:6])
+  #loop.bed <- na.exclude(loop.bed[1:6])
   # Get start positions of the loop, floored to 10kb windows, and make chr:pos index
-  loop.bed1.p <- paste0(loop.bed[,1], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,3] - loop.bed[,2] ) /2 )+ loop.bed[,2])   /resolution)))
-  loop.bed2.p <- paste0(loop.bed[,4], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,6] - loop.bed[,5] )/2)  + loop.bed[,5])   /resolution)))
+  #loop.bed1.p <- paste0(loop.bed[,1], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,3] - loop.bed[,2] ) /2 )+ loop.bed[,2])   /resolution)))
+  #loop.bed2.p <- paste0(loop.bed[,4], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,6] - loop.bed[,5] )/2)  + loop.bed[,5])   /resolution)))
+  
+  #Elzo why not the following
+  #just average start and end (middle), divide by the resolution, floor and multiply by the resolution
+  loop.bed1.p <- paste0(loop.bed[,1], ":", resolution*floor( (loop.bed[,2]+loop.bed[,3])/2*resolution) )
+  loop.bed2.p <- paste0(loop.bed[,4], ":", resolution*floor( (loop.bed[,5]+loop.bed[,6])/2*resolution) )
+  
   # Bugfix: in some cases paste0 yields an extra whitespace
   loop.bed1.p <- gsub(" ", "", loop.bed1.p, fixed = TRUE)
   loop.bed2.p <- gsub(" ", "", loop.bed2.p, fixed = TRUE)
@@ -74,7 +85,11 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, verbose = F){
     score.matrix <- score.matrix + s.mat
   }
   # Normalise to 100 loops
-  norma_loopCounts <- (score.matrix/as.numeric(unname(table(loop.bed1.p %in% bed.p)) ) ) * 100
+  #Elzo you tested for the fact that all the loop.bed1.p are in bed.p right?
+  #why the match, cant you do.
+  norma_loopCounts <- (score.matrix/nrow(loop.bed1.p)) * 100
+  #Elzo I find the normalization to 100 loops a bit strange
+  #norma_loopCounts <- (score.matrix/as.numeric(unname(table(loop.bed1.p %in% bed.p)) ) ) * 100
   # Rotate 90CW, so that diagonal of HiC-matrix is in bottomleft
   norma_loopCounts <- t(apply(norma_loopCounts, 2, rev))
   colnames(norma_loopCounts) <- 1:21

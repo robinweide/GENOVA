@@ -1,0 +1,22 @@
+Package: GENOVA
+Title: GENOVA: expore the Hi-C
+Version: 0.007
+Authors@R: c(
+  person("Robin H.", "van der Weide", email = "r.vd.weide@nki.nl", role = c("aut", "cre")),
+  person("Elzo", "de Wit", email = "e.d.wit@nki.nl", role = "aut"))
+Description: GENOVA consist of a set of analysis- and visualisation-functions. These will help to discover valuable information buried deep in your HiC-matrices.
+Depends:
+    R (>= 3.3.1)
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    data.table,
+    fields,
+    grid,
+    reshape2
+RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

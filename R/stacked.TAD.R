@@ -20,12 +20,14 @@ stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F)
   # Remove smaller tads
   tad.bed <- tad.bed[abs(tad.bed[,6]-tad.bed[,2]) >= smallTreshold ,]
   # Is BED 1 upstream of BED2?
+  #Elzo see APA.R
   for(i in 1:length(tad.bed[,1])){
     if( tad.bed[i,2] > tad.bed[i,5]){
       tad.bed <- tad.bed[i,c(4,5,6,1,2,3)]
     }
   }
   # Prune NA-rows
+  #Elzo see APA.R
   tad.bed <- na.exclude(tad.bed[1:6])
   # Make a bed from bedpe, with cols 1,2 and 6
   tad <- tad.bed[,c(1,2,6)]
@@ -39,6 +41,7 @@ stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F)
     if(verbose){cat(paste0(i, ' of ', tad.length, ' tads.'), "\r")}
     # Determine size of tad
     tadSize <-  tad[i,3] - tad[i,2]
+    #Elzo you removed them on line 21
     if(tadSize < smallTreshold){next}
     halftadSize <- floor((tadSize/resolution)/2)*resolution
     # Get start positions of the tad, floored to 10kb windows, and make chr:pos index
@@ -53,6 +56,7 @@ stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F)
     # Check if valid indeces (Missing or Mitochondrial stuff)
     if(!all(is.finite(start.pos),is.finite(end.pos))){next}
     # Extract data from HiC-pro matrix
+    #Elzo why not select.subset?
     x <- rep(start.pos:end.pos, each=length(start.pos:end.pos))
     y <- rep((start.pos):(end.pos), length(start.pos:end.pos))
     sel <- hicdata[list(x,y)]

@@ -78,8 +78,7 @@ visualise.stacked.TAD.ggplot <- function(stackedlist, title, focus = 1, zCoef = 
     ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
     ggplot2::labs(title = '',x = "", y = "", fill = "Difference")
-  return(grid.arrange(plot1, plot2, ncol=1))
-  # in newer versions of grid:
-  #grid::grid.newpage()
-  #grid::grid.draw(rbind(grid::ggplotGrob(plot1), ggplotGrob(grid::plot2), size = "last"))
+  #return(gridExtra::grid.arrange(plot1, plot2, ncol=1))
+  grid::grid.newpage()
+  grid::grid.draw(rbind(ggplot2::ggplotGrob(plot1), ggplot2::ggplotGrob(plot2), size = "last"))
 }

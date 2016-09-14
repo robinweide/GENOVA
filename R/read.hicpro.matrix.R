@@ -8,9 +8,8 @@
 #' @param norm Normalising factor.
 #' @return A data.table with normalised counts.
 #' @export
-read.hicpro.matrix <- function(file, norm=100e6){
+read.hicpro.matrix <- function(file, norm=1e9){
   data <- data.table::fread(file)
   data.table::setkey(data, "V1", "V2")
   data$V3 <- norm*data$V3/sum(data$V3)
-  return(data)
-}
+  return(data)}

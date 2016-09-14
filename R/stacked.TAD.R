@@ -1,5 +1,3 @@
-
-
 #' Get a z-stack matrix of TADs
 #'
 #' Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.

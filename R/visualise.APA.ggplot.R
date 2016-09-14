@@ -3,6 +3,7 @@
 #' @param APAlist A list of results from `APA`.
 #' @param title Text to plot
 #' @param Focus Wich sample does need to be the to-compare sample?
+#' @param zCoef Coefficient to change the zlims
 #' @return A grid object, containing two ggplot-objects.
 #' @export
 visualise.APA.ggplot <- function(APAlist, title, zCoef = 1, focus = 1, ...){

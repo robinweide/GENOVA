@@ -53,7 +53,7 @@ visualise.APA.ggplot <- function(APAlist, title, zCoef = 1, focus = 1, ...){
     ggplot2::scale_x_continuous(breaks = c(5.5,11,16.5), labels = c("-50Kb", "3'", "+50Kb"))+
     ggplot2::scale_y_continuous(breaks = c(5.5,11,16.5), labels = c("-50Kb", "5'", "+50Kb")) +
     ggplot2::labs(x = "", y = "", fill = "Difference")
-  return(grid.arrange(plot1, plot2, ncol=1))
-  #grid::grid.newpage()
-  #grid::grid.draw(rbind(grid::ggplotGrob(plot1), grid::ggplotGrob(plot2), size = "last"))
+  #return(gridExtra::grid.arrange(plot1, plot2, ncol=1))
+  grid::grid.newpage()
+  grid::grid.draw(rbind(ggplot2::ggplotGrob(plot1), ggplot2::ggplotGrob(plot2), size = "last"))
 }

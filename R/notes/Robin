@@ -1,0 +1,603 @@
+#' Get a z-stack matrix of 2D-regions (e.g. loops).
+#'
+#' Extract matrices around a defined set of pixels, like possible loops.
+#' Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
+#'
+#' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
+#' @param loop.bed Bedpe file containing the loop positions: produced by read.bedpe().
+#' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
+#' @param verbose Produces a progress-indication.
+#' @return A tidy data.frame containing the Z-stack scores.
+#' @import data.table
+#' @export
+APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose = F, saveRaw = F, outlierCutOff = 8, ...){
+  MADTRESHOLD <- outlierCutOff
+  if(((size-1) /2 )%%2 != 0){stop("Size should be an even number +1")}
+  size.offset = (size-1)/2
+  if(saveRaw){
+    rawMatList = list()
+  }
+  hicdata <- experiment$ICE
+  bed <- experiment$ABS
+  resolution <- experiment$RES
+  # Check for setkey
+  if(is.null(data.table::key(hicdata))){data.table::setkey(hicdata, V1, V2)}
+  # Make chr:pos index of HiC-index
+  bed.p <- paste0(bed[,1], ":", bed[,2])
+  # Remove smaller loops
+  loop.bed <- loop.bed[abs(loop.bed[,6]-loop.bed[,2]) >= smallTreshold ,]
+  # Is BED 1 upstream of BED2?
+  #Elzo maybe do something like this
+  loop.bed[loop.bed[,2] > loop.bed[,5],] <- loop.bed[loop.bed[,2] > loop.bed[,5],c(4,5,6,1,2,3)]
+  
+  for(i in 1:length(loop.bed[,1])){
+    if( loop.bed[i,2] > loop.bed[i,5]){
+      loop.bed <- loop.bed[i,c(4,5,6,1,2,3)]
+    }
+  }
+  # Prune NA-rows
+  #Elzo comma before 1:6
+  loop.bed <- na.exclude(loop.bed[,1:6])
+  #loop.bed <- na.exclude(loop.bed[1:6])
+  # Get start positions of the loop, floored to 10kb windows, and make chr:pos index
+  loop.bed1.p <- paste0(loop.bed[,1], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,3] - loop.bed[,2] ) /2 )+ loop.bed[,2])   /resolution)))
+  loop.bed2.p <- paste0(loop.bed[,4], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,6] - loop.bed[,5] )/2)  + loop.bed[,5])   /resolution)))
+  
+  #Elzo why not the following
+  #just average start and end (middle), divide by the resolution, floor and multiply by the resolution
+  #Robin: because that doesn't work: *e*-ids throughout
+  # loop.bed1.p <- paste0(loop.bed[,1], ":", resolution*floor( ( (loop.bed[,2]+loop.bed[,3])/2)/resolution) )
+  # loop.bed2.p <- paste0(loop.bed[,4], ":", resolution*floor( ( (loop.bed[,5]+loop.bed[,6])/2)/resolution) )
+  
+  # Bugfix: in some cases paste0 yields an extra whitespace
+  loop.bed1.p <- gsub(" ", "", loop.bed1.p, fixed = TRUE)
+  loop.bed2.p <- gsub(" ", "", loop.bed2.p, fixed = TRUE)
+  # Check if loops are all found:
+  if(!all(loop.bed1.p %in% bed.p)){
+    if(!all(loop.bed2.p %in% bed.p) ){
+      stop('not all loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?')
+    }
+    else{
+      stop(paste0(table(foo %in% bar)[1],' upstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))}
+  }else{
+    if(!all(loop.bed2.p %in% bed.p) ){
+      stop(paste0(table(foo %in% bar)[1],' downstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))
+    }
+  }
+  # Get anchor HiC-indexes
+  x.pos <- bed[match(loop.bed1.p,bed.p),4]
+  y.pos <- bed[match(loop.bed2.p,bed.p),4]
+  # Initialise matrix
+  score.matrix <- matrix(0, ncol=size, nrow=size)
+  # Loop trough loops and sum over scorematrices
+  lx <- length(x.pos)
+  for( i in 1:lx){
+    if(verbose){cat(paste0(i, ' of ', lx, ' loops.'), "\r")}
+    # Get Indeces of 10 up/downstream of anchor
+    sel.x <- (x.pos[i]-size.offset):(x.pos[i]+size.offset)
+    sel.y <- (y.pos[i]-size.offset):(y.pos[i]+size.offset)
+    # Exract scores from HiC
+    s <- select.sub.2D(hicdata, sel.x,sel.y)
+    s$V1 <- (s$V1 - min(sel.x)) + 1
+    s$V2 <- (s$V2 - min(sel.y)) + 1
+    # Check for 21x21 mat:
+    if(length(unique(s$V2)) < size){
+      cols <- 1:size
+      toADD <- cols[!cols %in% unique(s$V2)]
+      newdf <- data.frame(unique(cbind(rep(1:size, each = size), rep(toADD, length = size),0)))
+      colnames(newdf) <- c("V1","V2","V3")
+      s <- rbind(s, newdf)
+    }
+    if(length(unique(s$V1)) < size){
+      cols <- 1:size
+      toADD <- cols[!cols %in% unique(s$V1)]
+      newdf <- data.frame(unique(cbind(rep(toADD, length = size),rep(1:size, each = size),0)))
+      colnames(newdf) <- c("V1","V2","V3")
+      s <- rbind(s, newdf)
+    }
+    # Make matrix
+    # Fastest way!
+    s.mat <- reshape2::acast(s, V1~V2, value.var="V3")
+
+    # # Old way
+    # s.mat <- matrix(nrow=21, ncol=21,
+    #                 dimnames=list(1:21, 1:21))
+    # s.mat[cbind(s$V1, s$V2)] <- s$V3
+    s.mat[is.na(s.mat)] <- 0
+    # Add to Z-stack
+    score.matrix <- score.matrix + s.mat
+    # Add to rawMatList
+    if(saveRaw){
+      rawMatList[[i]] <- s.mat
+    }
+  } 
+  # Normalise to 100 loops
+  #Elzo you tested for the fact that all the loop.bed1.p are in bed.p right?
+  #why the match, cant you do.
+  norma_loopCounts <- (score.matrix/length(loop.bed1.p)) 
+  SL <- length(loop.bed1.p)
+  #Elzo I find the normalization to 100 loops a bit strange
+  #norma_loopCounts <- (score.matrix/as.numeric(unname(table(loop.bed1.p %in% bed.p)) ) ) * 100
+  # Rotate 90CW, so that diagonal of HiC-matrix is in bottomleft
+  norma_loopCounts <- t(apply(norma_loopCounts, 2, rev))
+  colnames(norma_loopCounts) <- 1:size
+  if(saveRaw){
+    #return(list(STACK = (results.vector/SL)[1:99,1:99],RAW = simplify2array(rawMatList)))
+    rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
+    sm <- simplify2array(rawMatList)
+    MED <- apply(sm,MARGIN = 1:2, median)
+    MAD <- apply(sm,MARGIN = 1:2, mad)
+    tres <- MED+(MAD*MADTRESHOLD)
+    tres[is.na(tres)] <- 0
+    for(i in 1:length(rawMatList)){
+      #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
+      m <- rawMatList[[i]]
+      #cat(i, "\n")
+      if(any(m[1:size,1:size] > tres[1:size,1:size]*5)){
+        rawMatList[[i]] <- matrix(0, nrow = size, ncol=size)
+        SL - 1
+      }
+    }
+    STACKoutlierr <- Reduce(rawMatList, f = '+')
+    norma_loopCountss <- (STACKoutlierr/SL) 
+    norma_loopCountss <- t(apply(norma_loopCountss, 2, rev))
+    colnames(norma_loopCountss) <- 1:size
+    
+    return(list(APA = norma_loopCounts,rawMatList = rawMatList, APAoutlier =  norma_loopCountss   ))
+    #return(list(APA = norma_loopCounts, rawMatList = rawMatList))
+  } else {
+  return(norma_loopCounts)
+  }
+}
+
+#' Construct a HiC-experiment.
+#'
+#' Make a structure which holds the most needed information of a HiC-experiment.
+#'
+#' @param ICEDpath Full path to HiC-pro matrix-file.
+#' @param BEDpath Full path the HiC-pro index-file
+#' @param SAMPLENAME The name of the sample.
+#' @param COLOR Color associated with sample.
+#' @param COMMENTS A place to store some comments.
+#' @return A list.
+#' @export
+construct.experiment <- function(ICEDpath,BEDpath, SAMPLENAME, COLOR = 1, COMMENTS = NULL){
+  # Check if files exist
+  if(!file.exists(ICEDpath)){stop('ICE-matrix file not found.')}
+  if(!file.exists(BEDpath)){stop('ICE-index file not found.')}
+  
+  ICE <- read.hicpro.matrix(ICEDpath)
+  ABS <- data.table::fread(BEDpath, header = F, data.table = F)
+  chromVector <- as.character(unique(ABS$V1))
+  res = as.numeric( median(ABS$V3-ABS$V2)  )
+  
+  # Contruct list
+  list(
+    # Iced HiC-matrix in three-column format (i.e. from HiC-pro)
+    ICE = ICE,
+    
+    # HiC-index in four-column format (i.e. from HiC-pro)
+    ABS = ABS,
+    
+    # Name of sample
+    NAME = SAMPLENAME,
+    
+    # Resolution of sample
+    RES = res,
+    
+    # Available chromosomes
+    CHRS = chromVector,
+    
+    # Color of sample (optional, but recommended for running RCP)
+    COL = COLOR,
+    
+    # Comments
+    COMM = COMMENTS
+    
+  )
+}
+
+#' Read hicpro three column matrix format.
+#'
+#' This function loads a HiC-pro file as a matrix. It assumes a three-column
+#' layout: bin1, bin2 and score. All scors are normalised to contacts per *norm*
+#' total contacts.
+#'
+#' @param file Full path to file.
+#' @param norm Normalising factor.
+#' @return A data.table with normalised counts.
+#' @export
+read.hicpro.matrix <- function(file, norm=1e9){
+  data <- data.table::fread(file)
+  data.table::setkey(data, "V1", "V2")
+  data$V3 <- norm*data$V3/sum(data$V3)
+  return(data)}
+
+select.sub.2D <- function( data , X, Y ){
+  x <- rep(X[1]:X[length(X)], X[length(X)]-X[1]+1)
+  y <- rep(Y[1]:Y[length(Y)], each=length(Y[1]:Y[length(Y)]))
+  data.sub <- data[base::list(x,y)]
+  data.sub <- data.sub[!is.na(data.sub$V3)]
+  data.sub
+}
+
+TADbedpeToGranges <- function(inpath, ...){
+  infile <- read.delim(inpath, header=FALSE)
+  vijf <- infile[,c(1,2,2)]
+  drie <- infile[,c(1,3,3)]
+  if(!any(grepl(infile$V1, pattern =  "chr") )){
+    vijf[,1 ] <- gsub(vijf[,1], pattern = "^", replacement = "chr")
+    drie[,1 ] <- gsub(drie[,1], pattern = "^", replacement = "chr")
+  }
+  colnames(vijf) <- c("seqnames", "start", "end")
+  colnames(drie) <- c("seqnames", "start", "end")
+  vijf <- na.exclude(vijf)
+  drie <- na.exclude(drie)
+  # check if 5 is smaller than 3
+  for(i in 1:nrow(drie)){
+    if(drie[i,2] < vijf[i,2]){
+      dd <- drie[i,]
+      vv <- vijf[i,]
+      drie[i,] <- vv
+      vijf[i,] <- dd
+    }
+  }
+  grV <- GenomicRanges::makeGRangesFromDataFrame(vijf)
+  grD <- GenomicRanges::makeGRangesFromDataFrame(drie)
+  
+  return(list(fivePrime = grV,threePrime = grD))
+}
+
+loopToGranges <- function(inpath, HICCUPS = T,...){
+  if(HICCUPS){
+    infile <- read.delim(inpath, header=TRUE)
+  } else {
+    infile <- read.delim(inpath, header=FALSE)
+  }
+  vijf <- infile[,1:3]
+  drie <- infile[,4:6]
+  if(!any(grepl(infile$V1, pattern =  "chr") )){
+    vijf[,1 ] <- gsub(vijf[,1], pattern = "^", replacement = "chr")
+    drie[,1 ] <- gsub(drie[,1], pattern = "^", replacement = "chr")
+  }
+  colnames(vijf) <- c("seqnames", "start", "end")
+  colnames(drie) <- c("seqnames", "start", "end")
+  vijf <- na.exclude(vijf)
+  drie <- na.exclude(drie)
+  for(i in 1:nrow(vijf)){
+    if(vijf[i,3] < vijf[i,2]){
+      d <- vijf[i,3]
+      vijf[i,3] <- vijf[i,2]
+      vijf[i,2] <- d
+    }
+  }
+  for(i in 1:nrow(drie)){
+    if(drie[i,3] < drie[i,2]){
+      d <- drie[i,3]
+      drie[i,3] <- drie[i,2]
+      drie[i,2] <- d
+    }
+  }
+  # check if 5 is smaller than 3
+  for(i in 1:nrow(drie)){
+    if(drie[i,2] < vijf[i,2]){
+      dd <- drie[i,]
+      vv <- vijf[i,]
+      drie[i,] <- vv
+      vijf[i,] <- dd
+    }
+  }
+  grV <- GenomicRanges::makeGRangesFromDataFrame(vijf)
+  grD <- GenomicRanges::makeGRangesFromDataFrame(drie)
+  
+  return(list(fivePrime = grV,threePrime = grD))
+}
+
+addSlopToGR <- function(inGR, fiveSlop = 20e3, threeSlop = 20e3){
+  df <- as.data.frame(inGR)
+  df[,2] <- df[,2] - fiveSlop
+  df[,3] <- df[,3] + threeSlop
+  return(makeGRangesFromDataFrame(df))
+}
+
+#' A quick lookup of square region from a HiC matrix.
+#'
+#' Extracts a symmetric matrix around the diagonal from *start* to *stop*.
+#'
+#' @param data HiC-pro matrix
+#' @param start Start of index-range.
+#' @param end End of index-range.
+#' @return A data.table with normalised counts.
+#' @export
+select.sub <- function( data, start, end ){
+  x <- rep(start:end, end-start+1)
+  y <- rep(start:end, each=end-start+1)
+  data.sub <- data[list(x,y)]
+  data.sub <- data.sub[!is.na(data.sub$V3)]
+  return(data.sub)
+}
+
+#' Plot the APA-results
+#'
+#' @param APAlist A list of results from `APA`.
+#' @param title Text to plot
+#' @param Focus Wich sample does need to be the to-compare sample?
+#' @return A grid object, containing two ggplot-objects.
+#' @export
+visualise.APA.ggplot <- function(APAlist, title, zCoef = 1, focus = 1, ...){
+  # Make two dataframes
+  abovePlots <- data.frame(Var1 = integer(),
+                           Var2 = integer(),
+                           value = numeric(),
+                           sample = factor())
+  belowPlots <- abovePlots
+  # Loop trough list and melt
+  list.len <- length(APAlist)
+  belownames <- vector()
+  for(i in 1:list.len){
+    a <- reshape2::melt(APAlist[[i]])
+    a$sample <- factor(rep(names(APAlist)[i], length(a[,1])))
+    abovePlots <- rbind(abovePlots, a)
+    
+    e <- reshape2::melt(APAlist[[i]]-APAlist[[focus]])
+    e$sample <- rep(paste0(names(APAlist)[focus], ' vs ', names(APAlist)[i] ) , length(e[,1]))
+    belowPlots <- rbind(belowPlots, e)
+    belownames <- c(belownames, paste0(names(APAlist)[focus], ' vs ', names(APAlist)[i] ))
+  }
+  # Find best color-limits
+  z <- max( abs( c(  quantile(na.exclude(abovePlots$value), .01) , quantile(na.exclude(abovePlots$value), .99)        )  )   )*zCoef
+  abovePlots$value[abovePlots$value > z] <- z
+  abovePlots$value[abovePlots$value < (z *-1)] <- (z *-1)
+  # Set focus-sample to column 1
+  abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[focus], levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ))
+  volgorde <- match(names(APAlist),levels(abovePlots$sample))
+  belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
+  # Plot per sample
+  plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) + ggplot2::geom_raster(ggplot2::aes(fill = value)) + ggplot2::facet_grid(.~ sample) +
+    ggplot2::coord_fixed() + ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
+    ggplot2::scale_x_continuous(breaks = c(5.5,11,16.5), labels = c("-50Kb", "3'", "+50Kb")) +
+    ggplot2::scale_y_continuous(breaks = c(5.5,11,16.5), labels = c("-50Kb", "5'", "+50Kb")) +
+    ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ") +
+    ggplot2::scale_fill_distiller(limits = c(0, z), palette = "Spectral")
+  # Find best color-limits
+  z2 <- max( abs( c(  quantile(na.exclude(belowPlots$value), .01) , quantile(na.exclude(belowPlots$value), .99)        )  )   )*zCoef
+  belowPlots$value[belowPlots$value > z2] <- z2
+  belowPlots$value[belowPlots$value < (z2 *-1)] <- (z2 *-1)
+  # Plot difference-plots
+  plot2 <- ggplot2::ggplot(belowPlots, ggplot2::aes(Var1, Var2)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = value)) + ggplot2::facet_grid(.~ sample) + ggplot2::coord_fixed()  +
+    ggplot2::scale_fill_gradient2(limits = c(z2*-1,z2), midpoint=0, low="#2166ac", mid="white", high="#b2182b") +
+    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA))+
+    ggplot2::scale_x_continuous(breaks = c(5.5,11,16.5), labels = c("-50Kb", "3'", "+50Kb"))+
+    ggplot2::scale_y_continuous(breaks = c(5.5,11,16.5), labels = c("-50Kb", "5'", "+50Kb")) +
+    ggplot2::labs(x = "", y = "", fill = "Difference")
+  return(grid.arrange(plot1, plot2, ncol=1))
+  #grid::grid.newpage()
+  #grid::grid.draw(rbind(grid::ggplotGrob(plot1), grid::ggplotGrob(plot2), size = "last"))
+}
+
+
+
+#' Rescale a vector.
+#'
+#' @param x A vector which needs to be resized.
+#' @param newrange A vector of the wanted length.
+#' @return A rescaled vector.
+#' @export
+rescale <- function(x, newrange=range(x)){
+  xrange <- range(x)
+  mfac <- (newrange[2]-newrange[1])/(xrange[2]-xrange[1])
+  newrange[1]+(x-xrange[1])*mfac
+}
+
+#' Rescale a matrix.
+#'
+#' @param mat A vector which needs to be resized.
+#' @param ndim Dimentions of the wanted matrix: can be obtained by dim(matrixOfChoice).
+#' @return A rescaled vector.
+#' @export
+resize.mat <- function(mat, ndim=dim(mat)){
+  # input object
+  odim <- dim(mat)
+  obj <- list(x= 1:odim[1], y=1:odim[2], z= mat)
+  # output object
+  ans <- matrix(NA, nrow=ndim[1], ncol=ndim[2])
+  ndim <- dim(ans)
+  # rescaling
+  ncord <- as.matrix(expand.grid(seq_len(ndim[1]), seq_len(ndim[2])))
+  loc <- ncord
+  loc[,1] = rescale(ncord[,1], c(1,odim[1]))
+  loc[,2] = rescale(ncord[,2], c(1,odim[2]))
+  # interpolation
+  ans[ncord] <- fields::interp.surface(obj, loc)
+  ans
+}
+
+#' Get a z-stack matrix of TADs
+#'
+#' Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.
+#' Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
+#'
+#' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
+#' @param tad.bed Bedpe file containing the TAD positions: produced by read.bedpe(). Please make a bedpe, by copying tad-bed columns to columns 4,5 and 6!
+#' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
+#' @param verbose Produces a progress-indication.
+#' @return A matrix containing the Z-stack scores.
+#' @export
+stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,saveRaw=T, outlierCutOff = 8){
+  MADTRESHOLD <- outlierCutOff
+  rawMatList = list()
+  hicdata <- experiment$ICE
+  bed <- experiment$ABS
+  resolution <- experiment$RES
+  # Check for setkey
+  if(is.null(data.table::key(hicdata))){data.table::setkey(hicdata, V1, V2)}
+  # Make chr:pos index of HiC-index
+  bed.p <- paste0(bed[,1], ":", bed[,2])
+  # Remove smaller tads
+  tad.bed <- tad.bed[abs(tad.bed[,6]-tad.bed[,2]) >= smallTreshold ,]
+  # Is BED 1 upstream of BED2?
+  #Elzo see APA.R
+  for(i in 1:length(tad.bed[,1])){
+    if( tad.bed[i,2] > tad.bed[i,5]){
+      tad.bed <- tad.bed[i,c(4,5,6,1,2,3)]
+    }
+  }
+  # Prune NA-rows
+  #Elzo see APA.R
+  tad.bed <- na.exclude(tad.bed[1:6])
+  # Make a bed from bedpe, with cols 1,2 and 6
+  tad <- tad.bed[,c(1,2,6)]
+  # Loop trough tads and sum over scorematrices
+  tad.length <- length(tad[,1])
+  # Add missing levels to Chromosomes
+  levels(tad$V1) <- levels(bed[,1])
+  # Successfull tads:
+  SL <- 0
+  for( i in 1:tad.length){
+    if(verbose){cat(paste0(i, ' of ', tad.length, ' tads.'), "\r")}
+    # Determine size of tad
+    tadSize <-  tad[i,3] - tad[i,2]
+    #Elzo you removed them on line 21
+    if(tadSize < smallTreshold){next}
+    halftadSize <- floor((tadSize/resolution)/2)*resolution
+    # Get start positions of the tad, floored to 10kb windows, and make chr:pos index
+    start <- paste0(tad[i,1], ":", as.integer(resolution*floor(  (tad[i,2] - halftadSize  )/resolution)))
+    end <- paste0(tad[i,1], ":", as.integer(resolution*floor(  (tad[i,3] + halftadSize   )/resolution)))
+    # Bugfix: in some cases paste0 yields an extra whitespace
+    start <- gsub(" ", "", start, fixed = TRUE)
+    end <- gsub(" ", "", end, fixed = TRUE)
+    # Get HiC-pro indexes of start and end of virt4C-plot
+    start.pos <- bed[match(start,bed.p),4]
+    end.pos <- bed[match(end,bed.p),4]
+    # Check if valid indeces (Missing or Mitochondrial stuff)
+    if(!all(is.finite(start.pos),is.finite(end.pos))){next}
+    # Extract data from HiC-pro matrix
+    #Elzo why not select.subset?
+    x <- rep(start.pos:end.pos, each=length(start.pos:end.pos))
+    y <- rep((start.pos):(end.pos), length(start.pos:end.pos))
+    sel <- hicdata[list(x,y)]
+    sel$V3[is.na(sel$V3)] <- 0
+    # Skip low-coverage sites
+    if(nrow(sel) < 10){next}
+    # Fastest way!
+    newMat <- reshape2::acast(sel, V1~V2, value.var="V3")
+    newMat[lower.tri(newMat)] <- t(newMat)[lower.tri(newMat)]
+    # Rescale to 100 breaks
+    sel.resized <- resize.mat(newMat, c(100,100))
+    rawMatList[[i]] <- sel.resized
+    if(!exists("results.vector")){
+      results.vector <- sel.resized
+    } else {
+      results.vector <- results.vector + sel.resized
+    }
+    SL <- SL + 1
+  } 
+  if(saveRaw){
+    #return(list(STACK = (results.vector/SL)[1:99,1:99],RAW = simplify2array(rawMatList)))
+    rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
+    sm <- simplify2array(rawMatList)
+    MED <- apply(sm,MARGIN = 1:2, median)
+    MAD <- apply(sm,MARGIN = 1:2, mad)
+    tres <- MED+(MAD*MADTRESHOLD)
+    tres[is.na(tres)] <- 0
+    for(i in 1:length(rawMatList)){
+      #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
+      m <- rawMatList[[i]]
+      #cat(i, "\n")
+      if(any(m[1:99,1:99] > tres[1:99,1:99]*5)){
+        rawMatList[[i]] <- matrix(0, nrow = 100, ncol=100)
+        SL - 1
+      }
+    }
+    STACKoutlierr <- Reduce(rawMatList, f = '+')
+    return(list(STACK = (results.vector/SL)[1:99,1:99],RAW = rawMatList, STACKoutlier =  (STACKoutlierr/SL)[1:99,1:99] )   )
+  }else{
+    return( (results.vector/SL)[1:99,1:99])
+  }
+}
+
+#' Plot the stacked TAD results.
+#'
+#' @param stackedlist List of results from `stacked.TAD`.
+#' @param title Text to plot
+#' @param Focus Wich sample does need to be the to-compare sample?
+#' @return A grid object, containing two ggplot-objects.
+#' @export
+visualise.stacked.TAD.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..){
+  # Make two dataframes
+  abovePlots <- data.frame(Var1 = integer(),
+                           Var2 = integer(),
+                           value = numeric(),
+                           sample = factor())
+  belowPlots <- abovePlots
+  # Loop trough list and melt
+  list.len <- length(stackedlist)
+  belownames <- vector()
+  m <- vector()
+  for(i in 1:list.len){
+    m <- c(m,max(stackedlist[[i]][30:40,60:70]))
+    a <- reshape2::melt(stackedlist[[i]])
+    a$sample <- factor(rep(names(stackedlist)[i], length(a[,1])))
+    abovePlots <- rbind(abovePlots, a)
+    
+    e <- reshape2::melt(stackedlist[[i]]-stackedlist[[focus]])
+    e$sample <- rep(paste0(names(stackedlist)[focus], ' vs ', names(stackedlist)[i] ) , length(e[,1]))
+    belowPlots <- rbind(belowPlots, e)
+    belownames <- c(belownames, paste0(names(stackedlist)[focus], ' vs ', names(stackedlist)[i] ))
+  }
+  # Set to per 1 milion contacts
+  zmaxAbove = max(m)*zCoef
+  
+  colnames(abovePlots) <- c('Var1','Var2','value','sample')
+  colnames(belowPlots) <- c('Var1','Var2','value','sample')
+  # Find zlims
+  zminAbove <- max(0, quantile(na.exclude(abovePlots$value), .3)*zCoef)
+  
+  
+  abovePlots[abovePlots$value < zminAbove, 3  ] <- zminAbove
+  abovePlots[abovePlots$value > zmaxAbove,  3 ] <- zmaxAbove
+  z2 <- min( abs(c(  quantile(na.exclude(belowPlots$value), .01) , quantile(na.exclude(belowPlots$value), 1)        ) )   )*zCoef
+  belowPlots$value[belowPlots$value > z2] <- z2
+  belowPlots$value[belowPlots$value < (z2 *-1)] <- (z2 *-1)
+  # Set focus-sample to column 1
+  abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[focus], levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ))
+  volgorde <- match(names(stackedlist),levels(abovePlots$sample))
+  belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
+
+  # Plot first row
+  if(require('viridis') == TRUE){
+    plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) + ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
+      ggplot2::coord_fixed() +
+      viridis::scale_fill_viridis(limits = c(zminAbove, zmaxAbove), option = "inferno", direction = -1)  +
+      ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
+      ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
+      ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +ggplot2::facet_grid(.~ sample)+
+      #geom_segment(aes(y = 26, x = 0, yend = 26, xend = 100, colour = "segment"))+
+      #geom_segment(aes(y = 77, x = 0, yend = 77, xend = 100, colour = "segment"))
+      ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
+  } else {
+  plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) + ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
+    ggplot2::coord_fixed() +
+    ggplot2::scale_fill_distiller(limits = c(zminAbove, zmaxAbove), palette = "Spectral")  +
+    ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
+    ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
+    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +ggplot2::facet_grid(.~ sample)+
+    #geom_segment(aes(y = 26, x = 0, yend = 26, xend = 100, colour = "segment"))+
+    #geom_segment(aes(y = 77, x = 0, yend = 77, xend = 100, colour = "segment"))
+    ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
+  }
+  plot2 <- ggplot2::ggplot(belowPlots, ggplot2::aes(Var1, Var2)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = F) +
+    ggplot2::facet_grid(.~ sample) +
+    ggplot2::scale_fill_gradient2(limits = c(z2*-1,z2), midpoint=0, low="#2166ac", mid="white", high="#b2182b") +
+    ggplot2::coord_fixed() +
+    ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse', labels = c("3' border", "5' border"))+
+    ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
+    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
+    ggplot2::labs(title = '',x = "", y = "", fill = "Difference")
+  return(grid.arrange(plot1, plot2, ncol=1))
+  # in newer versions of grid:
+  #grid::grid.newpage()
+  #grid::grid.draw(rbind(grid::ggplotGrob(plot1), ggplotGrob(grid::plot2), size = "last"))
+}

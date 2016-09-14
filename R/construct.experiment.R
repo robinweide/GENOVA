@@ -13,39 +13,34 @@ construct.experiment <- function(ICEDpath,BEDpath, SAMPLENAME, COLOR = 1, COMMEN
   # Check if files exist
   if(!file.exists(ICEDpath)){stop('ICE-matrix file not found.')}
   if(!file.exists(BEDpath)){stop('ICE-index file not found.')}
-
+  
   ICE <- read.hicpro.matrix(ICEDpath)
-  ABS <- read.delim(BEDpath, header = F)
+  ABS <- data.table::fread(BEDpath, header = F, data.table = F)
   chromVector <- as.character(unique(ABS$V1))
-  a <- dplyr::mutate(ABS, dif = V3-V2)
-  b <- dplyr::group_by(a, dif)
-  c <- dplyr::summarise(b, nd = n())
-  d <- dplyr::filter(c,nd == max(nd))
-  e <- dplyr::select(d,dif)
-  res = as.numeric(e)
-
+  res = as.numeric( median(ABS$V3-ABS$V2)  )
+  
   # Contruct list
   list(
     # Iced HiC-matrix in three-column format (i.e. from HiC-pro)
     ICE = ICE,
-
+    
     # HiC-index in four-column format (i.e. from HiC-pro)
     ABS = ABS,
-
+    
     # Name of sample
     NAME = SAMPLENAME,
-
+    
     # Resolution of sample
     RES = res,
-
+    
     # Available chromosomes
     CHRS = chromVector,
-
+    
     # Color of sample (optional, but recommended for running RCP)
     COL = COLOR,
-
+    
     # Comments
     COMM = COMMENTS
-
+    
   )
 }

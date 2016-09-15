@@ -1,7 +1,7 @@
 #' Get a z-stack matrix of 2D-regions (e.g. loops).
 #'
 #' Extract matrices around a defined set of pixels, like possible loops.
-#' Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
+#' Sums over all matrices to produce a single Z-stack matrix.
 #'
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param loop.bed Bedpe file containing the loop positions: produced by read.bedpe().
@@ -114,13 +114,10 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
       rawMatList[[i]] <- s.mat
     }
   } 
-  # Normalise to 100 loops
   #Elzo you tested for the fact that all the loop.bed1.p are in bed.p right?
   #why the match, cant you do.
   norma_loopCounts <- (score.matrix/length(loop.bed1.p)) 
   SL <- length(loop.bed1.p)
-  #Elzo I find the normalization to 100 loops a bit strange
-  #norma_loopCounts <- (score.matrix/as.numeric(unname(table(loop.bed1.p %in% bed.p)) ) ) * 100
   # Rotate 90CW, so that diagonal of HiC-matrix is in bottomleft
   norma_loopCounts <- t(apply(norma_loopCounts, 2, rev))
   colnames(norma_loopCounts) <- 1:size

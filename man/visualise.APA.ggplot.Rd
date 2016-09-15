@@ -4,12 +4,14 @@
 \alias{visualise.APA.ggplot}
 \title{Plot the APA-results}
 \usage{
-visualise.APA.ggplot(APAlist, title, focus = 1)
+visualise.APA.ggplot(APAlist, title, zCoef = 1, focus = 1, ...)
 }
 \arguments{
 \item{APAlist}{A list of results from `APA`.}
 
 \item{title}{Text to plot}
+
+\item{zCoef}{Coefficient to change the zlims}
 
 \item{Focus}{Wich sample does need to be the to-compare sample?}
 }

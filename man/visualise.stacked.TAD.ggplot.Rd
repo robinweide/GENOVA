@@ -4,12 +4,14 @@
 \alias{visualise.stacked.TAD.ggplot}
 \title{Plot the stacked TAD results.}
 \usage{
-visualise.stacked.TAD.ggplot(stackedlist, title, focus = 1)
+visualise.stacked.TAD.ggplot(stackedlist, title, focus = 1, zCoef = 1, ..)
 }
 \arguments{
 \item{stackedlist}{List of results from `stacked.TAD`.}
 
 \item{title}{Text to plot}
+
+\item{zCoef}{Coefficient to change the zlims}
 
 \item{Focus}{Wich sample does need to be the to-compare sample?}
 }

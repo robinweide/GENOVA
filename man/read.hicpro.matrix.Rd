@@ -4,7 +4,7 @@
 \alias{read.hicpro.matrix}
 \title{Read hicpro three column matrix format.}
 \usage{
-read.hicpro.matrix(file, norm = 1e+08)
+read.hicpro.matrix(file, norm = 1e+09)
 }
 \arguments{
 \item{file}{Full path to file.}

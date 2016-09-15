@@ -4,7 +4,8 @@
 \alias{stacked.TAD}
 \title{Get a z-stack matrix of TADs}
 \usage{
-stacked.TAD(experiment, tad.bed, smallTreshold = 225000, verbose = F)
+stacked.TAD(experiment, tad.bed, smallTreshold = 225000, verbose = F,
+  saveRaw = T, outlierCutOff = 8)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -14,6 +15,10 @@ stacked.TAD(experiment, tad.bed, smallTreshold = 225000, verbose = F)
 \item{smallTreshold}{The minimal size of loops. Too small loops lead to messy plots.}
 
 \item{verbose}{Produces a progress-indication.}
+
+\item{saveRaw}{Logical: True will output the raw matrices per loop and performs outlier-detection.}
+
+\item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
 }
 \value{
 A matrix containing the Z-stack scores.

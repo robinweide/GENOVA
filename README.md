@@ -1,2 +1,2 @@
 # Welcome!
-![alt tag](https://github.com/robinweide/HiSee/raw/master/LOGO.jpg)
+![alt tag](https://github.com/robinweide/HiSee/raw/master/LOGO.pdf)

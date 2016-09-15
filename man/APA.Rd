@@ -27,6 +27,6 @@ A list of a tidy data.frame containing the Z-stack scores (APA), the raw matrice
 }
 \description{
 Extract matrices around a defined set of pixels, like possible loops.
-Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
+Sums over all matrices to produce a single Z-stack matrix.
 }
 

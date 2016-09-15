@@ -11,7 +11,7 @@
 #' @param cut.off
 #' @param extraPadding
 #' @param ylim The y-start and -stop: zero is at the diagonal,
-#' @return A list of a tidy data.frame containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed tidy data.frame containing the Z-stack scores (APAoutlier).
+#' @return A plot.
 #' @import data.table
 frequency.from.matrix <- function( experiment, chrom, start, end, window = 10e3, q.val=0.95, cut.off=0, extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ... ){
   # Check size: if less than 50 bins: makes no sense...

@@ -16,6 +16,14 @@ read.bedpe <- function(loop.bed, header = T){
     LOI.extra <- LOI[,7:ncol(LOI)]
     LOI <- LOI[,1:6]
   }
+  # remove empty rows
+  s <- apply(is.na(LOI), 1, sum)
+  LOI <- LOI[-which(s > 0),]
+  if(is.data.frame(LOI.extra)){
+    LOI.extra <- LOI.extra[-which(s > 0),]
+  } else {
+    LOI.extra <- LOI.extra[-which(s > 0)]
+  }
   # Split chromosome
   chromosomeAvector <- as.character(LOI[,1])
   chromosomeBvector <- as.character(LOI[,4])
@@ -42,10 +50,6 @@ read.bedpe <- function(loop.bed, header = T){
                           V4 = chromosomeBvector,
                           V5 = posBdfsorted[,1],
                           V6 = posBdfsorted[,2])
-  # Add extra columns
-  if(!is.na(LOI.extra)){
-    BEDPE.new <- cbind(BEDPE.new, LOI.extra)
-  }
   # Return bedpe
   return(BEDPE.new)
 }

@@ -13,7 +13,7 @@
 #' @return A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed matrix containing the Z-stack scores (APAoutlier).
 #' @import data.table
 #' @export
-APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose = F, saveRaw = T, outlierCutOff = 8, ...){
+APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose = F, saveRaw = T, outlierCutOff = 40, ...){
   MADTRESHOLD <- outlierCutOff
   if(((size-1) /2 )%%2 != 0){stop("Size should be an even number +1")}
   size.offset = (size-1)/2
@@ -133,7 +133,7 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
       #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
       m <- rawMatList[[i]]
       #cat(i, "\n")
-      if(any(m[1:size,1:size] > tres[1:size,1:size]*5)){
+      if(any(m[1:size,1:size] > tres[1:size,1:size])){
         rawMatList[[i]] <- matrix(0, nrow = size, ncol=size)
         SL - 1
       }

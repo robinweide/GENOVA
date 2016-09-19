@@ -6,10 +6,10 @@
 #' @param loop.bed Path to bedpe file.
 #' @return A data.frame with the bedpe-values.
 #' @export
-read.bedpe <- function(loop.bed){
+read.bedpe <- function(loop.bed, header = T){
   # Load bedpe of loops of interest
   # Chromosome-columns are factors
-  LOI <- read.delim(loop.bed, stringsAsFactors=T, h = F)
+  LOI <- read.delim(loop.bed, stringsAsFactors=F, h = header)
   # Store extra columns
   LOI.extra <- NA
   if(ncol(LOI) > 6){
@@ -17,23 +17,31 @@ read.bedpe <- function(loop.bed){
     LOI <- LOI[,1:6]
   }
   # Split chromosome
-  chromosomeAvector <- LOI[,1]
-  chromosomeBvector <- LOI[,4]
+  chromosomeAvector <- as.character(LOI[,1])
+  chromosomeBvector <- as.character(LOI[,4])
+  # remove whitespaces
+  chromosomeAvector <- gsub("[[:space:]]","",chromosomeAvector)
+  chromosomeBvector <- gsub("[[:space:]]","",chromosomeBvector)
   # Check if chromosome entries have 'chr' or add.
-  if(all(grepl(chromosomeAvector,pattern = "^chr")) == FALSE){
-    chromosomeAvector <- gsub(chromosomeAvector, pattern = '^', replacement = 'chr', perl = T)
-    chromosomeBvector <- gsub(chromosomeBvector, pattern = '^', replacement = 'chr', perl = T)
-  }
+  chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")] <- gsub(chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
+  chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")] <- gsub(chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
   # Sort POS for each BED-entry
-  posAdf <- data.frame(t(apply(LOI[,2:3], 1, sort)))
-  posBdf <- data.frame(t(apply(LOI[,5:6], 1, sort)))
+  posAdf <- cbind(ifelse(LOI[,2] < LOI[,3], LOI[,2], LOI[,3]), ifelse(LOI[,2] < LOI[,3], LOI[,3], LOI[,2]))
+  posBdf <- cbind(ifelse(LOI[,5] < LOI[,6], LOI[,5], LOI[,6]), ifelse(LOI[,5] < LOI[,6], LOI[,6], LOI[,5]))
+  # check if posA is indeed upstream of posB
+  posAdf.Smaller <- na.omit(posAdf[posAdf[,1] < posBdf[,1],] )
+  posBdf.Smaller <- na.omit(posAdf[posAdf[,1] > posBdf[,1],] )
+  posAdf.Larger <- na.omit(posAdf[posAdf[,1] > posBdf[,1],] )
+  posBdf.Larger <- na.omit(posAdf[posAdf[,1] < posBdf[,1],])
+  posAdfsorted <- rbind(posAdf.Larger, posBdf.Larger)
+  posBdfsorted <- rbind(posAdf.Smaller, posBdf.Smaller)
   # Bind to new DF
   BEDPE.new <- data.frame(V1 = chromosomeAvector,
-                          V2 = posAdf[,1],
-                          V3 = posAdf[,2],
+                          V2 = posAdfsorted[,1],
+                          V3 = posAdfsorted[,2],
                           V4 = chromosomeBvector,
-                          V5 = posBdf[,1],
-                          V6 = posBdf[,2])
+                          V5 = posBdfsorted[,1],
+                          V6 = posBdfsorted[,2])
   # Add extra columns
   if(!is.na(LOI.extra)){
     BEDPE.new <- cbind(BEDPE.new, LOI.extra)

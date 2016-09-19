@@ -11,7 +11,7 @@
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
 #' @return A matrix containing the Z-stack scores.
 #' @export
-stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,saveRaw=T, outlierCutOff = 8){
+stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,saveRaw=T, outlierCutOff = 40){
   MADTRESHOLD <- outlierCutOff
   rawMatList = list()
   hicdata <- experiment$ICE
@@ -92,7 +92,7 @@ stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,
       #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
       m <- rawMatList[[i]]
       #cat(i, "\n")
-      if(any(m[1:99,1:99] > tres[1:99,1:99]*5)){
+      if(any(m[1:99,1:99] > tres[1:99,1:99])){
         rawMatList[[i]] <- matrix(0, nrow = 100, ncol=100)
         SL - 1
       }

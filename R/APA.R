@@ -143,7 +143,9 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
     norma_loopCountss <- t(apply(norma_loopCountss, 2, rev))
     colnames(norma_loopCountss) <- 1:size
     
-    return(list(APA = norma_loopCounts,rawMatList = rawMatList, APAoutlier =  norma_loopCountss   ))
+    pos <- seq(-(size-1)/2, (size-1)/2)*resolution
+    
+    return(list(APA = norma_loopCounts,rawMatList = rawMatList, APAoutlier =  norma_loopCountss, APAxy=list(x=pos,y=pos, z=norma_loopCountss)   ))
     #return(list(APA = norma_loopCounts, rawMatList = rawMatList))
   } else {
     return(norma_loopCounts)

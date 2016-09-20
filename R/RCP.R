@@ -89,7 +89,7 @@ RCP <- function(experimentList, chromsToUse, maxDistance = 1e09, verbose = F){
       #add names to data.frame
       if(standard){
         dat$sample <- paste("Exp.", i)
-      else{
+      }else{
         dat$sample <- experiment$NAME
       } 
 

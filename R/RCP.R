@@ -11,6 +11,19 @@
 #' @export
 RCP <- function(experimentList, chromsToUse, maxDistance = 1e09, verbose = F){
   amountOfSamples <- length(experimentList)
+  exp.names <- c()
+  
+  #check whether experiment names have been declared uniquely
+  #otherwise use standard names for RCP
+  for( i in 1:length(experimentList)){
+    exp.names <- c(exp.names, experimentList[[i]]$name)
+  } 
+  if(length(exp.names) != length(unique(exp.names))){
+    warning("Experiment names have not been declared uniquely, using standard names")
+    standard = TRUE
+  } 
+
+
   
   d <- dplyr::data_frame(distance = integer(),
                   prob = numeric(),
@@ -73,6 +86,13 @@ RCP <- function(experimentList, chromsToUse, maxDistance = 1e09, verbose = F){
       m.sum <- sum(m.chrom$V3)
       dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],rcp/m.sum)
       colnames(dat) <- c('distance',  'prob')
+      #add names to data.frame
+      if(standard){
+        dat$sample <- paste("Exp.", i)
+      else{
+        dat$sample <- experiment$NAME
+      } 
+
       dat$sample <- experiment$NAME
       dat$chrom <- chrom
       dat$color <- experiment$COL

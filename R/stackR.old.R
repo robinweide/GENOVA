@@ -12,8 +12,8 @@
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
 #' @return A list containing a matrix with the Z-stack scores (`STACK`). Optionally, it can contain the raw matrices per TAD (`STACK.list`) and a matrix without the outlier-correction (`STACK.raw`).
 #' @export
-stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
-    saveRaw = T, saveRawList = T,outlierCutOff = 50){
+stackR.old <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
+    saveRaw = T, saveRawList = T,outlierCutOff = 8){
 		if(any(tad.bed[,2] > tad.bed[,3])){
 			warning("5' TAD border larger then 3' TAD border for some entries")
 		}
@@ -21,6 +21,7 @@ stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
     rawMatList = list()
     hicdata <- experiment$ICE
     bed <- experiment$ABS
+    bed.p <- paste0(bed[,1], ":", bed[,2])
     bed[,1] <- as.factor(bed[, 1])
     resolution <- experiment$RES
     if (is.null(data.table::key(hicdata))) {
@@ -38,14 +39,38 @@ stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
         if (tadSize < smallTreshold) {
             next
         }
-        if (verbose) {
-            cat(i, " of ", tad.length, " tads.", "\r")
-        }
-				#select TAD data from select.subset
-        halftadSize <- floor((tadSize/resolution)/2) * resolution
-				newMat <- select.subset( hicdata, tad[i,1], tad[i,2] - halftadSize, tad[i,3] + halftadSize, bed )
-
-        sel.resized <- resize.mat(newMat$z, c(100, 100))
+        ##
+        if(verbose){cat(paste0(i, ' of ', tad.length, ' tads.'), "\r")}
+        # Determine size of tad
+        tadSize <-  tad[i,3] - tad[i,2]
+        #Elzo you removed them on line 21
+        if(tadSize < smallTreshold){next}
+        halftadSize <- floor((tadSize/resolution)/2)*resolution
+        # Get start positions of the tad, floored to 10kb windows, and make chr:pos index
+        start <- paste0(tad[i,1], ":", as.integer(resolution*floor(  (tad[i,2] - halftadSize  )/resolution)))
+        end <- paste0(tad[i,1], ":", as.integer(resolution*floor(  (tad[i,3] + halftadSize   )/resolution)))
+        # Bugfix: in some cases paste0 yields an extra whitespace
+        start <- gsub(" ", "", start, fixed = TRUE)
+        end <- gsub(" ", "", end, fixed = TRUE)
+        # Get HiC-pro indexes of start and end of virt4C-plot
+        start.pos <- bed[match(start,bed.p),4]
+        end.pos <- bed[match(end,bed.p),4]
+        # Check if valid indeces (Missing or Mitochondrial stuff)
+        if(!all(is.finite(start.pos),is.finite(end.pos))){next}
+        # Extract data from HiC-pro matrix
+        #Elzo why not select.subset?
+        x <- rep(start.pos:end.pos, each=length(start.pos:end.pos))
+        y <- rep((start.pos):(end.pos), length(start.pos:end.pos))
+        sel <- hicdata[list(x,y)]
+        sel$V3[is.na(sel$V3)] <- 0
+        # Skip low-coverage sites
+        if(nrow(sel) < 10){next}
+        # Fastest way!
+        newMat <- reshape2::acast(sel, V1~V2, value.var="V3")
+        newMat[lower.tri(newMat)] <- t(newMat)[lower.tri(newMat)]
+        # Rescale to 100 breaks
+        sel.resized <- resize.mat(newMat, c(100,100))
+        ##
         rawMatList[[i]] <- sel.resized
         if (!exists("results.vector")) {
             results.vector <- sel.resized
@@ -55,10 +80,8 @@ stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
         }
         SL <- SL + 1
     }
-    #rawMatListCopy <- rawMatList
 
-
-      #rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
+      rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
       sm <- simplify2array(rawMatList)
       MED <- apply(sm, MARGIN = 1:2, median)
       MAD <- apply(sm, MARGIN = 1:2, mad)
@@ -66,18 +89,12 @@ stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
       tres[is.na(tres)] <- 0
       for (i in 1:length(rawMatList)) {
           m <- rawMatList[[i]]
-
-          # get boolMatrix of sites in m bigger than tres:
-          biggerThanTres <- m[1:99, 1:99] > tres[1:99, 1:99]
-          zeroesInTres <- tres[1:99, 1:99] > 0
-          combinedBool <- biggerThanTres + zeroesInTres
-
-          if(!all(ifelse(combinedBool > 1, F, T))) {
+          if (any(m[1:99, 1:99] > tres[1:99, 1:99] * 5)) {
               rawMatList[[i]] <- matrix(0, nrow = 100, ncol = 100)
               SL - 1
           }
       }
-      STACK.outlierCorrected <- Reduce(as.list(rawMatList), f = "+")
+      STACK.outlierCorrected <- Reduce(rawMatList, f = "+")
       STACK.rawMatList <- rawMatList
       if(saveRaw){
         if(saveRawList){

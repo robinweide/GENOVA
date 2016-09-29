@@ -18,7 +18,7 @@ library("GENOVA")
 ```
 
 ## Loading data
-```{r loading, eval = F, message=FALSE, cache.lazy=T, cache=T}
+```{r loading, eval = T, message=FALSE, cache.lazy=F, cache=T}
 WT <- construct.experiment(ICEDpath = '~/Desktop/myExperiment/WT_10000_iced.matrix', 
                           BEDpath = '~/Desktop/myExperiment/WT_10000_abs.bed',
                           SAMPLENAME = "WT", 
@@ -59,7 +59,7 @@ visualise.virtual.4C(virt4Cdat)
 ```
 
 ## Stacked TAD analysis
-```{r stackedTAD, eval=F, fig.align='center', fig.width=9, message=FALSE, cache=T, cache.lazy=T}
+```{r stackedTAD, eval=T, fig.align='center', fig.width=9, message=FALSE, cache=T, cache.lazy=F}
 # # Run stackedTAD
 stackedTAD.dat.WT <- stackR(experiment = WT,tad.bed = hicsegBEDPE, verbose = F)
 stackedTAD.dat.DKO <- stackR(experiment = DKO,tad.bed = hicsegBEDPE, verbose = F)
@@ -67,7 +67,23 @@ stackedTAD.dat.DKO <- stackR(experiment = DKO,tad.bed = hicsegBEDPE, verbose = F
 # Create list of stackedTAD-results
 stackedTADResultList <- list(WT = stackedTAD.dat.WT,DKO = stackedTAD.dat.DKO)
 
+image(stackedTAD.dat.WT$STACK)
+image(stackedTAD.dat.DKO$STACK)
+```
+
+```{r stackedTADold, eval=F, fig.align='center', fig.width=9, message=FALSE, cache=T, cache.lazy=F}
+# # Run stackedTAD
+stackedTAD.old.dat.WT <- stackR.old(experiment = WT,tad.bed = hicsegBEDPE, verbose = F)
+stackedTAD.old.dat.DKO <- stackR.old(experiment = DKO,tad.bed = hicsegBEDPE, verbose = F)
+
+# Create list of stackedTAD-results
+stackedTADResultList.old <- list(WT = stackedTAD.old.dat.WT,DKO = stackedTAD.old.dat.DKO)
+```
+
+```{r stackedTADvis, eval=F, fig.align='center', fig.width=5,fig.height=5, message=FALSE, cache=T, cache.lazy=F}
 # Visualise with ggplot
+visualise.stackR.ggplot(stackedTADResultList.old, focus = 1, title = 'Comparing WT and DKO: stacked TAD old')
+
 visualise.stackR.ggplot(stackedTADResultList, focus = 1, title = 'Comparing WT and DKO: stacked TAD')
 ```
 

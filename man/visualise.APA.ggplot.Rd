@@ -4,7 +4,7 @@
 \alias{visualise.APA.ggplot}
 \title{Plot the APA-results}
 \usage{
-visualise.APA.ggplot(APAlist, title, zCoef = 1, focus = 1, ...)
+visualise.APA.ggplot(APAlist, resolution, title, zCoef = 1, focus = 1, ...)
 }
 \arguments{
 \item{APAlist}{A list of results from `APA`.}

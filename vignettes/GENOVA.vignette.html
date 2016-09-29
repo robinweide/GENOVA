@@ -12,7 +12,7 @@
 
 <meta name="author" content="Robin H. van der Weide &amp; Elzo de Wit" />
 
-<meta name="date" content="2016-08-13" />
+<meta name="date" content="2016-09-29" />
 
 <title>GENOVA: expore the Hi-C</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">GENOVA: expore the Hi-C</h1>
 <h4 class="author"><em>Robin H. van der Weide &amp; Elzo de Wit</em></h4>
-<h4 class="date"><em>2016-08-13</em></h4>
+<h4 class="date"><em>2016-09-29</em></h4>
 
 
 
@@ -98,7 +98,8 @@ DKO &lt;-<span class="st"> </span><span class="kw">construct.experiment</span>(<
 hiccupsBEDPE &lt;-<span class="st"> </span><span class="kw">read.bedpe</span>(<span class="st">'~/MEGA/Work/PhD/projects/HiCvis/DKO.hiccups'</span>)
 
 <span class="co"># Parse BEDPE of HiCseg-TADs</span>
-hicsegBEDPE &lt;-<span class="st"> </span><span class="kw">read.bedpe</span>(<span class="st">'~/MEGA/Work/PhD/projects/HiCvis/DKO.HiCseg'</span>)</code></pre></div>
+<span class="co">#hicsegBEDPE &lt;- read.bedpe('~/MEGA/Work/PhD/projects/HiCvis/DKO.HiCseg')</span>
+hicsegBEDPE &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">'~/Desktop/myExperiment/DKO.HiCseg'</span>, <span class="dt">h =</span> F)</code></pre></div>
 </div>
 <div id="aggegrate-peak-analysis" class="section level2">
 <h2>Aggegrate peak analysis</h2>
@@ -122,15 +123,15 @@ virt4Cdat &lt;-<span class="st"> </span><span class="kw">virtual.4C</span>(<span
 </div>
 <div id="stacked-tad-analysis" class="section level2">
 <h2>Stacked TAD analysis</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Run stackedTAD</span>
-stackedTAD.dat.WT &lt;-<span class="st"> </span><span class="kw">stackedTAD</span>(<span class="dt">experiment =</span> WT,<span class="dt">tad.bed =</span> hicsegBEDPE, <span class="dt">verbose =</span> F)
-stackedTAD.dat.DKO &lt;-<span class="st"> </span><span class="kw">stackedTAD</span>(<span class="dt">experiment =</span> DKO,<span class="dt">tad.bed =</span> hicsegBEDPE, <span class="dt">verbose =</span> F)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># # Run stackedTAD</span>
+stackedTAD.dat.WT &lt;-<span class="st"> </span><span class="kw">stackR</span>(<span class="dt">experiment =</span> WT,<span class="dt">tad.bed =</span> hicsegBEDPE, <span class="dt">verbose =</span> T)
+stackedTAD.dat.DKO &lt;-<span class="st"> </span><span class="kw">stackR</span>(<span class="dt">experiment =</span> DKO,<span class="dt">tad.bed =</span> hicsegBEDPE, <span class="dt">verbose =</span> F)
 
 <span class="co"># Create list of stackedTAD-results</span>
-stackedTADResultList &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">WT =</span> stackedTAD.dat.WT, <span class="dt">DKO =</span> stackedTAD.dat.DKO)
+stackedTADResultList &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">WT =</span> stackedTAD.dat.WT)
 
 <span class="co"># Visualise with ggplot</span>
-<span class="kw">visualise.stacked.TAD.ggplot</span>(stackedTADResultList, <span class="dt">focus =</span> <span class="dv">1</span>, <span class="dt">title =</span> <span class="st">'Comparing WT and DKO: stacked TAD'</span>)</code></pre></div>
+<span class="kw">visualise.stackR.ggplot</span>(stackedTADResultList, <span class="dt">focus =</span> <span class="dv">1</span>, <span class="dt">title =</span> <span class="st">'Comparing WT and DKO: stacked TAD'</span>)</code></pre></div>
 </div>
 <div id="relative-contact-probability" class="section level2">
 <h2>Relative contact probability</h2>

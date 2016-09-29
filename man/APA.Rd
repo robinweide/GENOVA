@@ -5,7 +5,7 @@
 \title{Get a z-stack matrix of 2D-regions (e.g. loops).}
 \usage{
 APA(experiment, loop.bed, smallTreshold = 225000, size = 21, verbose = F,
-  saveRaw = T, outlierCutOff = 8, ...)
+  saveRaw = T, outlierCutOff = 40, ...)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -23,7 +23,7 @@ APA(experiment, loop.bed, smallTreshold = 225000, size = 21, verbose = F,
 \item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
 }
 \value{
-A list of a tidy data.frame containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed tidy data.frame containing the Z-stack scores (APAoutlier).
+A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed matrix containing the Z-stack scores (APAoutlier).
 }
 \description{
 Extract matrices around a defined set of pixels, like possible loops.

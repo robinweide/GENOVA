@@ -6,7 +6,7 @@
 #' @param zCoef Coefficient to change the zlims
 #' @return A grid object, containing two ggplot-objects.
 #' @export
-visualise.stacked.TAD.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..){
+visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..){
   # Make two dataframes
   abovePlots <- data.frame(Var1 = integer(),
                            Var2 = integer(),
@@ -18,25 +18,25 @@ visualise.stacked.TAD.ggplot <- function(stackedlist, title, focus = 1, zCoef = 
   belownames <- vector()
   m <- vector()
   for(i in 1:list.len){
-    m <- c(m,max(stackedlist[[i]][30:40,60:70]))
-    a <- reshape2::melt(stackedlist[[i]])
+    m <- c(m,max(stackedlist[[i]]$STACK[30:40,60:70]))
+    a <- reshape2::melt(stackedlist[[i]]$STACK)
     a$sample <- factor(rep(names(stackedlist)[i], length(a[,1])))
     abovePlots <- rbind(abovePlots, a)
-    
-    e <- reshape2::melt(stackedlist[[i]]-stackedlist[[focus]])
+
+    e <- reshape2::melt(stackedlist[[i]]$STACK-stackedlist[[focus]]$STACK)
     e$sample <- rep(paste0(names(stackedlist)[focus], ' vs ', names(stackedlist)[i] ) , length(e[,1]))
     belowPlots <- rbind(belowPlots, e)
     belownames <- c(belownames, paste0(names(stackedlist)[focus], ' vs ', names(stackedlist)[i] ))
   }
   # Set to per 1 milion contacts
   zmaxAbove = max(m)*zCoef
-  
+
   colnames(abovePlots) <- c('Var1','Var2','value','sample')
   colnames(belowPlots) <- c('Var1','Var2','value','sample')
   # Find zlims
   zminAbove <- max(0, quantile(na.exclude(abovePlots$value), .3)*zCoef)
-  
-  
+
+
   abovePlots[abovePlots$value < zminAbove, 3  ] <- zminAbove
   abovePlots[abovePlots$value > zmaxAbove,  3 ] <- zmaxAbove
   z2 <- min( abs(c(  quantile(na.exclude(belowPlots$value), .01) , quantile(na.exclude(belowPlots$value), 1)        ) )   )*zCoef
@@ -46,7 +46,7 @@ visualise.stacked.TAD.ggplot <- function(stackedlist, title, focus = 1, zCoef = 
   abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[focus], levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ))
   volgorde <- match(names(stackedlist),levels(abovePlots$sample))
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
-  
+
   # Plot first row
   if(require('viridis') == TRUE){
     plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) + ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +

@@ -7,10 +7,12 @@ As input for the loop- and TAD-specific analyses, we request a specific input. F
 
 | Chromosome of upstream loop-anchor | Start of upstream loop-anchor | Stop of upstream loop-anchor| Chromosome of downstream loop-anchor | Start of downstream loop-anchor | Stop of downstream loop-anchor  |
 | ------------- | ------------- |------------- |------------- |------------- |------------- |
-| Chr1  | 100000  |  120000  |  Chr1  | 200000  |  220000  | 
+| chr1  | 100000  |  120000  |  chr1  | 200000  |  220000  | 
 
 For TAD-based analyses, we request a data.frame with:
 
 | Chromosome of TAD | Start of TAD | Stop of TAD| 
 | ------------- | ------------- |------------- |
-| Chr1  | 100000  |  220000  | 
+| chr1  | 100000  |  220000  | 
+
+We will provide simple format-checker scripts for these in the near future.

@@ -5,7 +5,7 @@
 \title{Get a z-stack matrix of TADs}
 \usage{
 stacked.TAD(experiment, tad.bed, smallTreshold = 225000, verbose = F,
-  saveRaw = T, outlierCutOff = 8)
+  saveRaw = T, outlierCutOff = 40)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}

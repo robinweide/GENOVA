@@ -4,7 +4,7 @@
 \alias{read.bedpe}
 \title{Load, parse and check BEDPE.}
 \usage{
-read.bedpe(loop.bed)
+read.bedpe(loop.bed, header = T)
 }
 \arguments{
 \item{loop.bed}{Path to bedpe file.}

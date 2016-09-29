@@ -18,7 +18,7 @@ library("GENOVA")
 ```
 
 ## Loading data
-```{r loading, eval = F, message=FALSE}
+```{r loading, eval = F, message=FALSE, cache.lazy=T, cache=T}
 WT <- construct.experiment(ICEDpath = '~/Desktop/myExperiment/WT_10000_iced.matrix', 
                           BEDpath = '~/Desktop/myExperiment/WT_10000_abs.bed',
                           SAMPLENAME = "WT", 
@@ -33,7 +33,7 @@ DKO <- construct.experiment(ICEDpath = '~/Desktop/myExperiment/DKO_10000_iced.ma
 hiccupsBEDPE <- read.bedpe('~/MEGA/Work/PhD/projects/HiCvis/DKO.hiccups')
 
 # Parse BEDPE of HiCseg-TADs
-hicsegBEDPE <- read.bedpe('~/MEGA/Work/PhD/projects/HiCvis/DKO.HiCseg')
+hicsegBEDPE <- read.delim('~/Desktop/myExperiment/DKO.HiCseg', h = F)
 ```
 
 ## Aggegrate peak analysis
@@ -59,16 +59,16 @@ visualise.virtual.4C(virt4Cdat)
 ```
 
 ## Stacked TAD analysis
-```{r stackedTAD, eval = F, message=FALSE, fig.align='center'}
-# Run stackedTAD
-stackedTAD.dat.WT <- stackedTAD(experiment = WT,tad.bed = hicsegBEDPE, verbose = F)
-stackedTAD.dat.DKO <- stackedTAD(experiment = DKO,tad.bed = hicsegBEDPE, verbose = F)
+```{r stackedTAD, eval=F, fig.align='center', fig.width=9, message=FALSE, cache=T, cache.lazy=T}
+# # Run stackedTAD
+stackedTAD.dat.WT <- stackR(experiment = WT,tad.bed = hicsegBEDPE, verbose = F)
+stackedTAD.dat.DKO <- stackR(experiment = DKO,tad.bed = hicsegBEDPE, verbose = F)
 
 # Create list of stackedTAD-results
-stackedTADResultList <- list(WT = stackedTAD.dat.WT, DKO = stackedTAD.dat.DKO)
+stackedTADResultList <- list(WT = stackedTAD.dat.WT,DKO = stackedTAD.dat.DKO)
 
 # Visualise with ggplot
-visualise.stacked.TAD.ggplot(stackedTADResultList, focus = 1, title = 'Comparing WT and DKO: stacked TAD')
+visualise.stackR.ggplot(stackedTADResultList, focus = 1, title = 'Comparing WT and DKO: stacked TAD')
 ```
 
 ## Relative contact probability

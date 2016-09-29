@@ -14,23 +14,24 @@
 #' @export
 stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
     saveRaw = T, saveRawList = T,outlierCutOff = 8){
-		if(any(tad[,2] > tad[,5])){
-			stop("5' TAD border larger then 3' TAD border for some entries")
+		if(any(tad.bed[,2] > tad.bed[,3])){
+			warning("5' TAD border larger then 3' TAD border for some entries")
 		}
     MADTRESHOLD <- outlierCutOff
     rawMatList = list()
     hicdata <- experiment$ICE
     bed <- experiment$ABS
+    bed[,1] <- as.factor(bed[, 1])
     resolution <- experiment$RES
     if (is.null(data.table::key(hicdata))) {
         data.table::setkey(hicdata, V1, V2)
     }
-    tad.bed <- tad.bed[abs(tad.bed[, 6] - tad.bed[, 2]) >= smallTreshold,
-        ]
-    tad.bed <- na.exclude(tad.bed[1:6])
-    tad <- tad.bed[, c(1, 2, 6)]
+    tad.bed <- tad.bed[abs(tad.bed[, 3] - tad.bed[, 2]) >= smallTreshold,]
+    tad.bed <- na.exclude(tad.bed[1:3])
+    tad <- tad.bed[, c(1, 2, 3)]
     tad.length <- length(tad[, 1])
-    levels(tad$V1) <- levels(bed[, 1])
+    tad[,1] <- factor(tad[,1], levels=levels(bed[,1]))
+
     SL <- 0
     for (i in 1:tad.length) {
         tadSize <- tad[i, 3] - tad[i, 2]
@@ -54,26 +55,37 @@ stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
         }
         SL <- SL + 1
     }
-    if (saveRaw) {
-        rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
-        sm <- simplify2array(rawMatList)
-        MED <- apply(sm, MARGIN = 1:2, median)
-        MAD <- apply(sm, MARGIN = 1:2, mad)
-        tres <- MED + (MAD * MADTRESHOLD)
-        tres[is.na(tres)] <- 0
-        for (i in 1:length(rawMatList)) {
-            m <- rawMatList[[i]]
-            if (any(m[1:99, 1:99] > tres[1:99, 1:99] * 5)) {
-                rawMatList[[i]] <- matrix(0, nrow = 100, ncol = 100)
-                SL - 1
-            }
+
+      rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
+      sm <- simplify2array(rawMatList)
+      MED <- apply(sm, MARGIN = 1:2, median)
+      MAD <- apply(sm, MARGIN = 1:2, mad)
+      tres <- MED + (MAD * MADTRESHOLD)
+      tres[is.na(tres)] <- 0
+      for (i in 1:length(rawMatList)) {
+          m <- rawMatList[[i]]
+          if (any(m[1:99, 1:99] > tres[1:99, 1:99] * 5)) {
+              rawMatList[[i]] <- matrix(0, nrow = 100, ncol = 100)
+              SL - 1
+          }
+      }
+      STACK.outlierCorrected <- Reduce(rawMatList, f = "+")
+      STACK.rawMatList <- rawMatList
+      if(saveRaw){
+        if(saveRawList){
+            return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
+                      STACK.raw = (results.vector/SL)[1:99, 1:99],
+                      STACK.list = STACK.rawMatList))
+        } else {
+            return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
+                      STACK.raw = (results.vector/SL)[1:99, 1:99]))
+          }
+      } else{
+        if(saveRawList){
+          return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
+                      STACK.list = STACK.rawMatList))
+        } else {
+          return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99]))
         }
-        STACKoutlierr <- Reduce(rawMatList, f = "+")
-        return(list(STACK = (results.vector/SL)[1:99, 1:99],
-            RAW = rawMatList, STACKoutlier = (STACKoutlierr/SL)[1:99,
-                1:99]))
-    }
-    else {
-        return((results.vector/SL)[1:99, 1:99])
-    }
-}
+      }
+  }

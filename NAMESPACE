@@ -3,6 +3,8 @@
 export(APA)
 export(PESCAn)
 export(RCP)
+export(badBin.find)
+export(badBin.plot)
 export(construct.experiment)
 export(cov2d)
 export(differential.TAD.dotplot)

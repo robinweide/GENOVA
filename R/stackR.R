@@ -13,9 +13,9 @@
 #' @return A list containing a matrix with the Z-stack scores (`STACK`). Optionally, it can contain the raw matrices per TAD (`STACK.list`) and a matrix without the outlier-correction (`STACK.raw`).
 #' @export
 stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
-    saveRaw = T, saveRawList = T,outlierCutOff = 50){
+    saveRaw = T, saveRawList = T,outlierCutOff = 40){
 		if(any(tad.bed[,2] > tad.bed[,3])){
-			warning("5' TAD border larger then 3' TAD border for some entries")
+			warning("5' TAD border downstream then 3' TAD border for some entries")
 		}
     MADTRESHOLD <- outlierCutOff
     rawMatList = list()

@@ -5,10 +5,10 @@
 \title{Get a z-stack matrix of TADs}
 \usage{
 stackR(experiment, tad.bed, smallTreshold = 225000, verbose = F,
-  saveRaw = T, saveRawList = T, outlierCutOff = 50)
+  saveRaw = T, saveRawList = T, outlierCutOff = 40)
 
 stackR(experiment, tad.bed, smallTreshold = 225000, verbose = F,
-  saveRaw = T, saveRawList = T, outlierCutOff = 50)
+  saveRaw = T, saveRawList = T, outlierCutOff = 40)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}

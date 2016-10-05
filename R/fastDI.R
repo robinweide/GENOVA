@@ -43,7 +43,7 @@ fastDI <- function(experiment, chrom, start, end, max.i = 100){
   sel <- sel[sel > 0]
   sel <- sel[sel < length(di)]
   di[sel] <- 0
-  di
+  -di
 }
 
 # v <- fastDI(WT.sub$z, 100); plot(WT.sub$x, v, type='h',lwd = 1.5,ylim=c(-400,400), xlim=xlim, axes=F); axis(1, at=seq(0,3e9, by=5e5), lab=NA, lwd=3)

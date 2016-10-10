@@ -3,10 +3,12 @@
 #' @param stackedlist List of results from `stacked.TAD`.
 #' @param title Text to plot
 #' @param Focus Wich sample does need to be the to-compare sample?
-#' @param zCoef Coefficient to change the zlims
+#' @param focusLast Plot the focus-sample in the last column?
+#' @param zCoef Coefficient to change the zlims above
+#' @param z2Coef Coefficient to change the zlims below
 #' @return A grid object, containing two ggplot-objects.
 #' @export
-visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..){
+visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, focusLast = F, zCoef = 1, z2Coef = 1,...){
   # Make two dataframes
   abovePlots <- data.frame(Var1 = integer(),
                            Var2 = integer(),
@@ -22,7 +24,7 @@ visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..
     a <- reshape2::melt(stackedlist[[i]]$STACK)
     a$sample <- factor(rep(names(stackedlist)[i], length(a[,1])))
     abovePlots <- rbind(abovePlots, a)
-
+    
     e <- reshape2::melt(stackedlist[[i]]$STACK-stackedlist[[focus]]$STACK)
     e$sample <- rep(paste0(names(stackedlist)[focus], ' vs ', names(stackedlist)[i] ) , length(e[,1]))
     belowPlots <- rbind(belowPlots, e)
@@ -30,23 +32,28 @@ visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..
   }
   # Set to per 1 milion contacts
   zmaxAbove = max(m)*zCoef
-
+  
   colnames(abovePlots) <- c('Var1','Var2','value','sample')
   colnames(belowPlots) <- c('Var1','Var2','value','sample')
   # Find zlims
-  zminAbove <- max(0, quantile(na.exclude(abovePlots$value), .3)*zCoef)
-
-
+  zminAbove <- max(0, quantile(na.exclude(abovePlots$value), .2)*zCoef)
+  
+  
   abovePlots[abovePlots$value < zminAbove, 3  ] <- zminAbove
   abovePlots[abovePlots$value > zmaxAbove,  3 ] <- zmaxAbove
-  z2 <- min( abs(c(  quantile(na.exclude(belowPlots$value), .01) , quantile(na.exclude(belowPlots$value), 1)        ) )   )*zCoef
+  z2 <- min( abs(c(  quantile(na.exclude(belowPlots$value), 0.005) , quantile(na.exclude(belowPlots$value), .995)        ) )   )*z2Coef
   belowPlots$value[belowPlots$value > z2] <- z2
   belowPlots$value[belowPlots$value < (z2 *-1)] <- (z2 *-1)
   # Set focus-sample to column 1
-  abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[focus], levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ))
-  volgorde <- match(names(stackedlist),levels(abovePlots$sample))
+  
+  if(focusLast == FALSE){
+    abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[focus], levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ))
+  } else {
+    abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ,levels(abovePlots$sample)[focus]))
+  }
+    volgorde <- match(names(stackedlist),levels(abovePlots$sample))
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
-
+  
   # Plot first row
   if(require('viridis') == TRUE){
     plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) + ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +

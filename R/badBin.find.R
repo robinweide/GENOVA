@@ -13,11 +13,11 @@ badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T){
   allbins <- unique(experiment$ICE$V1)
   maxbin <- max(allbins)
   oneToMaxBin <- 1:maxbin
-
+  
   res <- experiment$RES
   ### Sample 1000 bins (more, if runtime is low enough)
   sampledBINs <- sample(unique(experiment$ICE$V1), size = 1000)
-
+  
   cat("Generating base RCP... 0 percent\t\t\t\t\r\r")
   ### Make mean RCP of sampled bins -> RCP_base
   RCP_base <- rep(0, (1e6 / res)/2)
@@ -35,7 +35,7 @@ badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T){
     RCP_base <- RCP_base + vals$V3
   }
   RCP_base <- RCP_base / 1000
-  RCP_base.model <- lm(log(c(1:50))~ RCP_base)
+  RCP_base.model <- lm(log(c(1:((1e6 / res)/2)))~ RCP_base)
   #
   cat("\n")
   cat("Iterating over matrix... 0 percent\r")
@@ -49,11 +49,11 @@ badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T){
     x <- rep(bin, (1e6 / res)/2)
     y <- seq(bin,binStop-1)
     vals <- experiment$ICE[list(x,y)] # maybe also the other way around?
-    if( sum(is.na(vals$V3)) > 49){# saves time: no need to do cor-test on NA's
+    if( sum(is.na(vals$V3)) == ((1e6 / res)/2)){# saves time: no need to do cor-test on NA's
       COR.list[[I]] <- c(bin, 0, 1)
     } else{
       for (i in seq_along(vals)) data.table::set(vals, i=which(is.na(vals[[i]])), j=i, value=0)
-      exponential.model <- lm(log(c(1:50))~ vals$V3)
+      exponential.model <- lm(log(c(1:((1e6 / res)/2)))~ vals$V3)
       b <- cor.test(fitted.values(exponential.model), fitted.values(RCP_base.model), method = 'spearman')
       COR.list[[I]] <- c(bin, b$estimate, b$p.value)
     }
@@ -81,5 +81,5 @@ badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T){
   } else {
     return(list(badBins = badBins))
   }
-
+  
 }

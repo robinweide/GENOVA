@@ -13,9 +13,13 @@ visualise.stackR.ggplot(stackedlist, title, focus = 1, zCoef = 1, ..)
 
 \item{title}{Text to plot}
 
-\item{zCoef}{Coefficient to change the zlims}
+\item{zCoef}{Coefficient to change the zlims above}
 
 \item{Focus}{Wich sample does need to be the to-compare sample?}
+
+\item{focusLast}{Plot the focus-sample in the last column?}
+
+\item{z2Coef}{Coefficient to change the zlims below}
 
 \item{stackedlist}{List of results from `stacked.TAD`.}
 

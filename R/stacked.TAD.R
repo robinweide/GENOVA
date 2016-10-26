@@ -10,7 +10,6 @@
 #' @param saveRaw Logical: True will output the raw matrices per loop and performs outlier-detection.
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
 #' @return A matrix containing the Z-stack scores.
-#' @export
 stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,saveRaw=T, outlierCutOff = 40){
   MADTRESHOLD <- outlierCutOff
   rawMatList = list()
@@ -79,7 +78,7 @@ stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,
       results.vector <- results.vector + sel.resized
     }
     SL <- SL + 1
-  } 
+  }
   if(saveRaw){
     #return(list(STACK = (results.vector/SL)[1:99,1:99],RAW = simplify2array(rawMatList)))
     rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]

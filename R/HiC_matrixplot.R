@@ -181,9 +181,9 @@ plot.bw <- function( file, chrom, start, end, y1, y2, col, rotate=F){
 	}
 }
 
-#' Find all bad bins
+#' hic.matrixplot
 #'
-#' Builds a representative RCP and tests per Hi-C bin, whether its log-linear fitted data correlates.
+#' Plot a matrix (or two) for a region of interest with annotations
 #'
 #' @param exp1 The control Hi-C experiment object: produced by construct.experiment(). (bottom)
 #' @param exp2 Optional: the treatment Hi-C experiment object: produced by construct.experiment().

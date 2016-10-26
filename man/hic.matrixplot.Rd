@@ -2,7 +2,7 @@
 % Please edit documentation in R/HiC_matrixplot.R
 \name{hic.matrixplot}
 \alias{hic.matrixplot}
-\title{Find all bad bins}
+\title{hic.matrixplot}
 \usage{
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
   chip = list(NULL, NULL, NULL, NULL), bed.col = rep(c("red", "blue"), 2),
@@ -38,6 +38,6 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 A matrix-plot
 }
 \description{
-Builds a representative RCP and tests per Hi-C bin, whether its log-linear fitted data correlates.
+Plot a matrix (or two) for a region of interest with annotations
 }
 

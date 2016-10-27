@@ -15,7 +15,7 @@
 #' @export
 APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose = F, saveRaw = T, outlierCutOff = 40, ...){
   MADTRESHOLD <- outlierCutOff
-  if(((size-1) /2 )%%2 != 0){stop("Size should be an even number +1")}
+  if(((size-1) /2 )%%1 != 0){stop("Size should be an even number +1")}
   size.offset = (size-1)/2
   if(saveRaw){
     rawMatList = list()

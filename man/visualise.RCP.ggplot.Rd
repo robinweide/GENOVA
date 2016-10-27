@@ -4,10 +4,12 @@
 \alias{visualise.RCP.ggplot}
 \title{Plot the RCP results}
 \usage{
-visualise.RCP.ggplot(RCPdata)
+visualise.RCP.ggplot(RCPdata, smooth = F)
 }
 \arguments{
 \item{RCPdata}{Output of `RCP`}
+
+\item{smooth}{Plot a lowess-smoothed line?}
 }
 \value{
 A ggplot-object

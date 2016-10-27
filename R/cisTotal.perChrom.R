@@ -6,6 +6,7 @@
 #' @return The per-chromosome cis/total ratio
 #' @note The per chromsosome score is on average lower than the whole genome score, because in the per chromosome analysis every ditag is counted twice (for the two interacting chromosomes)
 #' @import data.table
+#' @export
 cisTotal.perChrom <- function( exp ){
   #sort the TADs otherwise the findInterval function will not work
   cis <- c()

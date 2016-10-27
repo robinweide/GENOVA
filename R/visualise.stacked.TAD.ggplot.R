@@ -5,7 +5,6 @@
 #' @param Focus Wich sample does need to be the to-compare sample?
 #' @param zCoef Coefficient to change the zlims
 #' @return A grid object, containing two ggplot-objects.
-#' @export
 visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, ..){
   # Make two dataframes
   abovePlots <- data.frame(Var1 = integer(),

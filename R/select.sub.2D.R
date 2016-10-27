@@ -7,7 +7,6 @@
 #' @param Y The Y index-range.
 #' @return A data.table with normalised counts.
 #' @import data.table
-#' @export
 select.sub.2D <- function( data , X, Y ){
   x <- rep(X[1]:X[length(X)], X[length(X)]-X[1]+1)
   y <- rep(Y[1]:Y[length(Y)], each=length(Y[1]:Y[length(Y)]))

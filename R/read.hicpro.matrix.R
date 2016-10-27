@@ -7,7 +7,6 @@
 #' @param file Full path to file.
 #' @param norm Normalising factor.
 #' @return A data.table with normalised counts.
-#' @export
 read.hicpro.matrix <- function(file, norm=1e9){
   data <- data.table::fread(file)
   data.table::setkey(data, "V1", "V2")

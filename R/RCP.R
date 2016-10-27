@@ -9,9 +9,12 @@
 #' @param verbose Produces a progress-indication.
 #' @return A data_frame with distance-bin and probabilities.
 #' @export
-RCP <- function(experimentList, chromsToUse, maxDistance = 1e09, verbose = F){
+RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 1e09, verbose = F){
   amountOfSamples <- length(experimentList)
   exp.names <- c()
+  if(is.null(chromsToUse)){
+    chromsToUse <-  unique(experimentList[[1]]$ABS[,1])
+  }
   
   #check whether experiment names have been declared uniquely
   #otherwise use standard names for RCP

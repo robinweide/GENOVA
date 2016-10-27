@@ -18,9 +18,10 @@ RCP <- function(experimentList, chromsToUse, maxDistance = 1e09, verbose = F){
   for( i in 1:length(experimentList)){
     exp.names <- c(exp.names, experimentList[[i]]$name)
   } 
+  standard <- FALSE
   if(length(exp.names) != length(unique(exp.names))){
     warning("Experiment names have not been declared uniquely, using standard names")
-    standard = TRUE
+    standard <- TRUE
   } 
 
 

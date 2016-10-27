@@ -9,7 +9,6 @@
 #' @param verbose Produces a progress-indication.
 #' @param saveRaw Logical: True will output the raw matrices per loop and performs outlier-detection.
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
-#' @return A matrix containing the Z-stack scores.
 stacked.TAD <- function(experiment, tad.bed, smallTreshold = 225e3, verbose = F,saveRaw=T, outlierCutOff = 40){
   MADTRESHOLD <- outlierCutOff
   rawMatList = list()

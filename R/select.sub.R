@@ -6,7 +6,6 @@
 #' @param start Start of index-range.
 #' @param end End of index-range.
 #' @return A data.table with normalised counts.
-#' @export
 select.sub <- function( data, start, end ){
   x <- rep(start:end, end-start+1)
   y <- rep(start:end, each=end-start+1)

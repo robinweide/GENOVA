@@ -6,7 +6,6 @@
 #' @param res The resolution
 #' @param bin The bin to plot
 #' @return A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can output a bed-file (`bed`).
-#' @export
 badBin.plot <- function(hicMat, res, bin, RCP_base = RCP_base){
   binStop <- (1e6 / res) + bin
   x <- rep(bin, (1e6 / res))

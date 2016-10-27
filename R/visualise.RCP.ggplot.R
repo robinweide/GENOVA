@@ -9,7 +9,7 @@ visualise.RCP.ggplot <-function(RCPdata){
     cols <- RCPdata$color
     names(cols) <- RCPdata$sample
     ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1e6, 
-        y = prob)) + ggplot2::geom_smooth(span = 0.25, se = F) + 
+        y = prob)) + ggplot2::geom_line() + 
         ggplot2::scale_x_log10() + ggplot2::scale_y_log10() + 
         ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCP_WTWAPL$chrom))))) + 
         ggplot2::theme_linedraw() + ggplot2::scale_color_manual(values = cols) + 

@@ -5,6 +5,7 @@
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @return The genome-wide cis/total ratio
 #' @import data.table
+#' @export
 cisTotal.scores <- function( exp ){
   #sort the TADs otherwise the findInterval function will not work
   cis <- 0

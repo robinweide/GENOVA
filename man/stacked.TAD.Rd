@@ -20,9 +20,6 @@ stacked.TAD(experiment, tad.bed, smallTreshold = 225000, verbose = F,
 
 \item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
 }
-\value{
-A matrix containing the Z-stack scores.
-}
 \description{
 Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.
 Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.

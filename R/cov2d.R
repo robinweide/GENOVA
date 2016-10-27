@@ -9,8 +9,6 @@
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor). 
 #' @return A list containing a score-matrix and a count-variable of the amount of used bed-entries.
 #' @import data.table
-#' @export
-#' 
 cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0){
   #read data from experiment list
   data = experiment$ICE

@@ -4,7 +4,7 @@
 \alias{RCP}
 \title{Get a per-chromosome scaling plot}
 \usage{
-RCP(experimentList, chromsToUse, maxDistance = 1e+09, verbose = F)
+RCP(experimentList, chromsToUse = NULL, maxDistance = 1e+09, verbose = F)
 }
 \arguments{
 \item{chromsToUse}{A vector containing the chromosome-names of interest.}

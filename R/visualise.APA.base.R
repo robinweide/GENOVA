@@ -7,9 +7,9 @@
 #' @param color.fun2 Optional color function for the second row
 #' @param abs.max Optional Z-max of the first row
 #' @param rel.max Optional Z-max of the second row
-#' @return A grid object, containing two ggplot-objects.
+#' @return A plot
 #' @export
-visualise.APA <- function( APAlist, title, focus = 1, color.fun1=NULL, color.fun2=NULL, abs.max=NULL, rel.max=NULL, ...){
+visualise.base.APA <- function( APAlist, title, focus = 1, color.fun1=NULL, color.fun2=NULL, abs.max=NULL, rel.max=NULL, ...){
 	#set the margins and store the old settings
 	opar <- par(mar=rep(3,4))
 

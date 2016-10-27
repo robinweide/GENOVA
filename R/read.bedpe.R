@@ -5,7 +5,6 @@
 #'
 #' @param loop.bed Path to bedpe file.
 #' @return A data.frame with the bedpe-values.
-#' @export
 read.bedpe <- function(loop.bed, header = T){
   # Load bedpe of loops of interest
   # Chromosome-columns are factors

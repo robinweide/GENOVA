@@ -56,6 +56,7 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 1e09, verbose 
       breaks <- 10**seq(4,8,length.out=81)
       
       m.chrom <- experiment$ICE[list(x,y)]
+      
       ### Does this ^^^ include 0's?
       # head(m.chrom)
       #   V1     V2 V3
@@ -74,6 +75,7 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 1e09, verbose 
       #   5: 279114 279115 245.6197
       #   6: 279115 279115 209.5638
       m.chrom <- dplyr::filter(m.chrom, V1 < V2)
+      if(nrow(m.chrom) == 0){ next }
       m.chrom$V3[is.na(m.chrom$V3)] <- 0
       # head(m.chrom)
       #   V1     V2 V3

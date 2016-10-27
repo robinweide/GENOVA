@@ -15,48 +15,51 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 1e09, verbose 
   if(is.null(chromsToUse)){
     chromsToUse <-  unique(experimentList[[1]]$ABS[,1])
   }
-  
+
+  # Check for N chromosomes: more than 100: please specify chroms!
+  if(length(chromsToUse) > 75){stop("Please restrict the amount of chromosomes with chromsToUse")}
+
+
   #check whether experiment names have been declared uniquely
   #otherwise use standard names for RCP
   for( i in 1:length(experimentList)){
     exp.names <- c(exp.names, experimentList[[i]]$name)
-  } 
+  }
   standard <- FALSE
   if(length(exp.names) != length(unique(exp.names))){
     warning("Experiment names have not been declared uniquely, using standard names")
     standard <- TRUE
-  } 
+  }
 
-
-  
   d <- dplyr::data_frame(distance = integer(),
                   prob = numeric(),
                   sample = integer())
-  
+
   for(Ci in 1:length(chromsToUse)){
     chrom <- chromsToUse[Ci]
     for(i in 1:amountOfSamples){
       if(verbose){cat(paste0('Chromosome ', Ci,' of ', length(chromsToUse), ' chromosomes\n' ,  'Sample ', i,' of ', amountOfSamples, ' samples'), "\r")}
-      experiment <- experimentList[[i]]
-      m <- experiment$ICE
-      resolu <- experiment$RES
-      
-      BED_ABS <- data.table::data.table(experiment$ABS)
+      #experiment <- experimentList[[i]]
+      #m <- experimentList[[i]]$ICE
+      resolu <- experimentList[[i]]$RES
+
+
+      BED_ABS <- data.table::data.table(experimentList[[i]]$ABS)
       data.table::setkey(BED_ABS, V1)
       idx1 <-BED_ABS[list(chrom)]
-      
+
       x <- rep(idx1$V4, length(idx1$V4))
       y <- rep(idx1$V4, each=length(idx1$V4))
       xydf <- dplyr::data_frame(x,y)
       xydf.b <- dplyr::filter(xydf,abs(x-y) <= (maxDistance/resolu))
-      
+
       x <- as.numeric(xydf$x)
       y <- as.numeric(xydf$y)
-      
+
       breaks <- 10**seq(4,8,length.out=81)
-      
-      m.chrom <- experiment$ICE[list(x,y)]
-      
+
+      m.chrom <- experimentList[[i]]$ICE[list(x,y)]
+
       ### Does this ^^^ include 0's?
       # head(m.chrom)
       #   V1     V2 V3
@@ -96,17 +99,17 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 1e09, verbose 
       if(standard){
         dat$sample <- paste("Exp.", i)
       }else{
-        dat$sample <- experiment$NAME
-      } 
+        dat$sample <- experimentList[[i]]$NAME
+      }
 
-      dat$sample <- experiment$NAME
+      dat$sample <- experimentList[[i]]$NAME
       dat$chrom <- chrom
-      dat$color <- experiment$COL
+      dat$color <- experimentList[[i]]$COL
       d <- rbind(d, dat)
     }
   }
   dat$sample <- factor(dat$sample)
   dat$color <- as.character(dat$color)
-  experiment$ABS <- as.data.frame(experiment$ABS)
+  experimentList[[i]]$ABS <- as.data.frame(experimentList[[i]]$ABS)
   return(d)
 }

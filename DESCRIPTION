@@ -1,6 +1,6 @@
 Package: GENOVA
 Title: GENOVA: expore the Hi-C
-Version: 0.5.6
+Version: 0.5.7
 Authors@R: c(
   person("Robin H.", "van der Weide", email = "r.vd.weide@nki.nl", role = c("aut", "cre")),
   person("Elzo", "de Wit", email = "e.d.wit@nki.nl", role = "aut"))

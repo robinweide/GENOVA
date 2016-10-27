@@ -5,6 +5,7 @@
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param color.fun Optional color-function
 #' @param z.max Adjust the maximum value of the color-scale
+#' @note Please use only low-resolution matrices with this.
 #' @return A plot of the chromosome matrix and a assignable matrix
 #' @export
 chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL ){

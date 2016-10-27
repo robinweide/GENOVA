@@ -19,4 +19,7 @@ A plot of the chromosome matrix and a assignable matrix
 \description{
 Plot a genome-wide overview-matrix.
 }
+\note{
+Please use only low-resolution matrices with this.
+}
 

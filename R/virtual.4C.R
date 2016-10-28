@@ -18,17 +18,11 @@ virtual.4C <- function(experiment, loop.bed, smallTreshold = 225e3, verbose = F)
   # Make chr:pos index of HiC-index
   bed.p <- paste0(bed[,1], ":", bed[,2])
   # Remove smaller loops
-  loop.bed <- loop.bed[abs(loop.bed[,6]-loop.bed[,2]) >= smallTreshold ,]
-  # Is BED 1 upstream of BED2?
-  for(i in 1:length(loop.bed[,1])){
-    if( loop.bed[i,2] > loop.bed[i,5]){
-      loop.bed <- loop.bed[i,c(4,5,6,1,2,3)]
-    }
-  }
+  loop.bed <- loop.bed[abs(loop.bed[,3]-loop.bed[,2]) >= smallTreshold ,]
   # Prune NA-rows
-  loop.bed <- na.exclude(loop.bed[1:6])
+  loop.bed <- na.exclude(loop.bed[1:3])
   # Make a bed from bedpe, with cols 1,2 and 6
-  loop.4c <- loop.bed[,c(1,2,6)]
+  loop.4c <- loop.bed[,c(1,2,3)]
   # Loop trough loops and sum over scorematrices
   loop.4c.length <- length(loop.4c$V1)
   # Add missing levels to Chromosomes

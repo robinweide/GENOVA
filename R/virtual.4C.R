@@ -27,6 +27,7 @@ function (experiment, loop.bed, smallTreshold = 225000, verbose = F)
     }
     loop.bed <- na.exclude(loop.bed[1:6])
     loop.4c <- loop.bed[, c(1, 2, 6)]
+    loop.4c$CHR1 <- gsub(loop.4c$CHR1, pattern = "chr ", replacement = "chr")
     loop.4c.length <- length(loop.4c$V1)
     levels(loop.4c$V1) <- levels(bed$V1)
     results.vector <- rep(0, 100)

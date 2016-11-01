@@ -51,7 +51,7 @@ visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, focusLast = F
   } else {
     abovePlots$sample <- factor(abovePlots$sample, levels = c(levels(abovePlots$sample)[!levels(abovePlots$sample) %in% levels(abovePlots$sample)[focus]] ,levels(abovePlots$sample)[focus]))
   }
-    volgorde <- match(names(stackedlist),levels(abovePlots$sample))
+  volgorde <- match(names(stackedlist),levels(abovePlots$sample))
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
   
   # Plot first row

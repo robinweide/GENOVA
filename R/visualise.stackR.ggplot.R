@@ -7,7 +7,7 @@
 #' @param z2Coef Coefficient to change the zlims below
 #' @return A grid object, containing two ggplot-objects.
 #' @export
-visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, z2Coef = 1,...){
+visualise.stackR.ggplot <- function(stackedlist, title, focus = 1, zCoef = 1, z2Coef = 1){
   # Make two dataframes
   abovePlots <- data.frame(Var1 = integer(),
                            Var2 = integer(),

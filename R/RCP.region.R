@@ -4,8 +4,7 @@
 #' Bins are created on a log scale, which leads to equal amounts of datapoints per bin.
 #'
 #' @param experiment List of experiment-objects from `construct.experiment()`.
-#' @param chromsToUse A vector containing the chromosome-names of interest.
-#' @param maxDistance The maximal distance to calculate scalings for.
+#' @param bed A bed-file.
 #' @param verbose Produces a progress-indication.
 #' @return A data_frame with distance-bin and probabilities.
 #' @export

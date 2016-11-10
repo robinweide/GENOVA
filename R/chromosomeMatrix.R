@@ -30,6 +30,6 @@ chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL ){
 
 	mat <- list(rawCounts=chrom.mat , normMat = norm.mat)
 
-	plot.chrom.comparison(mat)
+	plot.chrom.comparison(mat, color.fun=color.fun, z.max=z.max)
 	invisible(mat)
 }

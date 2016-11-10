@@ -265,7 +265,10 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
 	#draw pretty axes and boxes
 	box(lwd=2)
 	size.region <- diff(range(mat1$x))
-	if( size.region > 2e6){
+	if( size.region > 40e6){
+		axis(2, at=seq(0,3e9, by=10e6), lab=seq(0,3e9, by=10e6)/1e6, lwd=2, cex.axis=1.6)
+		axis(3, at=seq(0,3e9, by=10e6), lab=seq(0,3e9, by=10e6)/1e6, lwd=2, cex.axis=1.6)
+	}else if( size.region > 2e6){
 		axis(2, at=seq(0,3e9, by=1e6), lab=seq(0,3e9, by=1e6)/1e6, lwd=2, cex.axis=1.6)
 		axis(3, at=seq(0,3e9, by=1e6), lab=seq(0,3e9, by=1e6)/1e6, lwd=2, cex.axis=1.6)
 	}else{

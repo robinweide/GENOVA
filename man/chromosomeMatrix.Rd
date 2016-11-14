@@ -4,7 +4,7 @@
 \alias{chromosomeMatrix}
 \title{chromosomeMatrix}
 \usage{
-chromosomeMatrix(exp, color.fun = NULL, z.max = NULL)
+chromosomeMatrix(exp, color.fun = NULL, z.max = NULL, remove = NULL)
 }
 \arguments{
 \item{color.fun}{Optional color-function}

@@ -4,12 +4,14 @@
 \alias{visualise.RCP.ggplot}
 \title{Plot the RCP results}
 \usage{
-visualise.RCP.ggplot(RCPdata, smooth = F)
+visualise.RCP.ggplot(RCPdata, smooth = F, combine = T)
 }
 \arguments{
 \item{RCPdata}{Output of `RCP`}
 
 \item{smooth}{Plot a lowess-smoothed line?}
+
+\item{combine}{Combine all chromosomes?}
 }
 \value{
 A ggplot-object

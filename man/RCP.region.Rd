@@ -7,7 +7,7 @@
 RCP.region(experimentList, bed, verbose = F)
 }
 \arguments{
-\item{bed}{A bed-file.}
+\item{bed}{A BED-like dataframe of the regions of interest}
 
 \item{verbose}{Produces a progress-indication.}
 

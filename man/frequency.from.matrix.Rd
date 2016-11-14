@@ -17,7 +17,13 @@
 
 \item{end}{End position in bp.}
 
-\item{window}{}
+\item{window}{The window-size (default: 10e3).}
+
+\item{q.val}{Quantile cutoff}
+
+\item{cut.off}{Score cutoff}
+
+\item{extraPadding}{Extra room needed for the ends of the piramid.}
 
 \item{ylim}{The y-start and -stop: zero is at the diagonal,}
 }

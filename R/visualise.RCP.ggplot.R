@@ -4,11 +4,19 @@
 #'
 #' @param RCPdata Output of `RCP`
 #' @param smooth Plot a lowess-smoothed line?
+#' @param combine Combine all chromosomes?
 #' @return A ggplot-object
 #' @export
-visualise.RCP.ggplot <-function(RCPdata, smooth =F){
+visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T){
   cols <- RCPdata$color
   names(cols) <- RCPdata$sample
+  
+  if(combine == T){
+    RCPdata <- group_by(RCPdata, distance, sample) 
+    RCPdata <- summarise(RCPdata, prob = mean(prob), col = unique(color))
+    RCPdata$chrom <- "All chromosomes"
+  }
+  
   if(smooth == F){
     ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1e6, 
                                           y = prob)) + ggplot2::geom_line() + 

@@ -4,17 +4,16 @@
 #' Bins are created on a log scale, which leads to equal amounts of datapoints per bin.
 #'
 #' @param experiment List of experiment-objects from `construct.experiment()`.
-#' @param bed A bed-file.
+#' @param bed A BED-like dataframe of the regions of interest
 #' @param verbose Produces a progress-indication.
 #' @return A data_frame with distance-bin and probabilities.
 #' @export
 RCP.region <- function(experimentList, bed , verbose = F){
-  maxDistance = 5e06
+  maxDistance <- 1e07
   amountOfSamples <- length(experimentList)
   exp.names <- c()
   chromsToUse <-  unique(experimentList[[1]]$ABS[,1])
-  chromsToUse <- chromsToUse[-1]
-  chromsToUse <- chromsToUse[-24]
+  chromsToUse <-  chromsToUse[chromsToUse %in% unique(bed[,1])]
   #check whether experiment names have been declared uniquely
   #otherwise use standard names for RCP
   for( i in 1:length(experimentList)){
@@ -25,11 +24,11 @@ RCP.region <- function(experimentList, bed , verbose = F){
     warning("Experiment names have not been declared uniquely, using standard names")
     standard <- TRUE
   }
-
+  
   d <- dplyr::data_frame(distance = integer(),
                          prob = numeric(),
                          sample = integer())
-
+  
   for(Ci in 1:length(chromsToUse)){
     chrom <- chromsToUse[Ci]
     for(i in 1:amountOfSamples){
@@ -37,8 +36,8 @@ RCP.region <- function(experimentList, bed , verbose = F){
       #experiment <- experimentList[[i]]
       #m <- experimentList[[i]]$ICE
       resolu <- experimentList[[i]]$RES
-
-
+      
+      
       BED_ABS <- data.table::data.table(experimentList[[i]]$ABS)
       data.table::setkey(BED_ABS, V1)
       idx1 <-BED_ABS[list(chrom)]
@@ -49,14 +48,14 @@ RCP.region <- function(experimentList, bed , verbose = F){
       y <- rep(idx1$V4, each=length(idx1$V4))
       xydf <- dplyr::data_frame(x,y)
       xydf.b <- dplyr::filter(xydf,abs(x-y) <= (maxDistance/resolu))
-
+      
       x <- as.numeric(xydf$x)
       y <- as.numeric(xydf$y)
-
-      breaks <- 10**seq(4,8,length.out=81)
-
+      
+      breaks <- 10**seq(4,7,length.out=81)
+      
       m.chrom <- experimentList[[i]]$ICE[list(x,y)]
-
+      
       ### Does this ^^^ include 0's?
       # head(m.chrom)
       #   V1     V2 V3
@@ -85,23 +84,22 @@ RCP.region <- function(experimentList, bed , verbose = F){
       #   4: 278175 278172 0
       #   5: 278176 278172 0
       #   6: 278177 278172 0
-
+      
       # Get IDX's from bed-file
       sel <- NULL
       for(h in 1:nrow(bed)){
         sel <- c(sel,experimentList[[i]]$ABS[experimentList[[i]]$ABS[,1]==bed[h,1] & experimentList[[i]]$ABS[,2] >= bed[h,2] & experimentList[[i]]$ABS[,2] <= bed[h,3],4])
       }
-
-      m.chrom <- dplyr::filter(m.chrom, V1 %in% sel, V2 %in% sel:sel+(maxDistance/resolu))
-
-      m.chrom <- dplyr::filter(m.chrom, V1 < V2)
-
+      
+      m.chrom <- m.chrom[m.chrom$V1 %in% sel & m.chrom$V2-m.chrom$V1 <= (maxDistance/resolu),]
+      
+      rows <- nrow(m.chrom)
       distance = resolu*(m.chrom$V2-m.chrom$V1)
       cbb <- cut(distance, breaks,labels = FALSE)
       rcp <- tapply(m.chrom$V3,cbb,mean)
       rcp <- rcp[rcp!=0 & !is.na(rcp)]
       #m.sum <- sum(m.chrom$V3)
-      dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],rcp)
+      dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],rcp/rows)
       colnames(dat) <- c('distance',  'prob')
       #add names to data.frame
       if(standard){
@@ -109,15 +107,11 @@ RCP.region <- function(experimentList, bed , verbose = F){
       }else{
         dat$sample <- experimentList[[i]]$NAME
       }
-
-      dat$sample <- experimentList[[i]]$NAME
+      
       dat$chrom <- chrom
       dat$color <- experimentList[[i]]$COL
       d <- rbind(d, dat)
     }
   }
-  dat$sample <- factor(dat$sample)
-  dat$color <- as.character(dat$color)
-  experimentList[[i]]$ABS <- as.data.frame(experimentList[[i]]$ABS)
   return(d)
 }

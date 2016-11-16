@@ -59,7 +59,7 @@ plot.rectangle <- function( bed, chrom, y1, y2, start, end, col, rotate=F ){
 	sel.bed <- bed[bed[,1]==chrom & bed[,2] < end & bed[,3] > start,]
 	if(nrow(sel.bed)>0){
 		if(rotate){
-			rect(y1, sel.bed[,2], y2, sel.bed[,2], col=col, border=col)
+			rect(y1, sel.bed[,2], y2, sel.bed[,3], col=col, border=col)
 		}else{
 			rect(sel.bed[,2], y1, sel.bed[,3], y2, col=col, border=col)
 		}

@@ -7,7 +7,7 @@
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
   chip = list(NULL, NULL, NULL, NULL), bed.col = rep(c("red", "blue"), 2),
   bw.col = rep(c("navy", "darkred"), 2), type = rep("triangle", 4),
-  coplot = "dual", genes = NULL)
+  coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower")
 }
 \arguments{
 \item{exp1}{The control Hi-C experiment object: produced by construct.experiment(). (bottom)}
@@ -33,6 +33,10 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 \item{coplot}{When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1}
 
 \item{genes}{Structure with gene information, will only be combined with bed structure}
+
+\item{tads}{BED-like dataframe}
+
+\item{tad.type}{How to show TADS: upper, lower and or both}
 }
 \value{
 A matrix-plot

@@ -194,11 +194,11 @@ draw.tads <- function( tads, chrom, tad.type="lower", col="blue", lwd=2){
     segments(tads[,3], tads[,2], tads[,3], tads[,3], col="blue", lwd=lwd)
   }else{
     stop("Wrong option for TAD plot type: upper, lower and both are allowed");
-  } 
-} 
-		
-		
-		
+  }
+}
+
+
+
 #' hic.matrixplot
 #'
 #' Plot a matrix (or two) for a region of interest with annotations
@@ -215,6 +215,8 @@ draw.tads <- function( tads, chrom, tad.type="lower", col="blue", lwd=2){
 #' @param type Should a rectangle or a triangle be drawn? Not that for a triangle a 6th strand column should be included
 #' @param coplot When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1
 #' @param genes Structure with gene information, will only be combined with bed structure
+#' @param tads BED-like dataframe
+#' @param tad.type How to show TADS: upper, lower and or both
 #' @return A matrix-plot
 #' @export
 hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ){
@@ -295,12 +297,12 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
 		axis(2, at=seq(0,3e9, by=500e3), lab=lab, lwd=2, cex.axis=1.6)
 		axis(3, at=seq(0,3e9, by=500e3), lab=lab, lwd=2, cex.axis=1.6)
 	}
-	
+
 	#draw tads on the image plot
 	if(!is.null(tads)){
 		draw.tads( tads, chrom, tad.type=tad.type)
 	}
-	
+
 
 	#fill up empty elements
 	if(length(chip) < 4){

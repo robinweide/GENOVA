@@ -217,7 +217,7 @@ draw.tads <- function( tads, chrom, tad.type="lower", col="blue", lwd=2){
 #' @param genes Structure with gene information, will only be combined with bed structure
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL){
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ){
 
 	#some error handling
 	if(!is.null(exp2)){

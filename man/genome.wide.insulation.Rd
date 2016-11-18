@@ -12,7 +12,7 @@ genome.wide.insulation(hic, window.size, normalize.genome = F)
 \item{window.size}{The sliding square size}
 }
 \value{
-happiness
+DF with insulation score
 }
 \description{
 Get genome-wide insulation

@@ -313,7 +313,9 @@ matrix.insulation <- function( mat, window.size ){
 #'
 #' @param hic exp
 #' @param window.size The sliding square size
-#' @return happiness
+#' @param chrom Chromosome to use
+#' @return DF with insulation score
+#' @export
 chromosome.wide.insulation <- function( hic, window.size, chrom ){
 	max.pos <- max(hic$ABS[hic$ABS[,1]==chrom,3])
 	window = hic$RES*1000
@@ -338,7 +340,8 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 #'
 #' @param hic exp
 #' @param window.size The sliding square size
-#' @return happiness
+#' @return DF with insulation score
+#' @export
 genome.wide.insulation <- function( hic, window.size, normalize.genome = F ){
 	chrom.vec <- c(hic$ABS[1,1],hic$ABS[which(head(hic$ABS[,1],-1) != tail(hic$ABS[,1],-1))+1,1])
 	chrom.save <- c(); pos.save <- c(); ins.vec <- c()

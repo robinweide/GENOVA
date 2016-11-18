@@ -181,6 +181,24 @@ plot.bw <- function( file, chrom, start, end, y1, y2, col, rotate=F){
 	}
 }
 
+#overlay TAD positions with the hi-c data
+draw.tads <- function( tads, chrom, tad.type="lower", col="blue", lwd=2){
+  tads <- tads[tads[,1]==chrom,]
+  if(tad.type == "both"){
+    rect(tads[,2], tads[,2], tads[,3], tads[,3], border="blue", lwd=lwd)
+  }else if(tad.type == "lower"){
+    segments(tads[,2], tads[,2], tads[,2], tads[,3], col="blue", lwd=lwd)
+    segments(tads[,2], tads[,3], tads[,3], tads[,3], col="blue", lwd=lwd)
+  }else if(tad.type == "upper"){
+    segments(tads[,2], tads[,2], tads[,3], tads[,2], col="blue", lwd=lwd)
+    segments(tads[,3], tads[,2], tads[,3], tads[,3], col="blue", lwd=lwd)
+  }else{
+    stop("Wrong option for TAD plot type: upper, lower and both are allowed");
+  } 
+} 
+		
+		
+		
 #' hic.matrixplot
 #'
 #' Plot a matrix (or two) for a region of interest with annotations
@@ -199,7 +217,7 @@ plot.bw <- function( file, chrom, start, end, y1, y2, col, rotate=F){
 #' @param genes Structure with gene information, will only be combined with bed structure
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL){
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ){
 
 	#some error handling
 	if(!is.null(exp2)){
@@ -277,6 +295,12 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
 		axis(2, at=seq(0,3e9, by=500e3), lab=lab, lwd=2, cex.axis=1.6)
 		axis(3, at=seq(0,3e9, by=500e3), lab=lab, lwd=2, cex.axis=1.6)
 	}
+	
+	#draw tads on the image plot
+	if(!is.null(tads)){
+		draw.tads( tads, chrom, tad.type=tad.type)
+	}
+	
 
 	#fill up empty elements
 	if(length(chip) < 4){

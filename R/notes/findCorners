@@ -1,0 +1,119 @@
+setwd("~/dataDisk/Projects/WAPL/finalDataSet/mats/")
+WT_20kb <- construct.experiment(ICEDpath = "WT_20000_iced.matrix",
+                                BEDpath = "WT_20000_abs.bed", SAMPLENAME = "WT", COLOR = "black")
+TAD <- read.delim("../HiCseg/WT.bed", h = F)
+
+TAD10 <- TAD %>% filter(V1 == "chr10")
+TAD10$V7 <- "135,206,250"
+ratioList <- data_frame(TADnumber = numeric(), median_P = numeric(), median_5 = numeric(),median_3 = numeric(),ratio = numeric())
+testBEDPE <- NULL
+for(i in 1:nrow(TAD10)){
+  cat(i, "\r")
+  T <- TAD10[i,]
+  fivePrime <- WT_20kb$ABS %>% filter(V1 == T$V1) %>% mutate(V2D = abs(V2-T$V2)) %>% filter( V2D == min(V2D)) %>% filter(V2 == min(V2)) %>% select(V4) %>% unlist
+  threePrime <- WT_20kb$ABS %>% filter(V1 == T$V1) %>% mutate(V3D = abs(V3-T$V3)) %>% filter( V3D == min(V3D)) %>% filter(V3 == max(V3)) %>% select(V4) %>% unlist
+  dif <- abs(fivePrime-threePrime)
+  S <- floor(dif/3)
+  if(dif < 5){next}
+  
+  ID_corner <- list(rep(c((fivePrime -S):(fivePrime+S)),dif), rep(c((threePrime -S):(threePrime+S)), each = dif))
+  cornerScore <- WT_20kb$ICE[ID_corner]
+  if(sum(!is.na(cornerScore$V3)) / sum(is.na(cornerScore$V3)) < 0.75 ){next}
+  cornerScore[is.na(cornerScore$V3)] <- 0
+  ## Construct a matrix
+  x <- as.matrix(reshape2::dcast(unique(cornerScore), V1 ~ V2, fun.aggregate = sum, value.var = "V3"))
+  rownames(x) <- x[,1]
+  x <- x[-1,-c(1,2)]
+  
+  ## Convert it to a raster object
+  r <- raster(x)
+  extent(r) <- extent(c(0, msize, 0, msize) + 0.5)
+  
+  ## Find the maximum value within the 9-cell neighborhood of each cell
+  f <- function(X) max(X, na.rm=TRUE)
+  localmax <- focal(r, fun = f, pad=TRUE, w=matrix(1, nc=3, nr=3))
+  
+  ## Does each cell have the maximum value in its neighborhood?
+  r2 <- r==localmax
+  
+  ## Get x-y coordinates of those cells that are local maxima
+  maxXY <- xyFromCell(r2, Which(r2==1, cells=TRUE))
+  tiles <- 3
+  while( ! nrow(maxXY) == 1 ){
+    localmax <- focal(r, fun = f, pad=TRUE, w=matrix(1, nc=tiles, nr=tiles))
+    
+    ## Does each cell have the maximum value in its neighborhood?
+    r2 <- r==localmax
+    
+    ## Get x-y coordinates of those cells that are local maxima
+    maxXY <- xyFromCell(r2, Which(r2==1, cells=TRUE))
+    tiles <- tiles +2
+  }
+  # cat("Found optimal tile: ",tiles)
+  
+  # Visually inspect the data and the calculated local maxima
+  #plot(r)   ## Plot of heights
+  point <- unique(cornerScore) %>% filter(V3 == as.vector(r)[Which(r2==1, cells=TRUE)])
+  dif <- abs(point$V1-point$V2)
+  S <- floor(dif/3)
+  
+  point_5 <- (point$V2-2):(point$V2)
+  point_3 <- (point$V1):(point$V1+2)
+  
+  ID_corner <- list(rep(point_3,3), rep(point_5, each = 3))
+  cornerScore <- WT_20kb$ICE[ID_corner]
+  cornerScore[is.na(cornerScore$V3)] <- 0
+  ## Construct a matrix
+  x <- as.matrix(reshape2::dcast(unique(cornerScore), V1 ~ V2, fun.aggregate = sum, value.var = "V3"))
+  rownames(x) <- x[,1]
+  medianScoreP <- median(x[,-1])
+  
+  # make juice-box entry:
+  .bed <- cbind(filter(WT_20kb$ABS, V4 == min(unlist(ID_corner))) %>% select(V1,V2,V3),filter(WT_20kb$ABS, V4 == max(unlist(ID_corner))) %>% select(V1,V2,V3))
+  allmost <- cbind(.bed ,"255,0,0"); colnames(allmost) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
+  testBEDPE <- rbind(testBEDPE,allmost)
+  
+  
+  ### 5block
+  shiftedY <- (point$V2-S-1):(point$V2-S+1)
+  ID_corner <- list(rep(point_3,3), rep(shiftedY, each = 3))
+  cornerScore <- WT_20kb$ICE[ID_corner]
+  cornerScore[is.na(cornerScore$V3)] <- 0
+  ## Construct a matrix
+  x <- as.matrix(reshape2::dcast(unique(cornerScore), V1 ~ V2, fun.aggregate = sum, value.var = "V3"))
+  rownames(x) <- x[,1]
+  medianScores5 <- as.vector(x[,-1])
+  # make juice-box entry:
+  .bed <- cbind(filter(WT_20kb$ABS, V4 == min(unlist(ID_corner))) %>% select(V1,V2,V3),filter(WT_20kb$ABS, V4 == max(unlist(ID_corner))) %>% select(V1,V2,V3))
+  allmost <- cbind(.bed ,"0,255,0"); colnames(allmost) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
+  testBEDPE <- rbind(testBEDPE,allmost)
+  
+  ### 5block
+  shiftedX <- (point$V1+S-1):(point$V1+S+1) # dit is de upstream 
+  ID_corner <- list(rep(shiftedX,3), rep(point_5, each = 3))
+  cornerScore <- WT_20kb$ICE[ID_corner]
+  cornerScore[is.na(cornerScore$V3)] <- 0
+  ## Construct a matrix
+  x <- as.matrix(reshape2::dcast(unique(cornerScore), V1 ~ V2, fun.aggregate = sum, value.var = "V3"))
+  rownames(x) <- x[,1]
+  medianScores3 <- as.vector(x[,-1])
+  # make juice-box entry:
+  .bed <- cbind(filter(WT_20kb$ABS, V4 == min(unlist(ID_corner))) %>% select(V1,V2,V3),filter(WT_20kb$ABS, V4 == max(unlist(ID_corner))) %>% select(V1,V2,V3))
+  allmost <- cbind(.bed ,"0,0,255"); colnames(allmost) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
+  testBEDPE <- rbind(testBEDPE,allmost)
+  RL <- data_frame(TADnumber = i, 
+                   median_P = medianScoreP,
+                   median_5 = median(medianScores5),
+                   median_3 = median(medianScores3),
+                   ratio = median_P/median(c(medianScores5,medianScores3)))
+  ratioList <- rbind(ratioList, RL)
+  }
+
+  
+
+#ggplot( melt(ratioList[is.finite(ratioList$ratio),], id.vars = c("ratio")), aes(x = ratio)) + geom_density() 
+ggplot( melt(ratioList[is.finite(ratioList$ratio),], id.vars = c("ratio")), aes(y = ratio, x = variable)) + geom_violin()+ geom_abline( slope = 0 , intercept = 2.5)
+#ggplot( melt(ratioList[is.finite(ratioList$ratio),], id.vars = c("ratio")), aes(x = log2(ratio))) + geom_density() 
+#ggplot( melt(ratioList[is.finite(ratioList$ratio),], id.vars = c("ratio")), aes(x = variable, y = log2(ratio))) + geom_violin()
+write.table(TAD10[filter(ratioList, ratio > 1.35) %>% select(TADnumber) %>% unlist,], file = "~/Downloads/cornerTest.bedpe", quote = F, sep = "\t", row.names = F, col.names = F)
+write.table(testBEDPE, file = "~/Downloads/regioTest.bed", quote = F, sep = "\t", row.names = F, col.names = F)

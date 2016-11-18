@@ -1,0 +1,51 @@
+library(reshape2)
+KBM7.haploid.R1__hg19__chr2__C.40000.iced <- read.delim("~/Downloads/KBM7-haploid-R1__hg19__chr2__C-40000-iced.matrix", na.strings="nan")
+rownames(KBM7.haploid.R1__hg19__chr2__C.40000.iced) <- KBM7.haploid.R1__hg19__chr2__C.40000.iced$X6080x6080
+KBM7.haploid.R1__hg19__chr2__C.40000.iced$X6080x6080 <- NULL
+
+M <- Matrix::as.matrix(KBM7.haploid.R1__hg19__chr2__C.40000.iced, sparse = T)
+MT <- as(M, "dgTMatrix")
+
+ICE_1 <- cbind(MT@j, MT@i, MT@x) 
+ICE_1 <- as.data.frame(ICE_1)
+
+RN <- rownames(KBM7.haploid.R1__hg19__chr2__C.40000.iced)
+RN.m <- as.data.frame(matrix(unlist(strsplit(RN, split = "|", fixed = T) ), ncol = 3, byrow = T))
+ABS_BED_1 <- cbind(colsplit(RN.m$V3,pattern = "[:-]", names = c("chrom", "start", "stop")),RN.m$V1); colnames(ABS_BED_1)[4] <- "bin"
+
+ICE_1[,1:2] <- ICE_1[,1:2] + 1
+ABS_BED_1$bin <- as.numeric(as.character(ABS_BED_1$bin)) + 1
+
+### Second dataset
+
+KBM7.haploid.R2__hg19__chr2__C.40000.iced <- read.delim("~/Downloads/KBM7-haploid-R2__hg19__chr2__C-40000-iced.matrix.gz", na.strings="nan")
+rownames(KBM7.haploid.R2__hg19__chr2__C.40000.iced) <- KBM7.haploid.R2__hg19__chr2__C.40000.iced$X6080x6080
+KBM7.haploid.R2__hg19__chr2__C.40000.iced$X6080x6080 <- NULL
+
+M <- Matrix::as.matrix(KBM7.haploid.R2__hg19__chr2__C.40000.iced, sparse = T)
+MT <- as(M, "dgTMatrix")
+
+ICE_2 <- cbind(MT@j, MT@i, MT@x) 
+ICE_2 <- as.data.frame(ICE_2)
+
+RN <- rownames(KBM7.haploid.R2__hg19__chr2__C.40000.iced)
+RN.m <- as.data.frame(matrix(unlist(strsplit(RN, split = "|", fixed = T) ), ncol = 3, byrow = T))
+ABS_BED_2 <- cbind(colsplit(RN.m$V3,pattern = "[:-]", names = c("chrom", "start", "stop")),RN.m$V1); colnames(ABS_BED_2)[4] <- "bin"
+
+ICE_2[,1:2] <- ICE_2[,1:2] + 1
+ABS_BED_2$bin <- as.numeric(as.character(ABS_BED_2$bin)) + 1
+
+
+# Merge datasets
+ICE_1[is.na(ICE_1$V3),3] <- 0
+ICE_2[is.na(ICE_2$V3),3] <- 0
+ICE_combined <- NULL
+merged <- merge(ICE_1, ICE_2, by = c("V1","V2"), all = T)
+
+merged[is.na(merged$V3.x),3] <- 0
+merged[is.na(merged$V3.y),4] <- 0
+merged$score <- apply(merged[,3:4], MARGIN = 1, FUN = sum)
+merged <- merged[,-c(3:4)]
+ABS_BED_2$start <- ABS_BED_2$start -1
+write.table(merged, file = "~/Downloads/KBM7.ice", quote = F, sep = "\t", row.names = F, col.names = F)
+write.table(ABS_BED_2, file = "~/Downloads/KBM7.abs_bed", quote = F, sep = "\t", row.names = F, col.names = F)

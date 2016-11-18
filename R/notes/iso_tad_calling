@@ -1,0 +1,90 @@
+insu <- GENOVA::chromosome.wide.insulation(KBM7, window.size = 11, chrom = "chr2") # 50bins van 10kb // 25 bins van 20kb // 13 bins van 40kb
+KBM7$INSULATION <- cbind("chr2",insu$mat.x.pos.id. - KBM7$RES,insu); colnames(KBM7$INSULATION) <- c("V1", "V2", "V3", "V4")
+exp <- KBM7
+insulation.callTAD <- function(exp, TRES = 0.1, BEDCOLOR = "127,201,127"){
+  if(is.null(exp$INSULATION)){ stop("Call insulation score first and store in exp$INSULATION")}
+  res <- exp$RES
+  scooch <- floor(100e3 / res)
+  entries <- list()
+  cat("Computing the delta-vector...\n")
+  for(i in (scooch+1):(nrow(exp$INSULATION)-scooch)){
+    allTheCoolStuff <- exp$INSULATION[(i-scooch):(i+scooch),]
+    centralBin <- allTheCoolStuff[median(1:nrow(allTheCoolStuff)),]
+    leftBin <- allTheCoolStuff[1:(median(1:nrow(allTheCoolStuff))-1),]
+    leftBin.mean <- mean(leftBin$V4)
+    rightBin <- allTheCoolStuff[(median(1:nrow(allTheCoolStuff))+1):nrow(allTheCoolStuff),]
+    rightBin.mean <- mean(rightBin$V4)
+    delta <- leftBin.mean-rightBin.mean
+    if(length(unique(allTheCoolStuff$V1)) != 1){next}
+    entries[[i]] <- cbind(centralBin, delta)
+  }
+  deltaDF <-as.data.frame(data.table::rbindlist(entries))
+  cat("Calling borders...\n")
+  boundaryCalls <- NULL
+  for(j in (scooch+1):nrow(deltaDF)){
+    past <- deltaDF[j-1,]
+    current <- deltaDF[j,]
+    leftBin <- deltaDF[(j-scooch):(j-1),]
+    leftBin.max <- max(leftBin$delta)
+    rightBin <- deltaDF[(j+1):(j+scooch),]
+    rightBin.min <- min(rightBin$delta)
+    if(is.na(rightBin.min)){next}
+    if(is.na(leftBin.max)){next}
+    if( all(sign(tail(leftBin$delta, 1)) == 1, sign(head(rightBin$delta, 1)) == -1) ){ # test if delta crosses X : KLOPT NIET! MOET PAST VS FUTURE ZIJN!
+      if(past$delta > current$delta){ # test if valley
+        if( ! abs(leftBin.max-rightBin.min) < sd(calls0.05$deltas$delta)){
+          # Check is within 100kb another point exists: winner is the one with delta closest to zero
+          # by: compare current V2 with other V2s. 
+          if(is.null(boundaryCalls)) {
+            boundaryCalls <- rbind(boundaryCalls,current)
+          } else{
+          nearbyPoints <- filter(boundaryCalls, V2  >= (current$V2 - (res*scooch)) , V2 <= (current$V3 + (res*scooch) ))  # res*scooch
+          
+          if(nrow(nearbyPoints) == 0){
+            boundaryCalls <- rbind(boundaryCalls,current)
+          } else {
+            
+            closeToZeroDelta <- min(abs(c(nearbyPoints$delta, current$delta)))
+            winner <- rbind(nearbyPoints, current)[which(abs(c(nearbyPoints$delta, current$delta)) == closeToZeroDelta),]
+            losers <- rbind(nearbyPoints, current)[-which(abs(c(nearbyPoints$delta, current$delta)) == closeToZeroDelta),]
+            boundaryCalls <- rbind(boundaryCalls,current)
+            boundaryCalls <- dplyr::anti_join(boundaryCalls, losers, by = c("V1", "V2", "V3", "V4", "delta"))
+          }
+          }
+        }
+      }
+    }
+  }
+  for(i in 1:nrow(boundaryCalls)){
+    if( boundaryCalls[i,3] < boundaryCalls[i,2]  ){
+      tmp3 <- boundaryCalls[i,3]
+      tmp2 <- boundaryCalls[i,2]
+      boundaryCalls[i,3] <- tmp2
+      boundaryCalls[i,2] <- tmp3
+    }
+  }
+  
+  boundaryCalls <- boundaryCalls[with(boundaryCalls, order(V1, V2)), ]
+  
+  cat("Generating bedgraph...\n")
+  df = NULL
+  for(i in 2:nrow(boundaryCalls)){
+    if(!boundaryCalls[i-1,1] == boundaryCalls[i,1]){next}
+    prev <- boundaryCalls[i-1,3]
+    now <- boundaryCalls[i,1:2]
+    now[,2] <- now[,2] + (0.5*res)
+    prev <- prev - (0.5*res)
+    ddd <-cbind(now, prev,now,prev, BEDCOLOR)[c(1,3,2,1,3,2,7)]
+    colnames(ddd) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
+    df <- rbind(df, ddd)
+  }
+  
+  return(list(deltas = deltaDF,borders = boundaryCalls, bedgraph = df ))
+}
+
+ptm <- proc.time()
+calls0.05 <- insulation.callTAD(KBM7);dim(calls0.05$bedgraph)
+proc.time() - ptm
+
+hic.matrixplot(KBM7, chrom = "chr2", start = 30e6, end = 90e6, cut.off = 1050, tads = calls0.05$bedgraph[,1:3], tad.type = "lower")
+

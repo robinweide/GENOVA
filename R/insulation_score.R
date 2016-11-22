@@ -11,7 +11,7 @@
 #' @param local Per chromosome?
 #' @return A plot
 #' @export
-plot.insulation.single <- function( exp1, chrom, start, end, cut.off=0, window.size = 21, local = T ){
+insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.size = 21, local = T ){
 	#create a plotting layout
 	w = 6
 	lay <- matrix(4, nrow=w, ncol=w)
@@ -67,7 +67,7 @@ plot.insulation.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 #' @param delta plot the differential insulation scores
 #' @return A plot
 #' @export
-plot.insulation.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, window.size = 21, local = T, delta = F ){
+insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, window.size = 21, local = T, delta = F ){
 	#make sure the resolutions are the same
 	if(exp1$RES != exp2$RES){
 		stop("The Hi-C matrices should have the same resolution")

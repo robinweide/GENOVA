@@ -7,7 +7,7 @@
 #' @param z.max Adjust the maximum value of the color-scale
 #' @return A plot of the matrix
 #' @export
-plot.chrom.comparison <- function( mat, color.fun = NULL, z.max = NULL){
+chrom.comparison.plot <- function( mat, color.fun = NULL, z.max = NULL){
 
   if(is.null(color.fun)){
     color.fun <- colorRampPalette(c("blue","red", "white"))

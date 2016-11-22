@@ -12,7 +12,7 @@ insulation.callTAD(exp, BEDCOLOR = "127,201,127")
 \item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
 }
 \value{
-A list, with delta-values, border-calls and a BEDPE-file
+A BEDPE-df
 }
 \description{
 Call TADs

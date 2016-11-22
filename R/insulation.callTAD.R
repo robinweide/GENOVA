@@ -4,7 +4,7 @@
 #'
 #' @param exp1 The Hi-C experiment object: produced by construct.experiment().
 #' @param BEDCOLOR Color of items in the resulting BEDPE-file
-#' @return A list, with delta-values, border-calls and a BEDPE-file
+#' @return A BEDPE-df
 #' @note Call insulation scores first and store these in exp$INSULATION
 #' @export
 insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
@@ -12,13 +12,20 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   res <- exp$RES
   scooch <- floor(100e3 / res)
   entries <- list()
-  exp$INSULATION <- cbind(exp$INSULATION[,1:3],scale(exp$INSULATION$V4, center = TRUE, scale = TRUE))
-
-  colnames(exp$INSULATION)[4] <- "V4"
-
+  df = NULL
+  CHROMS <- unique(exp$INSULATION[,1])
+  
+  for(CCC in CHROMS){
+  cat("Starting chromosome",CCC, "\n")
+  INSU <- exp$INSULATION[exp$INSULATION[,1] == CCC ,]
+  insCol <- INSU[,4]
+  insCol[!is.finite(unlist(insCol))] <- 0
+  INSU <- cbind(INSU[,1:3],scale(insCol, center = TRUE, scale = TRUE))
+  colnames(INSU)[4] <- "V4"
+  
   cat("Computing the delta-vector...\n")
-  for(i in (scooch+1):(nrow(exp$INSULATION)-scooch)){
-    allTheCoolStuff <- exp$INSULATION[(i-scooch):(i+scooch),]
+  for(i in (scooch+1):(nrow(INSU)-scooch)){
+    allTheCoolStuff <- INSU[(i-scooch):(i+scooch),]
     centralBin <- allTheCoolStuff[median(1:nrow(allTheCoolStuff)),]
     leftBin <- allTheCoolStuff[1:(median(1:nrow(allTheCoolStuff))-1),]
     leftBin.mean <- mean(leftBin$V4)
@@ -31,7 +38,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   deltaDF <- as.data.frame(data.table::rbindlist(entries))
   deltaDF <- dplyr::arrange(deltaDF,  V1,V2)
   deltaDF$ID <- 1:nrow(deltaDF)
-
+  
   ####
   # First find peaks
   ###
@@ -41,7 +48,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   if (deltaDF$V4[[1]] == deltaDF$V4[[2]]) {
     VALLEYS <- VALLEYS[-1]
   }
-
+  
   cat("Calling borders...\n")
   boundaryCalls <- NULL
   VALLEYS <- sort(unique(c(VALLEYS+1, VALLEYS, VALLEYS-1)))
@@ -72,8 +79,8 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
       }
     }
   }
-
-    for(i in 1:nrow(boundaryCalls)){
+  
+  for(i in 1:nrow(boundaryCalls)){
     if( boundaryCalls[i,3] < boundaryCalls[i,2]  ){
       tmp3 <- boundaryCalls[i,3]
       tmp2 <- boundaryCalls[i,2]
@@ -81,11 +88,11 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
       boundaryCalls[i,2] <- tmp3
     }
   }
-
+  
   boundaryCalls <- boundaryCalls[with(boundaryCalls, order(V1, V2)), ]
-
+  
   cat("Generating bedgraph...\n")
-  df = NULL
+  
   for(i in 2:nrow(boundaryCalls)){
     if(!boundaryCalls[i-1,1] == boundaryCalls[i,1]){next}
     prev <- boundaryCalls[i-1,3]
@@ -96,6 +103,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
     colnames(ddd) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
     df <- rbind(df, ddd)
   }
-
-  return(list(deltas = deltaDF,borders = boundaryCalls, bedgraph = df ))
+}
+  
+  return(bedgraph = df)
 }

@@ -1,12 +1,21 @@
+#' insulation.callTAD
+#'
+#' Call TADs
+#'
+#' @param exp1 The Hi-C experiment object: produced by construct.experiment().
+#' @param BEDCOLOR Color of items in the resulting BEDPE-file
+#' @return A list, with delta-values, border-calls and a BEDPE-file
+#' @note Call insulation scores first and store these in exp$INSULATION
+#' @export
 insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   if(is.null(exp$INSULATION)){ stop("Call insulation score first and store in exp$INSULATION")}
   res <- exp$RES
   scooch <- floor(100e3 / res)
   entries <- list()
   exp$INSULATION <- cbind(exp$INSULATION[,1:3],scale(exp$INSULATION$V4, center = TRUE, scale = TRUE))
-  
+
   colnames(exp$INSULATION)[4] <- "V4"
-  
+
   cat("Computing the delta-vector...\n")
   for(i in (scooch+1):(nrow(exp$INSULATION)-scooch)){
     allTheCoolStuff <- exp$INSULATION[(i-scooch):(i+scooch),]
@@ -22,7 +31,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   deltaDF <- as.data.frame(data.table::rbindlist(entries))
   deltaDF <- dplyr::arrange(deltaDF,  V1,V2)
   deltaDF$ID <- 1:nrow(deltaDF)
-  
+
   ####
   # First find peaks
   ###
@@ -32,7 +41,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   if (deltaDF$V4[[1]] == deltaDF$V4[[2]]) {
     VALLEYS <- VALLEYS[-1]
   }
-  
+
   cat("Calling borders...\n")
   boundaryCalls <- NULL
   VALLEYS <- sort(unique(c(VALLEYS+1, VALLEYS, VALLEYS-1)))
@@ -63,7 +72,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
       }
     }
   }
-  
+
     for(i in 1:nrow(boundaryCalls)){
     if( boundaryCalls[i,3] < boundaryCalls[i,2]  ){
       tmp3 <- boundaryCalls[i,3]
@@ -72,9 +81,9 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
       boundaryCalls[i,2] <- tmp3
     }
   }
-  
+
   boundaryCalls <- boundaryCalls[with(boundaryCalls, order(V1, V2)), ]
-  
+
   cat("Generating bedgraph...\n")
   df = NULL
   for(i in 2:nrow(boundaryCalls)){
@@ -82,11 +91,11 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
     prev <- boundaryCalls[i-1,3]
     now <- boundaryCalls[i,1:2]
     now[,2] <- now[,2]
-    prev <- prev 
+    prev <- prev
     ddd <-cbind(now, prev,now,prev, BEDCOLOR)[c(1,3,2,1,3,2,7)]
     colnames(ddd) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
     df <- rbind(df, ddd)
   }
-  
+
   return(list(deltas = deltaDF,borders = boundaryCalls, bedgraph = df ))
 }

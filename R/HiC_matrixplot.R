@@ -137,7 +137,9 @@ features <- function( mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL, bed.col=c
 
 	if(typeof(chip1)=="list" || typeof(chip2)=="list"){
 		features.bed(mat1, chrom, genes=genes, chip1=chip1, chip2=chip2, col1=bed.col[1], col2=bed.col[2], type1=type[1], type2=type[2], rotate=rotate)
-	}
+	}else if(!is.null(genes) ){
+   		 features.bed(mat1, chrom, genes=genes, rotate=rotate)
+  	}
 }
 
 features.bw <- function( mat1, chrom, chip1=NULL, chip2=NULL, col1="navy", col2="darkred", rotate=F){

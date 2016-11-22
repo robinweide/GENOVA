@@ -326,7 +326,9 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 		if(start + 2*window.size*hic$RES > max.pos){
 			break
 		}
-		end <- start+window+window.size
+		end <- start+window+(window.size-1)*hic$RES
+		#update the start so that it also includes a flanking region
+		start <- start - (window.size-1)*hic$RES
 		mat <- select.subset( hic$ICE, chrom, start, end, hic$ABS)
 		ins.vec <- matrix.insulation( mat, window.size )
 		chrom.ins.vec <- rbind(chrom.ins.vec, ins.vec )

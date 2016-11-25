@@ -66,7 +66,7 @@ plot.rectangle <- function( bed, chrom, y1, y2, start, end, col, rotate=F ){
 	}
 }
 
-plot.genes <- function( genes, chrom, start, end, y.pos, horiz=T){
+plot.genes <- function( genes, chrom, start, end, y.pos, rotate=F){
 	#plot the horizontal top info
 	if(horiz){
 		draw_exon( genes, chrom=chrom, y.pos = y.pos, width =0.05)

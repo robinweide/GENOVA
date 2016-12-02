@@ -13,7 +13,6 @@ LazyData: true
 Imports:
     dplyr,
     data.table,
-    fields,
     grid,
     reshape2
 RoxygenNote: 5.0.1

@@ -16,6 +16,6 @@ resize.mat <- function(mat, ndim=dim(mat)){
   loc[,1] = rescale(ncord[,1], c(1,odim[1]))
   loc[,2] = rescale(ncord[,2], c(1,odim[2]))
   # interpolation
-  ans[ncord] <- fields::interp.surface(obj, loc)
+  ans[ncord] <- GENOVA::fields.interp.surface(obj, loc)
   ans
 }

@@ -15,6 +15,8 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   df = NULL
   CHROMS <- unique(exp$INSULATION[,1])
   
+  exp$INSULATION$V2 <- exp$INSULATION$V2 + exp$RES
+  
   for(CCC in CHROMS){
   cat("Starting chromosome",CCC, "\n")
   INSU <- exp$INSULATION[exp$INSULATION[,1] == CCC ,]

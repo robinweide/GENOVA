@@ -26,6 +26,17 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
   colnames(INSU)[4] <- "V4"
   
   cat("Computing the delta-vector...\n")
+  
+  add <- 1:scooch
+  i <- (scooch+1):(nrow(INSU)-scooch)
+  i.rep <- rep(i, each=length(add))
+  right <- matrix(INSU$V4[i.rep+add], ncol=scooch, byrow=T)
+	left <- matrix(INSU$V4[i.rep-add], ncol=scooch, byrow=T)
+	right <- apply(right, 1, mean)
+	left <- apply(left, 1, mean)
+  delta = left - right
+	data.frame(INSU[i,1:4], delta)
+    
   for(i in (scooch+1):(nrow(INSU)-scooch)){
     allTheCoolStuff <- INSU[(i-scooch):(i+scooch),]
     centralBin <- allTheCoolStuff[median(1:nrow(allTheCoolStuff)),]

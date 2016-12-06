@@ -50,7 +50,6 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
     if (deltaDF$V4[[1]] == deltaDF$V4[[2]]) {
       VALLEYS <- VALLEYS[-1]
     }
-    profvis({
     #car("Calling borders...\n")
     boundaryCalls <- NULL
     VALLEYS <- sort(unique(c(VALLEYS+1, VALLEYS, VALLEYS-1)))
@@ -93,7 +92,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
     }
     
     boundaryCalls <- boundaryCalls[with(boundaryCalls, order(V1, V2)), ]
-    })
+
     #car("Generating bedgraph...\n")
     
     for(i in 2:nrow(boundaryCalls)){

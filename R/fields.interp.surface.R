@@ -17,9 +17,17 @@
 # You should have received a copy of the GNU General Public License
 # along with the R software environment if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-# or see http://www.r-project.org/Licenses/GPL-2    
+# or see http://www.r-project.org/Licenses/GPL-2
+#' fields.interp.surface
+#'
+#' fields.interp.surface
+#'
+#' @param obj A surface or image  object like the list for contour, persp or image.
+#' @param lof A matrix of 2 d locations -- new points to evaluate the surface.
+#' @return An interpolated matrix
+#' @export
 fields.interp.surface <- function(obj, loc) {
-    
+
     # obj is a surface or image  object like the list for contour, persp or image.
     # loc a matrix of 2 d locations -- new points to evaluate the surface.
     x <- obj$x
@@ -45,7 +53,7 @@ fields.interp.surface <- function(obj, loc) {
     # bilinear interpolation finds simple weights based on the
     # the four corners of the grid box containing the new
     # points.
-    return(z[cbind(lx1, ly1)] * (1 - ex) * (1 - ey) + z[cbind(lx1 + 
-        1, ly1)] * ex * (1 - ey) + z[cbind(lx1, ly1 + 1)] * (1 - 
+    return(z[cbind(lx1, ly1)] * (1 - ex) * (1 - ey) + z[cbind(lx1 +
+        1, ly1)] * ex * (1 - ey) + z[cbind(lx1, ly1 + 1)] * (1 -
         ex) * ey + z[cbind(lx1 + 1, ly1 + 1)] * ex * ey)
 }

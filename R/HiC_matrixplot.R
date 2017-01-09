@@ -217,7 +217,7 @@ draw.tads <- function( tads, chrom, tad.type="lower", col="blue", lwd=2){
 #' @param type Should a rectangle or a triangle be drawn? Not that for a triangle a 6th strand column should be included
 #' @param coplot When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1
 #' @param genes Structure with gene information, will only be combined with bed structure
-#' @param tads BED-like dataframe
+#' @param tads BED-like dataframe (not a tibble or a data.table!)
 #' @param tad.type How to show TADS: upper, lower and or both
 #' @return A matrix-plot
 #' @export

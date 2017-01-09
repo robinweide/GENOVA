@@ -8,6 +8,7 @@
 #' @param start Start position in bp.
 #' @param end End position in bp.
 #' @return A data.table with normalised counts.
+#' @export
 select.subset <- function(r1, chrom, start, end, bed  ){
   sel <- bed[bed[,1]==chrom & bed[,2] >= start & bed[,2] <= end,4]
   start.i <- min(sel); end.i <- max(sel)

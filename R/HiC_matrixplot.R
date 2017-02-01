@@ -67,13 +67,8 @@ plot.rectangle <- function( bed, chrom, y1, y2, start, end, col, rotate=F ){
 }
 
 plot.genes <- function( genes, chrom, start, end, y.pos, rotate=F){
-	#plot the horizontal top info
-	if(horiz){
-		draw_exon( genes, chrom=chrom, y.pos = y.pos, width =0.05)
-	}else{
-	#plot the vertical top info
-		draw_exon( genes, chrom=chrom, y.pos = y.pos, width =0.05, rotate=T)
-	}
+	
+	draw_exon( genes, chrom=chrom, y.pos = y.pos, width =0.05, rotate=rotate)
 }
 
 features.bed <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL, y.values, type1="triangle", type2="triangle", col1="red", col2="blue",   rotate=F ){

@@ -7,7 +7,9 @@
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
   chip = list(NULL, NULL, NULL, NULL), bed.col = rep(c("red", "blue"), 2),
   bw.col = rep(c("navy", "darkred"), 2), type = rep("triangle", 4),
-  coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower")
+  coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower",
+  loops = NULL, loops.type = "lower", tads.color = "#3288bd",
+  loops.resize = 0, loops.color = "#3288bd")
 }
 \arguments{
 \item{exp1}{The control Hi-C experiment object: produced by construct.experiment(). (bottom)}
@@ -34,9 +36,17 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 
 \item{genes}{Structure with gene information, will only be combined with bed structure}
 
-\item{tads}{BED-like dataframe}
+\item{tads}{BED-like dataframe (not a tibble or a data.table!)}
 
 \item{tad.type}{How to show TADS: upper, lower and or both}
+
+\item{loops}{BED-like dataframe (not a tibble or a data.table!)}
+
+\item{loops.type}{How to show loops: upper, lower and or both}
+
+\item{loops.resize}{Make the loop-boxes bigger by X bp. Can help visibility.}
+
+\item{loops.color}{Which color do you want the loops to have?}
 }
 \value{
 A matrix-plot

@@ -11,7 +11,7 @@
 #' @import data.table
 fastDI <- function(experiment, chrom, start, end, max.i = 100){
   resolution <- experiment$RES
-  mat <- select.subset(experiment$ICE, chrom, start, end, experiment$ABS  )
+  mat <- select.subset(experiment$ICE, chrom, start, end, experiment$ABS  )$z
   
   data.vec <- as.vector(mat)
   iv <- as.vector(col(mat))

@@ -154,7 +154,7 @@ features.bw <- function( mat1, chrom, chip1=NULL, chip2=NULL, col1="navy", col2=
 }
 
 plot.bw <- function( file, chrom, start, end, y1, y2, col, rotate=F){
-  if(require("xtable") == F){stop("Please install github.com/jayhesselberth/bigwrig\n")  }
+  if(require("bigwrig") == F){stop("Please install github.com/jayhesselberth/bigwrig\n")  }
   
   #leave here in case something changes
   #d <- read_bigwig( file, chrom=chrom, start=start, end=end) #official call but don't need it

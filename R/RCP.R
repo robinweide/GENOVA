@@ -90,11 +90,17 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 1e09, verbose 
       #   6: 278177 278172 0
       distance = resolu*(m.chrom$V2-m.chrom$V1)
       cbb <- cut(distance, breaks,labels = FALSE)
-      rcp <- tapply(m.chrom$V3,cbb,mean)
-      rcp <- rcp[rcp!=0 & !is.na(rcp)]
+       rcp <- tapply(m.chrom$V3, cbb, mean)
+      rcp <- rcp[rcp != 0 & !is.na(rcp)]
+      # SEM Calc
+      robin_sem <- function(x) sqrt(var(x)/length(x))
+      rcpsem <- tapply(m.chrom$V3, cbb, robin_sem)
+      rcpsem <- rcpsem[rcpsem != 0 & !is.na(rcpsem)]
+      ###
       m.sum <- sum(m.chrom$V3)
-      dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],rcp/m.sum)
-      colnames(dat) <- c('distance',  'prob')
+      dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))], 
+                               rcp/m.sum,rcpsem/m.sum)
+      colnames(dat) <- c("distance", "prob", "SEM")
       #add names to data.frame
       if(standard){
         dat$sample <- paste("Exp.", i)

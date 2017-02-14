@@ -12,14 +12,14 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T){
   names(cols) <- RCPdata$sample
   if (combine == T) {
     RCPdata <- group_by(RCPdata, distance, sample)
-    RCPdata <- summarise(RCPdata, prob = median(prob), SD = mean(SD), col = unique(color))
+    RCPdata <- summarise(RCPdata, prob = median(prob), SEM = mean(SEM), col = unique(color))
     RCPdata$chrom <- "All chromosomes"
   }
   if (smooth == F) {
     ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000, 
                                           y = prob)) + 
       ggplot2::geom_line() + ggplot2::scale_x_log10() + 
-      ggplot2::geom_pointrange(shape = 20, ggplot2::aes(col = sample,ymin = prob-SD,ymax = prob+SD))+
+      ggplot2::geom_pointrange(shape = 20, ggplot2::aes(col = sample,ymin = prob-SEM,ymax = prob+SEM))+
       ggplot2::scale_y_log10() + ggplot2::facet_wrap(~chrom, 
                                                      nrow = floor(sqrt(length(unique(RCPdata$chrom))))) + 
       ggplot2::theme_linedraw() + ggplot2::scale_color_manual(values = cols) + 
@@ -31,7 +31,7 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T){
   else {
     ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000, 
                                           y = prob)) + 
-      ggplot2::geom_pointrange(shape = 20, ggplot2::aes(col = sample,ymin = prob-SD,ymax = prob+SD))+
+      ggplot2::geom_pointrange(shape = 20, ggplot2::aes(col = sample,ymin = prob-SEM,ymax = prob+SEM))+
       ggplot2::geom_smooth(span = 0.25, se = F) + 
       ggplot2::scale_x_log10() + ggplot2::scale_y_log10() + 
       ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) + 

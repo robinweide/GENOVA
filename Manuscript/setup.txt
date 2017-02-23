@@ -1,0 +1,43 @@
+# blueprints:
+https://academic.oup.com/nar/article-lookup/doi/10.1093/nar/gkx036
+
+# intro
+DNA organisatie en HI-C
+
+Verschillende levels van informatie to be found (kort ook erbij wat ze biologisch betekenen) -> territories naar loops 
+
+In the last few years, several computational tools have been published to enable researchers to look at these different levels. However, the majority of them are very specialised (focussing on one level only) and require a high level of expertise in the bioinformatics field. 
+
+Here, we introduce GENOVA, … . The software can be easily obtained and installed from robinweide.github/GENOVA.
+
+# methods
+Input
+Transformation
+Statistical inference
+Visualisation
+
+# results
+## Description of the method
+Based around a Hi-C experiment object, which you can use in all functions.
+Both zoomed out methods (e.g. whole-genome plots) and more specific analyses (ATA)
+Generates the data and subsequently the plots and stats. Gives the user the opportunity to use the data themselves.
+## Comparison with other tools
+- HiCplotter can only plot the matrix and parralel tracks, does not give underlying data to play with and cannot do more can produce hic.matrixplot.
+- Juicebox can be used as a browser, which is nice, but nothing more than this.
+- Juicer-tools can perform APA and arrowhead, but is again not flexible and forces the use of their specific data-type
+## Applications of GENOVA
+- Summarisation of (multiple) datasets from multiple datasrouces and formats
+- Can integrate and visualise tracks, beds & loops
+- Is designed for easy usage: one object, numerous methods. Low amount of dependent packages. R is easy to learn and powerful enough
+
+# discussion
+General summary of GENOVA
+STRENGTHS and orignality
+- A software package to probe a large number of organisational levels buried in the Hi-C data
+- Based on R, written to have a very flat learning curve for novice users and programmers.
+- A low amount of dependencies provides a more stable tool and ease of intstallation and maintenance
+- Added options of more experienced users, including multicore computing
+
+weaknesses
+- low-qual data
+- R as a base (slow and not high in mem)

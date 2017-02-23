@@ -17,4 +17,3 @@ A rescaled vector.
 \description{
 Rescale a matrix.
 }
-

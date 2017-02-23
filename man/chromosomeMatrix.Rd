@@ -22,4 +22,3 @@ Plot a genome-wide overview-matrix.
 \note{
 Please use only low-resolution matrices with this.
 }
-

@@ -23,4 +23,3 @@ A score-matrix.
 \description{
 From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan like data structure. Run this per chromosome.
 }
-

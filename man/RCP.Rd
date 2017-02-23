@@ -22,4 +22,3 @@ A data_frame with distance-bin and probabilities.
 Produce a dataframe with the probabilities of contacts in a set of distance-bins.
 Bins are created on a log scale, which leads to equal amounts of datapoints per bin.
 }
-

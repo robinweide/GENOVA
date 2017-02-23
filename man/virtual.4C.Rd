@@ -22,4 +22,3 @@ A vector containing the y-axis scores per rescaled bin.
 Extract matrices around a defined set of pixels, like possible loops.
 Matrices are rescaled, so that all viewpoints and anchors are overlapping.
 }
-

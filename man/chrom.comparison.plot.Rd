@@ -19,4 +19,3 @@ A plot of the matrix
 \description{
 Plot a genome-wide overview-matrix.
 }
-

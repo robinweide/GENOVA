@@ -33,4 +33,3 @@ A plot.
 \description{
 Extracts a sub-matrix from given coordinates and plots them pyramid-style (i.e. the Hi-C diagonal becomes horizontal).
 }
-

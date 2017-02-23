@@ -32,4 +32,3 @@ A plot
 \description{
 Get insulation scores
 }
-

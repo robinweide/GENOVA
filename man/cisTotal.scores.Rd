@@ -15,4 +15,3 @@ The genome-wide cis/total ratio
 \description{
 Calculate the ratio of the intrachromosomal interactions over the interchromosomal interactions
 }
-

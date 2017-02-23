@@ -19,4 +19,3 @@ A dotplot
 \description{
 Create a dot plot showing the log-ratio of the intra and inter TAD contact frequencies for different TAD distances.
 }
-

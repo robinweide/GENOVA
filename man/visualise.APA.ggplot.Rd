@@ -21,4 +21,3 @@ A grid object, containing two ggplot-objects.
 \description{
 Plot the APA-results
 }
-

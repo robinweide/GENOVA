@@ -18,4 +18,3 @@ Calculate the ratio of the intrachromosomal interactions over the interchromosom
 \note{
 The per chromsosome score is on average lower than the whole genome score, because in the per chromosome analysis every ditag is counted twice (for the two interacting chromosomes)
 }
-

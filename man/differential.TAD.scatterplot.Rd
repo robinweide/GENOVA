@@ -24,4 +24,3 @@ A scatterplot.
 \description{
 Create a scatter plot of the inter and intra TAD contact frequencies.
 }
-

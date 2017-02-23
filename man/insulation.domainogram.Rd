@@ -34,4 +34,3 @@ A plot
 \description{
 create a domainogram for the insulation scores
 }
-

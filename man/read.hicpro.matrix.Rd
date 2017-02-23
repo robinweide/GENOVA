@@ -19,4 +19,3 @@ This function loads a HiC-pro file as a matrix. It assumes a three-column
 layout: bin1, bin2 and score. All scors are normalised to contacts per *norm*
 total contacts.
 }
-

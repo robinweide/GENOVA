@@ -17,4 +17,3 @@ happiness
 \description{
 get insulation for matrix
 }
-

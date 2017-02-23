@@ -54,4 +54,3 @@ A matrix-plot
 \description{
 Plot a matrix (or two) for a region of interest with annotations
 }
-

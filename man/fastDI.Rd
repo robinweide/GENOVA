@@ -23,4 +23,3 @@ A vector of DI-scores per Hi-C bin.
 \description{
 Extracts a sub-matrix from given coordinates and calculates the Directionality-Index.
 }
-

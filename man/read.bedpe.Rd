@@ -16,4 +16,3 @@ A data.frame with the bedpe-values.
 This function loads a BEDPE file. Columns 2 and 4 and 5 and 6 will be sorted numerically.
 If only a BED-file is present, duplicate BED-columns 1,2,3 as: 1,2,2,1,3,3.
 }
-

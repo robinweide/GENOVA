@@ -24,4 +24,3 @@ stacked.TAD(experiment, tad.bed, smallTreshold = 225000, verbose = F,
 Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.
 Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
 }
-

@@ -32,4 +32,3 @@ A plot
 \description{
 Plot insulation-scores of two experiments
 }
-

@@ -19,4 +19,3 @@ A data.table with normalised counts.
 \description{
 Extracts a symmetric matrix. *X* and *Y* renote the indexes to extracts.
 }
-

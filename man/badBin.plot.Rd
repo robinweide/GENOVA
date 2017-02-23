@@ -19,4 +19,3 @@ A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can
 \description{
 Used witin badBin.find
 }
-

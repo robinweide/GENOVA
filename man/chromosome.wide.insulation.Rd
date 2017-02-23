@@ -19,4 +19,3 @@ DF with insulation score
 \description{
 loop over the entire chromosome and calcute the insulation score for every position, use this to correct if requeste
 }
-

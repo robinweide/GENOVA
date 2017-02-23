@@ -19,4 +19,3 @@ A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can
 \description{
 Builds a representative RCP and tests per Hi-C bin, whether its log-linear fitted data correlates.
 }
-

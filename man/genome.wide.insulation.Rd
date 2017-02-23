@@ -17,4 +17,3 @@ DF with insulation score
 \description{
 Get genome-wide insulation
 }
-

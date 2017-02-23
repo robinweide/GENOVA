@@ -4,7 +4,8 @@
 \alias{visualise.RCP.ggplot}
 \title{Plot the RCP results}
 \usage{
-visualise.RCP.ggplot(RCPdata, smooth = F, combine = T)
+visualise.RCP.ggplot(RCPdata, smooth = F, combine = T, lineWidth = 1,
+  pointWidth = 0.5)
 }
 \arguments{
 \item{RCPdata}{Output of `RCP`}
@@ -12,6 +13,10 @@ visualise.RCP.ggplot(RCPdata, smooth = F, combine = T)
 \item{smooth}{Plot a lowess-smoothed line?}
 
 \item{combine}{Combine all chromosomes?}
+
+\item{lineWidth}{Width of SEM-lines}
+
+\item{pointWidth}{Width of points}
 }
 \value{
 A ggplot-object
@@ -19,4 +24,3 @@ A ggplot-object
 \description{
 Produces a line-plot per chromosome.
 }
-

@@ -2,6 +2,7 @@
 % Please edit documentation in R/Stacked_Elzo.R, R/stackR.R
 \name{stackR}
 \alias{stackR}
+\alias{stackR}
 \title{Get a z-stack matrix of TADs}
 \usage{
 stackR(experiment, tad.bed, smallTreshold = 225000, verbose = F,
@@ -51,4 +52,3 @@ Sums over all matrices to produce a single Z-stack matrix, which is normalised t
 Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.
 Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
 }
-

@@ -19,4 +19,3 @@ A list containing a dataframe with scores between two TADs and an updated versio
 \description{
 Combine a bed file with TAD positions and the Hi-C matrix file to calculate the average coverage over a TAD and between two TADs.
 }
-

@@ -4,17 +4,17 @@
 \alias{construct.experiment}
 \title{Construct a HiC-experiment.}
 \usage{
-construct.experiment(ICEDpath, BEDpath, SAMPLENAME, COLOR = 1,
-  COMMENTS = NULL)
+construct.experiment(signalPath, indicesPath, name, color = 1,
+  comments = NULL)
 }
 \arguments{
-\item{ICEDpath}{Full path to HiC-pro matrix-file.}
+\item{signalPath}{Full path to a HiC-pro-like matrix-file or .sig from juicerToGenova.py}
 
-\item{BEDpath}{Full path the HiC-pro index-file}
+\item{indicesPath}{Full path the HiC-pro-like index-file or .bed from juicerToGenova.py}
 
-\item{SAMPLENAME}{The name of the sample.}
+\item{name}{The name of the sample.}
 
-\item{COLOR}{Color associated with sample.}
+\item{color}{Color associated with sample.}
 
 \item{COMMENTS}{A place to store some comments.}
 }
@@ -24,4 +24,3 @@ A list.
 \description{
 Make a structure which holds the most needed information of a HiC-experiment.
 }
-

@@ -23,4 +23,3 @@ A data.table with normalised counts.
 \description{
 Extracts a symmetric matrix around the diagonal from *start* to *stop* in chromosome *chrom*.
 }
-

@@ -29,4 +29,3 @@ A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMat
 Extract matrices around a defined set of pixels, like possible loops.
 Sums over all matrices to produce a single Z-stack matrix.
 }
-

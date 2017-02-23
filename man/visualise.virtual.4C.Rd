@@ -15,4 +15,3 @@ A plot.
 \description{
 Plot the virtual 4C results.
 }
-

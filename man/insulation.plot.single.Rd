@@ -28,4 +28,3 @@ A plot
 \description{
 Plot a single insulation
 }
-

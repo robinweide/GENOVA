@@ -28,4 +28,3 @@ A plot
 \description{
 Plot the APA-results
 }
-

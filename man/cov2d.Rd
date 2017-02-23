@@ -23,4 +23,3 @@ A list containing a score-matrix and a count-variable of the amount of used bed-
 \description{
 Get scores around given positions
 }
-

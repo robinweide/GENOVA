@@ -24,4 +24,3 @@ A grid object, containing two ggplot-objects.
 \description{
 Plot the stacked TAD results.
 }
-

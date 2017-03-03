@@ -70,6 +70,12 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
   # Get anchor HiC-indexes
   x.pos <- bed[match(loop.bed1.p,bed.p),4]
   y.pos <- bed[match(loop.bed2.p,bed.p),4]
+
+  # check for empty indexes
+  na.pos <- unique(c(which(is.na(x.pos)) ,which(is.na(y.pos)) ))
+  x.pos <- x.pos[-na.pos]
+  y.pos <- y.pos[-na.pos]
+  
   # Initialise matrix
   score.matrix <- matrix(0, ncol=size, nrow=size)
   # Loop trough loops and sum over scorematrices

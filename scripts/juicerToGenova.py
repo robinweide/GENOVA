@@ -45,7 +45,7 @@ if os.path.exists(SIGout) or os.path.exists(BEDout):
     else:
         void = subprocess.call(['rm',SIGout])
         void = subprocess.call(['rm',BEDout])
-        
+
 # Read chrom.sizes and store as dict: key==chromName, val==chromSize
 chromSizesDict = dict()
 with open(chromSizesFile,'r') as tsvin:
@@ -83,16 +83,18 @@ with open(SIGout, "a") as fp:
             absPandasC2 = absPandas[(absPandas.chr == c2)]
             C2dic = dict(zip(absPandasC2.X, absPandasC2.idx))
             # for all chromosome-chromosome combinations, run juicer-tools dump and store in tmp dir
-            print("Starting", c1,"versus", c2,"\r")
+            #print("Starting", c1,"versus", c2,"\r")
             OUT = "".join([tmpDir,c1,"_", c2,".tmp"])
             cmd = " ".join(['java', '-jar', juicerTools, 'dump','observed','NONE',juicerFile,c1,c2,"BP",str(resolution),OUT])
-            void = subprocess.getstatusoutput(cmd)
-            df = pd.read_table(OUT,delimiter="\t",header=None, names = ["pos1","pos2","signal"])
-            # Get idx-numbers
-            for e,row in enumerate(df.itertuples(index=True, name='Pandas')):
-                idxX = C2dic[int(row.pos1)]
-                idxY = C1dic[int(row.pos2)]
-                wr.writerow([int(idxX),int(idxY),row.signal])
-            void = subprocess.call(['rm',OUT])
-
-# Done!?
+            #print(cmd)
+            try:
+                void = subprocess.call(cmd, shell=True)
+                df = pd.read_table(OUT,delimiter="\t",header=None, names = ["pos1","pos2","signal"])
+                # Get idx-numbers
+                for e,row in enumerate(df.itertuples(index=True, name='Pandas')):
+                    idxX = C2dic[int(row.pos1)]
+                    idxY = C1dic[int(row.pos2)]
+                    wr.writerow([int(idxX),int(idxY),row.signal])
+                void = subprocess.call(['rm',OUT])
+            except:
+                continue

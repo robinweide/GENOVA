@@ -7,7 +7,7 @@
 #' @param loop.bed Bedpe file containing the loop positions: produced by read.bedpe().
 #' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
 #' @param verbose Produces a progress-indication.
-#' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor). 
+#' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @param saveRaw Logical: True will output the raw matrices per loop and performs outlier-detection.
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
 #' @return A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed matrix containing the Z-stack scores (APAoutlier).
@@ -32,7 +32,7 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
   # Is BED 1 upstream of BED2?
   #Elzo maybe do something like this
   loop.bed[loop.bed[,2] > loop.bed[,5],] <- loop.bed[loop.bed[,2] > loop.bed[,5],c(4,5,6,1,2,3)]
-  
+
   for(i in 1:length(loop.bed[,1])){
     if( loop.bed[i,2] > loop.bed[i,5]){
       loop.bed <- loop.bed[i,c(4,5,6,1,2,3)]
@@ -45,26 +45,26 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
   # Get start positions of the loop, floored to 10kb windows, and make chr:pos index
   loop.bed1.p <- paste0(loop.bed[,1], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,3] - loop.bed[,2] ) /2 )+ loop.bed[,2])   /resolution)))
   loop.bed2.p <- paste0(loop.bed[,4], ":", as.integer(resolution*floor(  ( (abs( loop.bed[,6] - loop.bed[,5] )/2)  + loop.bed[,5])   /resolution)))
-  
+
   #Elzo why not the following
   #just average start and end (middle), divide by the resolution, floor and multiply by the resolution
   #Robin: because that doesn't work: *e*-ids throughout
   # loop.bed1.p <- paste0(loop.bed[,1], ":", resolution*floor( ( (loop.bed[,2]+loop.bed[,3])/2)/resolution) )
   # loop.bed2.p <- paste0(loop.bed[,4], ":", resolution*floor( ( (loop.bed[,5]+loop.bed[,6])/2)/resolution) )
-  
+
   # Bugfix: in some cases paste0 yields an extra whitespace
   loop.bed1.p <- gsub(" ", "", loop.bed1.p, fixed = TRUE)
   loop.bed2.p <- gsub(" ", "", loop.bed2.p, fixed = TRUE)
   # Check if loops are all found:
   if(!all(loop.bed1.p %in% bed.p)){
     if(!all(loop.bed2.p %in% bed.p) ){
-      stop('not all loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?')
+      waring('not all loop-anchors can be found in HiC-file.\n# Are you sure that both are from the same complete reference?')
     }
     else{
-      stop(paste0(table(foo %in% bar)[1],' upstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))}
+      waring(paste0(table(foo %in% bar)[1],' upstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))}
   }else{
     if(!all(loop.bed2.p %in% bed.p) ){
-      stop(paste0(table(foo %in% bar)[1],' downstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))
+      waring(paste0(table(foo %in% bar)[1],' downstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))
     }
   }
   # Get anchor HiC-indexes
@@ -101,7 +101,7 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
     # Make matrix
     # Fastest way!
     s.mat <- reshape2::acast(s, V1~V2, value.var="V3")
-    
+
     # # Old way
     # s.mat <- matrix(nrow=21, ncol=21,
     #                 dimnames=list(1:21, 1:21))
@@ -113,10 +113,10 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
     if(saveRaw){
       rawMatList[[i]] <- s.mat
     }
-  } 
+  }
   #Elzo you tested for the fact that all the loop.bed1.p are in bed.p right?
   #why the match, cant you do.
-  norma_loopCounts <- (score.matrix/length(loop.bed1.p)) 
+  norma_loopCounts <- (score.matrix/length(loop.bed1.p))
   SL <- length(loop.bed1.p)
   # Rotate 90CW, so that diagonal of HiC-matrix is in bottomleft
   norma_loopCounts <- t(apply(norma_loopCounts, 2, rev))
@@ -139,12 +139,12 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
       }
     }
     STACKoutlierr <- Reduce(rawMatList, f = '+')
-    norma_loopCountss <- (STACKoutlierr/SL) 
+    norma_loopCountss <- (STACKoutlierr/SL)
     norma_loopCountss <- t(apply(norma_loopCountss, 2, rev))
     colnames(norma_loopCountss) <- 1:size
-    
+
     pos <- seq(-(size-1)/2, (size-1)/2)*resolution
-    
+
     return(list(APA = norma_loopCounts,rawMatList = rawMatList, APAoutlier =  norma_loopCountss, APAxy=list(x=pos,y=pos, z=norma_loopCountss)   ))
     #return(list(APA = norma_loopCounts, rawMatList = rawMatList))
   } else {

@@ -18,8 +18,8 @@ visualise.APA.ggplot <- function(APAlist, resolution, title, zCoef = 1, focus = 
   list.len <- length(APAlist)
   belownames <- vector()
   for (i in 1:list.len) {
-    firstMat <- as.data.frame(APAlist[[i]][1]); colnames(firstMat) <- 1:21 ; rownames(firstMat) <- 1:21
-    secondMat <- as.data.frame(APAlist[[focus]][1]); colnames(secondMat) <- 1:21
+    firstMat <- as.data.frame(APAlist[[i]][1]); colnames(firstMat) <- 1:size ; rownames(firstMat) <- 1:size
+    secondMat <- as.data.frame(APAlist[[focus]][1]); colnames(secondMat) <- 1:size ; rownames(secondMat) <- 1:size
     a <- reshape2::melt(as.matrix(firstMat))
     a$sample <- factor(rep(names(APAlist)[i], length(a[, 1])))
     abovePlots <- rbind(abovePlots, a)

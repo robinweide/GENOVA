@@ -73,9 +73,10 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
 
   # check for empty indexes
   na.pos <- unique(c(which(is.na(x.pos)) ,which(is.na(y.pos)) ))
-  x.pos <- x.pos[-na.pos]
-  y.pos <- y.pos[-na.pos]
-  
+  if(length(na.pos) != 0){
+    x.pos <- x.pos[-na.pos]
+    y.pos <- y.pos[-na.pos]
+  }
   # Initialise matrix
   score.matrix <- matrix(0, ncol=size, nrow=size)
   # Loop trough loops and sum over scorematrices

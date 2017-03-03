@@ -58,13 +58,13 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
   # Check if loops are all found:
   if(!all(loop.bed1.p %in% bed.p)){
     if(!all(loop.bed2.p %in% bed.p) ){
-      waring('not all loop-anchors can be found in HiC-file.\n# Are you sure that both are from the same complete reference?')
+      warning('not all loop-anchors can be found in HiC-file.\n# Are you sure that both are from the same complete reference?')
     }
     else{
-      waring(paste0(table(foo %in% bar)[1],' upstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))}
+      warning(paste0(table(foo %in% bar)[1],' upstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))}
   }else{
     if(!all(loop.bed2.p %in% bed.p) ){
-      waring(paste0(table(foo %in% bar)[1],' downstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))
+      warning(paste0(table(foo %in% bar)[1],' downstream loop-anchors can not be found in HiC-file.\n# Are you sure that both are from the same complete reference?'))
     }
   }
   # Get anchor HiC-indexes

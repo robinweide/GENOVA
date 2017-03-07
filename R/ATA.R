@@ -33,6 +33,7 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
     if (is.null(data.table::key(hicdata))) {
         data.table::setkey(hicdata, V1, V2)
     }
+    # issue 7: stacked.TAD.R : TAD bed file
     tad.bed <- tad.bed[abs(tad.bed[, 3] - tad.bed[, 2]) >= smallTreshold,]
     tad.bed <- na.exclude(tad.bed[1:3])
     tad <- tad.bed[, c(1, 2, 3)]

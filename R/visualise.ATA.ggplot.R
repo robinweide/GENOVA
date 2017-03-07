@@ -23,6 +23,7 @@
 ## End(**Not run**)
 #' @export
 visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = NULL, zlim2 = NULL){
+  # issue 29: rename stackr -> ata
   # Make two dataframes
   abovePlots <- data.frame(Var1 = integer(),
                            Var2 = integer(),
@@ -49,6 +50,7 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
   colnames(belowPlots) <- c('Var1','Var2','value','sample')
 
   # set zlims
+  # issue 28: GGatavis: manual zscale
   if(is.null(zlim1)){
     zminAbove <- min(na.exclude(abovePlots$value))
     zmaxAbove <- max(na.exclude(abovePlots$value))
@@ -63,6 +65,13 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
   } else {
     zminBelow <- zlim2[1]
     zmaxBelow <- zlim2[2]
+  }
+
+  # issue 19: don't allow diff0 as diff-zlim
+  if(diff(c(zminBelow,zmaxBelow))  == 0){
+    warning("The Z-lim of the differentials is too close together.\nUse zlim2 to override this.")
+    zminBelow <- -1
+    zmaxBelow <- 1
   }
 
   # To avoid bleaching, set out-of-zlim values to min/max
@@ -111,4 +120,4 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
 
   grid::grid.newpage()
   grid::grid.draw(rbind(ggplot2::ggplotGrob(plot1), ggplot2::ggplotGrob(plot2), size = "last"))
-}
+  }

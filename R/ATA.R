@@ -3,16 +3,23 @@
 #' Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.
 #' Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
 #'
-#' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
+#' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+#' @param experiment The Hi-C experiment object of a sample: produced by \code{construct.experiment()}.
 #' @param tad.bed Data.frame from a Bed file containing the TAD positions.
 #' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
 #' @param verbose Produces a progress-indication.
 #' @param saveRawList Logical: True will output the raw matrices per TAD.
 #' @param saveRaw Logical: True will output an aditional matrix without outlier-correction.
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
-#' @return A list containing a matrix with the Z-stack scores (`STACK`). Optionally, it can contain the raw matrices per TAD (`STACK.list`) and a matrix without the outlier-correction (`STACK.raw`).
+#' @return \item{STACK}{A list containing a matrix with the Z-stack scores}
+#' @return \item{STACK.list}{Optional: raw matrices per TAD}
+#' @return \item{STACK.raw}{Optional: a matrix without the outlier-correction}
+#' @examples
+## Not run:
+#' ATA_results_of_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
+## End(**Not run**)
 #' @export
-stackR <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
+ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
     saveRaw = T, saveRawList = T,outlierCutOff = 40){
 		if(any(tad.bed[,2] > tad.bed[,3])){
 			warning("5' TAD border downstream then 3' TAD border for some entries")

@@ -1,7 +1,7 @@
 #' Construct a HiC-experiment.
-#' 
+#'
 #' Make a structure which holds the most needed information of a HiC-experiment.
-#' 
+#'
 #' @param signalPath Full path to a HiC-pro-like matrix-file or .sig from juicerToGenova.py
 #' @param indicesPath Full path the HiC-pro-like index-file or .bed from juicerToGenova.py
 #' @param name The name of the sample.
@@ -11,8 +11,8 @@
 #' @export
 construct.experiment <- function(signalPath, indicesPath, name, color = 1, comments = NULL){
   # Check if files exist
-  if(!file.exists(signalPath)){stop('ICE-matrix file not found.')}
-  if(!file.exists(indicesPath)){stop('ICE-index file not found.')}
+  if(!file.exists(signalPath)){stop('Signal file not found.')}
+  if(!file.exists(indicesPath)){stop('Index file not found.')}
 
   ICE <- read.hicpro.matrix(signalPath)
   ABS <- data.table::fread(indicesPath, header = F, data.table = F)
@@ -53,7 +53,9 @@ construct.experiment <- function(signalPath, indicesPath, name, color = 1, comme
     COMM = comments,
 
     # Vector of masked bins
-    MASK = vector()
+    MASK = vector(),
 
+    # Named list of centromeric bins: list(chr1 = c(1,2,3,4,etc), "chr2" = c(3,4,5,6,etc))
+    CENTROMERES = list()
   )
 }

@@ -94,7 +94,7 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
 
       } else {
         # find biggest chrom to compare with
-        allChroms <- table(data.table(experimentList[[i]]$ABS)$V1)
+        allChroms <- table(data.table::data.table(experimentList[[i]]$ABS)$V1)
         if(length(allChroms) > 1){ # is there are more than 1 chromosome in the data, remove centromeres
 
           sizeChrom <- allChroms[names(allChroms)== chrom]
@@ -192,7 +192,7 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
                                  rcp/m.sum,rcpsem/m.sum)
         colnames(dat) <- c("distance", "prob", "SEM")
       }
-
+      if(nrow(dat) == 0){next()}
       #add names to data.frame
       if(standard){
         dat$sample <- paste("Exp.", i)

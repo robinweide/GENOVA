@@ -37,11 +37,11 @@ chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL
     remove.vec <- grep(remove, rownames(norm.mat))
     chrom.mat <- chrom.mat[-remove.vec,-remove.vec]
     norm.mat <- norm.mat[-remove.vec,-remove.vec]
-  } 
+  }
 
 
   mat <- list(rawCounts=chrom.mat , normMat = norm.mat)
 
-  plot.chrom.comparison(mat, color.fun = NULL, z.max = NULL)
-  invisible(mat)	
+  chrom.comparison.plot(mat, color.fun = NULL, z.max = NULL)
+  invisible(mat)
 }

@@ -14,7 +14,7 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, lineWidth = 1, 
   names(cols) <- RCPdata$sample
   if (combine == T) {
     RCPdata <- dplyr::group_by(RCPdata, distance, sample)
-    RCPdata <- summarise(RCPdata, prob = median(prob), SEM = mean(SEM), col = unique(color))
+    RCPdata <- dplyr::summarise(RCPdata, prob = median(prob), SEM = mean(SEM), col = unique(color))
     RCPdata$chrom <- "All chromosomes"
   }
   if (smooth == F) {

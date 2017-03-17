@@ -95,6 +95,7 @@ with open(SIGout, "a") as fp:
             try:
                 void = subprocess.call(cmd, shell=True)
                 df = pd.read_table(OUT,delimiter="\t",header=None, names = ["pos1","pos2","signal"])
+                df.dropna(inplace = True, how = 'any')
                 # Get idx-numbers
                 for e,row in enumerate(df.itertuples(index=True, name='Pandas')):
                     idxX = C2dic[int(row.pos1)]

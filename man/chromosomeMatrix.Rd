@@ -11,6 +11,8 @@ chromosomeMatrix(exp, color.fun = NULL, z.max = NULL, remove = NULL)
 
 \item{z.max}{Adjust the maximum value of the color-scale}
 
+\item{remove}{A vector of (partial) names of chromosomes to leave out.}
+
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 }
 \value{
@@ -20,5 +22,5 @@ A plot of the chromosome matrix and a assignable matrix
 Plot a genome-wide overview-matrix.
 }
 \note{
-Please use only low-resolution matrices with this.
+Please use only low-resolution matrices with this (e.g. 1Mb resolution).
 }

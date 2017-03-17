@@ -5,7 +5,8 @@
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param color.fun Optional color-function
 #' @param z.max Adjust the maximum value of the color-scale
-#' @note Please use only low-resolution matrices with this.
+#' @param remove A vector of (partial) names of chromosomes to leave out.
+#' @note Please use only low-resolution matrices with this (e.g. 1Mb resolution).
 #' @return A plot of the chromosome matrix and a assignable matrix
 #' @export
 chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL ){
@@ -34,7 +35,11 @@ chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL
   chrom.mat <- matrix(chrom.count[,3], ncol=length(chrom), byrow=T)
 
   if(!is.null(remove)){
-    remove.vec <- grep(remove, rownames(norm.mat))
+    remove.vec <- NULL
+    for(remove_item in remove){
+      hitsToRemove <- grep(remove_item, rownames(norm.mat))
+      remove.vec <- c(remove.vec, hitsToRemove)
+    }
     chrom.mat <- chrom.mat[-remove.vec,-remove.vec]
     norm.mat <- norm.mat[-remove.vec,-remove.vec]
   }

@@ -7,9 +7,10 @@
 #' @param name The name of the sample.
 #' @param color Color associated with sample.
 #' @param COMMENTS A place to store some comments.
+#' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
 #' @return A list.
 #' @export
-construct.experiment <- function(signalPath, indicesPath, name, color = 1, comments = NULL){
+construct.experiment <- function(signalPath, indicesPath, name, centromeres = NULL,  color = 1, comments = NULL){
   # Check if files exist
   if(!file.exists(signalPath)){stop('Signal file not found.')}
   if(!file.exists(indicesPath)){stop('Index file not found.')}
@@ -28,6 +29,10 @@ construct.experiment <- function(signalPath, indicesPath, name, color = 1, comme
   }
   chromVector <- as.character(unique(ABS$V1))
   res = as.numeric( median(ABS$V3-ABS$V2)  )
+
+  if(!is.null(centromeres)){
+    colnames(centromeres)[1:3] <- paste0('V',1:3)
+  }
 
   # Contruct list
   list(
@@ -55,7 +60,8 @@ construct.experiment <- function(signalPath, indicesPath, name, color = 1, comme
     # Vector of masked bins
     MASK = vector(),
 
-    # Named list of centromeric bins: list(chr1 = c(1,2,3,4,etc), "chr2" = c(3,4,5,6,etc))
-    CENTROMERES = list()
+    # DF with chr, start, stop
+    CENTROMERES = centromeres
+
   )
 }

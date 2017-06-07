@@ -4,16 +4,19 @@
 \alias{visualise.APA.ggplot}
 \title{Plot the APA-results}
 \usage{
-visualise.APA.ggplot(APAlist, resolution, title, zCoef = 1, focus = 1, ...)
+visualise.APA.ggplot(APAlist, resolution, title = "APA", zTop = NULL,
+  zBottom = NULL, focus = 1, ...)
 }
 \arguments{
 \item{APAlist}{A list of results from `APA`.}
 
 \item{title}{Text to plot}
 
-\item{zCoef}{Coefficient to change the zlims}
+\item{zTop}{The min and max colorscale-values for the first row of plots.}
 
-\item{Focus}{Wich sample does need to be the to-compare sample?}
+\item{zBottom}{The min and max colorscale-values for the first row of plots.}
+
+\item{Focus}{Which sample does need to be the to-compare sample?}
 }
 \value{
 A grid object, containing two ggplot-objects.

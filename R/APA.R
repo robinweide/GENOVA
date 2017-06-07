@@ -155,6 +155,6 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
     return(list(APA = norma_loopCounts,rawMatList = rawMatList, APAoutlier =  norma_loopCountss, APAxy=list(x=pos,y=pos, z=norma_loopCountss)   ))
     #return(list(APA = norma_loopCounts, rawMatList = rawMatList))
   } else {
-    return(norma_loopCounts)
+    return(list(APA = norma_loopCounts))
   }
 }

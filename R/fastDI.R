@@ -9,6 +9,7 @@
 #' @param max.i Maximal size of flanking regions to calculate DI.
 #' @return A vector of DI-scores per Hi-C bin.
 #' @import data.table
+#' @export
 fastDI <- function(experiment, chrom, start, end, max.i = 100){
   resolution <- experiment$RES
   mat <- select.subset(experiment, chrom, start, end)$z

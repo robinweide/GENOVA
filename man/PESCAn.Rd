@@ -23,3 +23,14 @@ A score-matrix.
 \description{
 From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan like data structure. Run this per chromosome.
 }
+\examples{
+# Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
+SE <- read.delim(superEnhancers.bed, header = F)
+SE_vs_WT <- PESCAn(experiment = WT, bed = SE, size = 500e3)
+
+# Do a circular perutation by adding 1Mb.
+SE_vs_WT_perm <- PESCAn(experiment = WT, bed = SE, size = 500e3, add = 1e6)
+
+# Plot using, for example, persp
+persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
+}

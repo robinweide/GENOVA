@@ -4,7 +4,8 @@
 \alias{cov2d}
 \title{cov2d}
 \usage{
-cov2d(experiment, bed, minDist = 5e+06, size = 5e+05, add = 0)
+cov2d(experiment, bed, minDist = 5e+06, size = 5e+05, add = 0,
+  outlierCutOff = 40)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -16,6 +17,8 @@ cov2d(experiment, bed, minDist = 5e+06, size = 5e+05, add = 0)
 \item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
 
 \item{add}{Add constant value to bed-start and -end.}
+
+\item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
 }
 \value{
 A list containing a score-matrix and a count-variable of the amount of used bed-entries.

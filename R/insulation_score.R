@@ -21,7 +21,7 @@ insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 	#layout
 
 	#get a matrix from the experiment
-	mat1 <- select.subset( exp1$ICE, chrom, start, end, exp1$ABS)
+	mat1 <- select.subset(exp1, chrom, start, end)
 	mat1$z[mat1$z > cut.off] <- cut.off
 	wr <- colorRampPalette(c("white","red"))
 	image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
@@ -86,8 +86,8 @@ insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, wind
 	#layout
 
 	#get a matrix from the experiment
-	mat1 <- select.subset( exp1$ICE, chrom, start, end, exp1$ABS)
-	mat2 <- select.subset( exp2$ICE, chrom, start, end, exp2$ABS)
+	mat1 <- select.subset( exp1, chrom, start, end)
+	mat2 <- select.subset( exp2, chrom, start, end)
 
 	mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
 
@@ -270,7 +270,7 @@ insulation.score <- function( hic, window.size, chrom, start, end, diag.add = 0,
 	if(window.size %% 2 == 0){
 		stop("Please use an odd window size")
 	}
-	mat <- select.subset( hic$ICE, chrom, start, end, hic$ABS)
+	mat <- select.subset(hic, chrom, start, end)
 	ins.score <- matrix.insulation( mat, window.size )
 	if(local){
 		ins.score[,2] <- log2(ins.score[,2]/mean(ins.score[,2], na.rm=T))
@@ -329,7 +329,7 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 		end <- start+window+(window.size-1)*hic$RES
 		#update the start so that it also includes a flanking region
 		start <- start - (window.size-1)*hic$RES
-		mat <- select.subset( hic$ICE, chrom, start, end, hic$ABS)
+		mat <- select.subset(hic, chrom, start, end)
 		ins.vec <- matrix.insulation( mat, window.size )
 		chrom.ins.vec <- rbind(chrom.ins.vec, ins.vec )
 	}

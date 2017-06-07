@@ -4,18 +4,21 @@
 \alias{compartment.score}
 \title{Get compartment-scores for a chromosome}
 \usage{
-compartment.score(exp, chrom = "chr2", comparableTrack = NULL)
+compartment.score(exp, chrom = "chr2", comparableTrack = NULL,
+  shuffle = F)
 }
 \arguments{
+\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+
 \item{chrom}{The chromosome of interest.}
 
 \item{comparableTrack}{An optional vector, which will be used to flip the A/B signal.
 For example, one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.}
 
-\item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{shuffle}{Will shuffle the Hi-C data if set to true. Useful for showing compartment-scores if no A/B structure.}
 }
 \value{
-A vector with the compartment-score for every bin in the Hi-C matrix.
+A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.
 }
 \description{
 This uses the per-arm compartment-score algorithm of G. Fudenberg.

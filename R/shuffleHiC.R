@@ -21,7 +21,7 @@ shuffleHiC <- function(MAT, symmetric =T){
   SS <- F
   MAT_BK <- MAT
   if( is.list(MAT) ){
-    cat('Input is considered as output of select.subset.\n')
+    message('Input is considered as output of select.subset().')
     SS <- T
     MAT <- MAT$z
   }

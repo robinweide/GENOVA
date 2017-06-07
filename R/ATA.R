@@ -26,12 +26,13 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
 		}
     MADTRESHOLD <- outlierCutOff
     rawMatList = list()
-    hicdata <- experiment$ICE
+
     bed <- experiment$ABS
+
     bed[,1] <- as.factor(bed[, 1])
     resolution <- experiment$RES
-    if (is.null(data.table::key(hicdata))) {
-        data.table::setkey(hicdata, V1, V2)
+    if (is.null(data.table::key(experiment$ICE))) {
+        data.table::setkey(experiment$ICE, V1, V2)
     }
     # issue 7: stacked.TAD.R : TAD bed file
     tad.bed <- tad.bed[abs(tad.bed[, 3] - tad.bed[, 2]) >= smallTreshold,]
@@ -51,7 +52,7 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
         }
 				#select TAD data from select.subset
         halftadSize <- floor((tadSize/resolution)/2) * resolution
-				newMat <- select.subset( hicdata, tad[i,1], tad[i,2] - halftadSize, tad[i,3] + halftadSize, bed )
+				newMat <- select.subset( experiment, tad[i,1], tad[i,2] - halftadSize, tad[i,3] + halftadSize)
 
         sel.resized <- resize.mat(newMat$z, c(100, 100))
         rawMatList[[i]] <- sel.resized

@@ -39,14 +39,15 @@ get.eigen <- function( mat, with.eigen.value = T, outlier.correct = 0.995 ){
 #' This uses the per-arm compartment-score algorithm of G. Fudenberg.
 #' The procedure is an eigenvector decomposition of the observed/expected matrix.
 #'
-#' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
+#' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param chrom The chromosome of interest.
 #' @param comparableTrack An optional vector, which will be used to flip the A/B signal.
 #' For example, one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.
-#' @return A vector with the compartment-score for every bin in the Hi-C matrix.
+#' @param shuffle Will shuffle the Hi-C data if set to true. Useful for showing compartment-scores if no A/B structure.
+#' @return A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.
 #' @export
 #'
-compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL){
+compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL, shuffle = F){
 
   if(is.null(exp$CENTROMERES)){
     stop('Please store centromere-data in construct.experiment.\n')
@@ -60,36 +61,13 @@ compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL){
   S = 0
   E = exp$CENTROMERES[exp$CENTROMERES$V1 == chrom,2]
 
-  ss <- select.subset(exp$ICE, C, S, E, exp$ABS)
-  ss_eigen <- get.eigen(ss)
-  compScore <- ss_eigen$vectors[,1] * (ss_eigen$values[1]  ** 0.5)
+  # get all bins of this region
+  first_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 <= E,3] - exp$RES
 
-  # If there is a comparison-vector, now is the chance to use it...
-
-  ##### making a GC-comparison-vector
-  # GCdf <- read.delim('~/Data/References/zebraFish/40kb.gc', h = F,stringsAsFactors = F) # to be made with GCContentByInterval from GATK
-  # library(reshape2)
-  # GGC <- colsplit(GCdf$V1,pattern = '[-:]', names = c('seqnames','start','end'))
-  # GGC$perc <- GCdf$V2
-  # comparableTrack <- GGC[GGC$seqnames ==C,4]
-  ####
-
-  if(!is.null(comparableTrack)){
-    SMPLCOR <- head(comparableTrack,length(compScore))
-    if(cor(compScore,SMPLCOR) < 0){
-      compScore <- compScore * -1
-    }
+  ss <- select.subset(exp, C, S, E)
+  if(shuffle){
+    ss <- suppressMessages(shuffleHiC(ss))
   }
-  firstArm <- compScore
-
-  ###
-  # second_arm
-  ###
-  C = chrom
-  S = exp$CENTROMERES[exp$CENTROMERES$V1 == chrom,2]
-  E = max(exp$ABS[exp$ABS$V1 == C,3])
-
-  ss <- select.subset(exp$ICE, C, S, E, exp$ABS)
   ss_eigen <- get.eigen(ss)
   compScore <- ss_eigen$vectors[,1] * (ss_eigen$values[1]  ** 0.5)
 
@@ -105,8 +83,47 @@ compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL){
 
   if(!is.null(comparableTrack)){
     SMPLCOR <- tail(comparableTrack,length(compScore))
-    if(cor(compScore,SMPLCOR) < 0){
+    CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
+    if(CORTEST < 0){
       compScore <- compScore * -1
+
+    }
+  }
+  firstArm <- compScore
+
+  ###
+  # second_arm
+  ###
+  C = chrom
+  S = exp$CENTROMERES[exp$CENTROMERES$V1 == chrom,2]
+  E = max(exp$ABS[exp$ABS$V1 == C,3])
+
+  # get all bins of this region
+  second_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 >= S,3] - exp$RES
+
+  ss <- select.subset(exp, C, S, E)
+  if(shuffle){
+    ss <- suppressMessages(shuffleHiC(ss))
+  }
+  ss_eigen <- get.eigen(ss)
+  compScore <- ss_eigen$vectors[,1] * (ss_eigen$values[1]  ** 0.5)
+
+  # If there is a comparison-vector, now is the chance to use it...
+
+  ##### making a GC-comparison-vector
+  # GCdf <- read.delim('~/Data/References/zebraFish/40kb.gc', h = F,stringsAsFactors = F) # to be made with GCContentByInterval from GATK
+  # library(reshape2)
+  # GGC <- colsplit(GCdf$V1,pattern = '[-:]', names = c('seqnames','start','end'))
+  # GGC$perc <- GCdf$V2
+  # comparableTrack <- GGC[GGC$seqnames ==C,4]
+  ####
+
+  if(!is.null(comparableTrack)){
+    SMPLCOR <- tail(comparableTrack,length(compScore))
+    CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
+    if(CORTEST < 0){
+      compScore <- compScore * -1
+
     }
   }
   secondArm <- compScore
@@ -114,10 +131,11 @@ compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL){
   ###
   # return
   ###
-  # merged vector of P and Q, incrusing zeroes at centromere
-  CentSize <- diff(unlist(exp$CENTROMERES[exp$CENTROMERES$V1 == chrom,2:3]))
-  centAB <- rep(0,ceiling(CentSize/exp$RES))
-  ABtrack <- c(firstArm,centAB,secondArm)
+  outDF <- data.frame(seqnames = C,
+             start = c(first_startLocVector,second_startLocVector),
+             end = c(first_startLocVector,second_startLocVector)+exp$RES,
+             compartmentScore = c(firstArm,secondArm),
+             name = exp$NAME)
 
-  return(ABtrack)
+  return(outDF)
 }

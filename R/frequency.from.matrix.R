@@ -16,7 +16,7 @@
 frequency.from.matrix <- function( experiment, chrom, start, end, window = 10e3, q.val=0.95, cut.off=0, extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ... ){
   # Check size: if less than 50 bins: makes no sense...
   resolution <- experiment$RES
-  mat <- select.subset(experiment$ICE, chrom, start- 2e7, end+ 2e7, experiment$ABS  )
+  mat <- select.subset(experiment, chrom, start- 2e7, end+ 2e7)
   pos <- which(mat$z >0 , arr.ind=T)
   mat.start <- min(mat$x)
   cnt <- as.vector(mat$z[mat$z > 0])

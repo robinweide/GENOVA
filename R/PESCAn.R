@@ -29,7 +29,7 @@ PESCAn <- function( experiment, bed, minDist = 5e6, size = 500e3, add = 0 ){
   # there could be circumstances where there is only one bed-entry for a specific chromosome!
   chromsomesToLookAt <- names(which(table(chipDat[,1]) > 1))
   for( chr in chromsomesToLookAt ){
-    cat("Analyzing ", chr, "\r")
+    message("Analyzing ", chr)
     pe.res <- cov2d(experiment, bed[bed[,1]==chr,], minDist, size, add)
     if(exists("score.mat")){
       score.mat <- score.mat + pe.res$score

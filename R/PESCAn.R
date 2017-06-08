@@ -4,6 +4,7 @@
 #'
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param bed A bed-dataframe.
+#' @param minComparables The minimal amount of bed-entries for a given chromosome. If this threshold is not reached, PE-SCAn will skip this chromosome.
 #' @param minDist The minimal distance
 #' @param add Add constant value to bed-start and -end.
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
@@ -21,7 +22,7 @@
 #' persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
 #' @export
 #'
-PESCAn <- function( experiment, bed, minDist = 5e6, size = 500e3, add = 0 ){
+PESCAn <- function( experiment, bed, minComparables = 5, minDist = 5e6, size = 500e3, add = 0 ){
   #sorting the bed file is essential for the analysis
   bed <- bed[order(bed[,1],bed[,2]),]
   count = 0
@@ -30,7 +31,11 @@ PESCAn <- function( experiment, bed, minDist = 5e6, size = 500e3, add = 0 ){
   chromsomesToLookAt <- names(which(table(chipDat[,1]) > 1))
   for( chr in chromsomesToLookAt ){
     message("Analyzing ", chr)
-    pe.res <- cov2d(experiment, bed[bed[,1]==chr,], minDist, size, add)
+    BED <- bed[bed[,1]==chr,]
+    if(nrow(BED) < minComparables){
+      next()
+      }
+    pe.res <- cov2d(experiment, BED, minDist, size, add)
     if(exists("score.mat")){
       score.mat <- score.mat + pe.res$score
       count = count + pe.res$count

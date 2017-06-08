@@ -60,6 +60,9 @@ cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0, outlierCutOf
 
   }
 
+  if(length(rawMatList) < 10){
+    warning(paste0("There are not a lot of comparisons for chromosome ",as.character(unique(bed[,1])),". Please tred carefully!\n"))
+  }
   rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
   sm <- simplify2array(rawMatList)
   sm[sm == 0] <- NA

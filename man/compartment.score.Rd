@@ -4,8 +4,8 @@
 \alias{compartment.score}
 \title{Get compartment-scores for a chromosome}
 \usage{
-compartment.score(exp, chrom = "chr2", comparableTrack = NULL,
-  shuffle = F)
+compartment.score(exp, chrom = "chr2", comparableBed = NULL,
+  comparableTrack = NULL, shuffle = F)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}

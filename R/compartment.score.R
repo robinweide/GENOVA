@@ -47,7 +47,7 @@ get.eigen <- function( mat, with.eigen.value = T, outlier.correct = 0.995 ){
 #' @return A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.
 #' @export
 #'
-compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL, shuffle = F){
+compartment.score <- function(exp, chrom = "chr2", comparableBed = NULL, comparableTrack = NULL, shuffle = F){
 
   if(is.null(exp$CENTROMERES)){
     stop('Please store centromere-data in construct.experiment.\n')
@@ -81,6 +81,25 @@ compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL, shuff
   # comparableTrack <- GGC[GGC$seqnames ==C,4]
   ####
 
+  if(!is.null(comparableBed)){
+
+    comparableBed <- comparableBed[order(comparableBed[,1],comparableBed[,2]),]
+    comparableBed <- comparableBed[comparableBed[,1]==C,]
+
+    #overlap the peaks with the windows
+    i <- findInterval(comparableBed[,2], first_startLocVector)
+    comparableBed.window <- table(i+1)
+    i.up <- which(compScore > 0)
+    i.down <- which(compScore < 0)
+
+    if(wilcox.test(comparableBed.window[as.character(i.up)], comparableBed.window[as.character(i.down)])$p.value < 1e-5){
+      if(median(comparableBed.window[as.character(i.up)], na.rm=T) < median(comparableBed.window[as.character(i.down)], na.rm=T)){
+        compScore <- -compScore
+      }
+    }
+
+  }
+
   if(!is.null(comparableTrack)){
     SMPLCOR <- tail(comparableTrack,length(compScore))
     CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
@@ -89,6 +108,7 @@ compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL, shuff
 
     }
   }
+
   firstArm <- compScore
 
   ###
@@ -117,6 +137,25 @@ compartment.score <- function(exp, chrom = "chr2", comparableTrack = NULL, shuff
   # GGC$perc <- GCdf$V2
   # comparableTrack <- GGC[GGC$seqnames ==C,4]
   ####
+
+  if(!is.null(comparableBed)){
+
+    comparableBed <- comparableBed[order(comparableBed[,1],comparableBed[,2]),]
+    comparableBed <- comparableBed[comparableBed[,1]==C,]
+
+    #overlap the peaks with the windows
+    i <- findInterval(comparableBed[,2], first_startLocVector)
+    comparableBed.window <- table(i+1)
+    i.up <- which(compScore > 0)
+    i.down <- which(compScore < 0)
+
+    if(wilcox.test(comparableBed.window[as.character(i.up)], comparableBed.window[as.character(i.down)])$p.value < 1e-5){
+      if(median(comparableBed.window[as.character(i.up)], na.rm=T) < median(comparableBed.window[as.character(i.down)], na.rm=T)){
+        compScore <- -compScore
+      }
+    }
+
+  }
 
   if(!is.null(comparableTrack)){
     SMPLCOR <- tail(comparableTrack,length(compScore))

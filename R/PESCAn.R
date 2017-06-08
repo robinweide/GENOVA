@@ -25,7 +25,10 @@ PESCAn <- function( experiment, bed, minDist = 5e6, size = 500e3, add = 0 ){
   #sorting the bed file is essential for the analysis
   bed <- bed[order(bed[,1],bed[,2]),]
   count = 0
-  for( chr in unique(bed[,1]) ){
+
+  # there could be circumstances where there is only one bed-entry for a specific chromosome!
+  chromsomesToLookAt <- names(which(table(chipDat[,1]) > 1))
+  for( chr in chromsomesToLookAt ){
     cat("Analyzing ", chr, "\r")
     pe.res <- cov2d(experiment, bed[bed[,1]==chr,], minDist, size, add)
     if(exists("score.mat")){

@@ -232,6 +232,7 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for the hic-matrix plot, in the diff option the negative of this is the lower bound
+#' @param inferno Use white/red/black colorscale or white/red?  
 #' @param chip A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4, first two and last two have to be the same (i.e. 1:bed,2:bed,3:path,4:path, but 1:bed,2:NULL,3:path,4:NULL is also allowed)
 #' @param bed.col Color of the bed track (max.len is 4)
 #' @param bw.col Same as bed col, but for the bigwig track
@@ -243,11 +244,11 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param loops BED-like dataframe (not a tibble or a data.table!)
 #' @param loops.type How to show loops: upper, lower and or both
 #' @param loops.resize Make the loop-boxes bigger by X bp. Can help visibility.
-#' @param loops.color Which color do you want the loops to have? 
+#' @param loops.color Which color do you want the loops to have?
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd"){
-  
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), inferno = T, bed.col=rep(c("red","blue"),2), bw.col=rep(c("navy","darkred"),2), type=rep("triangle",4), coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd"){
+  require(viridis)
   #some error handling
   if(!is.null(exp2)){
     #make sure the resolutions are the same
@@ -284,21 +285,52 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
   #layout
   
   #get a matrix from the experiment
-  mat1 <- select.subset( exp1$ICE, chrom, start, end, exp1$ABS)
+  mat1 <- select.subset( exp1, chrom, start, end)
   if(!is.null(exp2)){
-    mat2 <- select.subset( exp2$ICE, chrom, start, end, exp2$ABS)
+    mat2 <- select.subset( exp2, chrom, start, end)
   }
   
   if(is.null(exp2)){
     mat1$z[mat1$z > cut.off] <- cut.off
-    wr <- colorRampPalette(c("white","red"))
-    image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+    if(inferno){
+
+      #higlassCol <- c('#ffffff','#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026',"#000000")
+      higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
+      wr <- colorRampPalette(higlassCol)
+      
+      image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+      
+    } else {
+      wr <- colorRampPalette(c("white","red"))
+      image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+    }
+    
+    
+    
+    
+    
   }else{
     if(coplot == "dual"){
       mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
       mat1$z[mat1$z > cut.off] <- cut.off
-      wr <- colorRampPalette(c("white","red"))
-      image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+      
+
+      if(inferno){
+        higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
+        
+        #higlassCol <- c('#ffffff','#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026',"#000000")
+        
+        #image( mat1, col=viridis(256, option = "inferno", direction = -1), axes=F, ylim=rev(range(mat1$x)) )
+        wr <- colorRampPalette(higlassCol)
+        image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+      } else {
+        wr <- colorRampPalette(c("white","red"))
+        image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+      }
+
+      
+      
+
     }else{
       mat1$z <- mat2$z - mat1$z
       mat1$z[mat1$z > cut.off] <- cut.off

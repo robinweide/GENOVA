@@ -232,7 +232,6 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for the hic-matrix plot, in the diff option the negative of this is the lower bound
-#' @param inferno Use white/red/black colorscale or white/red?  
 #' @param chip A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4, first two and last two have to be the same (i.e. 1:bed,2:bed,3:path,4:path, but 1:bed,2:NULL,3:path,4:NULL is also allowed)
 #' @param bed.col Color of the bed track (max.len is 4)
 #' @param bw.col Same as bed col, but for the bigwig track
@@ -298,11 +297,11 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
       higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
       wr <- colorRampPalette(higlassCol)
       
-      image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
       
     } else {
       wr <- colorRampPalette(c("white","red"))
-      image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
     }
     
     
@@ -322,10 +321,10 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
         
         #image( mat1, col=viridis(256, option = "inferno", direction = -1), axes=F, ylim=rev(range(mat1$x)) )
         wr <- colorRampPalette(higlassCol)
-        image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
       } else {
         wr <- colorRampPalette(c("white","red"))
-        image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
+        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
       }
 
       

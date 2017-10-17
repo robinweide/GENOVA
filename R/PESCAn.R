@@ -28,7 +28,7 @@ PESCAn <- function( experiment, bed, minComparables = 5, minDist = 5e6, size = 5
   count = 0
 
   # there could be circumstances where there is only one bed-entry for a specific chromosome!
-  chromsomesToLookAt <- names(which(table(chipDat[,1]) > 1))
+  chromsomesToLookAt <- names(which(table(bed[,1]) > 1))
   for( chr in chromsomesToLookAt ){
     message("Analyzing ", chr)
     BED <- bed[bed[,1]==chr,]
@@ -44,5 +44,8 @@ PESCAn <- function( experiment, bed, minComparables = 5, minDist = 5e6, size = 5
       count = pe.res$count
     }
   }
-  return(score.mat/count)
+  
+  if(exists("score.mat")){
+    return(score.mat/count)
+  }
 }

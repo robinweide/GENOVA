@@ -5,9 +5,9 @@
 \title{hic.matrixplot}
 \usage{
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
-  chip = list(NULL, NULL, NULL, NULL), bed.col = rep(c("red", "blue"), 2),
-  bw.col = rep(c("navy", "darkred"), 2), type = rep("triangle", 4),
-  coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower",
+  chip = list(NULL, NULL, NULL, NULL), inferno = T, bed.col = rep(c("red",
+  "blue"), 2), bw.col = rep(c("navy", "darkred"), 2), type = rep("triangle",
+  4), coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower",
   loops = NULL, loops.type = "lower", tads.color = "#3288bd",
   loops.resize = 0, loops.color = "#3288bd")
 }
@@ -25,6 +25,8 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 \item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the negative of this is the lower bound}
 
 \item{chip}{A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4, first two and last two have to be the same (i.e. 1:bed,2:bed,3:path,4:path, but 1:bed,2:NULL,3:path,4:NULL is also allowed)}
+
+\item{inferno}{White/Red/black or White/Red coloscale?}
 
 \item{bed.col}{Color of the bed track (max.len is 4)}
 

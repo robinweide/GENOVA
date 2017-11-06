@@ -2,26 +2,23 @@
 % Please edit documentation in R/PESCAn.R
 \name{PESCAn}
 \alias{PESCAn}
-\title{PESCAn}
+\title{PE-SCAn}
 \usage{
-PESCAn(experiment, bed, minComparables = 5, minDist = 5e+06, size = 5e+05,
-  add = 0)
+PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05)
 }
 \arguments{
-\item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
 \item{bed}{A bed-dataframe.}
 
-\item{minComparables}{The minimal amount of bed-entries for a given chromosome. If this threshold is not reached, PE-SCAn will skip this chromosome.}
-
-\item{minDist}{The minimal distance}
+\item{shift}{Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.}
 
 \item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
 
-\item{add}{Add constant value to bed-start and -end.}
+\item{minDist}{The minimal distance}
 }
 \value{
-A score-matrix.
+A O/E score-matrix.
 }
 \description{
 From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan like data structure. Run this per chromosome.
@@ -29,11 +26,11 @@ From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan 
 \examples{
 # Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
 SE <- read.delim(superEnhancers.bed, header = F)
-SE_vs_WT <- PESCAn(experiment = WT, bed = SE, size = 500e3)
 
-# Do a circular perutation by adding 1Mb.
-SE_vs_WT_perm <- PESCAn(experiment = WT, bed = SE, size = 500e3, add = 1e6)
+WT_PE = PESCAn_run(exp = WT_exp, bed = SE)
+MUT_PE = PESCAn_run(exp = MUT_exp, bed = SE)
 
-# Plot using, for example, persp
-persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
+list_PE = list("WT" = WT_PE, 'Mutant' = MUT_PE)
+PESCAn_plot(list_PE, 4e4, title = 'PE-SCAn', zTop = c(1,1.5))
+
 }

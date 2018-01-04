@@ -128,7 +128,9 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
   # Rotate 90CW, so that diagonal of HiC-matrix is in bottomleft
   norma_loopCounts <- t(apply(norma_loopCounts, 2, rev))
   colnames(norma_loopCounts) <- 1:size
-  if(saveRaw){
+
+
+
     #return(list(STACK = (results.vector/SL)[1:99,1:99],RAW = simplify2array(rawMatList)))
     rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
     sm <- simplify2array(rawMatList)
@@ -152,9 +154,12 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
 
     pos <- seq(-(size-1)/2, (size-1)/2)*resolution
 
-    return(list(APA = norma_loopCounts,rawMatList = rawMatList, APAoutlier =  norma_loopCountss, APAxy=list(x=pos,y=pos, z=norma_loopCountss)   ))
+  if(saveRaw){
+    return(list(APA = norma_loopCountss,rawMatList = rawMatList,
+                APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES   ))
     #return(list(APA = norma_loopCounts, rawMatList = rawMatList))
   } else {
-    return(list(APA = norma_loopCounts))
+    return(list(APA = norma_loopCountss,
+                APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES))
   }
 }

@@ -57,7 +57,7 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, minDist = 5e6, s
 #' @param bed A bed-dataframe.
 #' @param minDist The minimal distance
 #' @param shift Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.
-#' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
+#' @param size Size in bp of window.
 #' @return A O/E score-matrix.
 #' @import data.table
 #' @examples
@@ -175,7 +175,9 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
                                 labels = c(paste0(tickLabelUpstream, "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
     ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") +
     #viridis::scale_fill_viridis( limits = z)
-    ggplot2::scale_fill_gradientn(colours = spectCol, limits = z)
+    #ggplot2::scale_fill_gradientn(colours = spectCol, limits = z)
+    ggplot2::scale_fill_gradient2(limits = z, midpoint = 1, low = "#2166ac", mid = "white", high = "#b2182b")
+
 
 
   z2 <- NULL

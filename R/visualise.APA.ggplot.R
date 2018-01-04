@@ -7,8 +7,9 @@
 #' @param zBottom The min and max colorscale-values for the first row of plots.
 #' @return A grid object, containing two ggplot-objects.
 #' @export
-visualise.APA.ggplot <- function(APAlist, resolution, title = 'APA', zTop = NULL, zBottom = NULL, focus = 1,...){
-  size <- dim(as.data.frame(APAlist[[1]][1]))[1]
+visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = NULL, focus = 1,...){
+  resolution = APAlist[[1]]$RES
+  size <- dim(as.data.frame(APAlist[[1]]$APA))[1]
   size.banks <- (size - 1)/2
   tickLabelDownstream <- as.character(1 * ((size.banks/2 *
                                               resolution)/1000))
@@ -19,8 +20,8 @@ visualise.APA.ggplot <- function(APAlist, resolution, title = 'APA', zTop = NULL
   list.len <- length(APAlist)
   belownames <- vector()
   for (i in 1:list.len) {
-    firstMat <- as.data.frame(APAlist[[i]][1]); colnames(firstMat) <- 1:size ; rownames(firstMat) <- 1:size
-    secondMat <- as.data.frame(APAlist[[focus]][1]); colnames(secondMat) <- 1:size ; rownames(secondMat) <- 1:size
+    firstMat <- as.data.frame(APAlist[[i]]$APA); colnames(firstMat) <- 1:size ; rownames(firstMat) <- 1:size
+    secondMat <- as.data.frame(APAlist[[focus]]$APA); colnames(secondMat) <- 1:size ; rownames(secondMat) <- 1:size
     a <- reshape2::melt(as.matrix(firstMat))
     a$sample <- factor(rep(names(APAlist)[i], length(a[, 1])))
     abovePlots <- rbind(abovePlots, a)

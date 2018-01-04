@@ -4,7 +4,7 @@
 \alias{intra.inter.TAD.contacts}
 \title{intra.inter.TAD.contacts}
 \usage{
-intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10)
+intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10, verbose = F)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}

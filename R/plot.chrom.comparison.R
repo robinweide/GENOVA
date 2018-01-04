@@ -10,7 +10,7 @@
 chrom.comparison.plot <- function( mat, color.fun = NULL, z.max = NULL){
 
   if(is.null(color.fun)){
-    color.fun <- colorRampPalette(c("blue","red", "white"))
+    color.fun <- colorRampPalette(c('white', '#f5a623', '#d0021b', 'black'))
   }
 
   log.mat <- log10(mat$rawCounts/mat$normMat)

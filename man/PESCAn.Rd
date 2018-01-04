@@ -13,7 +13,7 @@ PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05)
 
 \item{shift}{Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.}
 
-\item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
+\item{size}{Size in bp of window.}
 
 \item{minDist}{The minimal distance}
 }

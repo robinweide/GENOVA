@@ -4,7 +4,7 @@
 \alias{differential.TAD.dotplot}
 \title{differential.TAD.dotplot}
 \usage{
-differential.TAD.dotplot(exp1, exp2, color.fun = NULL, ...)
+differential.TAD.dotplot(exp1, exp2, color.fun = NULL, yRange = NULL, ...)
 }
 \arguments{
 \item{exp1}{Output of intra.inter.TAD.contacts for experiment 1.}
@@ -12,6 +12,8 @@ differential.TAD.dotplot(exp1, exp2, color.fun = NULL, ...)
 \item{exp2}{Output of intra.inter.TAD.contacts for experiment 2.}
 
 \item{color.fun}{A color-function like rainbow().}
+
+\item{yRange}{Set the y-axis limits, a two-number vector, otherwise use a quantile-based approach to find yRange}
 }
 \value{
 A dotplot

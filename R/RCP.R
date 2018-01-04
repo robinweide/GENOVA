@@ -10,7 +10,7 @@
 #' @param verbose Produces a progress-indication.
 #' @return A data_frame with distance-bin and probabilities.
 #' @export
-RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose = F,scaling = T){
+RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose = F,scaling = F){
   #find the largest stretch of 0s, which is
   #most likely the centromere
   largest.stretch <- function( x ){
@@ -78,31 +78,33 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
                   sample = integer())
   dat <- NULL
   for(Ci in 1:length(chromsToUse)){
-    chrom <- chromsToUse[Ci]
+
+    chrom <- unique(chromsToUse[Ci])
+
     for(i in 1:amountOfSamples){
       if(verbose){cat(paste0('Chromosome ', Ci,' of ', length(chromsToUse), ' chromosomes\r'))}
       dat <- NULL
       resolu <- experimentList[[i]]$RES
       BED_ABS <- data.table::data.table(experimentList[[i]]$ABS)
       data.table::setkey(BED_ABS, V1)
-      idx1 <-BED_ABS[list(chrom)]
+      idx1 <- BED_ABS[V1 == list(chrom)]
 
-      if(chrom %in% names(experimentList[[i]]$CENTROMERES)){
-
-        centromerixIDXes <- experimentList[[i]]$CENTROMERES[[chrom]]
+      if(chrom %in% experimentList[[i]]$CENTROMERES[,1]){
+        centroBed <- experimentList[[i]]$CENTROMERES[experimentList[[i]]$CENTROMERES[,1] == chrom,]
+        centromerixIDXes =  unname(unlist(idx1[V2 >= centroBed[,2] & V3 <= centroBed[,3],4]))
         idx1 <- idx1[!V4 %in% centromerixIDXes]
 
       } else {
         # find biggest chrom to compare with
         allChroms <- table(data.table::data.table(experimentList[[i]]$ABS)$V1)
-        if(length(allChroms) > 1){ # is there are more than 1 chromosome in the data, remove centromeres
+        if(length(allChroms) > 1){ # if there are more than 1 chromosome in the data, remove centromeres
 
           sizeChrom <- allChroms[names(allChroms)== chrom]
           allChroms <- allChroms[!names(allChroms) == chrom] # not the same chrom!
           toCompare <- names(which(allChroms == max(allChroms)))
           siztoCompare <- allChroms[names(allChroms)== toCompare]
 
-          chromTheBiggest <-siztoCompare < sizeChrom
+          chromTheBiggest <- siztoCompare < sizeChrom
           trans.mat <-NULL
           if(chromTheBiggest){
             trans.mat <- selectTransData(experimentList[[i]], chrom1 = chrom , chrom2 = toCompare)
@@ -123,12 +125,10 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
             cent2 <- which(apply(trans.mat$z,2,sum)==0)
             centromerixIDXes <- largest.stretch(cent2)
           }
-          experimentList[[i]]$CENTROMERES[[chrom]] <- centromerixIDXes
+          #experimentList[[i]]$CENTROMERES[[chrom]] <- centromerixIDXes
           idx1 <- idx1[!V4 %in% centromerixIDXes]
         }
       }
-
-
 
 
       x <- rep(idx1$V4, length(idx1$V4))
@@ -200,14 +200,13 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
         dat$sample <- experimentList[[i]]$NAME
       }
 
-      dat$sample <- experimentList[[i]]$NAME
-      dat$chrom <- chrom
-      dat$color <- experimentList[[i]]$COL
+      dat$chrom <- unique(chrom)
+      dat$color <- unique(experimentList[[i]]$COL)
       d <- rbind(d, dat)
+
     }
   }
   d$sample <- factor(d$sample)
   d$color <- as.character(d$color)
-  experimentList[[i]]$ABS <- as.data.frame(experimentList[[i]]$ABS)
   return(d)
 }

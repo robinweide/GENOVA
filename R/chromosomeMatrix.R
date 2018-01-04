@@ -34,19 +34,22 @@ chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL
   norm.mat <- outer(chrom.n, chrom.n, "*")
   chrom.mat <- matrix(chrom.count[,3], ncol=length(chrom), byrow=T)
 
+
+
   if(!is.null(remove)){
-    remove.vec <- NULL
-    for(remove_item in remove){
-      hitsToRemove <- grep(remove_item, rownames(norm.mat))
-      remove.vec <- c(remove.vec, hitsToRemove)
-    }
-    chrom.mat <- chrom.mat[-remove.vec,-remove.vec]
-    norm.mat <- norm.mat[-remove.vec,-remove.vec]
+    if(!any(remove %in% exp$CHRS)){
+      warning('Chromosome names in remove do not match exp!')
+      } else {
+        remove.vec = which(rownames(norm.mat) %in% remove)
+
+        chrom.mat <- chrom.mat[-remove.vec,-remove.vec]
+        norm.mat <- norm.mat[-remove.vec,-remove.vec]
+      }
   }
 
 
   mat <- list(rawCounts=chrom.mat , normMat = norm.mat)
 
-  chrom.comparison.plot(mat, color.fun = NULL, z.max = NULL)
+  chrom.comparison.plot(mat, color.fun, z.max)
   invisible(mat)
 }

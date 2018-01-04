@@ -1,4 +1,4 @@
-#' intra.inter.TAD.contacts 
+#' intra.inter.TAD.contacts
 #'
 #' Combine a bed file with TAD positions and the Hi-C matrix file to calculate the average coverage over a TAD and between two TADs.
 #'
@@ -9,11 +9,12 @@
 #' @import data.table
 #' @export
 #'
-intra.inter.TAD.contacts <- function ( exp, TAD, max.neighbor = 10 ){
+intra.inter.TAD.contacts <- function ( exp, TAD, max.neighbor = 10 , verbose = F){
   #error handling
   if( any(TAD[,3] < TAD[,2])){ stop("Incorrectly structured TAD data: end column smaller than start") }
-
-  cat("Calculating the intra- and inter-TAD contact frequency with", max.neighbor, "neighboring TADs. This can take several minutes depending on the size of the dataset\n")
+  if(verbose){
+    message("Calculating the intra- and inter-TAD contact frequency with ", max.neighbor, " neighboring TADs. This can take several minutes depending on the size of the dataset\n")
+  }
   #sort the TADs otherwise the findInterval function will not work
   TAD <- TAD[order(TAD[,1],TAD[,2]),1:3]
   TAD[,4] <- NA
@@ -22,7 +23,7 @@ intra.inter.TAD.contacts <- function ( exp, TAD, max.neighbor = 10 ){
   if(exists("intra.inter")){ rm(intra.inter) }
   #loop over chromosomes
   for( chr in chrom ){
-    cat("Now analyzing", chr, "\r" )
+    if(verbose){message("Now analyzing ", chr, " \r" )}
     chr.id <- exp$ABS[exp$ABS[,1]==chr,] #select the chromosome ids from the HiC data structure
     chr.id[,5] <- findInterval(chr.id[,2], TAD[TAD[,1]==chr,2]) #determine which ids overlap with which TAD/domain
     chr.id[,6] <- findInterval(chr.id[,2], TAD[TAD[,1]==chr,3]) #determine which ids overlap with which TAD/domain
@@ -60,6 +61,6 @@ intra.inter.TAD.contacts <- function ( exp, TAD, max.neighbor = 10 ){
     }
     #give every TAD an ID corresponding to the IDs used in intra.inter
   }
-  #combine the TAD positions and 
-  list(hic=intra.inter, tad=TAD)
+  #combine the TAD positions and
+  list(hic=intra.inter, tad=TAD, sampleName = exp$NAME)
 }

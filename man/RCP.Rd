@@ -5,7 +5,7 @@
 \title{Get a per-chromosome scaling plot}
 \usage{
 RCP(experimentList, chromsToUse = NULL, maxDistance = 5e+08, verbose = F,
-  scaling = T)
+  scaling = F)
 }
 \arguments{
 \item{chromsToUse}{A vector containing the chromosome-names of interest.}

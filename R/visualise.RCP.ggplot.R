@@ -69,7 +69,7 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
                     x = "Distance (Mbp)", y = "RCP", col = "") +
       ggplot2::theme(aspect.ratio = 1) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
-                                                                                            vjust = 0.5, hjust = 1))
+                                                         vjust = 0.5, hjust = 1))
 
     if(lineOnly == F){
       p <- p + ggplot2::geom_pointrange(size = lineWidth, shape = 20, fatten = pointWidth, ggplot2::aes(col = sample,ymin = prob-SEM,ymax = prob+SEM))
@@ -88,6 +88,7 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
     }
 
   }
-  p
+  suppressMessages(p + ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+                                      panel.grid.major =  ggplot2::element_line(colour = '#333333')))
 }
 

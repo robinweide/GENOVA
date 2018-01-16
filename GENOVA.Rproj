@@ -11,6 +11,7 @@ Encoding: UTF-8
 
 RnwWeave: knitr
 LaTeX: XeLaTeX
+RootDocument: vignettes/GENOVA_vignette.pdf
 
 AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes

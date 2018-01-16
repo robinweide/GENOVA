@@ -91,7 +91,7 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
     plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
       ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
       ggplot2::coord_fixed() +
-      scale_fill_gradientn(colours = higlassCol, limits = c(zminAbove, zmaxAbove))+
+      ggplot2::scale_fill_gradientn(colours = higlassCol, limits = c(zminAbove, zmaxAbove))+
       #viridis::scale_fill_viridis(limits = c(zminAbove, zmaxAbove), option = "inferno", direction = -1)  +
       ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
       ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+

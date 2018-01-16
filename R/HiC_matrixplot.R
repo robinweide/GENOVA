@@ -411,7 +411,7 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @return A matrix-plot
 #' @export
 hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep(c("red","blue"),2), bw.col="black", type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F){
-  require(viridis)
+
   #some error handling
   if(!is.null(exp2)){
     #make sure the resolutions are the same

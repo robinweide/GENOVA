@@ -8,6 +8,7 @@
 #' @return A grid object, containing two ggplot-objects.
 #' @export
 visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = NULL, focus = 1,...){
+  higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
   resolution = APAlist[[1]]$RES
   size <- dim(as.data.frame(APAlist[[1]]$APA))[1]
   size.banks <- (size - 1)/2
@@ -50,24 +51,30 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
   volgorde <- match(names(APAlist), levels(abovePlots$sample))
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde])
 
-  if(require('viridis') == TRUE){
+  # if(require('viridis') == TRUE){
     plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
       ggplot2::geom_raster(ggplot2::aes(fill = value)) +
       ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
       ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
       ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
       ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
-      ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") + viridis::scale_fill_viridis(limits = z, option = "inferno", direction = -1)
+      ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") +
+      scale_fill_gradientn(colours = higlassCol)
+      # #!
+      # viridis::scale_fill_viridis(limits = z, option = "inferno", direction = -1)
+      # #!
 
-  } else {
-    plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-      ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
-      ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
-      ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
-      ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
-      ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") + ggplot2::scale_fill_distiller(limits = z, palette = "Spectral")
-  }
+
+
+  # } else {
+  #   plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
+  #     ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+  #     ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
+  #     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
+  #     ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
+  #     ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
+  #     ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") + ggplot2::scale_fill_distiller(limits = z, palette = "Spectral")
+  # }
 
 
   z2 <- NULL

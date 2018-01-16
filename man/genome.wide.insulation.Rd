@@ -4,12 +4,14 @@
 \alias{genome.wide.insulation}
 \title{genome.wide.insulation}
 \usage{
-genome.wide.insulation(hic, window.size, normalize.genome = F)
+genome.wide.insulation(hic, window.size, normalize.genome = F, verbose = F)
 }
 \arguments{
 \item{hic}{exp}
 
 \item{window.size}{The sliding square size}
+
+\item{verbose}{Chatty?}
 }
 \value{
 DF with insulation score

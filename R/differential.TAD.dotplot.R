@@ -6,11 +6,14 @@
 #' @param exp2 Output of intra.inter.TAD.contacts for experiment 2.
 #' @param color.fun A color-function like rainbow().
 #' @param yRange Set the y-axis limits, a two-number vector, otherwise use a quantile-based approach to find yRange
+#' @param pch Which plot-characters?
+#' @param title Add a title to the plot.
+#' @param cex How big do you want the points?
 #' @return A dotplot
 #' @import data.table
 #' @export
 #'
-differential.TAD.dotplot <- function( exp1, exp2, color.fun=NULL, yRange =NULL, ... ){
+differential.TAD.dotplot <- function( exp1, exp2, color.fun=NULL, yRange =NULL, pch = '.', title = NULL, cex = 1, ... ){
   comb.exp <- merge(exp1$hic, exp2$hic, by=c("x","y"))
   max.neighbor <- max(comb.exp[,2]-comb.exp[,1])
   #if no user-defined color function is presented take jet.colors
@@ -25,10 +28,10 @@ differential.TAD.dotplot <- function( exp1, exp2, color.fun=NULL, yRange =NULL, 
   Q = quantile(log.ratio, c(0.0015,0.9985))
   Q = max(abs(Q))
   if(is.null(yRange)){
-    plot( tad.dist + runif(nrow(comb.exp), -0.4, 0.4), log.ratio, pch='.',  col=col.vec[tad.dist], ylab=yLab, xlab="TAD distance", xaxt='n', ylim = c(-1*Q, Q),...)
+    plot( tad.dist + runif(nrow(comb.exp), -0.4, 0.4), log.ratio, pch=pch,  col=col.vec[tad.dist], cex = cex, ylab=yLab, xlab="TAD distance", xaxt='n', ylim = c(-1*Q, Q), main = title, ...)
     axis(1, at=1:(max.neighbor+1), lab=paste0("n + ", 0:max.neighbor), las=2)
   } else {
-    plot( tad.dist + runif(nrow(comb.exp), -0.4, 0.4), log.ratio, pch='.',  col=col.vec[tad.dist], ylab=yLab, xlab="TAD distance", xaxt='n', ylim = yRange,...)
+    plot( tad.dist + runif(nrow(comb.exp), -0.4, 0.4), log.ratio, pch=pch,  col=col.vec[tad.dist], cex = cex, ylab=yLab, xlab="TAD distance", xaxt='n', ylim = yRange, main = title, ...)
     axis(1, at=1:(max.neighbor+1), lab=paste0("n + ", 0:max.neighbor), las=2)
   }
 

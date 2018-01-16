@@ -109,8 +109,20 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
 
   size <- dim(as.data.frame(PESCAnlist[[1]]))[1]
   size.banks <- (size - 1)/2
-  tickLabelDownstream <- as.character(1 * ((size.banks/2 *  resolution)/1000))
-  tickLabelUpstream <- as.character(-1 * ((size.banks/2 * resolution)/1000))
+  # tickLabelDownstream <- as.character(1 * ((size.banks/2 *  resolution)/1000))
+  # tickLabelUpstream <- as.character(-1 * ((size.banks/2 * resolution)/1000))
+
+  allTicks = seq(-1*resolution*size.banks, resolution*size.banks, length.out = size)/1e3
+
+
+
+  tickPosDownstream = median(1:size.banks)
+  tickPosUpstream = median( (((size-1)/2)+2 ): size )
+  tickLabelUpstream = mean(allTicks[c(tickPosDownstream-.5, tickPosDownstream+.5)])
+  tickLabelDownstream = mean(allTicks[c(tickPosUpstream-.5, tickPosUpstream+.5)])
+
+
+
   abovePlots <- data.frame(Var1 = integer(), Var2 = integer(),
                            value = numeric(), sample = factor())
   belowPlots <- abovePlots
@@ -168,12 +180,12 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
     ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = smooth) +
     ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",  colour = NA)) +
-    ggplot2::scale_x_continuous(breaks = c(size * 0.25, size * 0.5, size * 0.75),
+    ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
                                 labels = c(paste0(tickLabelUpstream, "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
-    ggplot2::scale_y_continuous(breaks = c(size * 0.25,
-                                           size * 0.5, size * 0.75),
+    ggplot2::scale_y_continuous(breaks = c(tickPosDownstream,
+                                           size.banks + 1, tickPosUpstream),
                                 labels = c(paste0(tickLabelUpstream, "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
-    ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") +
+    ggplot2::labs(title = title, x = "", y = "", fill = "O/E") +
     #viridis::scale_fill_viridis( limits = z)
     #ggplot2::scale_fill_gradientn(colours = spectCol, limits = z)
     ggplot2::scale_fill_gradient2(limits = z, midpoint = 1, low = "#2166ac", mid = "white", high = "#b2182b")
@@ -199,10 +211,11 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
     ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
     ggplot2::scale_fill_gradient2(limits = z2, midpoint = 0, low = "#2166ac", mid = "white", high = "#b2182b") +
     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
-    ggplot2::scale_x_continuous(breaks = c(size * 0.25, size * 0.5, size * 0.75),
-                                labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
-    ggplot2::scale_y_continuous(breaks = c(size * 0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'",
-                                                                                             paste0(tickLabelDownstream, "kb"))) +
+    ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
+                                labels = c(paste0(tickLabelUpstream, "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
+    ggplot2::scale_y_continuous(breaks = c(tickPosDownstream,
+                                           size.banks + 1, tickPosUpstream),
+                                labels = c(paste0(tickLabelUpstream, "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
     ggplot2::labs(x = "", y = "", fill = "Difference")
   grid::grid.newpage()
   grid::grid.draw(rbind(ggplot2::ggplotGrob(plot1), ggplot2::ggplotGrob(plot2), size = "last"))

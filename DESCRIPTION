@@ -14,7 +14,8 @@ Imports:
     dplyr,
     data.table,
     grid,
-    reshape2
+    reshape2,
+    ggplot2
 RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown,

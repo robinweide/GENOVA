@@ -6,11 +6,12 @@
 #' @param experiment List of experiment-objects from `construct.experiment()`.
 #' @param chromsToUse A vector containing the chromosome-names of interest.
 #' @param maxDistance The maximal distance to calculate scalings for.
-#' @param scaling Generate scaling instead of RCP?
+#' @param outlierCutoff Percentage for the cutoff.
+#' @param ignoreLengthWarning Force RCP to use maxDistance instead of longest chromosome if that is smaller than maxDistance.
 #' @param verbose Produces a progress-indication.
 #' @return A data_frame with distance-bin and probabilities.
 #' @export
-RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose = F,scaling = F){
+RCP <- function(experimentList, chromsToUse = NULL,  maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,verbose = F){
   #find the largest stretch of 0s, which is
   #most likely the centromere
   largest.stretch <- function( x ){
@@ -18,6 +19,15 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
     temp2 <- rle(temp)
     x[which(temp == with(temp2, values[which.max(lengths)]))]
   }
+
+  outlierRemovedMean = function(x, Q = 0.005){ # Q is percentage
+    x[is.na(x)] = 0
+    boundaries = quantile(x, c(Q/100, 1-(Q/100)))
+    x[x < boundaries[1]] = boundaries[1]
+    x[x > boundaries[2]] = boundaries[2]
+    return(mean(x))
+  }
+
 
   #select a matrix of interactions for between two chromosomes
   selectTransData <- function(exp, chrom1, chrom2){
@@ -51,12 +61,43 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
     mat
   }
 
+  robin_sem <- function(x) sqrt(var(x)/length(x))
+  coreRCP = function(m.chrom, resolu, breaks, outlierCutoff){
+    m.chrom <- dplyr::filter(m.chrom, V1 < V2)
+    m.chrom$V3[is.na(m.chrom$V3)] <- 0
+    distance = resolu*(m.chrom$V2-m.chrom$V1)
+    cbb <- cut(distance, breaks,labels = FALSE)
+    rcp <- tapply(m.chrom$V3, cbb, FUN = function(x){outlierRemovedMean(x, outlierCutoff )})
+    rcp <- rcp[rcp != 0 & !is.na(rcp)]
+    # SEM Calc
+    rcpsem <- tapply(m.chrom$V3, cbb, robin_sem)
+    rcpsem <- rcpsem[names(rcpsem) %in% names(rcp)]
+    rcpsem[is.na(rcpsem)] <- 0
+    ###
+    m.sum <- sum(m.chrom$V3)
+    dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],
+                             rcp/m.sum,rcpsem/m.sum)
+    colnames(dat) <- c("distance", "prob", "SEM")
+    return(dat)
+  }
+
 
   amountOfSamples <- length(experimentList)
   exp.names <- c()
   if(is.null(chromsToUse)){
     chromsToUse <-  unique(experimentList[[1]]$ABS[,1])
   }
+
+  # Compare largest chromosome to maxDistance
+  largestChrom = max(experimentList[[1]]$ABS[experimentList[[1]]$ABS$V1 %in% chromsToUse,3])
+  if(is.null(maxDistance)){
+    maxDistance = largestChrom
+  }
+  if(maxDistance > largestChrom & !ignoreLengthWarning){
+    warning(paste0("MaxDistance is -unnecessarily- too large.\nLargest chromosome is ", largestChrom, " long.\nSetting MaxDistance to ",largestChrom, "."))
+    maxDistance = largestChrom
+  }
+
 
   # Check for N chromosomes: more than 100: please specify chroms!
   if(length(chromsToUse) > 75){stop("Please restrict the amount of chromosomes with chromsToUse")}
@@ -89,6 +130,8 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
       data.table::setkey(BED_ABS, V1)
       idx1 <- BED_ABS[V1 == list(chrom)]
 
+      chromLength = max(BED_ABS[chrom,3])
+      centromerixIDXes = c()
       if(chrom %in% experimentList[[i]]$CENTROMERES[,1]){
         centroBed <- experimentList[[i]]$CENTROMERES[experimentList[[i]]$CENTROMERES[,1] == chrom,]
         centromerixIDXes =  unname(unlist(idx1[V2 >= centroBed[,2] & V3 <= centroBed[,3],4]))
@@ -130,6 +173,8 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
         }
       }
 
+      centStart = min(centromerixIDXes)
+      centEnd = max(centromerixIDXes)
 
       x <- rep(idx1$V4, length(idx1$V4))
       y <- rep(idx1$V4, each=length(idx1$V4))
@@ -143,56 +188,26 @@ RCP <- function(experimentList, chromsToUse = NULL, maxDistance = 5e08, verbose 
 
       m.chrom <- experimentList[[i]]$ICE[list(x,y)]
 
-      if(nrow(m.chrom) == 0){ next }
-      if(scaling == T){
-        m.chrom <- dplyr::filter(m.chrom, V1 < V2)
+      m.chrom_UP = m.chrom[V1 < centStart & V2 < centStart, ]
+      m.chrom_DOWN = m.chrom[V1 > centEnd & V2 > centEnd, ]
 
-        m.chrom$V3[is.na(m.chrom$V3)] <- 0
+      # if(nrow(m.chrom_UP) != 0){
+      #   dat_upArm = coreRCP(m.chrom_UP, resolu, breaks, outlierCutoff)
+      #   dat_upArm$ARM = 'UP'
+      #   dat = rbind(dat,dat_upArm)
+      # }
+      #
+      # if(nrow(m.chrom_DOWN) != 0){
+      #   dat_downArm = coreRCP(m.chrom_DOWN, resolu, breaks, outlierCutoff)
+      #   dat_downArm$ARM = 'DOWN'
+      #   dat = rbind(dat,dat_downArm)
+      # }
+
+      dat = coreRCP(rbind(m.chrom_DOWN,m.chrom_UP), resolu, breaks, outlierCutoff)
 
 
-        distance = resolu*(m.chrom$V2-m.chrom$V1)
-        cbb <- cut(distance, breaks,labels = FALSE)
-        rcp <- tapply(m.chrom$V3, cbb, mean)
-        rcp <- rcp[rcp != 0 & !is.na(rcp)]
-        # SEM Calc
-        robin_sem <- function(x) sqrt(var(x)/length(x))
-        rcpsem <- tapply(m.chrom$V3, cbb, robin_sem)
-        rcpsem <- rcpsem[names(rcpsem) %in% names(rcp)]
-        rcpsem[is.na(rcpsem)] <- 0
-        ###
-        # divided by the number of non-zero fields of bin X
-        tccb <- table(cbb)
-
-        ourRCP <- rcp/unname(tccb[names(tccb) %in% names(rcp)])
-        attributes(ourRCP) <- NULL
-
-        ourSEM <- rcpsem/unname(tccb[names(tccb) %in% names(rcpsem)])
-        attributes(ourSEM) <- NULL
-
-        #m.sum <- sum(m.chrom$V3)
-        dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],
-                                 ourRCP,
-                                 ourSEM)
-        colnames(dat) <- c("distance", "prob", "SEM")
-      } else {
-        m.chrom <- dplyr::filter(m.chrom, V1 < V2)
-        m.chrom$V3[is.na(m.chrom$V3)] <- 0
-        distance = resolu*(m.chrom$V2-m.chrom$V1)
-        cbb <- cut(distance, breaks,labels = FALSE)
-        rcp <- tapply(m.chrom$V3, cbb, mean)
-        rcp <- rcp[rcp != 0 & !is.na(rcp)]
-        # SEM Calc
-        robin_sem <- function(x) sqrt(var(x)/length(x))
-        rcpsem <- tapply(m.chrom$V3, cbb, robin_sem)
-        rcpsem <- rcpsem[names(rcpsem) %in% names(rcp)]
-        rcpsem[is.na(rcpsem)] <- 0
-        ###
-        m.sum <- sum(m.chrom$V3)
-        dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],
-                                 rcp/m.sum,rcpsem/m.sum)
-        colnames(dat) <- c("distance", "prob", "SEM")
-      }
       if(nrow(dat) == 0){next()}
+
       #add names to data.frame
       if(standard){
         dat$sample <- paste("Exp.", i)

@@ -4,17 +4,19 @@
 \alias{RCP}
 \title{Get a per-chromosome scaling plot}
 \usage{
-RCP(experimentList, chromsToUse = NULL, maxDistance = 5e+08, verbose = F,
-  scaling = F)
+RCP(experimentList, chromsToUse = NULL, maxDistance = NULL,
+  ignoreLengthWarning = F, outlierCutoff = 1, verbose = F)
 }
 \arguments{
 \item{chromsToUse}{A vector containing the chromosome-names of interest.}
 
 \item{maxDistance}{The maximal distance to calculate scalings for.}
 
-\item{verbose}{Produces a progress-indication.}
+\item{ignoreLengthWarning}{Force RCP to use maxDistance instead of longest chromosome if that is smaller than maxDistance.}
 
-\item{scaling}{Generate scaling instead of RCP?}
+\item{outlierCutoff}{Percentage for the cutoff.}
+
+\item{verbose}{Produces a progress-indication.}
 
 \item{experiment}{List of experiment-objects from `construct.experiment()`.}
 }

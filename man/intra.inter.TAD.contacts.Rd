@@ -9,7 +9,7 @@ intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10, verbose = F)
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
-\item{TAD}{A bed-dataframe.}
+\item{TAD}{A bed-dataframe. TADs should be consequtive (i.e. the 3' border of TAD1 is the 5' border of TAD2). This means that using TAD-calls from Arrowhead is only possible after some removing these internal sub-TADs.}
 
 \item{max.neighbor}{How many surrounding TADs should be taken into account?}
 }

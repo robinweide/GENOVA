@@ -25,6 +25,7 @@
 visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = NULL, zlim2 = NULL){
   # issue 29: rename stackr -> ata
   # Make two dataframes
+  higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
   abovePlots <- data.frame(Var1 = integer(),
                            Var2 = integer(),
                            value = numeric(),
@@ -86,27 +87,28 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
 
   # Plot first row
-  if(require('viridis') == TRUE){
+  # if(require('viridis') == TRUE){
     plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
       ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
       ggplot2::coord_fixed() +
-      viridis::scale_fill_viridis(limits = c(zminAbove, zmaxAbove), option = "inferno", direction = -1)  +
+      scale_fill_gradientn(colours = higlassCol, limits = c(zminAbove, zmaxAbove))+
+      #viridis::scale_fill_viridis(limits = c(zminAbove, zmaxAbove), option = "inferno", direction = -1)  +
       ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
       ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
       ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
       ggplot2::facet_grid(.~ sample)+
       ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
-  } else {
-    plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
-      ggplot2::coord_fixed() +
-      ggplot2::scale_fill_distiller(limits = c(zminAbove, zmaxAbove), palette = "Spectral")  +
-      ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
-      ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
-      ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
-      ggplot2::facet_grid(.~ sample)+
-      ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
-  }
+  # } else {
+  #   plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
+  #     ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
+  #     ggplot2::coord_fixed() +
+  #     ggplot2::scale_fill_distiller(limits = c(zminAbove, zmaxAbove), palette = "Spectral")  +
+  #     ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
+  #     ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
+  #     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
+  #     ggplot2::facet_grid(.~ sample)+
+  #     ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
+  # }
 
   plot2 <- ggplot2::ggplot(belowPlots, ggplot2::aes(Var1, Var2)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = F) +

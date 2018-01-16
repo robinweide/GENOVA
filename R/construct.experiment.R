@@ -8,14 +8,15 @@
 #' @param color Color associated with sample.
 #' @param COMMENTS A place to store some comments.
 #' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
+#' @param BPscaling Scale contacts to havebgenome-wide sum of [BPscaling] reads.
 #' @return A list.
 #' @export
-construct.experiment <- function(signalPath, indicesPath, name, centromeres = NULL,  color = 1, comments = NULL){
+construct.experiment <- function(signalPath, indicesPath, name, centromeres = NULL,  color = 1, comments = NULL,BPscaling = 1e9){
   # Check if files exist
   if(!file.exists(signalPath)){stop('Signal file not found.')}
   if(!file.exists(indicesPath)){stop('Index file not found.')}
 
-  ICE <- read.hicpro.matrix(signalPath)
+  ICE <- read.hicpro.matrix(signalPath, norm=BPscaling)
   ABS <- data.table::fread(indicesPath, header = F, data.table = F)
 
   # check for similar binsizes BED and ICE

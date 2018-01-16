@@ -5,11 +5,12 @@
 \title{hic.matrixplot}
 \usage{
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
-  chip = list(NULL, NULL, NULL, NULL), inferno = T, bed.col = rep(c("red",
-  "blue"), 2), bw.col = rep(c("navy", "darkred"), 2), type = rep("triangle",
-  4), coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower",
-  loops = NULL, loops.type = "lower", tads.color = "#3288bd",
-  loops.resize = 0, loops.color = "#3288bd")
+  chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
+  bed.col = rep(c("red", "blue"), 2), bw.col = "black",
+  type = rep("triangle", 4), guessType = T, coplot = "dual",
+  genes = NULL, tads = NULL, tad.type = "lower", loops = NULL,
+  loops.type = "lower", tads.color = "#3288bd", loops.resize = 0,
+  loops.color = "#3288bd", skipAnn = F, symmAnn = F)
 }
 \arguments{
 \item{exp1}{The control Hi-C experiment object: produced by construct.experiment(). (bottom)}
@@ -24,15 +25,19 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 
 \item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the negative of this is the lower bound}
 
-\item{chip}{A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4, first two and last two have to be the same (i.e. 1:bed,2:bed,3:path,4:path, but 1:bed,2:NULL,3:path,4:NULL is also allowed)}
+\item{chip}{A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4. Placement is inner-top, outer-top, outer-left, inner-left.}
 
 \item{inferno}{White/Red/black or White/Red coloscale?}
+
+\item{cexTicks}{Change size of numbers on the axis}
 
 \item{bed.col}{Color of the bed track (max.len is 4)}
 
 \item{bw.col}{Same as bed col, but for the bigwig track}
 
 \item{type}{Should a rectangle or a triangle be drawn? Not that for a triangle a 6th strand column should be included}
+
+\item{guessType}{If an element in the chip is a dataframe, infer the type from column 6? If true, column six should hold "+" and "-". If a row has other characters, we view this entry as no-oriention and thus plot a rectangle.}
 
 \item{coplot}{When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1}
 
@@ -49,6 +54,10 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 \item{loops.resize}{Make the loop-boxes bigger by X bp. Can help visibility.}
 
 \item{loops.color}{Which color do you want the loops to have?}
+
+\item{skipAnn}{Do not plot outside-annotation. Can be used to plot other things next to the matrix.}
+
+\item{symmAnn}{Put features 1&2 in also on verical (ignore chip-entries 3 & 4)}
 }
 \value{
 A matrix-plot

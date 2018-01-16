@@ -3,7 +3,7 @@
 #' Combine a bed file with TAD positions and the Hi-C matrix file to calculate the average coverage over a TAD and between two TADs.
 #'
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
-#' @param TAD A bed-dataframe.
+#' @param TAD A bed-dataframe. TADs should be consequtive (i.e. the 3' border of TAD1 is the 5' border of TAD2). This means that using TAD-calls from Arrowhead is only possible after some removing these internal sub-TADs.
 #' @param max.neighbor How many surrounding TADs should be taken into account?
 #' @return A list containing a dataframe with scores between two TADs and an updated version of the TAD-input file, which now also includes TAD-IDs.
 #' @import data.table

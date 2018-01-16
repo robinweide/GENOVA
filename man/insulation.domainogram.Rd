@@ -4,7 +4,7 @@
 \alias{insulation.domainogram}
 \title{insulation.domainogram}
 \usage{
-insulation.domainogram(exp1, chrom, start, end, window.size1 = 5,
+insulation.domainogram(exp1, chrom, start, end, axes = T, window.size1 = 5,
   window.size2 = 101, step = 2, local = T, zlim = c(-1, 0.5))
 }
 \arguments{

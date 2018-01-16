@@ -158,7 +158,7 @@ insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, wind
 #' @param zlim Zlims of the plot
 #' @return A plot
 #' @export
-insulation.domainogram <- function( exp1, chrom, start, end, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim=c(-1, 0.5)){
+insulation.domainogram <- function( exp1, chrom, start, end, axes = T, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim=c(-1, 0.5)){
 	if(step %% 2){
 		stop("Step size has to be even")
 	}
@@ -183,7 +183,9 @@ insulation.domainogram <- function( exp1, chrom, start, end, window.size1 = 5, w
 		rect(x1, y1, x2, y2, col=color.vec[color.index], border=NA)
 	}
 	at <- seq(1e6*floor(start/1e6), 1e6*floor(end/1e6), by=1e6)
-	axis(1, at=at, lab=at/1e6, lwd=2)
+	if(axes){
+	  axis(1, at=at, lab=at/1e6, lwd=2)
+	}
 	axis(2, lwd=2)
 	box(lwd=2)
 }
@@ -342,13 +344,14 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 #'
 #' @param hic exp
 #' @param window.size The sliding square size
+#' @param verbose Chatty?
 #' @return DF with insulation score
 #' @export
-genome.wide.insulation <- function( hic, window.size, normalize.genome = F ){
+genome.wide.insulation <- function( hic, window.size, normalize.genome = F, verbose = F ){
 	chrom.vec <- c(hic$ABS[1,1],hic$ABS[which(head(hic$ABS[,1],-1) != tail(hic$ABS[,1],-1))+1,1])
 	chrom.save <- c(); pos.save <- c(); ins.vec <- c()
 	for( chrom in chrom.vec ){
-		cat("Currently analyzing ", chrom, "\r")
+		if(verbose){cat("Currently analyzing ", chrom, "\r")}
 		#do not analyse chromosomes that are twice the window size
 		if(sum(hic$ABS[,1]==chrom) <= 2*window.size ){
 			next

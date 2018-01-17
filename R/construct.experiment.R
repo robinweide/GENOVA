@@ -47,6 +47,8 @@ construct.experiment <- function(signalPath, indicesPath, name, centromeres = NU
     }
   }
 
+  chromVector <- as.character(unique(ABS$V1))
+
   # Contruct list
   list(
     # Iced HiC-matrix in three-column format (i.e. from HiC-pro)

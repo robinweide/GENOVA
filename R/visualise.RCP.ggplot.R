@@ -22,23 +22,31 @@
 #' visualise.RCP.ggplot(RCP_out,combine = T,smooth = T, lineOnly = T, xlim = c(5,110))
 #' @return A ggplot-object
 #' @export
-visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xlim = NULL, lineOnly = T, lineWidth = 1, pointWidth = 0.5){
+visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xlim = NULL,lineOnly = T, lineWidth = 1, pointWidth = 0.5){
+
+
+
   cols <- RCPdata$color
   p <- NULL
   names(cols) <- RCPdata$sample
   if (combine == T) {
-    RCPdata <- dplyr::group_by(RCPdata, distance, sample)
+    RCPdata <- dplyr::group_by(RCPdata, distance, sample, BED)
     RCPdata <- dplyr::summarise(RCPdata, prob = median(prob), SEM = mean(SEM), col = unique(color))
     RCPdata$chrom <- "All chromosomes"
+  }
+
+  RCPdata$BED = factor(RCPdata$BED)
+  if(nlevels(RCPdata$BED) == 0){
+    RCPdata$BED = factor(1)
   }
   if (smooth == F) {
     p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000,
                                                y = prob)) +
-      ggplot2::geom_line() +
+      ggplot2::geom_line(ggplot2::aes(lty = BED)) +
       ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
       ggplot2::theme_linedraw() + ggplot2::scale_color_manual(values = cols) +
       ggplot2::labs(title = "Relative contact probability",
-                    x = "Distance (Mbp)", y = "RCP", col = "") +
+                    x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
       ggplot2::theme(aspect.ratio = 1) + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
                                                                                             vjust = 0.5, hjust = 1))
     if(lineOnly == F){
@@ -66,7 +74,7 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
       ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
       ggplot2::theme_linedraw() + ggplot2::scale_color_manual(values = cols) +
       ggplot2::labs(title = "Relative contact probability",
-                    x = "Distance (Mbp)", y = "RCP", col = "") +
+                    x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
       ggplot2::theme(aspect.ratio = 1) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
                                                          vjust = 0.5, hjust = 1))
@@ -87,6 +95,12 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
       p <- p + ggplot2::scale_x_log10()
     }
 
+  }
+
+
+  # if all beds are the same (or NA), remove guide altogether
+  if(nlevels(RCPdata$BED) < 2){
+    p = p+ggplot2::guides(lty=FALSE)
   }
   suppressMessages(p + ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                                       panel.grid.major =  ggplot2::element_line(colour = '#333333')))

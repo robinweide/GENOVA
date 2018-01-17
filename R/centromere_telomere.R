@@ -149,9 +149,9 @@ draw.chromosome <- function(){
 	polygon(y-1.07,1-x, col="grey", border="black", lwd=2)
 }
 
-#draw the log2-ratio of the relative interaction frequencies
-#the ratio is calculated over the median of the matrix
-
+#' draw the log2-ratio of the relative interaction frequencies
+#' the ratio is calculated over the median of the matrix
+#'
 #' @param m matrix result from centromere-telomere
 #' @param cut.off log2-ratio cut.off
 #' @export

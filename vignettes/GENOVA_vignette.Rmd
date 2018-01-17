@@ -52,20 +52,6 @@ library(GENOVA)
 ## Data structures of input
 GENOVA expects two input files: the signal- and the index-file. Signal-files have three columns (bin1, bin2, contactCount) and index-files have four (chromosome, start, end, bin). These are the default output of the Hi-C mapping pipeline HiC-Pro [@Servant2015], where they are called \*.matrix and \*.bed. The files are expected to be genome-wide and may be corrected with ICE-normalisation.
 
-## Juicebox
-We added a convenience script **juicerToGENOVA.py**, to load files from Juicerbox (.hic files). This allows for a fast conversion to signal- and index-files from, for example, data from Sanborn et al.[-@Sanborn2015]:
-
-```{r J2G, eval=FALSE, highlight=FALSE}
-# Convert data from Sanborn et al. normalised at 10kb resoltion:
-juicerToGenova.py -C ucsc.hg19_onlyRealChromosomes.noChr.chromSizes \
--JT ~/bin/juicer/AWS/scripts/juicebox_tools.7.0.jar \
--H ~/Downloads/Sanborn_Hap1_combined_30.hic \
--R 10000 \
--force TRUE \
--norm KR \
--O Sanborn_Hap1_combined_30.hic_10kb_KR 
-```
-
 ## Recommended resolutions
 To ensure computational strain and time is kept to a minimum, we recommend different resolutions for different functions (table \@ref(tab:tableRES)). More experienced users are free to deviate, while keeping in mind that these datasets are quite memory-heavy (table \@ref(tab:tableMEM)). 
 
@@ -91,11 +77,10 @@ Hap1 WT | 1Mb | 433.5 | 0.1
 
 
 ## construct.experiment
-Every Hi-C experiment will be stored in an experiment-object. This is done by invoking the `construct.experiment` function. Inside, several sanity checks will be performed, data is normalised to the total number of reads and scaled to a billion reads (i.e. 1e9). 
+Every Hi-C experiment will be stored in an experiment-object. This is done by invoking the `construct.experiment` function. Inside, several sanity checks will be performed, data is normalised to the total number of reads and scaled to a billion reads (the default value of the `BPscaling`-option). 
 
 For this example, we are going to use the Hi-C maps of WT and $\Delta$WAPL Hap1 cells from Haarhuis et al. [-@Haarhuis2017]. Since the genome-wide analyses do not need very high-resolution data, we will construct both 10kb, 40kb and 1Mb resolution experiment-objects. 
 ```{r centromere0, cache=T, echo = F}
-# Please make sure that the chromosome-names match.
 centromeres = read.delim('data/hg19_cytobandAcen.bed', 
                          sep = '\t', 
                          h = F, 
@@ -108,9 +93,7 @@ Hap1_WT_10kb <- construct.experiment(
                                 indicesPath = 'data/WT_10000_abs.bed', 
                                 name = "WT",
                                 centromeres = centromeres,
-                                color = "black", 
-                                comments = "This is an optional memo-field.",
-                                BPscaling = 1e9) # default scaling
+                                color = "black")
 
 Hap1_WAPL_10kb <- construct.experiment(
                                 signalPath = 'data/WAPL_10000_iced.matrix', 
@@ -124,8 +107,7 @@ Hap1_WT_40kb <- construct.experiment(
                                 indicesPath = 'data/WT_40000_abs.bed', 
                                 name = "WT",
                                 centromeres = centromeres,
-                                color = "black", 
-                                comments = "This is an optional memo-field.")
+                                color = "black")
 
 Hap1_WAPL_40kb <- construct.experiment(
                                 signalPath = 'data/WAPL_40000_iced.matrix', 
@@ -139,8 +121,7 @@ Hap1_WT_1MB <- construct.experiment(
                                 indicesPath = 'data/WT_1000000_abs.bed', 
                                 name = "WT",
                                 centromeres = centromeres,
-                                color = "black", 
-                                comments = "This is an optional memo-field.")
+                                color = "black")
 
 Hap1_WAPL_1MB <- construct.experiment(
                                 signalPath = 'data/WAPL_1000000_iced.matrix', 
@@ -148,27 +129,38 @@ Hap1_WAPL_1MB <- construct.experiment(
                                 name = "WAPL",
                                 centromeres = centromeres,
                                 color = "red")
-
 ```
 
-Several functions rely on centromere-information. You can add this in the form of a BED-like three-column data.frame when constructing the experiment-object. If not present, the centromeres will be emperically identified, by searching for the largest stretch of no coverage on a chromosome.
+Several functions rely on centromere-information. You can add this in the form of a BED-like three-column data.frame when constructing the experiment-object ^[Please make sure that the chromosome-names match.]. If not present, the centromeres will be emperically identified, by searching for the largest stretch of no coverage on a chromosome.
 ```{r centromere, cache=T}
-# Please make sure that the chromosome-names match.
 centromeres = read.delim('data/hg19_cytobandAcen.bed', 
                          sep = '\t', 
                          h = F, 
                          stringsAsFactors = F)
-
 head(centromeres)
 ```
 
-The resulting object has several slots. *ICE* and *ABS* are the signal- and index-data.tables, resp., *NAME*, *COL* and *COMM* are user-provided metadata vectors and *RES* is the automatically determined resolution of the Hi-C data. The amount of contacts in the *ICE* data.table is likely different from the input-data, because it is scaled to a fixed number of reads (which can be set with the `BPscaling`-option in `construct.experiment`). 
+The resulting object has several slots. *ICE* and *ABS* are the signal- and index-data.tables, resp., and *RES* is the automatically determined resolution of the Hi-C data. The *NAME*, *COL* and *COMM* are user-provided metadata vectors, where the latter is a free-from slot to store comments and/or output of different functions. The amount of contacts in the *ICE* data.table is likely different from the input-data, because it is scaled to a fixed number of reads (which can be set with the `BPscaling`-option in `construct.experiment`). 
 ```{r peakEXP3, collapse=F, results='markup', echo = F}
 str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 ```
 
+## Juicebox
+We added a convenience script **juicerToGENOVA.py**, to load files from Juicerbox (.hic files). This allows for a fast conversion to signal- and index-files from, for example, data from Sanborn et al.[-@Sanborn2015]:
+
+```{r J2G, eval=FALSE, highlight=FALSE}
+# Convert data from Sanborn et al. normalised at 10kb resoltion:
+juicerToGenova.py -C ucsc.hg19_onlyRealChromosomes.noChr.chromSizes \
+-JT ~/bin/juicer/AWS/scripts/juicebox_tools.7.0.jar \
+-H ~/Downloads/Sanborn_Hap1_combined_30.hic \
+-R 10000 \
+-force TRUE \
+-norm KR \
+-O Sanborn_Hap1_combined_30.hic_10kb_KR 
+```
+
 # Genome-wide analyses
-A good place to start your analyses are some quality-control functions on a genome-wide level. To assess the quality of the library, we can calculate the **cis**-fraction. 
+A good place to start your analyses are some functions on a genome-wide level. We can assess the quality of the library, identify translocations and generate contact probability (aka scaling or interaction decay plots).
 
 ## *Cis*-quantification
 Work by the group of Amos Tanay showed that the expected amount of intra-chromosomal contacts is the range of 90 to 93 percent [@Olivares-Chauvet2016]. Assuming that any extra inter-chromosomal contacts are due to debris/noise, the user might aspire to get the *cis*-percentages as close to 90% as possible. To compute the percentage of per-chromosome *cis*-contacts, we simply provide `cisTotal.perChrom` with the exp-object of interest. It will produce a boxplot of the percentages *cis* per chromosome and draw a red line with the genome-wide percentage. If you assign a variable to the output of this function, you will also get a list with the underlying data.
@@ -180,14 +172,17 @@ cisChrom_out <- cisTotal.perChrom(Hap1_WT_1MB)
 Using the underlying data stored in the variable  *cisChrom_out*, we can also inspect the results per chromosome more closely. The list has two entries: a data.frame with the per-chromosome percentages (*perChrom*) and the genome-wide percentage (*genomeWide*).
 ```{r cis2, cache=T,fig.cap="Fraction of cis-contacts per chromosome. Chromosomes 9, 15, 19 \\& 22 have translocations, which therefore appear to have more trans-contacts, but which in reality are cis-contacts."}
 plot(cisChrom_out$perChrom, las=2)
-# genome-wide percentage is also stored in the output of cisTotal.perChrom!
 abline(h = cisChrom_out$genomeWide, col = 'red') 
 ```
 
 ## chromosome plots
 Hi-C has been shown to be a powerful data-source to detect chromosomal rearrangements [@Harewood2017]. To find possible translocations, we can plot the genome-wide enrichment of interactions between all combinations of chromosomes. The values in the matrix are $log10(observed/expected)$. The Hap1 cell line has two known translocations, which we can easily see in the resulting plot. To narrow-in on this location, you could use the `trans.compartment.plot`-function (discussed below).
-```{r chromMat, message=FALSE, cache=T, fig.cap="Chromosome matrix. The two known translocations of Hap1 cells are easily identified (15-19 \\& 9-22)."}
+```{r chromMat1, echo = F, message=FALSE, cache=T, fig.cap="Chromosome matrix. The two known translocations of Hap1 cells are easily identified (15-19 \\& 9-22)."}
 par(pty ='s')
+# Lets remove mitochondrial and Y-chromosomal contacts
+chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"))
+```
+```{r chromMat2, eval = F, message=FALSE, cache=T, fig.cap="Chromosome matrix. The two known translocations of Hap1 cells are easily identified (15-19 \\& 9-22)."}
 # Lets remove mitochondrial and Y-chromosomal contacts
 chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"))
 ```
@@ -196,7 +191,7 @@ chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"))
 The Relative Contact Probability computes the contact probability as a function of genomic distance, as described in [@Lieberman-Aiden2009]. This can be computed for a specific set of chromosomes or genome-wide. To be able to ignore centromeric contacts (which have a abberant RCP), centromeric information is need. This is taken from the experiment-object or found emperically by comparing trans-interactions.
 
 ```{r doRCP, cache=T}
-RCP_out <- RCP(experimentList = list(Hap1_WT_40kb, Hap1_WAPL_40kb), 
+RCP_out135 <- RCP(experimentList = list(Hap1_WT_40kb, Hap1_WAPL_40kb), 
                chromsToUse = c('chr1','chr3', 'chr5'))
 ```
 
@@ -207,20 +202,49 @@ options(scipen = 1)
 
 ```{r RCPPLOT1, message=FALSE, fig.wide= T , fig.cap= "RCP. Every facet shows the RCP of one chromosome."}
 # Plot RCP: combined
-visualise.RCP.ggplot(RCPdata = RCP_out, 
+visualise.RCP.ggplot(RCPdata = RCP_out135, 
                      smooth = T, # use a LOESS smoothing
                      combine = F) # Don't merge data from all chromosomes
 ```
 
+### combined
+
 It is also possible to combine all available data into a genome-wide RCP-plot.
 ```{r RCPPLOT2, message=FALSE,   fig.small= T , fig.cap= "RCP. All data combined in one plot."}
 # Plot RCP: per-chromosome
-visualise.RCP.ggplot(RCPdata = RCP_out, 
+visualise.RCP.ggplot(RCPdata = RCP_out135, 
                      smooth = F, # do not use a LOESS smoothing
                      combine = T) # Merge data from all chromosomes
 ```
 
-## RCP.region
+### regions
+```{r RCPBED, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP. A-compartments have more contacts closerby."}
+CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
+SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
+
+SMC1_shifted = CTCF
+SMC1_shifted[,2:3] = SMC1_shifted[,2:3] + sample(0:2e6, nrow(SMC1_shifted) )
+
+RCP_out = RCP(experimentList = list(Hap1_WT_40kb ), 
+               bedList =  list("CTCF" = CTCF, 
+                               
+                               'Shuffled' = CTCF[1:10e2,]), 
+               chromsToUse = c('chr10'))
+
+visualise.RCP.ggplot(RCP_out)
+```
+
+```{r}
+RCP_out = RCP(experimentList = list(Hap1_WT_40kb, Hap1_WAPL_40kb ), 
+               bedList =  list("CTCF" = CTCF, 
+                               'Cohesin' = SMC1,
+                               'Shuffled' = SMC1_shifted), 
+               chromsToUse = c('chr10'))
+
+
+visualise.RCP.ggplot(RCP_out)
+```
+
 
 ...noting to see here, move along...
 
@@ -229,11 +253,26 @@ visualise.RCP.ggplot(RCPdata = RCP_out,
 ...noting to see here, move along...
 
 ## *cis*
-...noting to see here, move along...
+```{r CCP1, message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
+cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr20', arm = 'q',zlim = 20)
+```
+
+
+```{r CCP2, message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot. Observed over expected.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
+cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr20', arm = 'q',zlim = 1, obs.exp = T)
+```
+
+
+
 
 ## *trans*
-...noting to see here, move along...
 
+
+```{r TCP, message=FALSE , fig.asp=1,fig.cap= "Trans compartment plot. The t(9q;22q) translocation is easily identified.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
+
+trans.compartment.plot(exp = Hap1_WT_40kb, chrom1 = 'chr9', arm1 = 'q', chrom2 = 'chr22', arm2 = 'q', zlim = 10)
+
+```
 
 
 
@@ -602,12 +641,20 @@ persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
 
 `centromere.telomere.analysis` 
 
-`draw.centromere.telomere` and `draw.interarm`
+`draw.centromere.telomere` 
+We saw a enriched signal between chromosomes 15 and 19. We can wh
+```{r cent, cache=T}
+out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
+draw.centromere.telomere(out1519)
+
+```
+
 
 # To-do
 For the next version, the following will be added/fixed:
 
 - write `visualise.PESCAn.persp`
+- write RCP.region
 
 Please post questions, comments and rants on [our github issue tracker](https://github.com/robinweide/GENOVA/issues).
 

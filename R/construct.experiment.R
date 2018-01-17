@@ -35,6 +35,18 @@ construct.experiment <- function(signalPath, indicesPath, name, centromeres = NU
     colnames(centromeres)[1:3] <- paste0('V',1:3)
   }
 
+  # check is all chromosomes have actual data
+  for(C in chromVector){
+    tmp = ICE[V1 %in% ABS[ABS[,1] == C,4] | V2 %in% ABS[ABS[,1] == C,4]]
+    if(nrow(tmp) > 0){
+
+    } else {
+      # no ICE-data of chrom. warn and delete!
+      warning(paste0("No contacts of ", C))
+      ABS = ABS[ !ABS[,1] == C,]
+    }
+  }
+
   # Contruct list
   list(
     # Iced HiC-matrix in three-column format (i.e. from HiC-pro)

@@ -131,7 +131,7 @@ Hap1_WAPL_1MB <- construct.experiment(
                                 color = "red")
 ```
 
-Several functions rely on centromere-information. You can add this in the form of a BED-like three-column data.frame when constructing the experiment-object ^[Please make sure that the chromosome-names match.]. If not present, the centromeres will be emperically identified, by searching for the largest stretch of no coverage on a chromosome.
+Several functions rely on centromere-information. You can add this in the form of a BED-like three-column data.frame when constructing the experiment-object ^[Please make sure that the chromosome-names match.]. If not present, the centromeres will be emperically identified by searching for the largest stretch of no coverage on a chromosome.
 ```{r centromere, cache=T}
 centromeres = read.delim('data/hg19_cytobandAcen.bed', 
                          sep = '\t', 
@@ -218,33 +218,31 @@ visualise.RCP.ggplot(RCPdata = RCP_out135,
 ```
 
 ### regions
-```{r RCPBED, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP. A-compartments have more contacts closerby."}
+```{r RCPBED, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP."}
 CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
 SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
 
-SMC1_shifted = CTCF
-SMC1_shifted[,2:3] = SMC1_shifted[,2:3] + sample(0:2e6, nrow(SMC1_shifted) )
-
-RCP_out = RCP(experimentList = list(Hap1_WT_40kb ), 
+RCP_out = RCP(experimentList = list(Hap1_WT_40kb), 
                bedList =  list("CTCF" = CTCF, 
-                               
-                               'Shuffled' = CTCF[1:10e2,]), 
-               chromsToUse = c('chr10'))
+                               'Cohesin' =SMC1), 
+               chromsToUse = c('chr1'))
+
 
 visualise.RCP.ggplot(RCP_out)
 ```
 
-```{r}
+```{r RCPBED2, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. Multiple samples and BEDs can be combined."}
+CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
+SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
+
 RCP_out = RCP(experimentList = list(Hap1_WT_40kb, Hap1_WAPL_40kb ), 
                bedList =  list("CTCF" = CTCF, 
-                               'Cohesin' = SMC1,
-                               'Shuffled' = SMC1_shifted), 
-               chromsToUse = c('chr10'))
+                               'Cohesin' =SMC1), 
+               chromsToUse = c('chr1'))
 
 
 visualise.RCP.ggplot(RCP_out)
 ```
-
 
 ...noting to see here, move along...
 
@@ -252,25 +250,36 @@ visualise.RCP.ggplot(RCP_out)
 
 ...noting to see here, move along...
 
-## *cis*
+## *cis*-interactions 
 ```{r CCP1, message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
-cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr20', arm = 'q',zlim = 20)
+cis.compartment.plot(exp = Hap1_WT_40kb, 
+                     chrom = 'chr20', 
+                     arm = 'q',
+                     zlim = 20)
 ```
 
 
 ```{r CCP2, message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot. Observed over expected.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
-cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr20', arm = 'q',zlim = 1, obs.exp = T)
+cis.compartment.plot(exp = Hap1_WT_40kb, 
+                     chrom = 'chr20', 
+                     arm = 'q',
+                     zlim = 1, 
+                     obs.exp = T)
 ```
 
 
 
 
-## *trans*
-
+## *trans*-interactions 
 
 ```{r TCP, message=FALSE , fig.asp=1,fig.cap= "Trans compartment plot. The t(9q;22q) translocation is easily identified.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
 
-trans.compartment.plot(exp = Hap1_WT_40kb, chrom1 = 'chr9', arm1 = 'q', chrom2 = 'chr22', arm2 = 'q', zlim = 10)
+trans.compartment.plot(exp = Hap1_WT_40kb, 
+                       chrom1 = 'chr9', 
+                       arm1 = 'q', 
+                       chrom2 = 'chr22', 
+                       arm2 = 'q', 
+                       zlim = 10)
 
 ```
 
@@ -337,7 +346,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 ```
 
 ### BigWigs and BEDs
-Two tracks above and two tracks to the left can be added. These can be either BED-like data.frames or the paths the .bw files. For example, lets load a BED6-file ( [chrom, start, end, name, score, and strand](https://genome.ucsc.edu/FAQ/FAQformat.html) ) of CTCF-motifs under CTCF-ChIP peaks. The argument `type` can be set to either *triangle* or *rectangle*: triangle is nice to use if you want to look at the orientation of the BED-entries. 
+Two tracks above and two tracks to the left can be added. These can be either BED-like data.frames or the paths the .bw files. For example, lets load a BED6-file (chrom, start, end, name, score, and strand ^[https://genome.ucsc.edu/FAQ/FAQformat.html]) of CTCF-motifs under CTCF-ChIP peaks. The argument `type` can be set to either *triangle* or *rectangle*: triangle is nice to use if you want to look at the orientation of the BED-entries. 
 ```{r CTCF}
 CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
 SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
@@ -440,10 +449,11 @@ knitr::kable(
 
 ## ATA
 ```{r ATA, cache=T}
-ATA_Hap1_WT   <- ATA(experiment = Hap1_WT_10kb,
-                tad.bed = WT_TADs) 
-ATA_Hap1_WAPL <-  ATA(experiment = Hap1_WAPL_10kb,
-                 tad.bed = WT_TADs)
+ATA_Hap1_WT   <- ATA(experiment = Hap1_WT_10kb, verbose = F,
+                    tad.bed = WT_TADs) 
+
+ATA_Hap1_WAPL <-  ATA(experiment = Hap1_WAPL_10kb,verbose = F,
+                    tad.bed = WT_TADs)
 ```
 
 We can use `visualise.ATA.ggplot` to combine the ATA-results.
@@ -452,7 +462,7 @@ We can use `visualise.ATA.ggplot` to combine the ATA-results.
 visualise.ATA.ggplot(stackedlist = list('WT' = ATA_Hap1_WT, 
                                         'WAPL' = ATA_Hap1_WAPL), # a named list
                      title = "Hap1 Hi-C vs WT TADs from HiCseg", 
-                     zlim1 = c(0,25),
+                     zlim1 = c(0,26),
                      zlim2 = c(-5,5), 
                      focus = 1) # which entry to use as comparison
 ```
@@ -552,7 +562,7 @@ insulation.heatmap_out = insulation.heatmap(
 # Loops
 For this section, we are using the extended loops from Haarhuis et al. [-@Haarhuis2017]. These are the anchor-combinations of the merged loop-calls of WT Hap1 5-, 10- and 20-kb matrices, generated with HICCUPS [@Rao2014].
 ```{r loadLOOP, cache=T}
-WT_Loops = read.delim('data/WT_3Mb_extended_loops.bed', h = F)
+WT_Loops_extended = read.delim('data/WT_3Mb_extended_loops.bed', h = F)
 ```
 
 ```{r, echo=F}
@@ -560,11 +570,11 @@ options(scipen = 1e9)
 ```
 
 ```{r fixLOOP, echo = F, cache=T}
-WT_Loops$V1 = gsub(pattern = "^", replacement = "chr", x = WT_Loops$V1) 
-WT_Loops$V4 = gsub(pattern = "^", replacement = "chr", x = WT_Loops$V4)
+WT_Loops_extended$V1 = gsub(pattern = "^", replacement = "chr", x = WT_Loops_extended$V1) 
+WT_Loops_extended$V4 = gsub(pattern = "^", replacement = "chr", x = WT_Loops_extended$V4)
 
 knitr::kable(
-  head(WT_Loops[,1:6], 5), caption = "A data.frame holding a standard BEDPE format. Columns 1-3 are describe the 5' anchor, columns 4-6 describe the 3' anchor."
+  head(WT_Loops_extended[,1:6], 5), caption = "A data.frame holding a standard BEDPE format. Columns 1-3 are describe the 5' anchor, columns 4-6 describe the 3' anchor."
 )
 ```
 
@@ -575,21 +585,20 @@ options(scipen = 1)
 ## APA
 Explain smalltreshold
 ```{r APArun, cache=T}
-APA_Hap1_WT   <- APA(experiment = Hap1_WT_10kb,
-                     smallTreshold = 300e3,
-                     loop.bed = WT_Loops)
-APA_Hap1_WAPL <- APA(experiment = Hap1_WAPL_10kb,
-                     smallTreshold = 300e3,
-                     loop.bed = WT_Loops)
+APA_Hap1_WT_extended   <- APA(experiment = Hap1_WT_10kb,
+                              loop.bed = WT_Loops_extended)
+
+APA_Hap1_WAPL_extended <- APA(experiment = Hap1_WAPL_10kb,
+                              loop.bed = WT_Loops_extended)
 ```
 
 
 We can use `visualise.APA.ggplot` to combine the APA-results. 
 ```{r APAplot, message=FALSE , fig.cap= "APA. In the WAPL-knockout, we see an increase of contacts at the loop.",cache=T, fig.retina=T}
-visualise.APA.ggplot(APAlist = list('WT' = APA_Hap1_WT, 
-                                    'WAPL' = APA_Hap1_WAPL), # a named list
+visualise.APA.ggplot(APAlist = list('WT' = APA_Hap1_WT_extended, 
+                                    'WAPL' = APA_Hap1_WAPL_extended), # a named list
                      title = "Hap1 Hi-C vs extended loops", 
-                     zTop = c(1,12), # set the zlims of the upper row
+                     zTop = c(1,45), # set the zlims of the upper row
                      zBottom = c(-8.33,8.33),
                      focus = 1) # which item in APAlist to use as comparison
 ```

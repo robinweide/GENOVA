@@ -37,8 +37,11 @@ construct.experiment <- function(signalPath, indicesPath, name, centromeres = NU
 
   # check is all chromosomes have actual data
   for(C in chromVector){
-    tmp = ICE[V1 %in% ABS[ABS[,1] == C,4] | V2 %in% ABS[ABS[,1] == C,4]]
-    if(nrow(tmp) > 0){
+    CIDX = ABS[ABS[,1] == C, 4]
+    x = any( ICE$V1 %in%CIDX)
+    y = any( ICE$V2 %in% CIDX )
+
+    if(all(x,y)){
 
     } else {
       # no ICE-data of chrom. warn and delete!

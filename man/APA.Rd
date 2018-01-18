@@ -4,7 +4,7 @@
 \alias{APA}
 \title{Get a z-stack matrix of 2D-regions (e.g. loops).}
 \usage{
-APA(experiment, loop.bed, smallTreshold = 225000, size = 21, verbose = F,
+APA(experiment, loop.bed, smallTreshold = NULL, size = 21, verbose = F,
   saveRaw = T, outlierCutOff = 40, ...)
 }
 \arguments{
@@ -12,7 +12,7 @@ APA(experiment, loop.bed, smallTreshold = 225000, size = 21, verbose = F,
 
 \item{loop.bed}{Bedpe file containing the loop positions: produced by read.bedpe().}
 
-\item{smallTreshold}{The minimal size of loops. Too small loops lead to messy plots.}
+\item{smallTreshold}{The minimal size of loops. Too small loops lead to messy plots, with the diagonal visible.}
 
 \item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
 

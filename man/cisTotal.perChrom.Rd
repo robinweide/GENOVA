@@ -4,10 +4,12 @@
 \alias{cisTotal.perChrom}
 \title{cisTotal.perChrom}
 \usage{
-cisTotal.perChrom(exp, ...)
+cisTotal.perChrom(exp, chromsToUse = NULL, ...)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+
+\item{chromsToUse}{Only get data of a small set of chromosomes. Genome-wide score will not we given!}
 }
 \value{
 The per-chromosome cis/total ratio

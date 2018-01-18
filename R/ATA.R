@@ -83,11 +83,19 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
 
           if(!all(ifelse(combinedBool > 1, F, T))) {
               rawMatList[[i]] <- matrix(0, nrow = 100, ncol = 100)
-              SL - 1
+              SL = SL - 1
           }
       }
       STACK.outlierCorrected <- Reduce(as.list(rawMatList), f = "+")
       STACK.rawMatList <- rawMatList
+
+      # check is tres has zeroes. If so, data is too low-qual to do outlier-correction with current set of loops
+      if(any(tres == 0)){
+        warning("\nThe data is too sparse to do outlier-correction\n\twith current set of TADs.\nOutput will be without outlier-correction")
+        STACK.outlierCorrected = results.vector
+      }
+
+
       if(saveRaw){
         if(saveRawList){
             return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],

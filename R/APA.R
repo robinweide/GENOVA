@@ -5,7 +5,7 @@
 #'
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param loop.bed Bedpe file containing the loop positions: produced by read.bedpe().
-#' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
+#' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots, with the diagonal visible.
 #' @param verbose Produces a progress-indication.
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @param saveRaw Logical: True will output the raw matrices per loop and performs outlier-detection.
@@ -13,7 +13,13 @@
 #' @return A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed matrix containing the Z-stack scores (APAoutlier).
 #' @import data.table
 #' @export
-APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose = F, saveRaw = T, outlierCutOff = 40, ...){
+APA <- function(experiment, loop.bed, smallTreshold = NULL, size = 21, verbose = F, saveRaw = T, outlierCutOff = 40, ...){
+
+  if(is.null(smallTreshold )){
+    smallTreshold = experiment$RES*  (((size+2)) )
+  }
+
+
   MADTRESHOLD <- outlierCutOff
   if(((size-1) /2 )%%1 != 0){stop("Size should be an even number +1")}
   size.offset = (size-1)/2
@@ -123,8 +129,10 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
   }
   #Elzo you tested for the fact that all the loop.bed1.p are in bed.p right?
   #why the match, cant you do.
-  norma_loopCounts <- (score.matrix/length(loop.bed1.p))
   SL <- length(loop.bed1.p)
+
+  norma_loopCounts <- (score.matrix/SL)
+
   # Rotate 90CW, so that diagonal of HiC-matrix is in bottomleft
   norma_loopCounts <- t(apply(norma_loopCounts, 2, rev))
   colnames(norma_loopCounts) <- 1:size
@@ -138,13 +146,14 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
     MAD <- apply(sm,MARGIN = 1:2, mad)
     tres <- MED+(MAD*MADTRESHOLD)
     tres[is.na(tres)] <- 0
+
     for(i in 1:length(rawMatList)){
       #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
       m <- rawMatList[[i]]
       #cat(i, "\n")
       if(any(m[1:size,1:size] > tres[1:size,1:size])){
         rawMatList[[i]] <- matrix(0, nrow = size, ncol=size)
-        SL - 1
+        SL = SL - 1
       }
     }
     STACKoutlierr <- Reduce(rawMatList, f = '+')
@@ -154,10 +163,17 @@ APA <- function(experiment, loop.bed, smallTreshold = 225e3, size = 21, verbose 
 
     pos <- seq(-(size-1)/2, (size-1)/2)*resolution
 
+
+    # check is tres has zeroes. If so, data is too low-qual to do outlier-correction with current set of loops
+    if(any(tres == 0)){
+      warning("\nThe data is too sparse to do outlier-correction\n\twith current set of loops.\nOutput will be without outlier-correction")
+      norma_loopCountss = norma_loopCounts
+    }
+
+
   if(saveRaw){
     return(list(APA = norma_loopCountss,rawMatList = rawMatList,
                 APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES   ))
-    #return(list(APA = norma_loopCounts, rawMatList = rawMatList))
   } else {
     return(list(APA = norma_loopCountss,
                 APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES))

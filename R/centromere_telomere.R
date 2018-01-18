@@ -176,8 +176,9 @@ draw.centromere.telomere <- function( m, cut.off = 2 ){
 #' @param nrow dimensions of the matrix (number of columns will be the same)
 #' @param leave.out two-column matrix or data.frame containing the specific chromosome combinations that need to left out
 #' @param q.top top quantile of scores that should be left out of the analysis (because they are outliers)
+#' @param verbose Produces a progress-indication.
 #' @export
-centromere.telomere.analysis <- function( exp, chrom.vec, nrow=100, leave.out=NULL, q.top = 1e-5){
+centromere.telomere.analysis <- function( exp, chrom.vec, nrow=100, leave.out=NULL, q.top = 1e-5, verbose = F){
 	i.vec <- 1:(length(chrom.vec)-1)
 	#empty matrix for holding the contact frequencies
 	m.total <- matrix(0, nrow=nrow, ncol=nrow)
@@ -193,7 +194,9 @@ centromere.telomere.analysis <- function( exp, chrom.vec, nrow=100, leave.out=NU
 					next
 				}
 			}
-			cat(chrom1, "\t", chrom2, "\r")
+			if(verbose){
+			  message(chrom1, "\t", chrom2, "\r")
+			}
 			#select the interaction matrix between the trans chromosomes
 			trans.mat <- selectTransData( exp, chrom1, chrom2 )
 

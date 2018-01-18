@@ -5,7 +5,8 @@
 \title{Plot the RCP results}
 \usage{
 visualise.RCP.ggplot(RCPdata, smooth = F, combine = T, ylim = NULL,
-  xlim = NULL, lineOnly = T, lineWidth = 1, pointWidth = 0.5)
+  xlim = NULL, lineOnly = T, lineWidth = 1, errWidth = 1,
+  pointWidth = 0.5)
 }
 \arguments{
 \item{RCPdata}{Output of `RCP`}
@@ -20,7 +21,9 @@ visualise.RCP.ggplot(RCPdata, smooth = F, combine = T, ylim = NULL,
 
 \item{lineOnly}{Set to FALSE if you want to plot points and error-bars.}
 
-\item{lineWidth}{Width of SEM-lines}
+\item{lineWidth}{Width of the RCP-lines}
+
+\item{errWidth}{Width of SEM-lines}
 
 \item{pointWidth}{Width of points}
 }

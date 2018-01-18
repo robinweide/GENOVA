@@ -5,7 +5,7 @@
 \title{Calculate a scaled matrix of the interchromosomal interactions aligned from centromere to telomere}
 \usage{
 centromere.telomere.analysis(exp, chrom.vec, nrow = 100, leave.out = NULL,
-  q.top = 1e-05)
+  q.top = 1e-05, verbose = F)
 }
 \arguments{
 \item{exp}{GENOVA data structure for your experiment of interest}
@@ -17,6 +17,8 @@ centromere.telomere.analysis(exp, chrom.vec, nrow = 100, leave.out = NULL,
 \item{leave.out}{two-column matrix or data.frame containing the specific chromosome combinations that need to left out}
 
 \item{q.top}{top quantile of scores that should be left out of the analysis (because they are outliers)}
+
+\item{verbose}{Produces a progress-indication.}
 }
 \description{
 Calculate a scaled matrix of the interchromosomal interactions aligned from centromere to telomere

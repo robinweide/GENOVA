@@ -652,10 +652,14 @@ persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
 
 `draw.centromere.telomere` 
 We saw a enriched signal between chromosomes 15 and 19. We can wh
-```{r cent, cache=T}
+```{r cent1, cache=T, eval=F}
 out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
 draw.centromere.telomere(out1519)
-
+```
+```{r cent2, cache=T, echo = F, fig.cap='Centromere-telomere plot of chromosomes 15 and 19.'}
+par(pty ='s')
+out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
+draw.centromere.telomere(out1519)
 ```
 
 
@@ -663,7 +667,6 @@ draw.centromere.telomere(out1519)
 For the next version, the following will be added/fixed:
 
 - write `visualise.PESCAn.persp`
-- write RCP.region
 
 Please post questions, comments and rants on [our github issue tracker](https://github.com/robinweide/GENOVA/issues).
 

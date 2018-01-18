@@ -108,25 +108,11 @@ knitr::kable(
   head(WT_TADs[,1:3], 5), caption = 'A data.frame holding a standard BED3 format.'
 )
 
-## ----ATA, cache=T----------------------------------------------------------
-ATA_Hap1_WT   <- ATA(experiment = Hap1_WT_10kb, verbose = F,
-                    tad.bed = WT_TADs) 
-
-ATA_Hap1_WAPL <-  ATA(experiment = Hap1_WAPL_10kb,verbose = F,
-                    tad.bed = WT_TADs)
-
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1e9)
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)
-
-## ----APArun, cache=T-------------------------------------------------------
-APA_Hap1_WT_extended   <- APA(experiment = Hap1_WT_10kb,
-                              loop.bed = WT_Loops_extended)
-
-APA_Hap1_WAPL_extended <- APA(experiment = Hap1_WAPL_10kb,
-                              loop.bed = WT_Loops_extended)
 
 ## ----SE1-------------------------------------------------------------------
 superEnhancers = read.delim('data/homerSuperEnhancers.txt',
@@ -137,6 +123,15 @@ superEnhancers = read.delim('data/homerSuperEnhancers.txt',
 knitr::kable(
   head(superEnhancers[,1:6], 5), caption = "A data.frame holding the output of homer's findPeaks -style super."
 )
+
+## ----cent1, cache=T, eval=F------------------------------------------------
+#  out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
+#  draw.centromere.telomere(out1519)
+
+## ----cent2, cache=T, echo = F, fig.cap='Centromere-telomere plot of chromosomes 15 and 19.'----
+par(pty ='s')
+out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
+draw.centromere.telomere(out1519)
 
 ## ----sesh, echo = F--------------------------------------------------------
 sessionInfo()

@@ -11,7 +11,7 @@
 #' @param local Per chromosome?
 #' @return A plot
 #' @export
-insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.size = 21, local = T ){
+insulation.plot.single <- function( exp1, chrom, start, end, cut.off=NULL, window.size = 21, local = T ){
 	#create a plotting layout
 	w = 6
 	lay <- matrix(4, nrow=w, ncol=w)
@@ -22,6 +22,12 @@ insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 
 	#get a matrix from the experiment
 	mat1 <- select.subset(exp1, chrom, start, end)
+
+	if(is.null(cut.off)){
+	  cut.off = max(quantile(mat1$z, .99))
+	  warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+	}
+
 	mat1$z[mat1$z > cut.off] <- cut.off
 	wr <- colorRampPalette(c("white","red"))
 	image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
@@ -67,7 +73,7 @@ insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 #' @param delta plot the differential insulation scores
 #' @return A plot
 #' @export
-insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, window.size = 21, local = T, delta = F ){
+insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=NULL, window.size = 21, local = T, delta = F ){
 	#make sure the resolutions are the same
 	if(exp1$RES != exp2$RES){
 		stop("The Hi-C matrices should have the same resolution")
@@ -90,6 +96,11 @@ insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, wind
 	mat2 <- select.subset( exp2, chrom, start, end)
 
 	mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
+
+	if(is.null(cut.off)){
+	  cut.off = max(quantile(mat1$z, .99))
+	  warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+	}
 
 	mat1$z[mat1$z > cut.off] <- cut.off
 	wr <- colorRampPalette(c("white","red"))

@@ -20,6 +20,12 @@ knitr::include_graphics('/DATA/users/r.vd.weide/github/GENOVA/t1logo')
 ## ---- echo=T, warning=FALSE, error=F, results='hide'-----------------------
 library(GENOVA)
 
+## ----centromere0, cache=T, echo = F----------------------------------------
+centromeres = read.delim('data/hg19_cytobandAcen.bed', 
+                         sep = '\t', 
+                         h = F, 
+                         stringsAsFactors = F)
+
 ## ----peakEXP3, collapse=F, results='markup', echo = F----------------------
 str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 
@@ -103,10 +109,23 @@ knitr::kable(
   head(martExport[,-c(1,2)], 5), caption = 'A data.frame holding the needed columns for plotting genes.'
 )
 
-## ---- echo =F--------------------------------------------------------------
-knitr::kable(
-  head(WT_TADs[,1:3], 5), caption = 'A data.frame holding a standard BED3 format.'
-)
+## ----plotTADCALLS, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."----
+hic.matrixplot(exp1 = Hap1_WT_10kb,
+               chrom = 'chr7',
+               start = 25e6,
+               end=29e6, 
+               tads = TADcalls, # see ATA
+               tad.type = 'lower', # only plot in lower triangle
+               tads.color = '#91cf60', # green TAD-borders
+               cut.off = 25) # upper limit of contacts
+
+## ----ATAplot, message=FALSE , dev = 'png', dpi=300,fig.cap= "ATA. In the WAPL-knockout, we see a decrease of contacts within the TAD, but an increase at the corner.",cache=T----
+visualise.ATA.ggplot(stackedlist = list('WT' = ATA_Hap1_WT, 
+                                        'WAPL' = ATA_Hap1_WAPL), # a named list
+                     title = "Hap1 Hi-C vs WT TADs", 
+                     zlim1 = c(0,26),
+                     zlim2 = c(-5,5), 
+                     focus = 1) # which entry to use as comparison
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1e9)
@@ -123,15 +142,6 @@ superEnhancers = read.delim('data/homerSuperEnhancers.txt',
 knitr::kable(
   head(superEnhancers[,1:6], 5), caption = "A data.frame holding the output of homer's findPeaks -style super."
 )
-
-## ----cent1, cache=T, eval=F------------------------------------------------
-#  out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
-#  draw.centromere.telomere(out1519)
-
-## ----cent2, cache=T, echo = F, fig.cap='Centromere-telomere plot of chromosomes 15 and 19.'----
-par(pty ='s')
-out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
-draw.centromere.telomere(out1519)
 
 ## ----sesh, echo = F--------------------------------------------------------
 sessionInfo()

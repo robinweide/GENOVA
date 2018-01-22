@@ -17,6 +17,7 @@ chrom.comparison.plot <- function( mat, color.fun = NULL, z.max = NULL){
   #get z.max from the data if not defined
   if(is.null(z.max)){
     z.max <- max(log.mat[lower.tri(log.mat)])
+    warning("No cut.off was given: using 99.5% percentile: ", round(z.max), ".")
   }
   log.mat[log.mat > z.max] <- z.max
   #plot the matrix and use the chromosome names as row ids

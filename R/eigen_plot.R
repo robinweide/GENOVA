@@ -147,13 +147,13 @@ remove.outliers <- function( arm, q=0.05, th.mult = 1 ){
 #' @param exp GENOVA data object
 #' @param chrom chromosome that should be drawn
 #' @param arm which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')
-#' @param zlim maximum value for the heatmap
+#' @param cut.off maximum value for the heatmap
 #' @param obs.exp whether an observed over expected matrix should be drawn (default is false)
 #' @param invert whether the compartment score should be inverted
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
 #' @export
-cis.compartment.plot <- function( exp, chrom, arm="p", zlim=100, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL){
+cis.compartment.plot <- function( exp, chrom, arm="p", cut.off=NULL, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL){
 	data = exp
 
   mat <- selectData( data, chrom, chrom)
@@ -186,18 +186,30 @@ cis.compartment.plot <- function( exp, chrom, arm="p", zlim=100, obs.exp = F, in
 		bwr <- colorRampPalette(c("blue","white","red"))
 
 		log.mat <- log2(oe$z)
-		log.mat[log.mat >  zlim] <- zlim
-		log.mat[log.mat < -zlim] <- -zlim
+
+		if(is.null(cut.off)){
+		  cut.off = max(quantile(log.mat, .99))
+		  warning("No cut.off was given: using 99 percentile: ", round(cut.off), ".")
+		}
+
+		log.mat[log.mat >  cut.off] <- cut.off
+		log.mat[log.mat < -cut.off] <- -cut.off
 		oe$z <- log.mat
-		image(oe, col=bwr(300), zlim=c(-zlim,zlim), axes=F, ylim=rev(range(oe$y)))
+		image(oe, col=bwr(300), zlim=c(-cut.off,cut.off), axes=F, ylim=rev(range(oe$y)))
 	}else{
 		if(color.scheme=='fall'){
 			col.fun <- colorRampPalette(c("white", "orange", "darkred", "black"))
 		}else{
 			col.fun <- colorRampPalette(c("white", "red"))
 		}
-		arm$z[arm$z > zlim] <- zlim
-		image(arm, col=col.fun(300), zlim=c(0,zlim), axes=F, ylim=rev(range(oe$y)))
+
+	  if(is.null(cut.off)){
+	    cut.off = max(quantile(arm$z, .99))
+	    warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+	  }
+
+		arm$z[arm$z > cut.off] <- cut.off
+		image(arm, col=col.fun(300), zlim=c(0,cut.off), axes=F, ylim=rev(range(oe$y)))
 	}
 	box(lwd=2)
 
@@ -274,12 +286,12 @@ switch.chromosomes <- function( data, chrom1, chrom2 ){
 #' @param exp GENOVA data object
 #' @param chrom1,chrom2 chromosome combination that should be drawn
 #' @param arm1,arm2 which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')
-#' @param zlim maximum value for the heatmap
+#' @param cut.off maximum value for the heatmap
 #' @param invert whether the compartment score should be inverted, this should be a vector with a logical value for each chromosome
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
 #' @export
-trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", zlim=20, invert=c(F,F), color.scheme="fall", cs.lim=NULL){
+trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", cut.off=NULL, invert=c(F,F), color.scheme="fall", cs.lim=NULL){
   data = exp
 	#error handling
 	if( length( invert ) != 2 ){
@@ -318,8 +330,14 @@ trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", z
 	}else{
 		col.fun <- colorRampPalette(c("white", "red"))
 	}
-	arm$z[arm$z > zlim] <- zlim
-	image(arm, col=col.fun(300), zlim=c(0,zlim), axes=F, ylim=rev(range(arm$y)))
+
+	if(is.null(cut.off)){
+	  cut.off = max(quantile(arm$z, .99))
+	  warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+	}
+
+	arm$z[arm$z > cut.off] <- cut.off
+	image(arm, col=col.fun(300), zlim=c(0,cut.off), axes=F, ylim=rev(range(arm$y)))
 	box(lwd=2)
 
 	label <- seq( 10*floor(min(arm$x)/10e6), 10*floor(max(arm$x)/10e6), by=10 )

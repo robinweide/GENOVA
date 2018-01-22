@@ -34,8 +34,8 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10, 
     insName <-  names(insulationList)[i]
     results <- align.insulation( insdDat, bed, flank.length=flank , verbose = verbose)
     #! place zlims and remove infs !
-    results[results < zlim[1]] = zlim[1]
-    results[results > zlim[2]] = zlim[2]
+    # results[results < zlim[1]] = zlim[1]
+    # results[results > zlim[2]] = zlim[2]
     NVrows = c(NVrows, which((apply(results, 1, sd) == 0) ))
     sampleList[[i]] <- results
     names(sampleList)[i] <- insName
@@ -90,6 +90,8 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10, 
 
   # plot profiles
   groupedDF <- dplyr::group_by(df, sample, Var1)
+  groupedDF[is.na(groupedDF$value), "value"] = 0
+  groupedDF[groupedDF$value == -Inf, "value"] = min(groupedDF[groupedDF$value != -Inf, "value"])
   profDF <- dplyr::summarize(groupedDF, val = profileFunct(value))
 
   if(is.null(profileCols)){
@@ -137,6 +139,9 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10, 
   }
 
   # plot heatmaps
+
+  df$value[df$value < zlim[1]] = zlim[1]
+  df$value[df$value > zlim[2]] = zlim[2]
 
   HTMPS <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
     ggplot2::geom_raster(interpolate = T) +

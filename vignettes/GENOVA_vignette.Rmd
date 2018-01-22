@@ -255,7 +255,7 @@ visualise.RCP.ggplot(RCP_out)
 cis.compartment.plot(exp = Hap1_WT_40kb, 
                      chrom = 'chr20', 
                      arm = 'q',
-                     zlim = 20)
+                     cut.off = 20)
 ```
 
 
@@ -263,7 +263,7 @@ cis.compartment.plot(exp = Hap1_WT_40kb,
 cis.compartment.plot(exp = Hap1_WT_40kb, 
                      chrom = 'chr20', 
                      arm = 'q',
-                     zlim = 1, 
+                     cut.off = 1, 
                      obs.exp = T)
 ```
 
@@ -279,7 +279,7 @@ trans.compartment.plot(exp = Hap1_WT_40kb,
                        arm1 = 'q', 
                        chrom2 = 'chr22', 
                        arm2 = 'q', 
-                       zlim = 10)
+                       cut.off = 10)
 
 ```
 
@@ -312,11 +312,12 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                coplot = 'diff',
                chrom = 'chr7',
                start = 25e6,
-               end=30e6, 
-               cut.off = 25) # upper limit of contacts
+               end=30e6, # upper limit of contacts
+               cut.off = 25) 
 ```
 
 ### TADs and loops
+We use the TAD-calls of WT Hap1 20-kb matrices from Haarhuis et al. [-@Haarhuis2017], generated with HiCseg [@Levy-Leduc2014].
 
 Lets load some TAD- and loop-annotations:
 ```{r loadLOOP_mp, cache=T}
@@ -431,70 +432,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 ```    
 
 # TADs
-GENOVA has a repetoire of functions to analyse TADs. We use the TAD-calls of WT Hap1 20-kb matrices from Haarhuis et al. [-@Haarhuis2017], generated with HiCseg [@Levy-Leduc2014].
-```{r loadTAD, cache=T}
-# Lets load in some TAD-annotations from HiC-seg
-WT_TADs = read.delim('data/WT_hicseg_TADs.bed', h = F)
-```
-
-```{r fixTAD, echo = F, cache=T}
-WT_TADs <-  WT_TADs[WT_TADs$V2 < WT_TADs$V3,]
-```
-
-```{r, echo =F }
-knitr::kable(
-  head(WT_TADs[,1:3], 5), caption = 'A data.frame holding a standard BED3 format.'
-)
-```
-
-## ATA
-```{r ATA, cache=T}
-ATA_Hap1_WT   <- ATA(experiment = Hap1_WT_10kb, verbose = F,
-                    tad.bed = WT_TADs) 
-
-ATA_Hap1_WAPL <-  ATA(experiment = Hap1_WAPL_10kb,verbose = F,
-                    tad.bed = WT_TADs)
-```
-
-We can use `visualise.ATA.ggplot` to combine the ATA-results.
-
-```{r ATAplot, message=FALSE , fig.cap= "ATA. In the WAPL-knockout, we see a decrease of contacts within the TAD, but an increase at the corner.",cache=T}
-visualise.ATA.ggplot(stackedlist = list('WT' = ATA_Hap1_WT, 
-                                        'WAPL' = ATA_Hap1_WAPL), # a named list
-                     title = "Hap1 Hi-C vs WT TADs from HiCseg", 
-                     zlim1 = c(0,26),
-                     zlim2 = c(-5,5), 
-                     focus = 1) # which entry to use as comparison
-```
-
-## TAD+N
-```{r ii, cache=T}
-TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs, 
-                                       max.neighbor = 10, 
-                                       exp = Hap1_WT_10kb)
-TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs, 
-                                       max.neighbor = 10, 
-                                       exp = Hap1_WAPL_10kb)
-```
-
-We can compute the enrichment of contacts between TADs with the `differential.TAD.dotplot`-function. 
-```{r iiDIFF, message=FALSE , fig.cap= "Differential TAD-analysis. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T}
-differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
-                         exp2 = TAD_N_WAPL) # numerator
-```
-
-Or show it as a scatterplot. With `differential.TAD.scatterplot`, you can shoose to add a diagonal line with `line = T`. Furthermore, you can shoose to zoom in by `allData == F`.
-```{r iiDIFF2, message=FALSE , fig.cap= "Differential TAD-analysis: scatterplot. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T}
-par(mfrow = c(1,2), pty = 's')
-differential.TAD.scatterplot(exp1 = TAD_N_WT, # denominator
-                            exp2 = TAD_N_WAPL, 
-                            allData = T, 
-                            main = 'allData == T') # numerator
-differential.TAD.scatterplot(exp1 = TAD_N_WT, # denominator
-                            exp2 = TAD_N_WAPL, 
-                            allData = F, 
-                            main = 'allData == F') # numerator
-```
+GENOVA has a repetoire of functions to analyse TADs. Frist, we will use the insulation score to BLABLA
 
 ## Insulation
 To estimate the strength of TAD-borders, we can look at the insulation-score [@Crane2015]. At a TAD-border, this score reaches a local minimum: the lower the score, the stronger the insulation. We can generate this for a specific sliding-window size with `genome.wide.insulation`. Moreover, we can generate a domainogram of a range of window-sizes for a specific genomic region with `insulation.domainogram`.
@@ -537,27 +475,95 @@ insulation.domainogram(Hap1_WT_10kb,
 ```
 
 ### Computing the insulation score
+Windows size is scary and tricky
 ```{r generateINS, cache=T}
 Hap1_WT_10kb_insulation = genome.wide.insulation(hic = Hap1_WT_10kb, 
-                                                 window.size = 25)
+                                                 window.size = 40)
 Hap1_WAPL_10kb_insulation = genome.wide.insulation(hic = Hap1_WAPL_10kb, 
-                                                   window.size = 25)
+                                                   window.size = 40)
 ```
 
 ### Insulation-heatmap
-```{r INSalign, message=FALSE , fig.asp=1,fig.cap= "Insulation heatmap.",cache=T, fig.retina=T, dev = 'png', dpi=300,fig.small = F}
+```{r INSalign, message=FALSE , fig.asp=1,fig.cap= "Insulation heatmap.",cache=T, fig.retina=T, dev = 'png', dpi=300,fig.small = T}
 insulation.heatmap_out = insulation.heatmap(
-  
   insulationList = list(WT = Hap1_WT_10kb_insulation, 
                         WAPL = Hap1_WAPL_10kb_insulation ),
-                   
-  bed = WT_TADs, # see ATA
-  zlim = c(-1,0.5) # zlim. 
-                   # profileZlim: zlim for the profile
+  bed = SMC1, 
+  zlim = c(-.5,0.25), # zlim. 
+  profileZlim = c(-0.25,0.10) # zlim for the profile
   )
 
 
 ```
+
+## Call TADs
+Use the domanogram to choose a good window size: 
+```{r callTAD, cache=T, cache.lazy=F}
+Hap1_WT_10kb$INSULATION= Hap1_WT_10kb_insulation
+
+TADcalls = insulation.callTAD(Hap1_WT_10kb,BEDCOLOR = "#7ec0ee")
+```
+
+```{r plotTADCALLS, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."}
+hic.matrixplot(exp1 = Hap1_WT_10kb,
+               chrom = 'chr7',
+               start = 25e6,
+               end=29e6, 
+               tads = TADcalls, # see ATA
+               tad.type = 'lower', # only plot in lower triangle
+               tads.color = '#91cf60', # green TAD-borders
+               cut.off = 25) # upper limit of contacts
+```
+
+## ATA
+```{r ATA, cache=T}
+ATA_Hap1_WT   <- ATA(experiment = Hap1_WT_10kb, verbose = F,
+                    tad.bed = TADcalls) 
+
+ATA_Hap1_WAPL <-  ATA(experiment = Hap1_WAPL_10kb,verbose = F,
+                    tad.bed = TADcalls)
+```
+
+We can use `visualise.ATA.ggplot` to combine the ATA-results.
+
+```{r ATAplot, message=FALSE , dev = 'png', dpi=300,fig.cap= "ATA. In the WAPL-knockout, we see a decrease of contacts within the TAD, but an increase at the corner.",cache=T}
+visualise.ATA.ggplot(stackedlist = list('WT' = ATA_Hap1_WT, 
+                                        'WAPL' = ATA_Hap1_WAPL), # a named list
+                     title = "Hap1 Hi-C vs WT TADs", 
+                     zlim1 = c(0,26),
+                     zlim2 = c(-5,5), 
+                     focus = 1) # which entry to use as comparison
+```
+
+## TAD+N
+```{r ii, cache=T}
+TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs, 
+                                       max.neighbor = 10, 
+                                       exp = Hap1_WT_10kb)
+TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs, 
+                                       max.neighbor = 10, 
+                                       exp = Hap1_WAPL_10kb)
+```
+
+We can compute the enrichment of contacts between TADs with the `differential.TAD.dotplot`-function. 
+```{r iiDIFF, message=FALSE , fig.cap= "Differential TAD-analysis. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T}
+differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
+                         exp2 = TAD_N_WAPL) # numerator
+```
+
+Or show it as a scatterplot. With `differential.TAD.scatterplot`, you can shoose to add a diagonal line with `line = T`. Furthermore, you can shoose to zoom in by `allData == F`.
+```{r iiDIFF2, message=FALSE , fig.cap= "Differential TAD-analysis: scatterplot. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T}
+par(mfrow = c(1,2), pty = 's')
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # denominator
+                            exp2 = TAD_N_WAPL, 
+                            allData = T, 
+                            main = 'allData == T') # numerator
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # denominator
+                            exp2 = TAD_N_WAPL, 
+                            allData = F, 
+                            main = 'allData == F') # numerator
+```
+
 
 # Loops
 For this section, we are using the extended loops from Haarhuis et al. [-@Haarhuis2017]. These are the anchor-combinations of the merged loop-calls of WT Hap1 5-, 10- and 20-kb matrices, generated with HICCUPS [@Rao2014].

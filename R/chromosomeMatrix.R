@@ -5,11 +5,12 @@
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param color.fun Optional color-function
 #' @param z.max Adjust the maximum value of the color-scale
+#' @param chromsToUse Only get data of a small set of chromosomes. Genome-wide score will not we given!
 #' @param remove A vector of (partial) names of chromosomes to leave out.
 #' @note Please use only low-resolution matrices with this (e.g. 1Mb resolution).
 #' @return A plot of the chromosome matrix and a assignable matrix
 #' @export
-chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL ){
+chromosomeMatrix <- function( exp, color.fun = NULL, cut.off = NULL, chromsToUse = NULL, remove = NULL){
   exp$ABS[,1] <- as.character(exp$ABS[,1])
   chrom <- c(exp$ABS[1,1],exp$ABS[which(head(exp$ABS[,1],-1) != tail(exp$ABS[,1],-1))+1,1])
 
@@ -34,7 +35,12 @@ chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL
   norm.mat <- outer(chrom.n, chrom.n, "*")
   chrom.mat <- matrix(chrom.count[,3], ncol=length(chrom), byrow=T)
 
+  if(!is.null(chromsToUse)){
+    keep.vec = which(rownames(norm.mat) %in% chromsToUse)
 
+    chrom.mat <- chrom.mat[keep.vec,keep.vec]
+    norm.mat <- norm.mat[keep.vec,keep.vec]
+  }
 
   if(!is.null(remove)){
     if(!any(remove %in% exp$CHRS)){
@@ -50,6 +56,7 @@ chromosomeMatrix <- function( exp, color.fun = NULL, z.max = NULL, remove = NULL
 
   mat <- list(rawCounts=chrom.mat , normMat = norm.mat)
 
-  chrom.comparison.plot(mat, color.fun, z.max)
+
+  chrom.comparison.plot(mat, color.fun, cut.off)
   invisible(mat)
 }

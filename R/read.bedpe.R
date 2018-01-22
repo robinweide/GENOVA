@@ -29,9 +29,9 @@ read.bedpe <- function(loop.bed, header = T){
   # remove whitespaces
   chromosomeAvector <- gsub("[[:space:]]","",chromosomeAvector)
   chromosomeBvector <- gsub("[[:space:]]","",chromosomeBvector)
-  # Check if chromosome entries have 'chr' or add.
-  chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")] <- gsub(chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
-  chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")] <- gsub(chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
+  # # Check if chromosome entries have 'chr' or add.
+  # chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")] <- gsub(chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
+  # chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")] <- gsub(chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
   # Sort POS for each BED-entry
   posAdf <- cbind(ifelse(LOI[,2] < LOI[,3], LOI[,2], LOI[,3]), ifelse(LOI[,2] < LOI[,3], LOI[,3], LOI[,2]))
   posBdf <- cbind(ifelse(LOI[,5] < LOI[,6], LOI[,5], LOI[,6]), ifelse(LOI[,5] < LOI[,6], LOI[,6], LOI[,5]))

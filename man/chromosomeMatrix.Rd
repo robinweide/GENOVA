@@ -4,16 +4,19 @@
 \alias{chromosomeMatrix}
 \title{chromosomeMatrix}
 \usage{
-chromosomeMatrix(exp, color.fun = NULL, z.max = NULL, remove = NULL)
+chromosomeMatrix(exp, color.fun = NULL, cut.off = NULL,
+  chromsToUse = NULL, remove = NULL)
 }
 \arguments{
 \item{color.fun}{Optional color-function}
 
-\item{z.max}{Adjust the maximum value of the color-scale}
+\item{chromsToUse}{Only get data of a small set of chromosomes. Genome-wide score will not we given!}
 
 \item{remove}{A vector of (partial) names of chromosomes to leave out.}
 
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+
+\item{z.max}{Adjust the maximum value of the color-scale}
 }
 \value{
 A plot of the chromosome matrix and a assignable matrix

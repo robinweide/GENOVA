@@ -4,13 +4,13 @@
 \alias{hic.matrixplot}
 \title{hic.matrixplot}
 \usage{
-hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
+hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
   bed.col = rep(c("red", "blue"), 2), bw.col = "black",
   type = rep("triangle", 4), guessType = T, coplot = "dual",
   genes = NULL, tads = NULL, tad.type = "lower", loops = NULL,
   loops.type = "lower", tads.color = "#3288bd", loops.resize = 0,
-  loops.color = "#3288bd", skipAnn = F, symmAnn = F)
+  loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T)
 }
 \arguments{
 \item{exp1}{The control Hi-C experiment object: produced by construct.experiment(). (bottom)}
@@ -58,6 +58,8 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
 \item{skipAnn}{Do not plot outside-annotation. Can be used to plot other things next to the matrix.}
 
 \item{symmAnn}{Put features 1&2 in also on verical (ignore chip-entries 3 & 4)}
+
+\item{check.genome}{Check if reference genomes in exp1 and exp2 are the same}
 }
 \value{
 A matrix-plot

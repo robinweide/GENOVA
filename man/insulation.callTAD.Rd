@@ -4,7 +4,7 @@
 \alias{insulation.callTAD}
 \title{insulation.callTAD}
 \usage{
-insulation.callTAD(exp, BEDCOLOR = "127,201,127")
+insulation.callTAD(exp, BEDCOLOR = "127,201,127", verbose = F)
 }
 \arguments{
 \item{BEDCOLOR}{Color of items in the resulting BEDPE-file}

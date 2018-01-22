@@ -408,19 +408,25 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param loops.color Which color do you want the loops to have?
 #' @param skipAnn Do not plot outside-annotation. Can be used to plot other things next to the matrix.
 #' @param symmAnn Put features 1&2 in also on verical (ignore chip-entries 3 & 4)
+#' @param check.genome Check if reference genomes in exp1 and exp2 are the same
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep(c("red","blue"),2), bw.col="black", type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F){
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep(c("red","blue"),2), bw.col="black", type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T){
 
   #some error handling
   if(!is.null(exp2)){
+    if(any(exp2$RMCHROM, exp1$RMCHROM)){
+      check.genome = F
+    }
     #make sure the resolutions are the same
     if(exp1$RES != exp2$RES){
       stop("The Hi-C matrices should have the same resolution")
     }
 
-    if(!all(exp1$ABS[,4] == exp2$ABS[,4])){
-      stop("Not all ICE indexes are the same. Are you these experiments were mapped to the same genome (build)?")
+    if(check.genome){
+      if(!all(exp1$ABS[,4] == exp2$ABS[,4])){
+        stop("Not all ICE indexes are the same. Are you these experiments were mapped to the same genome (build)?")
+      }
     }
   }
 
@@ -454,6 +460,10 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
   }
 
   if(is.null(exp2)){
+    if(is.null(cut.off)){
+      cut.off = max(quantile(mat1$z, .99))
+      warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+    }
     mat1$z[mat1$z > cut.off] <- cut.off
     if(inferno){
 
@@ -475,6 +485,10 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
   }else{
     if(coplot == "dual"){
       mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
+      if(is.null(cut.off)){
+        cut.off = max(quantile(mat1$z, .995))
+        warning("No cut.off was given: using 99.5% percentile: ", round(cut.off), ".")
+      }
       mat1$z[mat1$z > cut.off] <- cut.off
 
 
@@ -496,6 +510,10 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=0, chip=
 
     }else{
       mat1$z <- mat2$z - mat1$z
+      if(is.null(cut.off)){
+        cut.off = max(quantile(mat1$z, .995))
+        warning("No cut.off was given: using 99.5% percentile: ", round(cut.off), ".")
+      }
       mat1$z[mat1$z > cut.off] <- cut.off
       mat1$z[mat1$z < -cut.off] <- -cut.off
       bwr <- colorRampPalette(c("blue","white","red"))

@@ -4,7 +4,7 @@
 \alias{cis.compartment.plot}
 \title{Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores}
 \usage{
-cis.compartment.plot(exp, chrom, arm = "p", zlim = 100, obs.exp = F,
+cis.compartment.plot(exp, chrom, arm = "p", cut.off = NULL, obs.exp = F,
   invert = F, color.scheme = "fall", cs.lim = NULL)
 }
 \arguments{
@@ -14,7 +14,7 @@ cis.compartment.plot(exp, chrom, arm = "p", zlim = 100, obs.exp = F,
 
 \item{arm}{which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')}
 
-\item{zlim}{maximum value for the heatmap}
+\item{cut.off}{maximum value for the heatmap}
 
 \item{obs.exp}{whether an observed over expected matrix should be drawn (default is false)}
 

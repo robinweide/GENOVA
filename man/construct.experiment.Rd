@@ -4,8 +4,8 @@
 \alias{construct.experiment}
 \title{Construct a HiC-experiment.}
 \usage{
-construct.experiment(signalPath, indicesPath, name, centromeres = NULL,
-  color = 1, comments = NULL, BPscaling = 1e+09)
+construct.experiment(signalPath, indicesPath, name, ignore.checks = F,
+  centromeres = NULL, color = 1, comments = NULL, BPscaling = 1e+09)
 }
 \arguments{
 \item{signalPath}{Full path to a HiC-pro-like matrix-file or .sig from juicerToGenova.py}
@@ -13,6 +13,8 @@ construct.experiment(signalPath, indicesPath, name, centromeres = NULL,
 \item{indicesPath}{Full path the HiC-pro-like index-file or .bed from juicerToGenova.py}
 
 \item{name}{The name of the sample.}
+
+\item{ignore.checks}{Skip the checks for empty matrices: EXPERT-ONLY!}
 
 \item{centromeres}{A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.}
 

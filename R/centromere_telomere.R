@@ -161,6 +161,7 @@ draw.centromere.telomere <- function( m, cut.off = 2 ){
 	#the matrix
 	lm <- log2(m/median(m))
 	#maximize the maximum and minimum threshold
+
 	lm[lm > cut.off] <- cut.off
 	lm[lm < -cut.off] <- -cut.off
 	image(lm[,nrow(lm):1], axes=F, xlim=c(-0.06,1.01), ylim=c(-0.01,1.06), col=bwr(1000), zlim=c(-cut.off, cut.off))

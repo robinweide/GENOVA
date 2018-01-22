@@ -4,7 +4,7 @@
 \alias{insulation.plot.dual}
 \title{plot.insulation.dual}
 \usage{
-insulation.plot.dual(exp1, exp2, chrom, start, end, cut.off = 0,
+insulation.plot.dual(exp1, exp2, chrom, start, end, cut.off = NULL,
   window.size = 21, local = T, delta = F)
 }
 \arguments{

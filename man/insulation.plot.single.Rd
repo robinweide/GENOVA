@@ -4,7 +4,7 @@
 \alias{insulation.plot.single}
 \title{plot.insulation.single}
 \usage{
-insulation.plot.single(exp1, chrom, start, end, cut.off = 0,
+insulation.plot.single(exp1, chrom, start, end, cut.off = NULL,
   window.size = 21, local = T)
 }
 \arguments{

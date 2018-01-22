@@ -5,7 +5,8 @@
 \title{Draw interchromosomal interaction heatmap for a chromosome (arm) with corresponding (cis) compartment scores}
 \usage{
 trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
-  zlim = 20, invert = c(F, F), color.scheme = "fall", cs.lim = NULL)
+  cut.off = NULL, invert = c(F, F), color.scheme = "fall",
+  cs.lim = NULL)
 }
 \arguments{
 \item{exp}{GENOVA data object}
@@ -14,7 +15,7 @@ trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
 
 \item{arm1, arm2}{which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')}
 
-\item{zlim}{maximum value for the heatmap}
+\item{cut.off}{maximum value for the heatmap}
 
 \item{invert}{whether the compartment score should be inverted, this should be a vector with a logical value for each chromosome}
 

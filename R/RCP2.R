@@ -15,6 +15,13 @@
 #' @export
 RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,verbose = F){
 
+  # check if all have the same resolution
+  RESSES = c()
+  for(i in 1:length(experimentList)){
+    RESSES = c(RESSES , experimentList[[i]]$RES)
+  }
+  if( length(unique(RESSES)) != 1 ){warning("The resolutions of the different experiments are not the same")}
+
   amountOfSamples <- length(experimentList)
   exp.names <- c()
   if(is.null(chromsToUse)){
@@ -32,8 +39,8 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance
   }
 
 
-  # Check for N chromosomes: more than 100: please specify chroms!
-  if(length(chromsToUse) > 75){stop("Please restrict the amount of chromosomes with chromsToUse")}
+  # Check for N chromosomes: more than 50: please specify chroms!
+  if(length(chromsToUse) > 50){stop("Please restrict the amount of chromosomes with chromsToUse")}
 
 
   #check whether experiment names have been declared uniquely

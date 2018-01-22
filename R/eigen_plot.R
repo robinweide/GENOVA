@@ -142,6 +142,25 @@ remove.outliers <- function( arm, q=0.05, th.mult = 1 ){
 	arm
 }
 
+#switch the eigen vector based on a chip track of for instance
+#active histone marks				      
+switch.EV <- function( ev.data, chip, chrom ){
+        start <- min(ev.data$x); end <- max(ev.data$x)
+        sub.chip <- chip[chip[,1]==chrom & chip[,2] > start & chip[,2] < end,]
+        window.cnt <- findInterval(sub.chip[,2], ev.data$x)
+        window.cnt <- table(factor(window.cnt,1:length(ev.data$x)))
+        #return true or false depending on whether the median value of
+        #ChIP in the up or down compartment is highests (i.e. true if
+        #down scores have the highest number of ChIP peaks)
+        #up comp.                             down comp.
+        median(window.cnt[ev.data$ev1 > 0]) < median(window.cnt[ev.data$ev1 < 0])
+}       
+
+				      
+
+				     
+				     
+				      
 #' Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores
 #'
 #' @param exp GENOVA data object
@@ -152,8 +171,9 @@ remove.outliers <- function( arm, q=0.05, th.mult = 1 ){
 #' @param invert whether the compartment score should be inverted
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
+#' @param chip ChIP track for active histone marks to correctly orient A/B compartments				      
 #' @export
-cis.compartment.plot <- function( exp, chrom, arm="p", zlim=100, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL){
+cis.compartment.plot <- function( exp, chrom, arm="p", zlim=100, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL, chip = NULL){
 	data = exp
 
   mat <- selectData( data, chrom, chrom)
@@ -172,7 +192,16 @@ cis.compartment.plot <- function( exp, chrom, arm="p", zlim=100, obs.exp = F, in
 
 	arm <- select.cis.arm(mat, centromere.pos, arm)
 	oe <- eigen.struct( arm )
-
+	
+	#orient compartment score
+	if(!is.null(chip)){
+		if(switch.EV( oe, chip, chrom) ){
+			oe$ev1 = -oe$ev1
+		}
+		#note that if you add a chip track the invert option
+		#is overridden
+		invert=F
+	}	
 
 	#create a plotting layout
 	w = 6
@@ -279,7 +308,7 @@ switch.chromosomes <- function( data, chrom1, chrom2 ){
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
 #' @export
-trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", zlim=20, invert=c(F,F), color.scheme="fall", cs.lim=NULL){
+trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", zlim=20, invert=c(F,F), color.scheme="fall", cs.lim=NULL, chip=NULL){
   data = exp
 	#error handling
 	if( length( invert ) != 2 ){
@@ -293,6 +322,19 @@ trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", z
 		return(NULL)
 	}
 
+	#orient compartment score
+	if(!is.null(chip)){
+		if(switch.EV( oe1, chip, chrom1) ){
+			oe1$ev1 = -oe1$ev1
+		}
+		if(switch.EV( oe2, chip, chrom2) ){
+			oe2$ev1 = -oe2$ev1
+		}
+		#note that if you add a chip track the invert option
+		#is overridden
+		invert=c(F,F)
+	}	
+	
 	centromere.pos <- rbind(oe1$cent[1,], oe2$cent[1,])
 
 	mat <- selectData( data, chrom1=chrom1, chrom2=chrom2 )

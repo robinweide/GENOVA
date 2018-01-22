@@ -58,18 +58,6 @@ visualise.RCP.ggplot(RCPdata = RCP_out135,
 CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
 SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
 
-RCP_out = RCP(experimentList = list(Hap1_WT_40kb), 
-               bedList =  list("CTCF" = CTCF, 
-                               'Cohesin' =SMC1), 
-               chromsToUse = c('chr1'))
-
-
-visualise.RCP.ggplot(RCP_out)
-
-## ----RCPBED2, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. Multiple samples and BEDs can be combined."----
-CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
-SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
-
 RCP_out = RCP(experimentList = list(Hap1_WT_40kb, Hap1_WAPL_40kb ), 
                bedList =  list("CTCF" = CTCF, 
                                'Cohesin' =SMC1), 
@@ -119,14 +107,6 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                tads.color = '#91cf60', # green TAD-borders
                cut.off = 25) # upper limit of contacts
 
-## ----ATAplot, message=FALSE , dev = 'png', dpi=300,fig.cap= "ATA. In the WAPL-knockout, we see a decrease of contacts within the TAD, but an increase at the corner.",cache=T----
-visualise.ATA.ggplot(stackedlist = list('WT' = ATA_Hap1_WT, 
-                                        'WAPL' = ATA_Hap1_WAPL), # a named list
-                     title = "Hap1 Hi-C vs WT TADs", 
-                     zlim1 = c(0,26),
-                     zlim2 = c(-5,5), 
-                     focus = 1) # which entry to use as comparison
-
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1e9)
 
@@ -144,8 +124,5 @@ knitr::kable(
 )
 
 ## ----sesh, echo = F--------------------------------------------------------
-sessionInfo()
-
-## ----REF, echo = F, results = 'hide'---------------------------------------
 sessionInfo()
 

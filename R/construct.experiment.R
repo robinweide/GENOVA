@@ -39,18 +39,15 @@ construct.experiment <- function(signalPath, indicesPath, name, ignore.checks = 
   # check is all chromosomes have actual data
   RMCHROM = F
   if(!ignore.checks){
+    IIDX = unique(c(ICE$V1, ICE$V2))
     for(C in chromVector){
       CIDX = ABS[ABS[,1] == C, 4]
-      x = any( ICE$V1 %in%CIDX)
-      y = any( ICE$V2 %in% CIDX )
 
-      if(all(x,y)){
-
-      } else {
-        # no ICE-data of chrom. warn and delete!
+      if(!any(!IIDX %in% CIDX)){
         warning(paste0("No contacts of ", C))
         ABS = ABS[ !ABS[,1] == C,]
       }
+
     }
 
   }

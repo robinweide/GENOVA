@@ -5,7 +5,7 @@
 \title{Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores}
 \usage{
 cis.compartment.plot(exp, chrom, arm = "p", cut.off = NULL, obs.exp = F,
-  invert = F, color.scheme = "fall", cs.lim = NULL)
+  invert = F, color.scheme = "fall", cs.lim = NULL, chip = NULL)
 }
 \arguments{
 \item{exp}{GENOVA data object}
@@ -23,6 +23,8 @@ cis.compartment.plot(exp, chrom, arm = "p", cut.off = NULL, obs.exp = F,
 \item{color.scheme}{color scheme that should be used, defaults to fall, other values result in white-red gradient}
 
 \item{cs.lim}{y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value}
+
+\item{chip}{A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments}
 }
 \description{
 Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores

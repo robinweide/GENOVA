@@ -6,7 +6,7 @@
 \usage{
 trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
   cut.off = NULL, invert = c(F, F), color.scheme = "fall",
-  cs.lim = NULL)
+  cs.lim = NULL, chip = NULL)
 }
 \arguments{
 \item{exp}{GENOVA data object}
@@ -22,6 +22,8 @@ trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
 \item{color.scheme}{color scheme that should be used, defaults to fall, other values result in white-red gradient}
 
 \item{cs.lim}{y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value}
+
+\item{chip}{A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments}
 }
 \description{
 Draw interchromosomal interaction heatmap for a chromosome (arm) with corresponding (cis) compartment scores

@@ -168,9 +168,11 @@ plot.genes <- function( genes, chrom, start, end, y.pos, rotate=F){
 #   }
 # }
 
-features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP = T, rotate=F, type=c("triangle","triangle"), bw.col=NULL, bed.col=NULL){
+features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP = T, rotate=F, type=c("triangle","triangle"), bw.col=NULL, bed.col=NULL){
   # - set bounds for three tracks
-
+  if(is.null(bed.col)){
+    bed.col <- 'black'
+  }
   if(!is.null(genes)){
     if(typeof(chip1) == 'character' && typeof(chip2) != typeof(chip1)){ # BW in 1,  bed/null in 2
       gene.pos = 1.05
@@ -240,7 +242,9 @@ features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP 
 
   if(typeof(chip1) == 'list'){ # BED!
 
-    if(autoCHIP & !any(c("-","+") %in% chip1[,6])){ # there is no orientatio in column 6
+    if(ncol(chip1) < 6){
+      type[1] = "rectangle"
+    } else if(autoCHIP & !any(c("-","+") %in% chip1[,6])){ # there is no orientation in column 6
       type[1] = "rectangle"
     }
 
@@ -252,7 +256,7 @@ features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP 
       # -
       blabla = plot.triangle( chip1[chip1[,6] == '-',  ], chrom=chrom, y1=y.values$chip1.y2 - tmp_step, y2=y.values$chip1.y2 , start=min(mat1$x), end=max(mat1$x), rotate=rotate)
       # # other
-      blabla = plot.rectangle(chip1[chip1[,6] != '-' & chip1[,6] != '+',], chrom=chrom, y1=y.values$chip1.y1, y2=y.values$chip1.y2, start=min(mat1$x), end=max(mat1$x), col='black', rotate=rotate)
+      blabla = plot.rectangle(chip1[chip1[,6] != '-' & chip1[,6] != '+',], chrom=chrom, y1=y.values$chip1.y1, y2=y.values$chip1.y2, start=min(mat1$x), end=max(mat1$x), col=bed.col[1], rotate=rotate)
 
     }else if(type[1]=="rectangle"){
       blabla = plot.rectangle(chip1, chrom=chrom, y1=y.values$chip1.y1, y2=y.values$chip1.y2, start=min(mat1$x), end=max(mat1$x), col=bed.col[1], rotate=rotate)
@@ -260,7 +264,7 @@ features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP 
 
   } else if(typeof(chip1) == 'character'){ # BW!
 
-    blabla = plot.bw(chip1, chrom,  min(mat1$x), max(mat1$x), y.values$chip1.y1, y.values$chip1.y2, col=bw.col[1], rotate=rotate)
+    blabla =  suppressWarnings(plot.bw(chip1, chrom,  min(mat1$x), max(mat1$x), y.values$chip1.y1, y.values$chip1.y2, col=bw.col[1], rotate=rotate, yMax = yMax))
 
   }
 
@@ -268,7 +272,9 @@ features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP 
 
   if(typeof(chip2) == 'list'){ # BED!
 
-    if(autoCHIP & !any(c("-","+") %in% chip2[,6])){ # there is no orientatio in column 6
+    if(ncol(chip2) < 6){
+      type[2] = "rectangle"
+    } else if(autoCHIP & !any(c("-","+") %in% chip2[,6])){ # there is no orientatio in column 6
       type[2] = "rectangle"
     }
 
@@ -288,7 +294,7 @@ features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP 
 
   } else if(typeof(chip2) == 'character'){ # BW!
 
-    blabla = plot.bw(chip2, chrom, min(mat1$x), max(mat1$x), y.values$chip2.y1, y.values$chip2.y2, col=bw.col[2], rotate=rotate)
+    blabla = suppressWarnings(plot.bw(chip2, chrom, min(mat1$x), max(mat1$x), y.values$chip2.y1, y.values$chip2.y2, col=bw.col[2], rotate=rotate, yMax = yMax))
 
   }
 
@@ -313,7 +319,7 @@ features <- function(mat1, chrom, genes=NULL, chip1=NULL, chip2=NULL,  autoCHIP 
 
 
 
-plot.bw <- function( file, chrom, start, end, y1, y2, col, rotate=F){
+plot.bw <- function( file, chrom, start, end, y1, y2, col, yMax = NULL,rotate=F){
   if(require("bigwrig") == F){stop("Please install github.com/jayhesselberth/bigwrig\n")  }
 
   #leave here in case something changes
@@ -328,7 +334,14 @@ plot.bw <- function( file, chrom, start, end, y1, y2, col, rotate=F){
   sel <- floor(c(0,head(i,-1))+i)/2 #select the middle of a set of consecutive values
   d <- d[sel,]
 
+
   max.val <- max(d[,4])
+  d[,4] = as.numeric(d[,4])
+  if(!is.null(yMax)){
+    d[d[,4] > yMax,] = yMax
+    max.val = yMax
+  }
+
   y.range <- abs(y1-y2)
   y.val <- y.range*d[,4]/max.val
   if(rotate){
@@ -396,7 +409,8 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param cexTicks Change size of numbers on the axis
 #' @param bed.col Color of the bed track (max.len is 4)
 #' @param bw.col Same as bed col, but for the bigwig track
-#' @param type Should a rectangle or a triangle be drawn? Not that for a triangle a 6th strand column should be included
+#' @param yMax Set the maximum height of all biwigs.
+#' @param type Should a rectangle or a triangle be drawn? Note that for a triangle a 6th strand column should be included
 #' @param guessType If an element in the chip is a dataframe, infer the type from column 6? If true, column six should hold "+" and "-". If a row has other characters, we view this entry as no-oriention and thus plot a rectangle.
 #' @param coplot When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1
 #' @param genes Structure with gene information, will only be combined with bed structure
@@ -411,7 +425,7 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param check.genome Check if reference genomes in exp1 and exp2 are the same
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep(c("red","blue"),2), bw.col="black", type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T){
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep("black",4), bw.col="black", yMax = NULL, type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T){
 
   #some error handling
   if(!is.null(exp2)){
@@ -557,7 +571,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
   if(!skipAnn){
 
     #plot the features horizontal
-    features( mat1, chrom, genes, chip1 = chip[[1]], chip2 = chip[[2]], autoCHIP = guessType ,bed.col = bed.col[1:2], bw.col = bw.col[1:2], type=type[1:2] )
+    features( mat1, chrom, genes, chip1 = chip[[1]], chip2 = chip[[2]], autoCHIP = guessType ,yMax = yMax,bed.col = bed.col[1:2], bw.col = bw.col[1:2], type=type[1:2] )
     # clone 1 and two to feature entries 3 and 4
     if(symmAnn){
       if(!is.null(chip[[1]])){
@@ -568,6 +582,6 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
       }
     }
 
-    features( mat1, chrom, genes, chip[[3]], chip[[4]], bed.col = bed.col[3:4], autoCHIP = guessType ,bw.col = bw.col[3:4], type=type[3:4], rotate=T )
+    features( mat1, chrom, genes, chip[[3]], chip[[4]], bed.col = bed.col[3:4], autoCHIP = guessType ,yMax = yMax,bw.col = bw.col[3:4], type=type[3:4], rotate=T )
   }
 }

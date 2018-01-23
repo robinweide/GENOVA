@@ -21,7 +21,7 @@ vignette: >
 bibliography: GENOVA.bib
 ---
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.pos = '!h')
+knitr::opts_chunk$set(fig.pos = 'h')
 ```
 
 ```{r echo = F}
@@ -45,6 +45,7 @@ knitr::include_graphics('/DATA/users/r.vd.weide/github/GENOVA/t1logo')
 # Loading data
 
 ```{r, echo=T, warning=FALSE, error=F, results='hide'}
+# devtools::install_github("robinweide/GENOVA", ref = 'dev')
 library(GENOVA)
 ```
 
@@ -66,18 +67,14 @@ intra.inter.TAD.contacts | 20kb - 40kb
 PE-SCAn | 20kb-40kb
 hic.matrixplot | $\frac{width\ in\ bp\ of\ window}{500}$ 
 centromere.telomere.analysis | 40kb
-cis.compartment.plot | 100kb
-trans.compartment.plot | 100kb
+*.compartment.plot | 100kb
 : (\#tab:tableRES) Recommended resolutions. These will provide optimal resource/result tradeoffs.
 
-Experiment | Resolution | Contacts (millions) | Memory (GB)
----------- | ---------- | ---------------- | ----------
-Hap1 WT | 10kb | 433.5 | 2.9
-Hap1 WT | 40kb | 433.5 | 1.7
-Hap1 WT | 100kb | 433.5 | 1.1
-Hap1 WT | 1Mb | 433.5 | 0.1
+Experiment            | Contacts |  10kb  |  40kb  |  100kb  |  1Mb 
+----------------------|----------|--------|--------|---------|-------
+Hap1 [@Haarhuis2017]  | 433.5M   | 2.9Gb  | 1.7Gb  |  1.1Gb  | 0.1Gb
+iPSC [@Krijger2016]   | 427.9M   | 3.1Gb  | 1.9Gb  |  1.0Gb  | 53.1MB
 : (\#tab:tableMEM) Memory footprints of objects loaded into R. 
-
 
 ## construct.experiment
 Every Hi-C experiment will be stored in an experiment-object. This is done by invoking the `construct.experiment` function. Inside, several sanity checks will be performed, data is normalised to the total number of reads and scaled to a billion reads (the default value of the `BPscaling`-option). 
@@ -204,7 +201,7 @@ The user can decide to plot the RCP per chromosome. If the data is sparse, a LOE
 options(scipen = 1)
 ```
 
-```{r RCPPLOT1, message=FALSE, fig.wide= T , fig.cap= "RCP. Every facet shows the RCP of one chromosome."}
+```{r RCPPLOT1, cache=T, message=FALSE, fig.wide= T , fig.cap= "RCP. Every facet shows the RCP of one chromosome."}
 # Plot RCP: combined
 visualise.RCP.ggplot(RCPdata = RCP_out135, 
                      smooth = T, # use a LOESS smoothing
@@ -213,8 +210,8 @@ visualise.RCP.ggplot(RCPdata = RCP_out135,
 
 ### combined
 
-It is also possible to combine all available data into a genome-wide RCP-plot (figure \@ref(fig:RCPPLOT2)).
-```{r RCPPLOT2, message=FALSE,   fig.small= T , fig.cap= "RCP. All data combined in one plot."}
+It is also possible to combine all available data into a genome-wide RCP-plot (figure \@ref(fig:RCPPLOT2)). The average probabilities are then plotted, with optional errorbars for the standard error of the mean.
+```{r RCPPLOT2, message=FALSE,  cache=T, fig.small= T , fig.cap= "RCP. All data combined in one plot."}
 # Plot RCP: per-chromosome
 visualise.RCP.ggplot(RCPdata = RCP_out135, 
                      smooth = F, # do not use a LOESS smoothing
@@ -223,7 +220,7 @@ visualise.RCP.ggplot(RCPdata = RCP_out135,
 
 ### regions
 But what if you want to compare the contact probabilities of specific regions, like Cohesin- or CTCF-bound regions? For this, we added the possibility to add a list of BED-data_frames to the `bedList`-argument. Under the hood, we perform a standard per-arm RCP (thus still enabling users to alse set the `chromsToUse`-parameter), whereafter we filter out Hi-C bins that do not have entries in the dataframe(s) of `bedList`. The same plot-function can be used: different BED-files will have different line-types. The fact that we use linetype for the `bedList` entries, allows us to still use multiple samples in `experimentList`, as shown in figure \@ref(fig:RCPBED).
-```{r RCPBED, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP."}
+```{r RCPBED, message=FALSE,  cache=T, fig.small= F , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP."}
 CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
 SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
 
@@ -306,7 +303,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                cut.off = 50) # upper limit of contacts
 ```
 
-```{r HMPdiff2, message=FALSE , fig.cap= "Hi-C matrixplot: diff. Note the ease of identifying the extended loops.",dev = 'png', dpi=300,cache=T,fig.asp=1, fig.small = T, fig.retina=T}
+```{r HMPdiff2, message=FALSE ,cache=T, fig.cap= "Hi-C matrixplot: diff. Note the ease of identifying the extended loops.",dev = 'png', dpi=300,cache=T,fig.asp=1, fig.small = T, fig.retina=T}
 hic.matrixplot(exp1 = Hap1_WT_10kb,
                exp2 = Hap1_WAPL_10kb,
                coplot = 'diff',
@@ -348,8 +345,8 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 ```
 
 ### BigWigs and BEDs
-Two tracks above and two tracks to the left can be added. These can be either BED-like data.frames or the paths the .bw files. For example, lets load a BED6-file (chrom, start, end, name, score, and strand ^[https://genome.ucsc.edu/FAQ/FAQformat.html]) of CTCF-motifs under CTCF-ChIP peaks. The argument `type` can be set to either *triangle* or *rectangle*: triangle is nice to use if you want to look at the orientation of the BED-entries (figure \@ref(fig:HMPchip)). 
-```{r CTCF}
+Two tracks above and two tracks to the left can be added. These can be either BED-like data.frames or the paths the .bw files. For example, lets load a BED6-file (chrom, start, end, name, score, and strand ^[https://genome.ucsc.edu/FAQ/FAQformat.html]) of CTCF-motifs under CTCF-ChIP peaks. The argument `type` can be set to either *triangle* or *rectangle*: triangle is nice to use if you want to look at the orientation of the BED-entries (figure \@ref(fig:HMPchip)). If you only have a three column BED, then the autput will allways be *rectangle*.
+```{r CTCF, cache=T}
 CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
 SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
 ```
@@ -360,7 +357,7 @@ knitr::kable(
 )
 ```
 
-Moreover, we can use a bigwig (.bw) file to plot a track. For this example, we are using a SMC1 ChIP-seq track from [@Haarhuis2017]. We need the `bigwrig` package, which is easily installed from github using `devtools::install_github()`.
+Moreover, we can use a bigwig (.bw) file to plot a track. For this example, we are using a SMC1 ChIP-seq track from [@Haarhuis2017]. We need the `bigwrig` package, which is easily installed from github using `devtools::install_github()`. The `yMax` argument is handy if you want to compare bigwig-tracks: it lets you set the y-axis maximum.
 ```{r bigwrig, eval=F, echo = F}
 library(devtools)
 install_github(repo ='bigwrig', username =  'jayhesselberth')
@@ -381,7 +378,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 
 ### Genes
 We make use of the data.fame, where each row is an exon from a gene. There are several ways to get this. One of the easiest is to use biomart to get exon-coordinates. This can be done with the biomaRt-package or via the web-based service. For this example, we downloaded data of all exons from the Ensembl biomart and plotted both the BED-file and the genes (figure \@ref(fig:HMPchipGene)).
-```{r biomart}
+```{r biomart, cache=T}
 ## Gene stable ID & Transcript stable ID & Chromosome/scaffold name &
 ## Transcript start (bp) & Transcript end (bp) & Exon region start (bp) &
 ## Exon region end (bp) & Strand
@@ -402,7 +399,7 @@ knitr::kable(
 ```
 
 
-```{r HMPchipGene, message=FALSE , fig.cap= "Hi-C matrixplot: genes.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
+```{r HMPchipGene, message=FALSE , cache=T, fig.cap= "Hi-C matrixplot: genes.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
 hic.matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',  start = 26.75e6,  end=28.5e6, 
                genes = martExport,
@@ -507,7 +504,7 @@ Hap1_WT_10kb$INSULATION= Hap1_WT_10kb_insulation
 TADcalls = insulation.callTAD(Hap1_WT_10kb,BEDCOLOR = "#7ec0ee")
 ```
 
-```{r plotTADCALLS, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."}
+```{r plotTADCALLS, cache=T, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."}
 hic.matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',
                start = 25e6,
@@ -615,13 +612,13 @@ visualise.APA.ggplot(APAlist = list('WT' = APA_Hap1_WT_extended,
 # Far-cis interactions
 ## PE-SCAn
 Some regulatory features, like super-enhancers come together in 3D-space. To test this, we implemented PE-SCAn. Here, the enrichment of interaction-frequency of all pairwise combinations of given regions is computed. The background is generated by shifting all regions by a fxed distance (1Mb: can be changed with the `shift`-argument).
-```{r SE1}
+```{r SE1, cache=T}
 superEnhancers = read.delim('data/homerSuperEnhancers.txt',
                             h = F, 
                             comment.char = "#")
 ```
 
-```{r, echo =F }
+```{r, echo =F , cache=T}
 knitr::kable(
   head(superEnhancers[,1:6], 5), caption = "A data.frame holding the output of homer's findPeaks -style super."
 )
@@ -676,6 +673,7 @@ draw.centromere.telomere(out1519)
 For the next version, the following will be added/fixed:
 
 - write `visualise.PESCAn.persp`
+- write `ABsaddleplot`
 
 Please post questions, comments and rants on [our github issue tracker](https://github.com/robinweide/GENOVA/issues).
 

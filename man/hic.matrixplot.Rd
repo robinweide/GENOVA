@@ -6,7 +6,7 @@
 \usage{
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
-  bed.col = rep(c("red", "blue"), 2), bw.col = "black",
+  bed.col = rep("black", 4), bw.col = "black", yMax = NULL,
   type = rep("triangle", 4), guessType = T, coplot = "dual",
   genes = NULL, tads = NULL, tad.type = "lower", loops = NULL,
   loops.type = "lower", tads.color = "#3288bd", loops.resize = 0,
@@ -35,7 +35,9 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
 
 \item{bw.col}{Same as bed col, but for the bigwig track}
 
-\item{type}{Should a rectangle or a triangle be drawn? Not that for a triangle a 6th strand column should be included}
+\item{yMax}{Set the maximum height of all biwigs.}
+
+\item{type}{Should a rectangle or a triangle be drawn? Note that for a triangle a 6th strand column should be included}
 
 \item{guessType}{If an element in the chip is a dataframe, infer the type from column 6? If true, column six should hold "+" and "-". If a row has other characters, we view this entry as no-oriention and thus plot a rectangle.}
 

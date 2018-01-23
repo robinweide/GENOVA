@@ -1,5 +1,5 @@
 ## ----global_options, include=FALSE-----------------------------------------
-knitr::opts_chunk$set(fig.pos = '!h')
+knitr::opts_chunk$set(fig.pos = 'h')
 
 ## ----echo = F--------------------------------------------------------------
 color.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nticks), title='') {
@@ -18,6 +18,7 @@ color.bar <- function(lut, min, max=-min, nticks=11, ticks=seq(min, max, len=nti
 knitr::include_graphics('/DATA/users/r.vd.weide/github/GENOVA/t1logo')
 
 ## ---- echo=T, warning=FALSE, error=F, results='hide'-----------------------
+# devtools::install_github("robinweide/GENOVA", ref = 'dev')
 library(GENOVA)
 
 ## ----centromere0, cache=T, echo = F----------------------------------------
@@ -25,6 +26,49 @@ centromeres = read.delim('data/hg19_cytobandAcen.bed',
                          sep = '\t', 
                          h = F, 
                          stringsAsFactors = F)
+
+## ----CONSTRUCT, echo=T, warning=FALSE, error=F, results='hide', cache=T, cache.lazy=F----
+Hap1_WT_10kb <- construct.experiment(ignore.checks = T, # time-saver for vignette.
+                                signalPath = 'data/WT_10000_iced.matrix', 
+                                indicesPath = 'data/WT_10000_abs.bed', 
+                                name = "WT",
+                                centromeres = centromeres,
+                                color = "black")
+
+Hap1_WAPL_10kb <- construct.experiment(ignore.checks = T,
+                                signalPath = 'data/WAPL_10000_iced.matrix', 
+                                indicesPath = 'data/WAPL_10000_abs.bed', 
+                                name = "WAPL",
+                                centromeres = centromeres,
+                                color = "red")
+
+Hap1_WT_40kb <- construct.experiment(ignore.checks = T,
+                                signalPath = 'data/WT_40000_iced.matrix', 
+                                indicesPath = 'data/WT_40000_abs.bed', 
+                                name = "WT",
+                                centromeres = centromeres,
+                                color = "black")
+
+Hap1_WAPL_40kb <- construct.experiment(ignore.checks = T,
+                                signalPath = 'data/WAPL_40000_iced.matrix', 
+                                indicesPath = 'data/WAPL_40000_abs.bed', 
+                                name = "WAPL",
+                                centromeres = centromeres,
+                                color = "red")
+
+Hap1_WT_1MB <- construct.experiment(ignore.checks = T,
+                                signalPath = 'data/WT_1000000_iced.matrix', 
+                                indicesPath = 'data/WT_1000000_abs.bed', 
+                                name = "WT",
+                                centromeres = centromeres,
+                                color = "black")
+
+Hap1_WAPL_1MB <- construct.experiment(ignore.checks = T, 
+                                signalPath = 'data/WAPL_1000000_iced.matrix', 
+                                indicesPath = 'data/WAPL_1000000_abs.bed', 
+                                name = "WAPL",
+                                centromeres = centromeres,
+                                color = "red")
 
 ## ----peakEXP3, collapse=F, results='markup', echo = F----------------------
 str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
@@ -42,34 +86,6 @@ str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)
 
-## ----RCPPLOT1, message=FALSE, fig.wide= T , fig.cap= "RCP. Every facet shows the RCP of one chromosome."----
-# Plot RCP: combined
-visualise.RCP.ggplot(RCPdata = RCP_out135, 
-                     smooth = T, # use a LOESS smoothing
-                     combine = F) # Don't merge data from all chromosomes
-
-## ----RCPPLOT2, message=FALSE,   fig.small= T , fig.cap= "RCP. All data combined in one plot."----
-# Plot RCP: per-chromosome
-visualise.RCP.ggplot(RCPdata = RCP_out135, 
-                     smooth = F, # do not use a LOESS smoothing
-                     combine = T) # Merge data from all chromosomes
-
-## ----RCPBED, message=FALSE,   fig.small= T , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP."----
-CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
-SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
-
-RCP_out = RCP(experimentList = list(Hap1_WT_40kb, Hap1_WAPL_40kb ), 
-               bedList =  list("CTCF" = CTCF, 
-                               'Cohesin' =SMC1), 
-               chromsToUse = c('chr1'))
-
-
-visualise.RCP.ggplot(RCP_out)
-
-## ----CTCF------------------------------------------------------------------
-CTCF = read.delim('data/CTCF_WT_motifs.bed', h = F)
-SMC1 = read.delim('data/SMC1_WT_peaks.narrowPeak', h = F)
-
 ## ---- echo =F--------------------------------------------------------------
 knitr::kable(
   head(CTCF, 3), caption = 'A data.frame holding a standard BED6 format.'
@@ -79,49 +95,16 @@ knitr::kable(
 #  library(devtools)
 #  install_github(repo ='bigwrig', username =  'jayhesselberth')
 
-## ----biomart---------------------------------------------------------------
-## Gene stable ID & Transcript stable ID & Chromosome/scaffold name &
-## Transcript start (bp) & Transcript end (bp) & Exon region start (bp) &
-## Exon region end (bp) & Strand
-martExport = read.delim('data/mart_export.txt.gz', stringsAsFactors = F)
-colnames(martExport) = c('ENSG','ENST','chrom' , # change column names
-                         'txStart' , 'txEnd' , 
-                         'exonStart' , 'exonEnd' , 'strand')
-martExport$chrom = gsub(martExport$chrom, # add chr-prefix
-                        pattern = '^',
-                        replacement = 'chr') 
-martExport$strand = ifelse(martExport$strand == 1, '+',"-") # 1/-1 to +/-
-
 ## ---- echo =F--------------------------------------------------------------
 knitr::kable(
   head(martExport[,-c(1,2)], 5), caption = 'A data.frame holding the needed columns for plotting genes.'
 )
-
-## ----plotTADCALLS, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."----
-hic.matrixplot(exp1 = Hap1_WT_10kb,
-               chrom = 'chr7',
-               start = 25e6,
-               end=29e6, 
-               tads = TADcalls, # see ATA
-               tad.type = 'lower', # only plot in lower triangle
-               tads.color = '#91cf60', # green TAD-borders
-               cut.off = 25) # upper limit of contacts
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1e9)
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)
-
-## ----SE1-------------------------------------------------------------------
-superEnhancers = read.delim('data/homerSuperEnhancers.txt',
-                            h = F, 
-                            comment.char = "#")
-
-## ---- echo =F--------------------------------------------------------------
-knitr::kable(
-  head(superEnhancers[,1:6], 5), caption = "A data.frame holding the output of homer's findPeaks -style super."
-)
 
 ## ----sesh, echo = F--------------------------------------------------------
 sessionInfo()

@@ -423,9 +423,10 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param skipAnn Do not plot outside-annotation. Can be used to plot other things next to the matrix.
 #' @param symmAnn Put features 1&2 in also on verical (ignore chip-entries 3 & 4)
 #' @param check.genome Check if reference genomes in exp1 and exp2 are the same
+#' @param antoni Logical: plot an explorer of the microscopic world
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep("black",4), bw.col="black", yMax = NULL, type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T){
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep("black",4), bw.col="black", yMax = NULL, type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T, antoni = F){
 
   #some error handling
   if(!is.null(exp2)){
@@ -473,15 +474,19 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
     mat2 <- select.subset( exp2, chrom, start, end)
   }
 
-  if(is.null(exp2)){
+  if(antoni){
+    load("../R/antoni.Rdat")
+    CR = colorRampPalette(c('#ffffff','#f0f0f0','#d9d9d9',
+                            '#bdbdbd','#969696','#737373','#525252','#252525','#000000'))
+
+    image(  IMONABOATrect[,nrow(IMONABOATrect):1 ], col = rev(CR(10)), axes=F,ylim=rev(range(IMONABOATrect)))
+  } else if(is.null(exp2)){
     if(is.null(cut.off)){
       cut.off = max(quantile(mat1$z, .99))
       warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
     }
     mat1$z[mat1$z > cut.off] <- cut.off
     if(inferno){
-
-      #higlassCol <- c('#ffffff','#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026',"#000000")
       higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
       wr <- colorRampPalette(higlassCol)
 
@@ -492,11 +497,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
       image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
     }
 
-
-
-
-
-  }else{
+  } else{
     if(coplot == "dual"){
       mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
       if(is.null(cut.off)){
@@ -508,19 +509,12 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
 
       if(inferno){
         higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
-
-        #higlassCol <- c('#ffffff','#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026',"#000000")
-
-        #image( mat1, col=viridis(256, option = "inferno", direction = -1), axes=F, ylim=rev(range(mat1$x)) )
         wr <- colorRampPalette(higlassCol)
         image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
       } else {
         wr <- colorRampPalette(c("white","red"))
         image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
       }
-
-
-
 
     }else{
       mat1$z <- mat2$z - mat1$z
@@ -535,6 +529,9 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
     }
 
   }
+
+
+
 
   #draw pretty axes and boxes
   box(lwd=2)

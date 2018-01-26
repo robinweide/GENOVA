@@ -475,11 +475,11 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
   }
 
   if(antoni){
-    load("../R/antoni.Rdat")
+    load(url("https://github.com/robinweide/GENOVA/raw/dev/R/antoni.Rdat"))
     CR = colorRampPalette(c('#ffffff','#f0f0f0','#d9d9d9',
                             '#bdbdbd','#969696','#737373','#525252','#252525','#000000'))
 
-    image(  IMONABOATrect[,nrow(IMONABOATrect):1 ], col = rev(CR(10)), axes=F,ylim=rev(range(IMONABOATrect)))
+    image(  antoni[,nrow(antoni):1 ], col = rev(CR(10)), axes=F,ylim=rev(range(antoni)))
   } else if(is.null(exp2)){
     if(is.null(cut.off)){
       cut.off = max(quantile(mat1$z, .99))

@@ -77,15 +77,15 @@ PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05){
   # Get signal
   signal = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size))
 
-  # Get background
-  background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size))
-  medianBackground = median(background)
-
+  
   # Get O/E
   OE = NULL
   if(shift == 0){
     OE = signal
-  } else {
+  } else { # if a shift value is given
+    # Get background
+    background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size))
+    medianBackground = median(background)
     OE = signal/medianBackground
   }
 

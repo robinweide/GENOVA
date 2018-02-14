@@ -7,13 +7,31 @@
 #' @param experiment List of experiment-objects from `construct.experiment()`.
 #' @param chromsToUse A vector containing the chromosome-names of interest. If bed is also given, only entries in chromsToUse will be used.
 #' @param bedList A named list of BED-like dataframse of the regions of interest. RCP will intersect this with the Hi-C bin by intersecting the middle of both ranges.
+#' @param colors Override colors of experiments. Will be used for BEDs if only one experiment is given.
 #' @param maxDistance The maximal distance to calculate scalings for.
 #' @param outlierCutoff Percentage for the cutoff.
 #' @param ignoreLengthWarning Force RCP to use maxDistance instead of longest chromosome if that is smaller than maxDistance.
 #' @param verbose Produces a progress-indication.
 #' @return A data_frame with distance-bin and probabilities.
 #' @export
-RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,verbose = F){
+RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, colors = NULL, maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,verbose = F){
+
+  BEDCOL = NULL
+  if(is.null(colors)){
+    colors = c()
+    for(i in 1:length(experimentList)){
+      colors = c(colors, unique(experimentList[[i]]$COL))
+    }
+    if(length(experimentList) == 1 & length(bedList) > 0){
+      colors = rainbow(length(bedList))
+    }
+  } else {
+    if(length(experimentList) == 1){
+      BEDCOL = colors
+    } else {
+      colors = colors
+    }
+  }
 
   # check if all have the same resolution
   RESSES = c()
@@ -45,13 +63,15 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance
 
   #check whether experiment names have been declared uniquely
   #otherwise use standard names for RCP
+  exp.names = c()
   for( i in 1:length(experimentList)){
-    exp.names <- c(exp.names, experimentList[[i]]$name)
+    exp.names <- c(exp.names, experimentList[[i]]$NAME)
   }
   standard <- FALSE
   if(length(exp.names) != length(unique(exp.names))){
     warning("Experiment names have not been declared uniquely, using standard names")
     standard <- TRUE
+    exp.names = paste("Exp.", 1:length(experimentList))
   }
 
   d <- dplyr::data_frame(distance = integer(),
@@ -138,6 +158,7 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance
       m.chrom_DOWN = m.chrom[V1 > centEnd & V2 > centEnd, ]
 
       dat = data.frame()
+      message(BEDCOL)
       if(!is.null(bedList)){
         if(!is.list(bedList)){stop('bedList must be a named list of dataframes!')}
         ABSchrom = experimentList[[i]]$ABS[experimentList[[i]]$ABS[,1] == chrom,]
@@ -163,6 +184,14 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance
             tmp = coreRCP(rbind(m.chrom_DOWN,m.chrom_UP), resolu, breaks, outlierCutoff, bedi = bedi)
             if(nrow(tmp) > 0){
               tmp$BED = names(bedList)[BLidx]
+
+              # if multiple samples, do not do this!
+              if(length(experimentList) > 1){
+                tmp$color <- colors[i]
+              }else {
+                tmp$color <- colors[BLidx]
+              }
+
               dat = rbind(dat, tmp)
             }
           }
@@ -175,6 +204,7 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance
         if(nrow(dat) > 0){
           dat$BED = NA
         }
+        dat$color <- colors[i]
       }
 
 
@@ -188,13 +218,19 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, maxDistance
       }
 
       dat$chrom <- unique(chrom)
-      dat$color <- unique(experimentList[[i]]$COL)
+
+
       d <- rbind(d, dat)
 
     }
   }
-  d$sample <- factor(d$sample)
-  d$color <- as.character(d$color)
+
+
+  d$sample <- factor(d$sample, levels = exp.names)
+  #d$color <- as.character(d$color)
+  if(!is.na(unique(d$BED)[1])){
+    d$BED = factor(d$BED, levels = names(bedList))
+  }
   return(d)
 }
 

@@ -23,6 +23,17 @@
 ## End(**Not run**)
 #' @export
 visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = NULL, zlim2 = NULL){
+
+  #! check OUTLIERCORRECTIONSWITCH
+  OL = c()
+  for(i in 1:length(stackedlist)){
+    OL = c(OL, stackedlist[[i]]$OUTLIERCORRECTIONSWITCH)
+  }
+  OL = unique(OL)
+  if(length(OL != 1)){
+    stop('There seem to be some ATAs with outlier-correction and some not...')
+  }
+
   # issue 29: rename stackr -> ata
   # Make two dataframes
   higlassCol <- c('white', '#f5a623', '#d0021b', 'black')

@@ -4,7 +4,8 @@
 \alias{PESCAn}
 \title{PE-SCAn}
 \usage{
-PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05)
+PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
+  rmOutlier = F)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -14,6 +15,8 @@ PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05)
 \item{shift}{Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.}
 
 \item{size}{Size in bp of window.}
+
+\item{rmOutlier}{Try to perform outlier-correction}
 
 \item{minDist}{The minimal distance}
 }

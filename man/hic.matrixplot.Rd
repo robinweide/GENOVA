@@ -8,7 +8,7 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
   bed.col = rep("black", 4), bw.col = "black", yMax = NULL,
   type = rep("triangle", 4), guessType = T, coplot = "dual",
-  genes = NULL, tads = NULL, tad.type = "lower", loops = NULL,
+  genes = NULL, tads = NULL, tads.type = "lower", loops = NULL,
   loops.type = "lower", tads.color = "#3288bd", loops.resize = 0,
   loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T,
   antoni = F)
@@ -46,11 +46,11 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
 
 \item{genes}{Structure with gene information, will only be combined with bed structure}
 
-\item{tads}{BED-like dataframe (not a tibble or a data.table!)}
+\item{tads}{BED-like dataframe or a list of these data.frames (not a tibble or a data.table!)}
 
-\item{tad.type}{How to show TADS: upper, lower and or both}
+\item{tads.type}{How to show TADS: upper, lower and or both}
 
-\item{loops}{BED-like dataframe (not a tibble or a data.table!)}
+\item{loops}{BED-like dataframe or a list of these data.frames (not a tibble or a data.table!)}
 
 \item{loops.type}{How to show loops: upper, lower and or both}
 

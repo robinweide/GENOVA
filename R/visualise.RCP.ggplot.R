@@ -29,7 +29,16 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
 
   cols <- RCPdata$color
   p <- NULL
-  names(cols) <- RCPdata$sample
+  colorOnBed = F
+  if(nlevels(RCPdata$sample) > 1){
+    names(cols) <- RCPdata$sample
+  } else if(nlevels(RCPdata$BED) > 1){
+    names(cols) <- RCPdata$BED
+    colorOnBed = T
+  } else {
+    names(cols) <- RCPdata$sample
+  }
+
   if (combine == T) {
     RCPdata <- dplyr::group_by(RCPdata, distance, sample, BED)
     RCPdata <- dplyr::summarise(RCPdata, prob = median(prob), SEM = sum(SEM), col = unique(color))
@@ -43,16 +52,33 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
 
 
   if (smooth == F) {
-    p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000,
-                                               y = prob)) +
-      ggplot2::geom_line(size = lineWidth, mapping = ggplot2::aes( lty = BED)) +
-      ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
-      ggplot2::theme_linedraw() +
-      ggplot2::scale_color_manual(values = cols) +
-      ggplot2::labs(title = "Relative contact probability",
-                    x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
-      ggplot2::theme(aspect.ratio = 1) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,vjust = 0.5, hjust = 1))
+
+    if(colorOnBed){
+      p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = BED, x = distance/1000000,
+                                                 y = prob)) +
+        ggplot2::geom_line(size = lineWidth, mapping = ggplot2::aes( lty = BED)) +
+        ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_color_manual(values = cols) +
+        ggplot2::labs(title = "Relative contact probability",
+                      x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
+        ggplot2::theme(aspect.ratio = 1) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,vjust = 0.5, hjust = 1))
+    } else {
+
+      p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000,
+                                                 y = prob)) +
+        ggplot2::geom_line(size = lineWidth, mapping = ggplot2::aes( lty = BED)) +
+        ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_color_manual(values = cols) +
+        ggplot2::labs(title = "Relative contact probability",
+                      x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
+        ggplot2::theme(aspect.ratio = 1) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,vjust = 0.5, hjust = 1))
+
+
+    }
 
     if(lineOnly == F){
       p <- p + ggplot2::geom_pointrange(size = errWidth,
@@ -79,13 +105,17 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
       p <- p + ggplot2::scale_x_log10()
     }
 
+
+
   }
 
   ##########################
   #    smooth    #
   ##########################
   else {
-    p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000,
+    if(colorOnBed){
+
+    p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = BED, x = distance/1000000,
                                                y = prob)) +
       ggplot2::geom_smooth(mapping = ggplot2::aes( lty = BED),size = lineWidth,  span = 0.25, se = F) +
       ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
@@ -96,6 +126,19 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
       ggplot2::theme(aspect.ratio = 1) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
                                                          vjust = 0.5, hjust = 1))
+    } else {
+      p <- ggplot2::ggplot(RCPdata, ggplot2::aes(col = sample, x = distance/1000000,
+                                                 y = prob)) +
+        ggplot2::geom_smooth(mapping = ggplot2::aes( lty = BED),size = lineWidth,  span = 0.25, se = F) +
+        ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_color_manual(values = cols) +
+        ggplot2::labs(title = "Relative contact probability",
+                      x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
+        ggplot2::theme(aspect.ratio = 1) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
+                                                           vjust = 0.5, hjust = 1))
+    }
 
     if(lineOnly == F){
       p <- p + ggplot2::geom_pointrange(size = errWidth, shape = 20, fatten = pointWidth, ggplot2::aes(col = sample,ymin = prob-SEM,ymax = prob+SEM))

@@ -43,7 +43,7 @@ construct.experiment <- function(signalPath, indicesPath, name, ignore.checks = 
     for(C in chromVector){
       CIDX = ABS[ABS[,1] == C, 4]
 
-      if(!any(!IIDX %in% CIDX)){
+      if(!any(IIDX %in% CIDX)   ){
         warning(paste0("No contacts of ", C))
         ABS = ABS[ !ABS[,1] == C,]
       }

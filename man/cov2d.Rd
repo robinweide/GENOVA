@@ -5,7 +5,7 @@
 \title{cov2d}
 \usage{
 cov2d(experiment, bed, minDist = 5e+06, size = 5e+05, add = 0,
-  outlierCutOff = 40)
+  outlierCutOff = 40, rmOutlier = F)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -19,6 +19,8 @@ cov2d(experiment, bed, minDist = 5e+06, size = 5e+05, add = 0,
 \item{add}{Add constant value to bed-start and -end.}
 
 \item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
+
+\item{rmOutlier}{Try to perform outlier-correction}
 }
 \value{
 A list containing a score-matrix and a count-variable of the amount of used bed-entries.

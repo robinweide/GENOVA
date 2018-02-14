@@ -21,55 +21,6 @@ knitr::include_graphics('/DATA/users/r.vd.weide/github/GENOVA/t1logo')
 # devtools::install_github("robinweide/GENOVA", ref = 'dev')
 library(GENOVA)
 
-## ----centromere0, cache=T, echo = F----------------------------------------
-centromeres = read.delim('data/hg19_cytobandAcen.bed', 
-                         sep = '\t', 
-                         h = F, 
-                         stringsAsFactors = F)
-
-## ----CONSTRUCT, echo=T, warning=FALSE, error=F, results='hide', cache=T, cache.lazy=F----
-Hap1_WT_10kb <- construct.experiment(ignore.checks = T, # time-saver for vignette.
-                                signalPath = 'data/WT_10000_iced.matrix', 
-                                indicesPath = 'data/WT_10000_abs.bed', 
-                                name = "WT",
-                                centromeres = centromeres,
-                                color = "black")
-
-Hap1_WAPL_10kb <- construct.experiment(ignore.checks = T,
-                                signalPath = 'data/WAPL_10000_iced.matrix', 
-                                indicesPath = 'data/WAPL_10000_abs.bed', 
-                                name = "WAPL",
-                                centromeres = centromeres,
-                                color = "red")
-
-Hap1_WT_40kb <- construct.experiment(ignore.checks = T,
-                                signalPath = 'data/WT_40000_iced.matrix', 
-                                indicesPath = 'data/WT_40000_abs.bed', 
-                                name = "WT",
-                                centromeres = centromeres,
-                                color = "black")
-
-Hap1_WAPL_40kb <- construct.experiment(ignore.checks = T,
-                                signalPath = 'data/WAPL_40000_iced.matrix', 
-                                indicesPath = 'data/WAPL_40000_abs.bed', 
-                                name = "WAPL",
-                                centromeres = centromeres,
-                                color = "red")
-
-Hap1_WT_1MB <- construct.experiment(ignore.checks = T,
-                                signalPath = 'data/WT_1000000_iced.matrix', 
-                                indicesPath = 'data/WT_1000000_abs.bed', 
-                                name = "WT",
-                                centromeres = centromeres,
-                                color = "black")
-
-Hap1_WAPL_1MB <- construct.experiment(ignore.checks = T, 
-                                signalPath = 'data/WAPL_1000000_iced.matrix', 
-                                indicesPath = 'data/WAPL_1000000_abs.bed', 
-                                name = "WAPL",
-                                centromeres = centromeres,
-                                color = "red")
-
 ## ----peakEXP3, collapse=F, results='markup', echo = F----------------------
 str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 
@@ -82,6 +33,13 @@ str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 #  -force TRUE \
 #  -norm KR \
 #  -O Sanborn_Hap1_combined_30.hic_10kb_KR
+
+## ----cis, cache=T,fig.cap="Fraction of cis-contacts per chromosome.", fig.small = T----
+cisChrom_out <- cisTotal.perChrom( Hap1_WT_1MB )
+
+## ----cis2, cache=T,fig.cap="Fraction of cis-contacts per chromosome. Chromosomes 9, 15, 19 \\& 22 have translocations, which therefore appear to have more trans-contacts, but which in reality are cis-contacts.", fig.small = T----
+plot( cisChrom_out$perChrom, las=2 )
+abline( h = cisChrom_out$genomeWide, col = 'red' ) 
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)

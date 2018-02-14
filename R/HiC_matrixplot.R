@@ -352,44 +352,121 @@ plot.bw <- function( file, chrom, start, end, y1, y2, col, yMax = NULL,rotate=F)
 }
 
 #overlay TAD positions with the hi-c data
-draw.tads <- function( tads, chrom, tad.type="lower", tads.color ="#006837", lwd=2){
-  tads <- tads[tads[,1]==chrom,]
-  if(tad.type == "both"){
-    rect(tads[,2], tads[,2], tads[,3], tads[,3], border=tads.color, lwd=lwd)
-  }else if(tad.type == "lower"){
-    segments(tads[,2], tads[,2], tads[,2], tads[,3], col=tads.color, lwd=lwd)
-    segments(tads[,2], tads[,3], tads[,3], tads[,3], col=tads.color, lwd=lwd)
-  }else if(tad.type == "upper"){
-    segments(tads[,2], tads[,2], tads[,3], tads[,2], col=tads.color, lwd=lwd)
-    segments(tads[,3], tads[,2], tads[,3], tads[,3], col=tads.color, lwd=lwd)
-  }else{
-    stop("Wrong option for TAD plot type: upper, lower and both are allowed");
+draw.tads <- function( tads, chrom, tads.type="lower", tads.color ="#006837", lwd=2){
+
+  # check if tads is a list of dataframes or a data.frame
+  if(inherits(tads, "list") ){ #this seems to be a tad!
+    if(all(unlist(lapply(tads, inherits, "data.frame")))){ # all DFs in list!
+      tadList = T
+    } else {
+      stop("tads is not a (list of) data.frame!")
+    }
+  } else if(inherits(tads, "data.frame")) {
+    tmpList = list() # cool. there is one df of tads. Put in a list
+    tmpList[[1]] = tads
+    tads = tmpList
+    rm(tmpList)
+  } else {
+    stop("tads is not a (list of) data.frame!")
   }
+  # if you survived this, you will now have a list of dfs!
+
+  # get the tads color, resize and type
+  if(length(tads) != length(tads.type)){
+    tads.type = rep(tads.type[1], length(tads))
+  }
+
+  if(length(tads) != length(tads.color)){
+    tads.color = rep(tads.color[1], length(tads))
+  }
+
+
+  for(listIDX in 1:length(tads)){
+
+    tad = tads[[listIDX]]
+
+    #tads has min. 6 cols : 1 and 4 are the chrom. 2 is outer-edge 5' anchor. 6 is outer edge 3' anchor
+    tad <- tad[tad[,1]==chrom,]
+
+    if(tads.type[listIDX] == "both"){
+      rect(tad[,2], tad[,2], tad[,3], tad[,3], border=tads.color[listIDX], lwd=lwd)
+    }else if(tads.type[listIDX] == "lower"){
+      segments(tad[,2], tad[,2], tad[,2], tad[,3], col=tads.color[listIDX], lwd=lwd)
+      segments(tad[,2], tad[,3], tad[,3], tad[,3], col=tads.color[listIDX], lwd=lwd)
+    }else if(tads.type[listIDX] == "upper"){
+      segments(tad[,2], tad[,2], tad[,3], tad[,2], col=tads.color[listIDX], lwd=lwd)
+      segments(tad[,3], tad[,2], tad[,3], tad[,3], col=tads.color[listIDX], lwd=lwd)
+    }else{
+      stop("Wrong option for TAD plot type: upper, lower and both are allowed");
+    }
+
+  }
+
+
 }
 
 #overlay loop positions with the hi-c data
-draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837", lwd=2 , loops.resize ){
-  #loops has min. 6 cols : 1 and 4 are the chrom. 2 is outer-edge 5' anchor. 6 is outer edge 3' anchor
-  loops <- loops[loops[,1]==chrom,]
+draw.loops <- function( loops, chrom, loops.type="both", loops.color = "green", lwd=2 , loops.resize ){
 
-  # resize loops
-  loops[,2] <- loops[,2] - loops.resize
-  loops[,3] <- loops[,3] + loops.resize
-  loops[,5] <- loops[,5] - loops.resize
-  loops[,6] <- loops[,6] + loops.resize
-
-  if(loops.type == "both"){
-    rect(xleft = loops[,5], ybottom = loops[,3], xright = loops[,6], ytop = loops[,2], border=loops.color, lwd=lwd)
-    rect(xleft = loops[,2], ybottom = loops[,6], xright = loops[,3], ytop = loops[,5], border=loops.color, lwd=lwd)
-  }else if(loops.type == "lower"){
-
-    rect(xleft = loops[,2], ybottom = loops[,6], xright = loops[,3], ytop = loops[,5], border=loops.color, lwd=lwd)
-
-  }else if(loops.type == "upper"){
-    rect(xleft = loops[,5], ybottom = loops[,3], xright = loops[,6], ytop = loops[,2], border=loops.color, lwd=lwd)
-  }else{
-    stop("Wrong option for loop plot type: upper, lower and both are allowed");
+  # check if loops is a list of dataframes or a data.frame
+  if(inherits(loops, "list") ){ #this seems to be a loop!
+    if(all(unlist(lapply(loops, inherits, "data.frame")))){ # all DFs in list!
+      loopList = T
+    } else {
+      stop("Loops is not a (list of) data.frame!")
+    }
+  } else if(inherits(loops, "data.frame")) {
+    tmpList = list() # cool. there is one df of loops. Put in a list
+    tmpList[[1]] = loops
+    loops = tmpList
+    rm(tmpList)
+  } else {
+    stop("Loops is not a (list of) data.frame!")
   }
+  # if you survived this, you will now have a list of dfs!
+
+  # get the loops color, resize and type
+  if(length(loops) != length(loops.type)){
+    loops.type = rep(loops.type[1], length(loops))
+  }
+
+  if(length(loops) != length(loops.color)){
+    loops.color = rep(loops.color[1], length(loops))
+  }
+
+  if(length(loops) != length(loops.resize)){
+    loops.resize = rep(loops.resize[1], length(loops))
+  }
+
+  # loops over de list and plot
+  for(listIDX in 1:length(loops)){
+
+    loop = loops[[listIDX]]
+
+    #loops has min. 6 cols : 1 and 4 are the chrom. 2 is outer-edge 5' anchor. 6 is outer edge 3' anchor
+    loop <- loop[loop[,1]==chrom,]
+
+    # resize loops
+    loop[,2] <- loop[,2] - loops.resize[listIDX]
+    loop[,3] <- loop[,3] + loops.resize[listIDX]
+    loop[,5] <- loop[,5] - loops.resize[listIDX]
+    loop[,6] <- loop[,6] + loops.resize[listIDX]
+
+    if(loops.type[listIDX] == "both"){
+      rect(xleft = loop[,5], ybottom = loop[,3], xright = loop[,6], ytop = loop[,2], border=loops.color[listIDX], lwd=lwd)
+      rect(xleft = loop[,2], ybottom = loop[,6], xright = loop[,3], ytop = loop[,5], border=loops.color[listIDX], lwd=lwd)
+    }else if(loops.type[listIDX] == "lower"){
+
+      rect(xleft = loop[,2], ybottom = loop[,6], xright = loop[,3], ytop = loop[,5], border=loops.color[listIDX], lwd=lwd)
+
+    }else if(loops.type[listIDX] == "upper"){
+      rect(xleft = loop[,5], ybottom = loop[,3], xright = loop[,6], ytop = loop[,2], border=loops.color[listIDX], lwd=lwd)
+    }else{
+      stop("Wrong option for loop plot type: upper, lower and both are allowed");
+    }
+
+  }
+
 }
 
 
@@ -414,9 +491,9 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param guessType If an element in the chip is a dataframe, infer the type from column 6? If true, column six should hold "+" and "-". If a row has other characters, we view this entry as no-oriention and thus plot a rectangle.
 #' @param coplot When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1
 #' @param genes Structure with gene information, will only be combined with bed structure
-#' @param tads BED-like dataframe (not a tibble or a data.table!)
-#' @param tad.type How to show TADS: upper, lower and or both
-#' @param loops BED-like dataframe (not a tibble or a data.table!)
+#' @param tads BED-like dataframe or a list of these data.frames (not a tibble or a data.table!)
+#' @param tads.type How to show TADS: upper, lower and or both
+#' @param loops BED-like dataframe or a list of these data.frames (not a tibble or a data.table!)
 #' @param loops.type How to show loops: upper, lower and or both
 #' @param loops.resize Make the loop-boxes bigger by X bp. Can help visibility.
 #' @param loops.color Which color do you want the loops to have?
@@ -426,8 +503,11 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "#006837"
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep("black",4), bw.col="black", yMax = NULL, type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tad.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T, antoni = F){
+hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, chip=list(NULL,NULL,NULL,NULL), inferno = T, cexTicks = 1, bed.col=rep("black",4), bw.col="black", yMax = NULL, type=rep("triangle",4), guessType = T, coplot="dual", genes=NULL, tads=NULL, tads.type="lower" ,loops=NULL, loops.type="lower", tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T, antoni = F){
 
+  if(length(chip) < 3){
+    symmAnn = T
+  }
   #some error handling
   if(!is.null(exp2)){
     if(any(exp2$RMCHROM, exp1$RMCHROM)){
@@ -499,7 +579,9 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
 
   } else{
     if(coplot == "dual"){
-      mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
+
+      mat1$z[upper.tri(mat1$z)] <- mat2$z[upper.tri(mat2$z)]
+
       if(is.null(cut.off)){
         cut.off = max(quantile(mat1$z, .995))
         warning("No cut.off was given: using 99.5% percentile: ", round(cut.off), ".")
@@ -551,7 +633,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL, ch
 
   #draw tads on the image plot
   if(!is.null(tads)){
-    draw.tads( tads, chrom, tad.type=tad.type, tads.color = tads.color)
+    draw.tads( tads, chrom, tads.type=tads.type, tads.color = tads.color)
   }
 
   #draw loops on the image plot

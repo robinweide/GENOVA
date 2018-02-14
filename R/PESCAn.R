@@ -6,6 +6,7 @@
 #' @param bed A bed-dataframe.
 #' @param minComparables The minimal amount of bed-entries for a given chromosome. If this threshold is not reached, PE-SCAn will skip this chromosome.
 #' @param minDist The minimal distance
+#' @param rmOutlier to outlier-correction
 #' @param add Add constant value to bed-start and -end.
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @return A score-matrix.
@@ -21,7 +22,7 @@
 #' # Plot using, for example, persp
 #' persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
 #'
-PESCAn_covert <- function( experiment, bed, minComparables = 5, minDist = 5e6, size = 500e3, add = 0 ){
+PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,minDist = 5e6, size = 500e3, add = 0 ){
   #sorting the bed file is essential for the analysis
   bed <- bed[order(bed[,1],bed[,2]),]
   count = 0
@@ -34,7 +35,7 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, minDist = 5e6, s
     if(nrow(BED) < minComparables){
       next()
       }
-    pe.res <- cov2d(experiment, BED, minDist, size, add)
+    pe.res <- cov2d(experiment, BED, minDist, size, add, rmOutlier = rmOutlier)
     if(exists("score.mat")){
       score.mat <- score.mat + pe.res$score
       count = count + pe.res$count
@@ -58,6 +59,7 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, minDist = 5e6, s
 #' @param minDist The minimal distance
 #' @param shift Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.
 #' @param size Size in bp of window.
+#' @param rmOutlier Try to perform outlier-correction
 #' @return A O/E score-matrix.
 #' @import data.table
 #' @examples
@@ -72,13 +74,13 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, minDist = 5e6, s
 #'
 #' @export
 #'
-PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05){
+PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlier = F){
 
   # Get signal
-  signal = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size))
+  signal = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size, rmOutlier = rmOutlier))
 
   # Get background
-  background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size))
+  background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size, rmOutlier = rmOutlier))
   medianBackground = median(background)
 
   # Get O/E

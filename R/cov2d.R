@@ -8,9 +8,10 @@
 #' @param add Add constant value to bed-start and -end.
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
+#' @param rmOutlier Try to perform outlier-correction
 #' @return A list containing a score-matrix and a count-variable of the amount of used bed-entries.
 #' @import data.table
-cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0, outlierCutOff = 40){
+cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0, outlierCutOff = 40, rmOutlier = F){
   #read data from experiment list
   data = experiment$ICE
   window = experiment$RES
@@ -64,22 +65,25 @@ cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0, outlierCutOf
     warning(paste0("There are not a lot of comparisons for chromosome ",as.character(unique(bed[,1])),". Please tred carefully!\n"))
   }
   rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
-  sm <- simplify2array(rawMatList)
-  sm[sm == 0] <- NA
-  MED <- apply(sm,MARGIN = 1:2, FUN = function(x) median(x,na.rm = T))
-  MAD <- apply(sm,MARGIN = 1:2, FUN = function(x) mad(x,na.rm = T))
-  tres <- MED+(MAD*outlierCutOff)
-  tres[is.na(tres)] <- 0
-  for(i in 1:length(rawMatList)){
-    #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
-    m <- rawMatList[[i]]
-    #cat(i, "\n")
-    if(any(m > tres)){
-      rawMatList[[i]] <- matrix(0, nrow = dim(sm)[1], ncol=dim(sm)[2])
-      count <- count - 1
+  if(rmOutlier){
+    sm <- simplify2array(rawMatList)
+    sm[sm == 0] <- NA
+    MED <- apply(sm,MARGIN = 1:2, FUN = function(x) median(x,na.rm = T))
+    MAD <- apply(sm,MARGIN = 1:2, FUN = function(x) mad(x,na.rm = T))
+    tres <- MED+(MAD*outlierCutOff)
+    tres[is.na(tres)] <- 0
+    for(i in 1:length(rawMatList)){
+      #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
+      m <- rawMatList[[i]]
+      #cat(i, "\n")
+      if(any(m > tres)){
+        rawMatList[[i]] <- matrix(0, nrow = dim(sm)[1], ncol=dim(sm)[2])
+        count <- count - 1
+      }
     }
+    STACKoutlierr <- Reduce(rawMatList, f = '+')
+  } else {
+    STACKoutlierr <- Reduce(rawMatList, f = '+')
   }
-  STACKoutlierr <- Reduce(rawMatList, f = '+')
-
   return(list(score=STACKoutlierr, count=count))
 }

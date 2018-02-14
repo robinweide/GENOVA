@@ -8,6 +8,15 @@
 #' @return A grid object, containing two ggplot-objects.
 #' @export
 visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = NULL, focus = 1,...){
+  OL = c()
+  for(i in 1:length(APAlist)){
+    OL = c(OL, APAlist[[i]]$OUTLIERCORRECTIONSWITCH)
+  }
+  OL = unique(OL)
+  if(length(OL != 1)){
+    stop('There seem to be some APAs with outlier-correction and some not...')
+  }
+
   higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
   resolution = APAlist[[1]]$RES
   size <- dim(as.data.frame(APAlist[[1]]$APA))[1]

@@ -4,8 +4,8 @@
 \alias{PESCAn_covert}
 \title{PESCAn_covert}
 \usage{
-PESCAn_covert(experiment, bed, minComparables = 5, minDist = 5e+06,
-  size = 5e+05, add = 0)
+PESCAn_covert(experiment, bed, minComparables = 5, rmOutlier = F,
+  minDist = 5e+06, size = 5e+05, add = 0)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -13,6 +13,8 @@ PESCAn_covert(experiment, bed, minComparables = 5, minDist = 5e+06,
 \item{bed}{A bed-dataframe.}
 
 \item{minComparables}{The minimal amount of bed-entries for a given chromosome. If this threshold is not reached, PE-SCAn will skip this chromosome.}
+
+\item{rmOutlier}{to outlier-correction}
 
 \item{minDist}{The minimal distance}
 

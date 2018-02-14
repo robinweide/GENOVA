@@ -7,13 +7,15 @@
 #' @param loop.bed Bedpe file containing the loop positions: produced by read.bedpe().
 #' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots, with the diagonal visible.
 #' @param verbose Produces a progress-indication.
+#' @param rmOutlier Try to perform outlier-correction
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @param saveRaw Logical: True will output the raw matrices per loop and performs outlier-detection.
 #' @param outlierCutOff The severity of outliers: roughly translates to the amount of MADs above the median.
 #' @return A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed matrix containing the Z-stack scores (APAoutlier).
 #' @import data.table
 #' @export
-APA <- function(experiment, loop.bed, smallTreshold = NULL, size = 21, verbose = F, saveRaw = T, outlierCutOff = 40, ...){
+APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = F, size = 21, verbose = F, saveRaw = T, outlierCutOff = 40, ...){
+  OUTLIERCORRECTIONSWITCH = F
 
   if(is.null(smallTreshold )){
     smallTreshold = experiment$RES*  (((size+2)) )
@@ -138,7 +140,7 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, size = 21, verbose =
   colnames(norma_loopCounts) <- 1:size
 
 
-
+  if(rmOutlier){
     #return(list(STACK = (results.vector/SL)[1:99,1:99],RAW = simplify2array(rawMatList)))
     rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
     sm <- simplify2array(rawMatList)
@@ -168,14 +170,20 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, size = 21, verbose =
     if(any(tres == 0)){
       warning("\nThe data is too sparse to do outlier-correction\n\twith current set of loops.\nOutput will be without outlier-correction")
       norma_loopCountss = norma_loopCounts
+    } else {
+      OUTLIERCORRECTIONSWITCH = T
     }
-
+  } else {
+    norma_loopCountss = norma_loopCounts
+  }
 
   if(saveRaw){
     return(list(APA = norma_loopCountss,rawMatList = rawMatList,
-                APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES   ))
+                APAraw =  norma_loopCounts,
+                APAxy=list(x=pos,y=pos, z=norma_loopCountss),
+                RES = experiment$RES, OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH   ))
   } else {
     return(list(APA = norma_loopCountss,
-                APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES))
+                APAraw =  norma_loopCounts, APAxy=list(x=pos,y=pos, z=norma_loopCountss), RES = experiment$RES, OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH))
   }
 }

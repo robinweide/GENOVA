@@ -4,8 +4,8 @@
 \alias{ATA}
 \title{Get a z-stack matrix of TADs}
 \usage{
-ATA(experiment, tad.bed, smallTreshold = 225000, verbose = F, saveRaw = T,
-  saveRawList = T, outlierCutOff = 40)
+ATA(experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,
+  verbose = F, saveRaw = T, saveRawList = T, outlierCutOff = 40)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by \code{construct.experiment()}.}
@@ -13,6 +13,8 @@ ATA(experiment, tad.bed, smallTreshold = 225000, verbose = F, saveRaw = T,
 \item{tad.bed}{Data.frame from a Bed file containing the TAD positions.}
 
 \item{smallTreshold}{The minimal size of loops. Too small loops lead to messy plots.}
+
+\item{rmOutlier}{Try to perform outlier-correction}
 
 \item{verbose}{Produces a progress-indication.}
 

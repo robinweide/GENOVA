@@ -7,6 +7,7 @@
 #' @param experiment The Hi-C experiment object of a sample: produced by \code{construct.experiment()}.
 #' @param tad.bed Data.frame from a Bed file containing the TAD positions.
 #' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
+#' @param rmOutlier Try to perform outlier-correction
 #' @param verbose Produces a progress-indication.
 #' @param saveRawList Logical: True will output the raw matrices per TAD.
 #' @param saveRaw Logical: True will output an aditional matrix without outlier-correction.
@@ -19,8 +20,9 @@
 #' ATA_results_of_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
 ## End(**Not run**)
 #' @export
-ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
-    saveRaw = T, saveRawList = T,outlierCutOff = 40){
+ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verbose = F,  saveRaw = T, saveRawList = T,outlierCutOff = 40){
+
+  OUTLIERCORRECTIONSWITCH = F
 		if(any(tad.bed[,2] > tad.bed[,3])){
 			warning("5' TAD border downstream then 3' TAD border for some entries")
 		}
@@ -66,7 +68,7 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
     }
     #rawMatListCopy <- rawMatList
 
-
+    if(rmOutlier){
       #rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
       sm <- simplify2array(rawMatList)
       MED <- apply(sm, MARGIN = 1:2, median)
@@ -93,24 +95,31 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, verbose = F,
       if(any(tres == 0)){
         warning("\nThe data is too sparse to do outlier-correction\n\twith current set of TADs.\nOutput will be without outlier-correction")
         STACK.outlierCorrected = results.vector
+      } else {
+        OUTLIERCORRECTIONSWITCH = T
       }
-
+    } else {
+      STACK.outlierCorrected = results.vector
+    }
 
       if(saveRaw){
         if(saveRawList){
             return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
                       STACK.raw = (results.vector/SL)[1:99, 1:99],
-                      STACK.list = STACK.rawMatList))
+                      STACK.list = STACK.rawMatList,
+                      OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH))
         } else {
             return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
-                      STACK.raw = (results.vector/SL)[1:99, 1:99]))
+                      STACK.raw = (results.vector/SL)[1:99, 1:99],
+                   OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH))
           }
       } else{
         if(saveRawList){
           return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
                       STACK.list = STACK.rawMatList))
         } else {
-          return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99]))
+          return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
+                      OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH))
         }
       }
   }

@@ -4,7 +4,7 @@
 \alias{RCP}
 \title{Get a per-chromosome scaling plot}
 \usage{
-RCP(experimentList, chromsToUse = NULL, bedList = NULL,
+RCP(experimentList, chromsToUse = NULL, bedList = NULL, colors = NULL,
   maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,
   verbose = F)
 }
@@ -12,6 +12,8 @@ RCP(experimentList, chromsToUse = NULL, bedList = NULL,
 \item{chromsToUse}{A vector containing the chromosome-names of interest. If bed is also given, only entries in chromsToUse will be used.}
 
 \item{bedList}{A named list of BED-like dataframse of the regions of interest. RCP will intersect this with the Hi-C bin by intersecting the middle of both ranges.}
+
+\item{colors}{Override colors of experiments. Will be used for BEDs if only one experiment is given.}
 
 \item{maxDistance}{The maximal distance to calculate scalings for.}
 

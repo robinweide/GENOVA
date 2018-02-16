@@ -13,7 +13,7 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
     OL = c(OL, APAlist[[i]]$OUTLIERCORRECTIONSWITCH)
   }
   OL = unique(OL)
-  if(length(OL != 1)){
+  if(length(OL) != 1){
     stop('There seem to be some APAs with outlier-correction and some not...')
   }
 

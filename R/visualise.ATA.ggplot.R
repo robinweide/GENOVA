@@ -30,7 +30,7 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
     OL = c(OL, stackedlist[[i]]$OUTLIERCORRECTIONSWITCH)
   }
   OL = unique(OL)
-  if(length(OL != 1)){
+  if(length(OL) != 1){
     stop('There seem to be some ATAs with outlier-correction and some not...')
   }
 

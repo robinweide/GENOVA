@@ -344,7 +344,7 @@ rotate <- function(x) t(apply(x, 2, rev))
 #' @import data.table
 #' @export
 visualise.saddle = function(SBoutList, addText = T, zlim = c(-0.5,0.5), EVlim = NULL, square = T, crossLines = NULL){
-
+  par_temp = par()
   if(is.null(EVlim)){
     EVlim = zlim
   }
@@ -435,5 +435,6 @@ visualise.saddle = function(SBoutList, addText = T, zlim = c(-0.5,0.5), EVlim = 
   if(square){
     par(pty = 'm')
   }
+  par(par_temp)
 
 }

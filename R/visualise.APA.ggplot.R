@@ -68,7 +68,7 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
       ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
       ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
       ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") +
-      ggplot2::scale_fill_gradientn(colours = higlassCol)
+      ggplot2::scale_fill_gradientn(colours = higlassCol, limits = z)
       # #!
       # viridis::scale_fill_viridis(limits = z, option = "inferno", direction = -1)
       # #!

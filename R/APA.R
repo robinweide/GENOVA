@@ -31,6 +31,7 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = F, size 
   hicdata <- experiment$ICE
   bed <- experiment$ABS
   resolution <- experiment$RES
+  pos <- seq(-(size-1)/2, (size-1)/2)*resolution
   # Check for setkey
   if(is.null(data.table::key(hicdata))){data.table::setkey(hicdata, V1, V2)}
   # Make chr:pos index of HiC-index
@@ -174,6 +175,7 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = F, size 
       OUTLIERCORRECTIONSWITCH = T
     }
   } else {
+    pos <- seq(-(size-1)/2, (size-1)/2)*resolution
     norma_loopCountss = norma_loopCounts
   }
 

@@ -100,6 +100,7 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
       }
     } else {
       STACK.outlierCorrected = results.vector
+      STACK.rawMatList = results.vector
     }
 
       if(saveRaw){
@@ -116,7 +117,8 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
       } else{
         if(saveRawList){
           return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
-                      STACK.list = STACK.rawMatList))
+                      STACK.list = STACK.rawMatList,
+                      OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH))
         } else {
           return(list(STACK = (STACK.outlierCorrected/SL)[1:99, 1:99],
                       OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH))

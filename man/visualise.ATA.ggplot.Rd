@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualise.ATA.ggplot.R
 \name{visualise.ATA.ggplot}
 \alias{visualise.ATA.ggplot}
-\title{Plot the stacked TAD results.}
+\title{visualise.ATA.ggplot}
 \usage{
 visualise.ATA.ggplot(stackedlist, title = "ATA", focus = 1, zlim1 = NULL,
   zlim2 = NULL)
@@ -10,7 +10,7 @@ visualise.ATA.ggplot(stackedlist, title = "ATA", focus = 1, zlim1 = NULL,
 \arguments{
 \item{stackedlist}{Named list of results from \code{ATA}.}
 
-\item{title}{Title to plot}
+\item{title}{Title-text to plot}
 
 \item{zlim1}{Vector of 2 values, denoting the min and max color-values of the first row}
 
@@ -22,19 +22,23 @@ visualise.ATA.ggplot(stackedlist, title = "ATA", focus = 1, zlim1 = NULL,
 A \code{grid} object, containing two ggplot-objects.
 }
 \description{
-Takes in a named list of ATA-outputs and plots these next to eachother. It also plots differentials.
+Plot the stacked TAD results: takes in a named list of ATA-outputs and plots these next to eachother.
+It also plots differentials.
 }
 \details{
 By substracting the values from each sample with the values from the \code{focus}-sample, we generate the differentials.
 A positive value in the differential plots thus means an enrichment in that sample versus the \code{focus}-sample.
 }
 \examples{
-ATA_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs) # run ATA
-ATA_Sanbornetal <- ATA(experiment = Sanborn_20k,tad.bed = TADs) # run ATA
+# run ATA
+ATA_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
+ATA_Sanbornetal <- ATA(experiment = Sanborn_20k,tad.bed = TADs)
 
-ATAlist <- list(Rao = ATA_RAOetal, Sanborn = ATA_Sanbornetal) # make list
+# make a named list
+ATAlist <- list(Rao = ATA_RAOetal, Sanborn = ATA_Sanbornetal)
 
-visualise.ATA.ggplot(ATAlist, focus = 1, title = 'Rao vs Sanborn.') # plot
+# plot the results
+visualise.ATA.ggplot(ATAlist, focus = 1, title = 'Rao vs Sanborn.')
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

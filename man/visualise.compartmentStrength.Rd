@@ -10,8 +10,17 @@ visualise.compartmentStrength(SBoutList)
 \item{SBoutList}{A list of outputs trom saddleBins.}
 }
 \value{
-A plot and an invisible underlying dataframe.
+A plot and an invisible underlying dataframe containing per-sample and -chromosome-arm the compartment-score.
 }
 \description{
 Takes the input from saddleBins and produces a boxplot of compartment-strenghts.
+}
+\examples{
+# run saddleBins on all chromosomes with 25 bins.
+saddle_WT = saddleBins(exp = Hap1_WT_1MB, ChIP = H3K27acPeaks,nBins = 25)
+
+# plot compartment-strengths
+CS = visualise.compartmentStrength(list(saddle_WT))
+median(tmp$score)
+
 }

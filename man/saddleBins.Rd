@@ -4,7 +4,8 @@
 \alias{saddleBins}
 \title{Compute compartment-v-compartment scores}
 \usage{
-saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5, verbose = T)
+saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5,
+  closeCis = NULL, verbose = T)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -13,7 +14,9 @@ saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5, verbose = T)
 
 \item{chromsToUse}{Do the computation for a subset of chromosomes.}
 
-\item{nBins}{The number of bins to split the compartment-score. A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 will produce a plot similar to Bonev et al. (2017).}
+\item{nBins}{The number of bins to split the compartment-score.}
+
+\item{closeCis}{Do not take into account interactions close-by (10Mb)}
 
 \item{verbose}{Produces a progress-indication.}
 }
@@ -21,7 +24,22 @@ saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5, verbose = T)
 A log2(O/E) matrix and a DF of compartment-scores.
 }
 \description{
-Splits range of compartment-scores in nBins bins.
+Splits the range of compartment-scores in nBins bins (bin one having the highest compartment-scores and bin n the lowest).
 Generates an average O/E contact-score for each compartment-score bin.
 Sorts matrix on compartment-score.
+}
+\note{
+A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 will produce a plot similar to Bonev et al. (2017). The increase in time with more nBins is in exponential time at this point in time. Future versions will tackle this.
+}
+\examples{
+# run saddleBins on all chromosomes with 25 bins.
+saddle_WT = saddleBins(exp = Hap1_WT_1MB, ChIP = H3K27acPeaks,nBins = 25)
+
+# plot saddle-plot
+visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
+
+# plot compartment-strengths
+CS = visualise.compartmentStrength(list(saddle_WT))
+median(tmp$score)
+
 }

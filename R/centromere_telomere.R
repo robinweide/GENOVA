@@ -149,48 +149,83 @@ draw.chromosome <- function(){
 	polygon(y-1.07,1-x, col="grey", border="black", lwd=2)
 }
 
-#' draw the log2-ratio of the relative interaction frequencies
-#' the ratio is calculated over the median of the matrix
+#' draw.centromere.telomere
 #'
+#' Plot the log2-ratio of the relative interaction frequencies.
+#' The ratio is calculated over the median of the matrix.
+#'
+#' @author Elzo de Wit, \email{e.d.wit@nki.nl}
 #' @param m matrix result from centromere-telomere
 #' @param cut.off log2-ratio cut.off
+#' @examples
+#' # Get a scaled matric of the interchomosomal interactions between 15 and 19
+#' out1519 = centromere.telomere.analysis(WT_40kb,
+#'                                        chrom.vec = c('chr15', 'chr19'))
+#'
+#' # Plot the results
+#' draw.centromere.telomere(out1519)
 #' @export
-draw.centromere.telomere <- function( m, cut.off = 2 ){
+draw.centromere.telomere <- function(m, cut.off = 2){
 	bwr <- colorRampPalette(c("blue", "white", "red"))
-	#normalize the contact frequencies by dividing by the median
-	#the matrix
-	lm <- log2(m/median(m))
-	#maximize the maximum and minimum threshold
 
+	#normalize the contact frequencies by dividing by the median
+	lm <- log2(m/median(m))
+
+	#maximize the maximum and minimum threshold
 	lm[lm > cut.off] <- cut.off
 	lm[lm < -cut.off] <- -cut.off
-	image(lm[,nrow(lm):1], axes=F, xlim=c(-0.06,1.01), ylim=c(-0.01,1.06), col=bwr(1000), zlim=c(-cut.off, cut.off))
+	image(lm[,nrow(lm):1],
+	      axes=F,
+	      xlim=c(-0.06, 1.01),
+	      ylim=c(-0.01, 1.06),
+	      col=bwr(1000),
+	      zlim=c(-cut.off, cut.off))
+
 	#add cartoon chromosomes
 	draw.chromosome()
 }
 
 
-#' Calculate a scaled matrix of the interchromosomal interactions aligned from centromere to telomere
+#' centromere.telomere.analysis
 #'
+#' Calculate a scaled matrix of the interchromosomal interactions aligned from
+#' centromere to telomere
+#'
+#' @author Elzo de Wit, \email{e.d.wit@nki.nl}
 #' @param exp GENOVA data structure for your experiment of interest
-#' @param chrom.vec a vector containing the chromosomes that should be considered in the pair-wise interchromosomal interactions
+#' @param chrom.vec a vector containing the chromosomes that should be
+#' considered in the pair-wise interchromosomal interactions
 #' @param nrow dimensions of the matrix (number of columns will be the same)
-#' @param leave.out two-column matrix or data.frame containing the specific chromosome combinations that need to left out
-#' @param q.top top quantile of scores that should be left out of the analysis (because they are outliers)
+#' @param leave.out two-column matrix or data.frame containing the specific
+#' chromosome combinations that need to left out
+#' @param q.top top quantile of scores that should be left out of the analysis
+#' (because they are outliers)
 #' @param verbose Produces a progress-indication.
+#' @examples
+#' # Get a scaled matric of the interchomosomal interactions between 15 and 19
+#' out1519 = centromere.telomere.analysis(WT_40kb,
+#'                                        chrom.vec = c('chr15', 'chr19'))
+#'
+#' # Plot the results
+#' draw.centromere.telomere(out1519)
 #' @export
-centromere.telomere.analysis <- function( exp, chrom.vec, nrow=100, leave.out=NULL, q.top = 1e-5, verbose = F){
+centromere.telomere.analysis <- function(exp, chrom.vec, nrow = 100,
+                                         leave.out = NULL, q.top = 1e-5,
+                                         verbose = F){
 	i.vec <- 1:(length(chrom.vec)-1)
-	#empty matrix for holding the contact frequencies
-	m.total <- matrix(0, nrow=nrow, ncol=nrow)
-	#loop over the chromosome combinations
-	for( i in i.vec ){
-		for(j in (i+1):(max(i.vec)+1) ){
-			chrom1 <- chrom.vec[i]; chrom2 <- chrom.vec[j];
+	# empty matrix for holding the contact frequencies
+	m.total <- matrix(0, nrow = nrow, ncol = nrow)
+	# loop over the chromosome combinations
+	for(i in i.vec){
+		for(j in (i+1):(max(i.vec)+1)){
+			chrom1 <- chrom.vec[i]
+			chrom2 <- chrom.vec[j]
 
-			#if the leave.out dataset is defined check if the chromosome combination is found
+			# if the leave.out dataset is defined check if the chromosome combination
+			# is found
 			if(!is.null(leave.out)){
-				sum.val <- sum(leave.out[,1]==chrom1 & leave.out[,2]==chrom2) + sum(leave.out[,1]==chrom2 & leave.out[,2]==chrom1)
+				sum.val <- sum(leave.out[,1] == chrom1 & leave.out[,2] == chrom2) +
+				           sum(leave.out[,1] == chrom2 & leave.out[,2] == chrom1)
 				if(sum.val > 0){
 					next
 				}
@@ -198,34 +233,41 @@ centromere.telomere.analysis <- function( exp, chrom.vec, nrow=100, leave.out=NU
 			if(verbose){
 			  message(chrom1, "\t", chrom2, "\r")
 			}
-			#select the interaction matrix between the trans chromosomes
-			trans.mat <- selectTransData( exp, chrom1, chrom2 )
+			# select the interaction matrix between the trans chromosomes
+			trans.mat <- selectTransData(exp, chrom1, chrom2)
 
-			#set the q.top highest values to this value
+			# set the q.top highest values to this value
 			th <- quantile(trans.mat$z, 1-q.top)
 			trans.mat$z[trans.mat$z > th] <- th
 
-			#get the centromere positions emprically
-			cent1 <- which(apply(trans.mat$z,1,sum)==0)
-			cent2 <- which(apply(trans.mat$z,2,sum)==0)
+			# get the centromere positions emprically
+			cent1 <- which(apply(trans.mat$z,1,sum) == 0)
+			cent2 <- which(apply(trans.mat$z,2,sum) == 0)
 
 			cent1 <- largest.stretch(cent1)
 			cent2 <- largest.stretch(cent2)
 
-			centromere.pos <- data.frame(chrom=c(chrom1,chrom2), start=c(min(cent1)*exp$RES, min(cent2)*exp$RES), end=c(max(cent1)*exp$RES, max(cent2)*exp$RES))
+			res <- exp$RES
+			centromere.pos <- data.frame(chrom = c(chrom1,chrom2),
+			                             start = c(min(cent1)*res, min(cent2)*res),
+			                             end   = c(max(cent1)*res, max(cent2)*res))
 
-			#Q1,2,3,4 are the different quadrants of the chromosome-chromosome combinations
-			#T------------T
-			#| 1   |   2  |
-			#------C------T
-			#| 3   |   4  |
-			#T------------T
-			for( quadrant in 1:4){
+			# Q1,2,3,4 are the different quadrants of the chromosome-chromosome
+			# combinations
+			# +-----------+
+			# |  1  |  2  |
+			# +-----C-----+
+			# |  3  |  4  |
+			# +-----------+
+			for(quadrant in 1:4){
 				m.sub <- select.arm(trans.mat, centromere.pos, quadrant)
-				if(is.null(dim(m.sub))){ next } #acrocentric chromosomes happen
+				# acrocentric chromosomes happen
+				if(is.null(dim(m.sub))){
+				  next
+				}
 				m.sub <- resize.mat(m.sub, c(nrow, nrow))
-				#calculate the average of the transposed matrix and the regular matrix
-				#to get rid of chromosome specific enrichments
+				# calculate the average of the transposed matrix and the regular matrix
+				# to get rid of chromosome specific enrichments
 				m.total <- m.total + (m.sub + t(m.sub))/2
 			}
 
@@ -234,11 +276,12 @@ centromere.telomere.analysis <- function( exp, chrom.vec, nrow=100, leave.out=NU
 	m.total
 }
 
-inter.arm.data <- function( exp, chrom.vec, nrow=100, leave.out=NULL, q.top = 1e-5){
+inter.arm.data <- function(exp, chrom.vec, nrow = 100,
+                           leave.out = NULL, q.top = 1e-5){
 
-	m.total <- matrix(0, nrow=nrow, ncol=nrow)
+	m.total <- matrix(0, nrow = nrow, ncol = nrow)
 	for( chrom in chrom.vec ){
-		cis.mat <- selectTransData( exp, chrom, chrom )
+		cis.mat <- selectTransData(exp, chrom, chrom )
 
 		#set the q.top highest values to this value
 		th <- quantile(cis.mat$z, 1-q.top)

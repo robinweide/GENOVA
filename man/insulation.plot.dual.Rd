@@ -22,13 +22,16 @@ insulation.plot.dual(exp1, exp2, chrom, start, end, cut.off = NULL,
 
 \item{window.size}{The sliding square size}
 
-\item{local}{Per chromosome?}
+\item{local}{Local or per-chromosome normalisation?}
 
-\item{delta}{plot the differential insulation scores}
+\item{delta}{Plot the differential insulation scores (exp1 - exp2)}
 }
 \value{
 A plot
 }
 \description{
-Plot insulation-scores of two experiments
+Plot insulation-scores of two experiments, complete with Hi-C matrices, for a region of interest.
+}
+\examples{
+# Make a matrix-plot, with two experiments and their respective insulation-scores, for a region of interest.
 }

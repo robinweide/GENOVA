@@ -10,35 +10,52 @@ insulation.heatmap(insulationList, bed, focus = 1, sortWidth = 10,
   "#ffeda0", "white", "#31a354"), rmNonVariateRows = T, verbose = F)
 }
 \arguments{
-\item{insulationList}{A named list of results from `genome.wide.insulation()`.}
+\item{insulationList}{A named list of results from genome.wide.insulation().}
 
-\item{bed}{A bed-df with TAD-calls. Only the first three columns are important.}
+\item{bed}{A BED-df with TAD-calls. Only the first three columns
+(chrom, start & stop) are important.}
 
-\item{focus}{Sort on which sample? (give the index-number)}
+\item{focus}{Sort on which sample? (give the index-number of the list)}
 
 \item{sortWidth}{Percentage of columns to sort on (aligned on center)}
 
 \item{whatToPlot}{Do you want to plot a profile, heatmap or both?}
 
-\item{profileFunct}{Function to make profile-plots (mean, median, sum, absSum)}
+\item{profileFunct}{Function to make profile-plots (mean, median, sum)}
 
 \item{flank}{Amount of flanking bp.}
 
-\item{zlim}{zlims c(min,max)}
+\item{zlim}{The heatmap-zlims c(min,max).}
 
-\item{profileCols}{Vector of colors for profiles}
+\item{profileCols}{Vector of line-colors for profiles}
 
-\item{profileZlim}{zlims c(min,max) for profiles}
+\item{profileZlim}{The profile-zlims c(min,max).}
 
-\item{heatmapCols}{a vector of colors for the heatmap-gradient.}
+\item{heatmapCols}{A vector of colors for the heatmap-gradient.}
 
-\item{rmNonVariateRows}{ignore rows with an sd of 0}
+\item{rmNonVariateRows}{Ignore rows with an sd of 0.}
 
-\item{verbose}{Chatty?}
+\item{verbose}{Should this function be chatty?}
 }
 \value{
-A plot
+A plot plus an (invisible) dataframe of the underlying matrix.
 }
 \description{
-insulations in, plot out
+Takes a list of insulation-scores and plots a sorted heatmap and/or
+average profile.
+}
+\examples{
+# Get the insulation score with window-size 25 of two experiments.
+WT_10kb_ins = genome.wide.insulation(hic = WT_10kb, window.size = 25)
+SCC4_10kb_ins = genome.wide.insulation(hic = SCC4_10kb, window.size = 25)
+
+# Store insulation-scores in a named list
+inList = list(WT = WT_10kb_ins, SCC4 = SCC4_10kb_ins )
+
+# Plot the heatmap and profile and store the underlying df in df.out.
+df.out = insulation.heatmap(inList, bed = WT_TADs,
+                            zlim = c(-.5,0.25), profileZlim = c(-.75,-.1))
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 }

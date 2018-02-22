@@ -10,20 +10,35 @@ chromosomeMatrix(exp, color.fun = NULL, cut.off = NULL,
 \arguments{
 \item{color.fun}{Optional color-function}
 
-\item{chromsToUse}{Only get data of a small set of chromosomes. Genome-wide score will not we given!}
+\item{cut.off}{Adjust the maximum value of the color-scale}
+
+\item{chromsToUse}{Only get data of a small set of chromosomes.
+Genome-wide score will not we given!}
 
 \item{remove}{A vector of (partial) names of chromosomes to leave out.}
 
-\item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
-
-\item{z.max}{Adjust the maximum value of the color-scale}
+\item{experiment}{The Hi-C experiment object of a sample: produced by
+construct.experiment().}
 }
 \value{
-A plot of the chromosome matrix and a assignable matrix
+A plot of the chromosome matrix and an assignable list:
+
+\item{rawCounts}{the observed chromosome-chromosome matrix}
+
+\item{normMat}{the expected chromosome-chromosome matrix}
 }
 \description{
-Plot a genome-wide overview-matrix.
+Plot a genome-wide overview-matrix: values are log10(observed/expected).
 }
 \note{
-Please use only low-resolution matrices with this (e.g. 1Mb resolution).
+Please use only low-resolution matrices with this (e.g. 1Mb resolution)
+}
+\examples{
+# use chromosomeMatrix without chromosome M and Y.
+chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"), cut.off = 2)
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

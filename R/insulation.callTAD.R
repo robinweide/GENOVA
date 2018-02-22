@@ -1,26 +1,38 @@
 #' insulation.callTAD
 #'
-#' Call TADs
+#' Call TADs using a similar method as Crane et al. (2015).
+#' Briefly, we take the result of genome.wide.insulation that is stored in experiment$INSULATION.
+#' Next, we compute the local minima of the delta-vector: these are (after some filtering) the TAD-borders
+#' As a last step, we create TADs by combining the borders (which are sorted) two-by-two, creating non-overlapping fully-covering TAD-borders on the genome.
 #'
-#' @param exp1 The Hi-C experiment object: produced by construct.experiment().
-#' @param BEDCOLOR Color of items in the resulting BEDPE-file
+#' @param experiment The Hi-C experiment object: produced by construct.experiment().
+#' @param BEDcolor Color of items in the resulting BEDPE-file
 #' @return A BEDPE-df
 #' @note Call insulation scores first and store these in exp$INSULATION
+#' @examples
+#' # Get the insulation score with window-size 25 and store in the INSULATION-slot.
+#' Hap1_WT_10kb$INSULATION = genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+#'
+#' # Call TAD from the insulation-score.
+#' TADcalls = insulation.callTAD(Hap1_WT_10kb)
+#'
+#' # Plot TADs
+#' hic.matrixplot(exp1 = Hap1_WT_10kb, chrom = 'chr7', start = 25e6, end=30e6, tads = WT_TADs, tads.type = 'lower', cut.off = 25)
 #' @export
-insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127", verbose = F){
-  if(is.null(exp$INSULATION)){ stop("Call insulation score first and store in exp$INSULATION")}
-  res <- exp$RES
+insulation.callTAD <- function(experiment,  BEDcolor = "127,201,127", verbose = F){
+  if(is.null(experiment$INSULATION)){ stop("Call insulation score first and store in experiment$INSULATION")}
+  res <- experiment$RES
   scooch <- floor(100e3 / res)
   entries <- list()
   df = NULL
-  CHROMS <- unique(exp$INSULATION[,1])
+  CHROMS <- unique(experiment$INSULATION[,1])
 
-  exp$INSULATION$V2 <- exp$INSULATION[,2] + exp$RES
+  experiment$INSULATION$V2 <- experiment$INSULATION[,2] + experiment$RES
 
   for(CCC in CHROMS){
     if(verbose){   message("Starting chromosome",CCC, "\n")  }
 
-    INSU <- exp$INSULATION[exp$INSULATION[,1] == CCC ,]
+    INSU <- experiment$INSULATION[experiment$INSULATION[,1] == CCC ,]
     insCol <- INSU[,4]
 
     #determine minimum and maximum values
@@ -119,7 +131,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127", verbose = F){
       now <- boundaryCalls[i,1:2]
       now[,2] <- now[,2]
       prev <- prev
-      ddd <-cbind(now, prev,now,prev, BEDCOLOR)[c(1,3,2,1,3,2,7)]
+      ddd <-cbind(now, prev,now,prev, BEDcolor)[c(1,3,2,1,3,2,7)]
       colnames(ddd) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
       df <- rbind(df, ddd)
     }

@@ -1,3 +1,17 @@
+outlier3Darray = function(ARRAY, Q = .995){
+  ARRAY[is.na(ARRAY)] = 0
+  tmp = apply(ARRAY, c(1,2), quantile, probs = Q, na.rm = TRUE)
+  tmp.bk = tmp
+
+  for(i in 1:nrow(tmp)){
+    for(j in 1:ncol(tmp)){
+      ARRAY[i,j,ARRAY[i, j , ] > tmp[i,j]] = tmp[i,j]
+    }
+  }
+
+  return(ARRAY)
+}
+
 #' cov2d
 #'
 #' Get scores around given positions
@@ -61,29 +75,20 @@ cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0, outlierCutOf
 
   }
 
-  if(length(rawMatList) < 10){
-    warning(paste0("There are not a lot of comparisons for chromosome ",as.character(unique(bed[,1])),". Please tred carefully!\n"))
-  }
+  # Convert to 3D array
   rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
+  sm <- simplify2array(rawMatList)
+
+  #####################
+  #  outlier correct  #
+  #####################
+  DATA = NULL
   if(rmOutlier){
-    sm <- simplify2array(rawMatList)
-    sm[sm == 0] <- NA
-    MED <- apply(sm,MARGIN = 1:2, FUN = function(x) median(x,na.rm = T))
-    MAD <- apply(sm,MARGIN = 1:2, FUN = function(x) mad(x,na.rm = T))
-    tres <- MED+(MAD*outlierCutOff)
-    tres[is.na(tres)] <- 0
-    for(i in 1:length(rawMatList)){
-      #rawMatList[[i]][rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]] <- 0 #tres[rawMatList[[i]][1:99,1:99] > tres[1:99,1:99]]
-      m <- rawMatList[[i]]
-      #cat(i, "\n")
-      if(any(m > tres)){
-        rawMatList[[i]] <- matrix(0, nrow = dim(sm)[1], ncol=dim(sm)[2])
-        count <- count - 1
-      }
-    }
-    STACKoutlierr <- Reduce(rawMatList, f = '+')
+    sm = outlier3Darray(ARRAY = sm, Q = outlierCutOff)
+    DATA = apply(sm, c(1,2), sum, na.rm = T)
   } else {
-    STACKoutlierr <- Reduce(rawMatList, f = '+')
+    DATA = apply(sm, c(1,2), sum, na.rm = T)
   }
-  return(list(score=STACKoutlierr, count=count))
+
+  return(list(score=DATA, count=count))
 }

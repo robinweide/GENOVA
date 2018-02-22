@@ -7,16 +7,36 @@
 cisTotal.perChrom(exp, chromsToUse = NULL, ...)
 }
 \arguments{
-\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{exp}{The Hi-C experiment object of a sample:
+produced by construct.experiment().}
 
-\item{chromsToUse}{Only get data of a small set of chromosomes. Genome-wide score will not we given!}
+\item{chromsToUse}{Only get data of a small set of chromosomes.
+Genome-wide score will not we given!}
 }
 \value{
-The per-chromosome cis/total ratio
+A boxplot with red line showing genome-wide %cis and a list:
+
+\item{perChrom}{dataframe with chromosome and percentage cis}
+
+\item{genomeWide}{the genome-wide percentage cis}
 }
 \description{
-Calculate the ratio of the intrachromosomal interactions over the interchromosomal interactions
+Calculate the ratio of the intrachromosomal interactions over the
+interchromosomal interactions.
 }
 \note{
-The per chromsosome score is on average lower than the whole genome score, because in the per chromosome analysis every ditag is counted twice (for the two interacting chromosomes)
+The per chromsosome score is on average lower than the
+whole genome score, because in the per chromosome analysis every ditag is
+counted twice (for the two interacting chromosomes)
+}
+\examples{
+# calculate the ratios for a 1Mb-resolution experiment
+cisChrom_out <- cisTotal.perChrom(WT_1MB)
+
+# using the underlying data, make a barplot
+plot( cisChrom_out$perChrom, las=2 )
+abline( h = cisChrom_out$genomeWide, col = 'red' )
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 }

@@ -1,6 +1,6 @@
 
 #create an observed over expected matrix
-obs.exp.matrix <- function( mat, correct=F, outlier.correct = 0.995, lowess = F ){
+obs.exp.matrix_saddle <- function( mat, correct=F, outlier.correct = 0.995, lowess = F ){
   pos <- which(mat > -1, arr.ind=T)
   val <- mat[mat > -1]
   d <- abs(pos[,1]-pos[,2])
@@ -21,25 +21,9 @@ obs.exp.matrix <- function( mat, correct=F, outlier.correct = 0.995, lowess = F 
   return(obs.exp)
 }
 
-#switch the eigen vector based on a chip track of for instance
-#active histone marks
-switch.EV <- function( ev.data, chip, chrom ){
-  start <- min(ev.data$x); end <- max(ev.data$x)
-  sub.chip <- chip[chip[,1]==chrom & chip[,2] > start & chip[,2] < end,]
-
-
-  window.cnt <- findInterval(sub.chip[,2], ev.data$x)
-  window.cnt <- table(factor(window.cnt,1:length(ev.data$x)))
-  #return true or false depending on whether the median value of
-  #ChIP in the up or down compartment is highests (i.e. true if
-  #down scores have the highest number of ChIP peaks)
-  #up comp.                             down comp.
-  median(window.cnt[ev.data$ev1 > 0]) < median(window.cnt[ev.data$ev1 < 0])
-}
-
 
 #select a matrix of interactions for between two chromosomes
-selectData <- function (exp, chrom1, chrom2){
+selectData_saddle <- function (exp, chrom1, chrom2){
   bed <- exp$ABS
   data <- exp$ICE
   X <- bed[bed[,1]==chrom1,4]
@@ -72,13 +56,13 @@ selectData <- function (exp, chrom1, chrom2){
 
 #find the largest stretch of 0s, which is
 #most likely the centromere
-largest.stretch <- function( x ){
+largest.stretch_saddle <- function( x ){
   temp <- cumsum(c(1,diff(x) - 1))
   temp2 <- rle(temp)
   x[which(temp == with(temp2, values[which.max(lengths)]))]
 }
 
-saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, start = NULL, end = NULL, cutOffQuantile =.995){
+saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, start = NULL, end = NULL, cutOffQuantile =.995, closeCis = NULL){
   # if start or end is NULL, use whole chrom
   if(is.null(start) | is.null(end)){
     start = 0
@@ -105,24 +89,25 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
   if(!is.null(ChIP)){peaks = peaks[colSums(inMat) != 0]}
 
   # get EV of ZSMAT
-  OE = obs.exp.matrix(ZSMAT, correct = F, lowess = T)
+  OE = obs.exp.matrix_saddle(ZSMAT, correct = F, lowess = T)
   OE[!is.finite(OE)] <- 1
   Q = quantile(OE, c(1-cutOffQuantile, cutOffQuantile))
   OE[OE < Q[1]] = Q[1]
   OE[OE > Q[2]] = Q[2]
+
+  # get compartment-score
   EV <- eigen(OE-1)
   EV = EV$vectors[,1]
 
   if(errEVcorrect){
     tmp = length(EV[EV < 0]) /  length(EV)
     if(tmp < 0.1 | tmp > 0.9){
-      message(paste(exp$NAME,chrom,start))
+      #message(paste(exp$NAME,chrom,start))
       return(list(dat = NULL, EVbins = NULL))
     }
   }
+
   # flip EV on basis of chip-peaks
-
-
   if(!is.null(ChIP)){
     TEST = median(peaks[EV > 0]) > median(peaks[EV < 0])
     #message( TEST )
@@ -131,35 +116,43 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
       EV = tmp*-1
     }
   } else {
-    warning('No ChIP was given.\nIt is highly recommened that you\nadd some active regions such as H3K27ac!')
+    warning('No ChIP was given.\nIt is highly recommend that you\nadd some active regions such as H3K27ac!')
+  }
+
+  # set close-cis to NA
+  if(!is.null(closeCis)){
+    OE[is.na(OE)] = 1
+    NAwidth = closeCis / exp$RES
+    size = nrow(OE)
+    idxDF = expand.grid(seq(1, size), seq(1, size))
+    idxDF$D = abs(idxDF[,1] - idxDF[,2])
+    idxDF = idxDF[idxDF$D <= NAwidth,]
+    OE[cbind(idxDF[,1], idxDF[,2])] = NA
   }
 
   # find Qbins
+  # 1 is A, 5 is B
   QBINS = quantile(EV*-1, seq(0,1,length.out = nBins+1))
   QCUTS = as.numeric(cut(EV*-1, QBINS, include.lowest = T) )
-  # 1 is A, 5 is B
+
   EVbins = rev(tapply(EV, QCUTS, FUN = mean))
 
   df = data.frame()
   for(i in 1:nBins){
     for(j in 1:nBins){
       score = OE[QCUTS == i,QCUTS == j]
-      score = mean(score)
+      score = mean(score, na.rm = T)
       df = dplyr::bind_rows(df, data.frame(i,j, score))
     }
   }
-  # QCUTS_repped = rep(QCUTS,each = length(QCUTS))
-  # ave <- aggregate(as.vector(OE), by=list(QCUTS_repped,QCUTS_repped), mean)
 
-
-
-  return(list(dat = df, EVbins = EVbins))
+    return(list(dat = df, EVbins = EVbins))
 
 }
 
 #' Compute compartment-v-compartment scores
 #'
-#' Splits range of compartment-scores in nBins bins.
+#' Splits the range of compartment-scores in nBins bins (bin one having the highest compartment-scores and bin n the lowest).
 #' Generates an average O/E contact-score for each compartment-score bin.
 #' Sorts matrix on compartment-score.
 #'
@@ -167,11 +160,25 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
 #' @param ChIP BED-dataframe containing active sites (e.g. H3K27ac-peaks).
 #' @param chromsToUse Do the computation for a subset of chromosomes.
 #' @param verbose Produces a progress-indication.
-#' @param nBins The number of bins to split the compartment-score. A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 will produce a plot similar to Bonev et al. (2017).
+#' @param nBins The number of bins to split the compartment-score.
+#' @param closeCis Do not take into account interactions close-by (10Mb)
+#' @note
+#' A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 will produce a plot similar to Bonev et al. (2017). The increase in time with more nBins is in exponential time at this point in time. Future versions will tackle this.
+#' @examples
+#' # run saddleBins on all chromosomes with 25 bins.
+#' saddle_WT = saddleBins(exp = Hap1_WT_1MB, ChIP = H3K27acPeaks,nBins = 25)
+#'
+#' # plot saddle-plot
+#' visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
+#'
+#' # plot compartment-strengths
+#' CS = visualise.compartmentStrength(list(saddle_WT))
+#' median(tmp$score)
+#'
 #' @return A log2(O/E) matrix and a DF of compartment-scores.
 #' @import data.table
 #' @export
-saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, verbose = T){
+saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, closeCis = NULL, verbose = T){
 
   if(is.null(chromsToUse)){
     chromsToUse = exp$CHRS
@@ -183,10 +190,10 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, verbose = 
     if(verbose){
       message( paste0(exp$NAME, ": ", C))
     }
-    mat <- selectData( exp, C, C)
+    mat <- selectData_saddle( exp, C, C)
 
     cent <- which(apply(mat$z,1,sum)==0)
-    cent <- largest.stretch(cent)
+    cent <- largest.stretch_saddle(cent)
     chromStructure <- data.frame(chrom = C,
                                  start = 0,
                                  startC = min(cent)*exp$RES,
@@ -203,7 +210,8 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, verbose = 
                              chrom = chromStructure[1,1],
                              start = chromStructure[1,4],
                              end = chromStructure[1,5],
-                             nBins = nBins)
+                             nBins = nBins,
+                             closeCis = closeCis)
 
       df_this = data.frame(sample = exp$NAME,
                            chrom = C,
@@ -224,7 +232,8 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, verbose = 
                              chrom = chromStructure[1,1],
                              start = chromStructure[1,2],
                              end = chromStructure[1,3],
-                             nBins = nBins)
+                             nBins = nBins,
+                             closeCis = closeCis)
 
       df_this = data.frame(sample = exp$NAME,
                            chrom = C,
@@ -242,7 +251,8 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, verbose = 
                              chrom = chromStructure[1,1],
                              start = chromStructure[1,4],
                              end = chromStructure[1,5],
-                             nBins = nBins)
+                             nBins = nBins,
+                             closeCis = closeCis)
 
       df_this = data.frame(sample = exp$NAME,
                            chrom = C,
@@ -269,8 +279,15 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, verbose = 
 #' Takes the input from saddleBins and produces a boxplot of compartment-strenghts.
 #'
 #' @param SBoutList A list of outputs trom saddleBins.
-#' @return A plot and an invisible underlying dataframe.
-#' @import data.table
+#' @return A plot and an invisible underlying dataframe containing per-sample and -chromosome-arm the compartment-score.
+#' @examples
+#' # run saddleBins on all chromosomes with 25 bins.
+#' saddle_WT = saddleBins(exp = Hap1_WT_1MB, ChIP = H3K27acPeaks,nBins = 25)
+#'
+#' # plot compartment-strengths
+#' CS = visualise.compartmentStrength(list(saddle_WT))
+#' median(tmp$score)
+#'
 #' @export
 visualise.compartmentStrength = function(SBoutList){
   strengthDF = data.frame()
@@ -286,8 +303,11 @@ visualise.compartmentStrength = function(SBoutList){
     dat$matrix[dat$matrix$i >= MAXbin-binsTOse+1 & dat$matrix$j >= MAXbin-binsTOse+1,"CC"] = "BB"
     dat$matrix = dat$matrix[dat$matrix$CC != 'XX',]
 
-    tmp = dat$matrix %>% group_by(sample, chrom, arm, CC) %>%
-      summarise(score = mean(unLog))
+    tmp = dplyr::summarise(dplyr::group_by(dat$matrix,
+                                           sample,
+                                           chrom,
+                                           arm,
+                                           CC),score = mean(unLog))
 
     for(S in unique(tmp$sample)){
 
@@ -317,17 +337,6 @@ visualise.compartmentStrength = function(SBoutList){
   invisible(strengthDF)
 }
 
-
-
-
-
-
-
-
-
-
-
-
 rotate <- function(x) t(apply(x, 2, rev))
 
 #' Plot saddle-plots
@@ -335,13 +344,18 @@ rotate <- function(x) t(apply(x, 2, rev))
 #' Takes the input from saddleBins and produces saddleplots.
 #'
 #' @param SBoutList A list of outputs trom saddleBins.
-#' @param addText A list of outputs trom saddleBins.
+#' @param addText Add annotations in the corners for legibility.
+#' @param crossLines Plot crosslines in matrix. Crossline denote border of- A and B-bins. If not set, will plot them when nBins  >= 10.
 #' @param zlim Set the z-lims of the matrix.
 #' @param EVlim If set, use a different set of z-lims for the compartment-scores.
 #' @param square Set this to FALSE if plots are unaligned: will not produce a rigidly square matrix.
-#' @param crossLines Plot crosslines in matrix. Crossline denote border of- A and B-bins. If not set, will plot them when nBins  >= 10.
 #' @return A saddle-plot
-#' @import data.table
+#' @examples
+#' # run saddleBins on all chromosomes with 25 bins.
+#' saddle_WT = saddleBins(exp = Hap1_WT_1MB, ChIP = H3K27acPeaks,nBins = 25)
+#'
+#' # plot saddle-plot
+#' visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
 #' @export
 visualise.saddle = function(SBoutList, addText = T, zlim = c(-0.5,0.5), EVlim = NULL, square = T, crossLines = NULL){
   par_temp = par()

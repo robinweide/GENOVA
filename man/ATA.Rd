@@ -2,38 +2,37 @@
 % Please edit documentation in R/ATA.R
 \name{ATA}
 \alias{ATA}
-\title{Get a z-stack matrix of TADs}
+\title{Aggegrate TAD Analysis}
 \usage{
 ATA(experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,
-  verbose = F, saveRaw = T, saveRawList = T, outlierCutOff = 40)
+  verbose = F, outlierCutOff = 0.995)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by \code{construct.experiment()}.}
 
-\item{tad.bed}{Data.frame from a Bed file containing the TAD positions.}
+\item{tad.bed}{Data.frame from a BED-file containing the TAD positions.}
 
-\item{smallTreshold}{The minimal size of loops. Too small loops lead to messy plots.}
+\item{smallTreshold}{The minimal size of TADs. Too small TADs lead to messy plots.}
 
-\item{rmOutlier}{Try to perform outlier-correction}
+\item{rmOutlier}{Perform outlier-correction by tresholding [outlierCutOff] percentile per pixel.}
 
 \item{verbose}{Produces a progress-indication.}
 
-\item{saveRaw}{Logical: True will output an aditional matrix without outlier-correction.}
-
-\item{saveRawList}{Logical: True will output the raw matrices per TAD.}
-
-\item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
+\item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff] percentile per pixel and set values bigger than that to this value.}
 }
 \value{
-\item{STACK}{A list containing a matrix with the Z-stack scores}
+\item{STACK}{a list containing a matrix with the Z-stack scores}
 
-\item{STACK.list}{Optional: raw matrices per TAD}
+\item{STACK.raw}{a matrix without the outlier-correction}
 
-\item{STACK.raw}{Optional: a matrix without the outlier-correction}
+\item{STACK.list}{raw matrices per TAD}
+
+\item{OUTLIERCORRECTIONSWITCH}{the outlierCutOff if rmOutlier is TRUE, otherwise set to FALSE}
 }
 \description{
-Extracts matrices from a BED-like structure and resizes them, which leads to all start- and end-position of TADs overlapping.
-Sums over all matrices to produce a single Z-stack matrix, which is normalised to 100 loops.
+Get a z-stack matrix of TADs: this function extracts matrices from a BED-like structure and resizes them,
+which leads to all start- and end-position of TADs overlapping. Next, it averages all matrices to produce
+a single Z-stack matrix.
 }
 \examples{
 ATA_results_of_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)

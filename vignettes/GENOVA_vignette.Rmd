@@ -92,6 +92,12 @@ Hap1_WT_10kb <- construct.experiment(ignore.checks = T, # time-saver for vignett
                                 name = "WT", 
 			        color = "black")
 
+Hap1_WAPL_10kb <- construct.experiment(ignore.checks = T,
+                                signalPath = 'data/WAPL_10000_iced.matrix', 
+                                indicesPath = 'data/WAPL_10000_abs.bed', 
+                                name = "WAPL", 
+                                color = "red")
+
 Hap1_SCC4_10kb <- construct.experiment(ignore.checks = T,
                                 signalPath = 'data/SCC4_10kb_iced.matrix', 
                                 indicesPath = 'data/SCC4_10kb_abs.bed', 
@@ -225,7 +231,36 @@ RCP_out = RCP(experimentList = list(Hap1_WT_40kb ),
 visualise.RCP.ggplot(RCPdata = RCP_out)
 ```
 
+## A- and B-compartments
+```{r saddle, message=FALSE,  cache=T}
+H3K27acPeaks = read.delim('data/H3K27ac_WT.narrowPeak', h = F)
+saddle_WT = saddleBins(exp = Hap1_WT_1MB, 
+                       ChIP = H3K27acPeaks,
+                       chromsToUse = paste0('chr', 1:10),
+                       nBins = 25, 
+                       verbose = F)
+saddle_WAPL = saddleBins(exp = Hap1_WAPL_1MB, 
+                       ChIP = H3K27acPeaks,
+                       chromsToUse = paste0('chr', 1:10),
+                       nBins = 25,  
+                       verbose = F)
+```
 
+### Saddle-plot
+```{r saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot"}
+visualise.saddle(list(saddle_WT,
+                      saddle_WAPL),
+                 crossLines = T, 
+                 addText = T,
+                 zlim = c(-0.5,0.5), 
+                 EVlim = c(-0.5,0.5))
+```
+
+### Compartment-strength
+```{r saddleStrength, message=FALSE,  cache=T, warning=FALSE, fig.cap= "The per-arm compartment strength", fig.small = T}
+tmp = visualise.compartmentStrength(list(saddle_WT,
+                                   saddle_WAPL))
+```
 
 # Interaction plots
 GENOVA has serveral plotting-functions for genomic loci. *cis.compartment.plot* and *trans.compartment.plot* provide a easy way to plot whole chromosome arms, including compartmentalisation-score tracks. For more zomomed-in plots *hic.matrixplot* can be used. This function also allows rich annotation and between-experiment comparision possibilities. All functions try to guess the most appropriate color-scale limits, but finer control of this can be gotten by setting the `cut.off`-argument.
@@ -418,7 +453,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 
 ```
 
-### Everthing toghether
+### Everthing together
 Finally, we can combine all these options in one. This may be complete overkill, but it could be quite handy. In this example, we can see that most TAD-borders and loop-anchors have clear SMC1- and CTCF-signal (figure \@ref(fig:HMPall)). Both these are expected to be found at these locations according to the *chromatin extrusion model*. Moreover, we can also see that the CTCF-orientation of the upstream and downstream loop-anchor are forward and reverse, resp. This *convergent rule* is a known feature of loops [@DeWit2015]. 
 
 ```{r HMPall, message=FALSE , fig.cap= "Hi-C matrixplot: a complex case. Loops and TADs are annotated within the Hi-C matrix. On the top annotation-bar, we have plotted the ChIP-seq signal and peaks of SMC1. On the left annotation-bar are the ChIP-seq signal and peaks (with orientiation) of CTCF. Genes are plotted on both annotation-bars.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
@@ -437,7 +472,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                            'data/SMC1_WT.bw', # inner-left
                            CTCF), # outer-left
                tads = WT_TADs, # see ATA
-               tad.type = 'lower', # only plot in lower triangle
+               tads.type = 'lower', # only plot in lower triangle
                tads.color = '#91cf60', # green TAD-borders
                cut.off = 50) # upper limit of contacts
 ```    
@@ -471,7 +506,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                start = 25e6,
                end=29e6, 
                tads = WT_TADs, # see ATA
-               tad.type = 'upper', # only plot in lower triangle
+               tads.type = 'upper', # only plot in lower triangle
                tads.color = '#91cf60', # green TAD-borders
                cut.off = 25, # upper limit of contacts
                skipAnn = T) # skip the outside annotation
@@ -522,13 +557,14 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                start = 25e6,
                end=29e6, 
                tads = TADcalls, # see ATA
-               tad.type = 'lower', # only plot in lower triangle
+               tads.type = 'lower', # only plot in lower triangle
                tads.color = '#91cf60', # green TAD-borders
                cut.off = 25) # upper limit of contacts
 ```
 
 ## ATA
 ```{r ATA, cache=T}
+TADcalls = WT_TADs
 ATA_Hap1_WT   <- ATA(experiment = Hap1_WT_10kb, verbose = F,
                     tad.bed = TADcalls) 
 
@@ -566,14 +602,14 @@ differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
 Or show it as a scatterplot. With `differential.TAD.scatterplot`, you can shoose to add a diagonal line with `line = T`. Furthermore, you can shoose to zoom in by `allData == F`.
 ```{r iiDIFF2, message=FALSE , fig.cap= "Differential TAD-analysis: scatterplot. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T}
 par(mfrow = c(1,2), pty = 's')
-differential.TAD.scatterplot(exp1 = TAD_N_WT, # denominator
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
                             exp2 = TAD_N_WAPL, 
                             allData = T, 
-                            main = 'allData == T') # numerator
-differential.TAD.scatterplot(exp1 = TAD_N_WT, # denominator
+                            main = 'allData == T') # y
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
                             exp2 = TAD_N_WAPL, 
                             allData = F, 
-                            main = 'allData == F') # numerator
+                            main = 'allData == F') # y
 ```
 
 
@@ -616,8 +652,8 @@ We can use `visualise.APA.ggplot` to combine the APA-results.
 visualise.APA.ggplot(APAlist = list('WT' = APA_Hap1_WT_extended, 
                                     'WAPL' = APA_Hap1_WAPL_extended), # a named list
                      title = "Hap1 Hi-C vs extended loops", 
-                     zTop = c(1,45), # set the zlims of the upper row
-                     zBottom = c(-8.33,8.33),
+                     zTop = c(0,9.5), # set the zlims of the upper row
+                     zBottom = c(-5,5),
                      focus = 1) # which item in APAlist to use as comparison
 ```
 
@@ -685,7 +721,8 @@ draw.centromere.telomere(out1519)
 For the next version, the following will be added/fixed:
 
 - write `visualise.PESCAn.persp`
-- write `ABsaddleplot`
+- write `findBadBin`
+- optimise the time-v-nBin problem in `saddleBins`
 
 Please post questions, comments and rants on [our github issue tracker](https://github.com/robinweide/GENOVA/issues).
 

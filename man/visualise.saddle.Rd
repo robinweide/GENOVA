@@ -10,7 +10,7 @@ visualise.saddle(SBoutList, addText = T, zlim = c(-0.5, 0.5),
 \arguments{
 \item{SBoutList}{A list of outputs trom saddleBins.}
 
-\item{addText}{A list of outputs trom saddleBins.}
+\item{addText}{Add annotations in the corners for legibility.}
 
 \item{zlim}{Set the z-lims of the matrix.}
 
@@ -25,4 +25,11 @@ A saddle-plot
 }
 \description{
 Takes the input from saddleBins and produces saddleplots.
+}
+\examples{
+# run saddleBins on all chromosomes with 25 bins.
+saddle_WT = saddleBins(exp = Hap1_WT_1MB, ChIP = H3K27acPeaks,nBins = 25)
+
+# plot saddle-plot
+visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
 }

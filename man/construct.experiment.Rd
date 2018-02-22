@@ -20,13 +20,19 @@ construct.experiment(signalPath, indicesPath, name, ignore.checks = F,
 
 \item{color}{Color associated with sample.}
 
-\item{BPscaling}{Scale contacts to havebgenome-wide sum of [BPscaling] reads.}
+\item{comments}{A place to store some comments.}
 
-\item{COMMENTS}{A place to store some comments.}
+\item{BPscaling}{Scale contacts to have agenome-wide sum of [BPscaling] reads (default: 1000M).}
 }
 \value{
-A list.
+An experiment-object, which is a named list of contacts, indices and metadata for a Hi-C matrix of a given sample at a given resolution.
 }
 \description{
-Make a structure which holds the most needed information of a HiC-experiment.
+Make an object which holds the most needed information of a HiC-experiment at a given resolution.
+}
+\note{
+Some reference genomes have very small "random" or "patch" chromosomes, which can have zero contacts mapped to it (at certain resolutions). Construct.experiment checks this and omits these chromosomes in the resulting experiment-object. The RMCHROM-flag will also be set to TRUE: this will help other GENOVA-functions to deal better with this problem. There is a slight performance-cost during the construction of the experiment, however. Therefore, experienced users can set ignore.checks to TRUE to skip all of this, keeping in mind that some functions will not work properly/at all is there are these zero-coverage chromosomes in their data.
+}
+\examples{
+WT_10kb <- construct.experiment(ignore.checks = T, signalPath = 'WT_10kb_iced.matrix', indicesPath = 'WT_10kb_abs.bed', name = "WT", color = "black")
 }

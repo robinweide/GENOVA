@@ -20,11 +20,14 @@ insulation.plot.single(exp1, chrom, start, end, cut.off = NULL,
 
 \item{window.size}{The sliding square size}
 
-\item{local}{Per chromosome?}
+\item{Local}{or per-chromosome normalisation?}
 }
 \value{
 A plot
 }
 \description{
-Plot a single insulation
+Plot a single insulation-score and Hi-C matrix for a region of interest.
+}
+\examples{
+# Make a matrix-plot of an experiment and the insulation-score for a region of interest.
 }

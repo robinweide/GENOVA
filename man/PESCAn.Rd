@@ -16,24 +16,36 @@ PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
 
 \item{size}{Size in bp of window.}
 
-\item{rmOutlier}{Try to perform outlier-correction}
+\item{rmOutlier}{Perform outlier-correction}
 
 \item{minDist}{The minimal distance}
+
+\item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff] percentile per pixel and set values bigger than that to this value.}
 }
 \value{
-A O/E score-matrix.
+An O/E score-matrix (if shift != 0), otherwise an observed score-matrix.
 }
 \description{
-From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan like data structure. Run this per chromosome.
+From a ChIP-peaks.BED dataframe, calculate the all-vs-all Hi-C contacts.
 }
 \examples{
-# Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
-SE <- read.delim(superEnhancers.bed, header = F)
+# Run PE-SCAn on a bed of super-enhancers,
+using WT Hi-C data and a circular permutation of 1Mb
+WT_PE_OUT = PESCAn(exp = WT_40kb,
+                   bed = superEnhancers,
+                   shift = 1e6)
 
-WT_PE = PESCAn_run(exp = WT_exp, bed = SE)
-MUT_PE = PESCAn_run(exp = MUT_exp, bed = SE)
+# Plot using visualise.PESCAn.ggplot
+visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
+                        resolution = 40e3,
+                        smooth = F)
 
-list_PE = list("WT" = WT_PE, 'Mutant' = MUT_PE)
-PESCAn_plot(list_PE, 4e4, title = 'PE-SCAn', zTop = c(1,1.5))
-
+# Plot using persp
+RES = 40e3 # resolution of the Hi-C
+persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
+           y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
+           z = WT_PE_OUT)
+}
+\author{
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

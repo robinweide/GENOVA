@@ -2,16 +2,16 @@
 % Please edit documentation in R/eigen_plot.R
 \name{trans.compartment.plot}
 \alias{trans.compartment.plot}
-\title{Draw interchromosomal interaction heatmap for a chromosome (arm) with corresponding (cis) compartment scores}
+\title{trans.compartment.plot}
 \usage{
 trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
   cut.off = NULL, invert = c(F, F), color.scheme = "fall",
   cs.lim = NULL, chip = NULL)
 }
 \arguments{
-\item{exp}{GENOVA data object}
+\item{exp}{A GENOVA experiment-object}
 
-\item{chrom1, chrom2}{chromosome combination that should be drawn}
+\item{chrom1, chrom2}{Which chromosome-combination should be drawn}
 
 \item{arm1, arm2}{which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')}
 
@@ -21,10 +21,14 @@ trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
 
 \item{color.scheme}{color scheme that should be used, defaults to fall, other values result in white-red gradient}
 
-\item{cs.lim}{y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value}
+\item{cs.lim}{y-axis limit for the compartment-score, if unset (NULL) will default to the maximum absolute value}
 
 \item{chip}{A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments}
 }
 \description{
 Draw interchromosomal interaction heatmap for a chromosome (arm) with corresponding (cis) compartment scores
+}
+\note{
+# Plot a trans-compartment plot of the q-arms of chromosome 9 and 22
+trans.compartment.plot(exp = Hap1_WT_40kb, chrom1 = 'chr9', arm1 = 'q', chrom2 = 'chr22', arm2 = 'q', cut.off = 10,chip = H3K27ac_peaks)
 }

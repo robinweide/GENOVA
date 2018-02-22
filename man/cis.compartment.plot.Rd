@@ -2,17 +2,17 @@
 % Please edit documentation in R/eigen_plot.R
 \name{cis.compartment.plot}
 \alias{cis.compartment.plot}
-\title{Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores}
+\title{cis.compartment.plot}
 \usage{
 cis.compartment.plot(exp, chrom, arm = "p", cut.off = NULL, obs.exp = F,
   invert = F, color.scheme = "fall", cs.lim = NULL, chip = NULL)
 }
 \arguments{
-\item{exp}{GENOVA data object}
+\item{exp}{A GENOVA experiment-object}
 
-\item{chrom}{chromosome that should be drawn}
+\item{chrom}{The chromosome that should be drawn}
 
-\item{arm}{which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')}
+\item{arm}{Which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')}
 
 \item{cut.off}{maximum value for the heatmap}
 
@@ -28,4 +28,11 @@ cis.compartment.plot(exp, chrom, arm = "p", cut.off = NULL, obs.exp = F,
 }
 \description{
 Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores
+}
+\note{
+# Plot a cis-compartment plot of the q-arm of chromosome 14.
+cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks)
+
+# Plot a observed/expected cis-compartment plot of the q-arm of chromosome 14.
+cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks, obs.exp = T)
 }

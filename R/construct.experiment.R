@@ -1,18 +1,22 @@
 #' Construct a HiC-experiment.
 #'
-#' Make a structure which holds the most needed information of a HiC-experiment.
+#' Make an object which holds the most needed information of a HiC-experiment at a given resolution.
 #'
 #' @param signalPath Full path to a HiC-pro-like matrix-file or .sig from juicerToGenova.py
 #' @param indicesPath Full path the HiC-pro-like index-file or .bed from juicerToGenova.py
 #' @param name The name of the sample.
 #' @param ignore.checks Skip the checks for empty matrices: EXPERT-ONLY!
 #' @param color Color associated with sample.
-#' @param COMMENTS A place to store some comments.
+#' @param comments A place to store some comments.
 #' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
-#' @param BPscaling Scale contacts to havebgenome-wide sum of [BPscaling] reads.
-#' @return A list.
+#' @param BPscaling Scale contacts to have agenome-wide sum of [BPscaling] reads (default: 1000M).
+#' @note
+#' Some reference genomes have very small "random" or "patch" chromosomes, which can have zero contacts mapped to it (at certain resolutions). Construct.experiment checks this and omits these chromosomes in the resulting experiment-object. The RMCHROM-flag will also be set to TRUE: this will help other GENOVA-functions to deal better with this problem. There is a slight performance-cost during the construction of the experiment, however. Therefore, experienced users can set ignore.checks to TRUE to skip all of this, keeping in mind that some functions will not work properly/at all is there are these zero-coverage chromosomes in their data.
+#' @examples
+#' WT_10kb <- construct.experiment(ignore.checks = T, signalPath = 'WT_10kb_iced.matrix', indicesPath = 'WT_10kb_abs.bed', name = "WT", color = "black")
+#' @return An experiment-object, which is a named list of contacts, indices and metadata for a Hi-C matrix of a given sample at a given resolution.
 #' @export
-construct.experiment <- function(signalPath, indicesPath, name, ignore.checks = F, centromeres = NULL,  color = 1, comments = NULL,BPscaling = 1e9){
+construct.experiment <- function(signalPath, indicesPath, name, ignore.checks = F, centromeres = NULL,  color = 1, comments = NULL, BPscaling = 1e9){
   # Check if files exist
   if(!file.exists(signalPath)){stop('Signal file not found.')}
   if(!file.exists(indicesPath)){stop('Index file not found.')}

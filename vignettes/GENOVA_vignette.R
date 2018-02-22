@@ -21,6 +21,12 @@ knitr::include_graphics('/DATA/users/r.vd.weide/github/GENOVA/t1logo')
 # devtools::install_github("robinweide/GENOVA", ref = 'dev')
 library(GENOVA)
 
+## ----centromere0, cache=T, echo = F----------------------------------------
+centromeres = read.delim('data/hg19_cytobandAcen.bed', 
+                         sep = '\t', 
+                         h = F, 
+                         stringsAsFactors = F)
+
 ## ----peakEXP3, collapse=F, results='markup', echo = F----------------------
 str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 
@@ -34,15 +40,33 @@ str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 #  -norm KR \
 #  -O Sanborn_Hap1_combined_30.hic_10kb_KR
 
-## ----cis, cache=T,fig.cap="Fraction of cis-contacts per chromosome.", fig.small = T----
-cisChrom_out <- cisTotal.perChrom( Hap1_WT_1MB )
-
-## ----cis2, cache=T,fig.cap="Fraction of cis-contacts per chromosome. Chromosomes 9, 15, 19 \\& 22 have translocations, which therefore appear to have more trans-contacts, but which in reality are cis-contacts.", fig.small = T----
-plot( cisChrom_out$perChrom, las=2 )
-abline( h = cisChrom_out$genomeWide, col = 'red' ) 
-
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)
+
+## ----saddle, message=FALSE,  cache=T---------------------------------------
+H3K27acPeaks = read.delim('data/H3K27ac_WT.narrowPeak', h = F)
+saddle_WT = saddleBins(exp = Hap1_WT_1MB, 
+                       ChIP = H3K27acPeaks,
+                       chromsToUse = paste0('chr', 1:10),
+                       nBins = 25, 
+                       verbose = F)
+saddle_WAPL = saddleBins(exp = Hap1_WAPL_1MB, 
+                       ChIP = H3K27acPeaks,
+                       chromsToUse = paste0('chr', 1:10),
+                       nBins = 25,  
+                       verbose = F)
+
+## ----saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot"----
+visualise.saddle(list(saddle_WT,
+                      saddle_WAPL),
+                 crossLines = T, 
+                 addText = T,
+                 zlim = c(-0.5,0.5), 
+                 EVlim = c(-0.5,0.5))
+
+## ----saddleStrength, message=FALSE,  cache=T, warning=FALSE, fig.cap= "The per-arm compartment strength", fig.small = T----
+visualise.compartmentStrength(list(saddle_WT,
+                                   saddle_WAPL))
 
 ## ---- echo =F--------------------------------------------------------------
 knitr::kable(

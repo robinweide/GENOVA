@@ -4,23 +4,41 @@
 \alias{compartment.score}
 \title{Get compartment-scores for a chromosome}
 \usage{
-compartment.score(exp, chrom = "chr2", comparableBed = NULL,
-  comparableTrack = NULL, shuffle = F)
+compartment.score(exp, chrom = "chr2", empericalCentromeres = T, pEV = 1,
+  qEV = 1, comparableBed = NULL, comparableTrack = NULL, shuffle = F)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
 \item{chrom}{The chromosome of interest.}
 
-\item{comparableTrack}{An optional vector, which will be used to flip the A/B signal.
-For example, one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.}
+\item{empericalCentromeres}{Emperically determine the centromeres (i.e. based on the largest white stripe in the Hi-C matrix).}
+
+\item{pEV, qEV}{Sometimes, the second or third EV will better resemble the compartmentalisation. In this case, you can choose to get the 2nd or 3rd EV per chromosome-arm.}
+
+\item{comparableBed}{An optional dataframe of active regions (e.g. H3K27ac-peaks), which will be used to flip the A/B signal.}
+
+\item{comparableTrack}{An optional earlier output of compartment.score, which will be used to flip the A/B signal. Or one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.}
 
 \item{shuffle}{Will shuffle the Hi-C data if set to true. Useful for showing compartment-scores if no A/B structure.}
 }
 \value{
-A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.
+A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.The centromere will be skipped.
 }
 \description{
 This uses the per-arm compartment-score algorithm of G. Fudenberg.
-The procedure is an eigenvector decomposition of the observed/expected matrix.
+The procedure is an eigenvector decomposition of the observed/expected matrix minus one.
+}
+\examples{
+# Compute the compartment-scores of chromosome 20.
+WT_40kb_CS = compartment.score(WT_40kb, chrom = 'chr20')
+
+# Plot chromosome 20 with skipAnn = T to allow for an
+# insertion op a plot on top.
+hic.matrixplot(WT_40kb, chrom = 'chr20', start = 0,
+end = 63025520, skipAnn = T, cut.off = 25)
+
+# Plot the compartment-score as a histogram
+plot(WT_40kb_CS$start, WT_40kb_CS$compartmentScore,
+t = 'h', axes = F); axis(2)
 }

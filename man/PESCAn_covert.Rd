@@ -5,7 +5,7 @@
 \title{PESCAn_covert}
 \usage{
 PESCAn_covert(experiment, bed, minComparables = 5, rmOutlier = F,
-  minDist = 5e+06, size = 5e+05, add = 0)
+  minDist = 5e+06, size = 5e+05, add = 0, outlierCutOff = 0.995)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -21,6 +21,8 @@ PESCAn_covert(experiment, bed, minComparables = 5, rmOutlier = F,
 \item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
 
 \item{add}{Add constant value to bed-start and -end.}
+
+\item{outlierCutOff}{outlierCutOff}
 }
 \value{
 A score-matrix.
@@ -30,13 +32,14 @@ From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan 
 }
 \examples{
 # Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
-SE <- read.delim(superEnhancers.bed, header = F)
-SE_vs_WT <- PESCAn(experiment = WT, bed = SE, size = 500e3)
+WT_PE_OUT = PESCAn(exp = WT_40kb, bed = superEnhancers)
 
-# Do a circular perutation by adding 1Mb.
-SE_vs_WT_perm <- PESCAn(experiment = WT, bed = SE, size = 500e3, add = 1e6)
+# Plot using visualise.PESCAn.ggplot
+visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
+                        resolution = 40e3,
+                        smooth = F)
 
-# Plot using, for example, persp
+# Plot using persp
 persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
 
 }

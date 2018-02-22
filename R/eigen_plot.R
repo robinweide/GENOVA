@@ -1,4 +1,3 @@
-
 #create an observed over expected matrix
 obs.exp.matrix <- function( mat, correct=F, outlier.correct = 0.995, lowess = F ){
 	pos <- which(mat$z > -1, arr.ind=T)
@@ -161,17 +160,25 @@ switch.EV <- function( ev.data, chip, chrom ){
 
 
 
+#' cis.compartment.plot
+#'
 #' Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores
 #'
-#' @param exp GENOVA data object
-#' @param chrom chromosome that should be drawn
-#' @param arm which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')
+#' @param exp A GENOVA experiment-object
+#' @param chrom The chromosome that should be drawn
+#' @param arm Which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')
 #' @param cut.off maximum value for the heatmap
 #' @param obs.exp whether an observed over expected matrix should be drawn (default is false)
 #' @param invert whether the compartment score should be inverted
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
 #' @param chip A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments
+#' @note
+#' # Plot a cis-compartment plot of the q-arm of chromosome 14.
+#' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks)
+#'
+#' # Plot a observed/expected cis-compartment plot of the q-arm of chromosome 14.
+#' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks, obs.exp = T)
 #' @export
 cis.compartment.plot <- function( exp, chrom, arm="p", cut.off=NULL, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL, chip = NULL){
 	data = exp
@@ -310,16 +317,21 @@ switch.chromosomes <- function( data, chrom1, chrom2 ){
 }
 
 
+#' trans.compartment.plot
+#'
 #' Draw interchromosomal interaction heatmap for a chromosome (arm) with corresponding (cis) compartment scores
 #'
-#' @param exp GENOVA data object
-#' @param chrom1,chrom2 chromosome combination that should be drawn
+#' @param exp A GENOVA experiment-object
+#' @param chrom1,chrom2 Which chromosome-combination should be drawn
 #' @param arm1,arm2 which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')
 #' @param cut.off maximum value for the heatmap
 #' @param invert whether the compartment score should be inverted, this should be a vector with a logical value for each chromosome
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
-#' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
+#' @param cs.lim y-axis limit for the compartment-score, if unset (NULL) will default to the maximum absolute value
 #' @param chip A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments
+#' @note
+#' # Plot a trans-compartment plot of the q-arms of chromosome 9 and 22
+#' trans.compartment.plot(exp = Hap1_WT_40kb, chrom1 = 'chr9', arm1 = 'q', chrom2 = 'chr22', arm2 = 'q', cut.off = 10,chip = H3K27ac_peaks)
 #' @export
 trans.compartment.plot <- function( exp, chrom1, arm1="p", chrom2, arm2 = "p", cut.off=NULL, invert=c(F,F), color.scheme="fall", cs.lim=NULL, chip=NULL){
   data = exp

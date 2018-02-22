@@ -1,11 +1,17 @@
-#' Plot the APA-results
+#' visualise.APA.ggplot
 #'
-#' @param APAlist A list of results from `APA`.
-#' @param title Text to plot
-#' @param Focus Which sample does need to be the to-compare sample?
-#' @param zTop The min and max colorscale-values for the first row of plots.
-#' @param zBottom The min and max colorscale-values for the first row of plots.
+#' Plot the APA-results and the differential results.
+#'
+#' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+#' @param APAlist A list of results from the APA-function.
+#' @param title Title-text to plot.
+#' @param focus Which sample will be the to-compare sample in the differential row?
+#' @param zTop The min and max values for the first row of plots.
+#' @param zBottom The min and max values for the first row of plots.
 #' @return A grid object, containing two ggplot-objects.
+#' @details
+#' By substracting the values from each sample with the values from the \code{focus}-sample, we generate the differentials.
+#' A positive value in the differential plots thus means an enrichment in that sample versus the \code{focus}-sample.
 #' @export
 visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = NULL, focus = 1,...){
   OL = c()
@@ -14,16 +20,36 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
   }
   OL = unique(OL)
   if(length(OL) != 1){
-    stop('There seem to be some APAs with outlier-correction and some not...')
+    stop('There seem to be APAs with different outlier-corrections...')
   }
 
   higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
   resolution = APAlist[[1]]$RES
-  size <- dim(as.data.frame(APAlist[[1]]$APA))[1]
+
+  size <- dim(APAlist[[1]]$APA)[1]
   size.banks <- (size - 1)/2
-  tickLabelDownstream <- as.character(1 * ((size.banks/2 *
-                                              resolution)/1000))
-  tickLabelUpstream <- as.character(-1 * ((size.banks/2 * resolution)/1000))
+  allTicks = seq(resolution*size.banks, -1*resolution*size.banks, length.out = size)/1e3
+
+  tickLabelUpstream = 0
+  tickLabelDownstream = 0
+
+  tickPosUpstream =  (size.banks +1) - (size.banks/2)
+  tickPosDownstream = (size.banks +1) + (size.banks/2)
+
+  if(size.banks %% 2 == 0){ # like 21
+    tickLabelDownstream = allTicks[tickPosDownstream]
+    tickLabelUpstream = allTicks[tickPosUpstream]
+  } else { # 19
+    tickPosUpstream = tickPosUpstream - .5
+    tickPosDownstream = tickPosDownstream + .5
+
+    tickLabelDownstream = allTicks[tickPosDownstream]
+    tickLabelUpstream = allTicks[tickPosUpstream]
+  }
+
+
+
+
   abovePlots <- data.frame(Var1 = integer(), Var2 = integer(),
                            value = numeric(), sample = factor())
   belowPlots <- abovePlots
@@ -36,7 +62,7 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
     a$sample <- factor(rep(names(APAlist)[i], length(a[, 1])))
     abovePlots <- rbind(abovePlots, a)
 
-    e <-  melt(as.matrix(firstMat - secondMat))
+    e <-  reshape2::melt(as.matrix(firstMat - secondMat))
     e$sample <- rep(paste0(names(APAlist)[focus], " vs ",
                            names(APAlist)[i]), length(e[, 1]))
     belowPlots <- rbind(belowPlots, e)
@@ -60,30 +86,24 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
   volgorde <- match(names(APAlist), levels(abovePlots$sample))
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde])
 
-  # if(require('viridis') == TRUE){
-    plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-      ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
-      ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
-      ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
-      ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
-      ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") +
-      ggplot2::scale_fill_gradientn(colours = higlassCol, limits = z)
-      # #!
-      # viridis::scale_fill_viridis(limits = z, option = "inferno", direction = -1)
-      # #!
+
+  plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = value)) +
+    ggplot2::facet_grid(. ~ sample) +
+    ggplot2::coord_fixed() +
+
+    GENOVA_THEME() +
+
+    ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
+                                expand = c(0,0),
+                                labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
+    ggplot2::scale_y_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
+                                expand = c(0,0),
+                                labels = c(paste0(tickLabelDownstream,  "kb"), "5'", paste0(tickLabelUpstream, "kb"))) +
+    ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") +
+    ggplot2::scale_fill_gradientn(colours = higlassCol, limits = z)
 
 
-
-  # } else {
-  #   plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
-  #     ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-  #     ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
-  #     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
-  #     ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
-  #     ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
-  #     ggplot2::labs(title = title, x = "", y = "", fill = "Contacts ") + ggplot2::scale_fill_distiller(limits = z, palette = "Spectral")
-  # }
 
 
   z2 <- NULL
@@ -101,11 +121,16 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
 
   plot2 <- ggplot2::ggplot(belowPlots, ggplot2::aes(Var1, Var2)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value)) +
-    ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
+    ggplot2::facet_grid(. ~ sample) +
+    ggplot2::coord_fixed() +
     ggplot2::scale_fill_gradient2(limits = z2, midpoint = 0, low = "#2166ac", mid = "white", high = "#b2182b") +
-    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
-    ggplot2::scale_x_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
-    ggplot2::scale_y_continuous(breaks = c(size *  0.25, size * 0.5, size * 0.75), labels = c(paste0(tickLabelUpstream, "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
+    GENOVA_THEME() +
+    ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
+                                expand = c(0,0),
+                                labels = c(paste0(tickLabelDownstream,  "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
+    ggplot2::scale_y_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
+                                expand = c(0,0),
+                                labels = c(paste0(tickLabelDownstream, "kb"), "5'", paste0(tickLabelUpstream, "kb"))) +
     ggplot2::labs(x = "",   y = "", fill = "Difference")
 
   grid::grid.newpage()

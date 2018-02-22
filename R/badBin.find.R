@@ -5,19 +5,25 @@
 #' @param experiment The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param p.treshold Cutoff of spearmans correlation.
 #' @param getBed Produce a bed-like object.
+#' @param plotBad Plot some of the bad bins for visual inspection.
 #' @return A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can output a bed-file (`bed`).
-#' @export
+#' @examples
+#' # Identify and plot the bad bins
+#' bb_out <- badBin.find(experiment = WT_100kb, p.treshold = 0.1, getBed = T, plotBad = T)
+#'
+#' # plot the region from within hic.matrixplot
+#' hic.matrixplot(exp1 = WT_100kb, chrom = 'chr7',  start = 26.75e6,  end=28.5e6, chip = list(bb_out$bed))
 badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T){
   ## INIT-phase
   cat("Initiation...\n")
   allbins <- unique(experiment$ICE$V1)
   maxbin <- max(allbins)
   oneToMaxBin <- 1:maxbin
-  
+
   res <- experiment$RES
   ### Sample 1000 bins (more, if runtime is low enough)
   sampledBINs <- sample(unique(experiment$ICE$V1), size = 1000)
-  
+
   cat("Generating base RCP... 0 percent\t\t\t\t\r\r")
   ### Make mean RCP of sampled bins -> RCP_base
   RCP_base <- rep(0, (1e6 / res)/2)
@@ -81,5 +87,5 @@ badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T){
   } else {
     return(list(badBins = badBins))
   }
-  
+
 }

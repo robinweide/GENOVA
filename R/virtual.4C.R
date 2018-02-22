@@ -8,7 +8,6 @@
 #' @param smallTreshold The minimal size of loops. Too small loops lead to messy plots.
 #' @param verbose Produces a progress-indication.
 #' @return A vector containing the y-axis scores per rescaled bin.
-#' @export
 virtual.4C <- function (experiment, loop.bed, smallTreshold = 225000, verbose = F)
 {
     hicdata <- experiment$ICE

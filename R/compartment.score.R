@@ -1,3 +1,35 @@
+#select a matrix of interactions for between two chromosomes
+selectData_saddle <- function (exp, chrom1, chrom2){
+  bed <- exp$ABS
+  data <- exp$ICE
+  X <- bed[bed[,1]==chrom1,4]
+  Y <- bed[bed[,1]==chrom2,4]
+  #the order of the chromosomes matters for the analysis
+  #make sure that X is smaller than Y, otherwise switch
+  #them around
+  if(X[1] > Y[1]){
+    temp <- X
+    X <- Y
+    Y <- temp
+    temp <- chrom1; chrom1 <- chrom2; chrom2 <- temp; #switch the chromosomes around as well
+  }
+  #create x and y vectors that contain the positions of the
+  #entries in the matrix that we are creating
+  x <- rep(X[1]:X[length(X)],        tail(Y, n=1) - Y[1] + 1)
+  y <- rep(Y[1]:Y[length(Y)], each = tail(X, n=1) - X[1] + 1)
+  data.sub <- data[base::list(x, y)]
+  data.sub <- data.sub[!is.na(data.sub$V3)]
+  #create an empty matrix, that has as many rows as the 'X' chromosome has
+  #windows and as many columns as the 'Y' chromosome has windows
+  mat <- matrix(0, ncol=tail(Y, n=1) - Y[1] + 1, nrow=tail(X, n=1) - X[1] + 1)
+  mat[cbind(data.sub$V1-min(X)+1, data.sub$V2-min(Y)+1)] <- data.sub$V3
+  x.pos <- bed[bed[,1]==chrom1,2]
+  y.pos <- bed[bed[,1]==chrom2,2]
+  #create a list that is compatible with the image function
+  mat <- list(x=x.pos, y=y.pos, z=mat)
+  mat
+}
+
 obs.exp.matrix <- function( mat, correct=F, outlier.correct = 0.995, lowess = F ){
   mat$z[is.na(mat$z)] <- 0
   pos <- which(mat$z > -1, arr.ind=T)
@@ -34,24 +66,57 @@ get.eigen <- function( mat, with.eigen.value = T, outlier.correct = 0.995 ){
   ev
 }
 
+#find the largest stretch of 0s, which is
+#most likely the centromere
+largest.stretch <- function( x ){
+  temp <- cumsum(c(1,diff(x) - 1))
+  temp2 <- rle(temp)
+  x[which(temp == with(temp2, values[which.max(lengths)]))]
+}
+
 #' Get compartment-scores for a chromosome
 #'
 #' This uses the per-arm compartment-score algorithm of G. Fudenberg.
-#' The procedure is an eigenvector decomposition of the observed/expected matrix.
+#' The procedure is an eigenvector decomposition of the observed/expected matrix minus one.
 #'
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param chrom The chromosome of interest.
-#' @param comparableTrack An optional vector, which will be used to flip the A/B signal.
-#' For example, one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.
+#' @param empericalCentromeres Emperically determine the centromeres (i.e. based on the largest white stripe in the Hi-C matrix).
+#' @param comparableBed An optional dataframe of active regions (e.g. H3K27ac-peaks), which will be used to flip the A/B signal.
+#' @param comparableTrack An optional earlier output of compartment.score, which will be used to flip the A/B signal. Or one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.
 #' @param shuffle Will shuffle the Hi-C data if set to true. Useful for showing compartment-scores if no A/B structure.
-#' @return A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.
-#' @export
+#' @param pEV,qEV Sometimes, the second or third EV will better resemble the compartmentalisation. In this case, you can choose to get the 2nd or 3rd EV per chromosome-arm.
+#' @return A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.The centromere will be skipped.
+#' @examples
+#' # Compute the compartment-scores of chromosome 20.
+#' WT_40kb_CS = compartment.score(WT_40kb, chrom = 'chr20')
 #'
-compartment.score <- function(exp, chrom = "chr2", comparableBed = NULL, comparableTrack = NULL, shuffle = F){
+#' # Plot chromosome 20 with skipAnn = T to allow for an
+#' # insertion op a plot on top.
+#' hic.matrixplot(WT_40kb, chrom = 'chr20', start = 0,
+#' end = 63025520, skipAnn = T, cut.off = 25)
+#'
+#' # Plot the compartment-score as a histogram
+#' plot(WT_40kb_CS$start, WT_40kb_CS$compartmentScore,
+#' t = 'h', axes = F); axis(2)
+#' @export
+compartment.score <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV = 1, qEV =1, comparableBed = NULL, comparableTrack = NULL, shuffle = F){
+  centChrom = NULL
 
-  if(is.null(exp$CENTROMERES)){
-    stop('Please store centromere-data in construct.experiment.\n')
+  if(empericalCentromeres){
+    mat <- selectData_saddle( exp, chrom, chrom)
+
+    cent <- which(apply(mat$z,1,sum)==0)
+    cent <- largest.stretch(cent)
+    centChrom <- data.frame(chrom = chrom,
+                            startC = min(cent)*exp$RES,
+                            endC = max(cent)*exp$RES)
+  } else if(!is.null(exp$CENTROMERES) & chrom %in% exp$CENTROMERES[,1]){
+    centChrom = exp$CENTROMERES[exp$CENTROMERES[,1] == chrom,]
+  } else {
+    stop("User doesn't want empericalCentromeres,\nbut chromosome is not found in exp$CENTROMERES.\nQuitting...")
   }
+
   chromSize <- max(exp$ABS[exp$ABS$V1 == chrom,3])
 
   ###
@@ -59,7 +124,7 @@ compartment.score <- function(exp, chrom = "chr2", comparableBed = NULL, compara
   ###
   C = chrom
   S = 0
-  E = exp$CENTROMERES[exp$CENTROMERES$V1 == chrom,2]
+  E = centChrom[centChrom[,1] == chrom,2]
 
   # get all bins of this region
   first_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 <= E,3] - exp$RES
@@ -69,7 +134,7 @@ compartment.score <- function(exp, chrom = "chr2", comparableBed = NULL, compara
     ss <- suppressMessages(shuffleHiC(ss))
   }
   ss_eigen <- get.eigen(ss)
-  compScore <- ss_eigen$vectors[,1] * (ss_eigen$values[1]  ** 0.5)
+  compScore <- ss_eigen$vectors[,pEV] * (ss_eigen$values[pEV]  ** 0.5)
 
   # If there is a comparison-vector, now is the chance to use it...
 
@@ -115,7 +180,7 @@ compartment.score <- function(exp, chrom = "chr2", comparableBed = NULL, compara
   # second_arm
   ###
   C = chrom
-  S = exp$CENTROMERES[exp$CENTROMERES$V1 == chrom,2]
+  S = centChrom[centChrom[,1] == chrom,3]
   E = max(exp$ABS[exp$ABS$V1 == C,3])
 
   # get all bins of this region
@@ -126,7 +191,7 @@ compartment.score <- function(exp, chrom = "chr2", comparableBed = NULL, compara
     ss <- suppressMessages(shuffleHiC(ss))
   }
   ss_eigen <- get.eigen(ss)
-  compScore <- ss_eigen$vectors[,1] * (ss_eigen$values[1]  ** 0.5)
+  compScore <- ss_eigen$vectors[,qEV] * (ss_eigen$values[qEV]  ** 0.5)
 
   # If there is a comparison-vector, now is the chance to use it...
 

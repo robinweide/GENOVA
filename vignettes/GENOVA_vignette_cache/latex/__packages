@@ -2,8 +2,6 @@ base
 BiocStyle
 GENOVA
 bindrcpp
-bigwrig
 ggplot2
+bigwrig
 reshape2
-viridisLite
-viridis

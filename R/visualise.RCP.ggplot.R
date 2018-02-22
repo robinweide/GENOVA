@@ -1,8 +1,9 @@
 #' Plot the RCP results
 #'
-#' Produces a line-plot per chromosome.
+#' Produces a line-plot per chromosome and (optionally) per-BED.
 #'
-#' @param RCPdata Output of `RCP`
+#' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+#' @param RCPdata Output of the RCP-function.
 #' @param smooth Plot a lowess-smoothed line?
 #' @param combine Combine all chromosomes?
 #' @param ylim An optional vector of two values, containing the y-axis limits.
@@ -58,10 +59,10 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
                                                  y = prob)) +
         ggplot2::geom_line(size = lineWidth, mapping = ggplot2::aes( lty = BED)) +
         ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
-        ggplot2::theme_linedraw() +
         ggplot2::scale_color_manual(values = cols) +
         ggplot2::labs(title = "Relative contact probability",
                       x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
+        GENOVA_THEME() +
         ggplot2::theme(aspect.ratio = 1) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,vjust = 0.5, hjust = 1))
     } else {
@@ -70,11 +71,11 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
                                                  y = prob)) +
         ggplot2::geom_line(size = lineWidth, mapping = ggplot2::aes( lty = BED)) +
         ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
-        ggplot2::theme_linedraw() +
         ggplot2::scale_color_manual(values = cols) +
         ggplot2::labs(title = "Relative contact probability",
                       x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
         ggplot2::theme(aspect.ratio = 1) +
+        GENOVA_THEME() +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,vjust = 0.5, hjust = 1))
 
 
@@ -119,10 +120,10 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
                                                y = prob)) +
       ggplot2::geom_smooth(mapping = ggplot2::aes( lty = BED),size = lineWidth,  span = 0.25, se = F) +
       ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
-      ggplot2::theme_linedraw() +
       ggplot2::scale_color_manual(values = cols) +
       ggplot2::labs(title = "Relative contact probability",
                     x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
+      GENOVA_THEME() +
       ggplot2::theme(aspect.ratio = 1) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
                                                          vjust = 0.5, hjust = 1))
@@ -131,10 +132,10 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
                                                  y = prob)) +
         ggplot2::geom_smooth(mapping = ggplot2::aes( lty = BED),size = lineWidth,  span = 0.25, se = F) +
         ggplot2::facet_wrap(~chrom, nrow = floor(sqrt(length(unique(RCPdata$chrom))))) +
-        ggplot2::theme_linedraw() +
         ggplot2::scale_color_manual(values = cols) +
         ggplot2::labs(title = "Relative contact probability",
                       x = "Distance (Mbp)", y = "RCP", col = "", lty = "") +
+        GENOVA_THEME() +
         ggplot2::theme(aspect.ratio = 1) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90,
                                                            vjust = 0.5, hjust = 1))
@@ -168,3 +169,14 @@ visualise.RCP.ggplot <-function(RCPdata, smooth =F, combine = T, ylim = NULL, xl
                                       panel.grid.major =  ggplot2::element_line(colour = '#333333')))
 }
 
+GENOVA_THEME = function(){
+  require(ggplot2)
+  p = ggplot2::theme(panel.background = ggplot2::element_blank(),
+                     legend.key =  ggplot2::element_rect(fill = 'white'),
+                     strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                     panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                     text = ggplot2::element_text(color = 'black'),
+                     axis.text = ggplot2::element_text(colour = 'black'),
+                     strip.text = ggplot2::element_text(colour = 'black') )
+  return(p)
+}

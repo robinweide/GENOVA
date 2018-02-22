@@ -1,6 +1,6 @@
 #' Get matrix from a BED-like entry.
 #'
-#' Extracts a symmetric matrix around the diagonal from *start* to *stop* in chromosome *chrom*.
+#' Extracts a symmetric matrix around the diagonal from start to stop in chromosome chrom.
 #'
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param chrom Chromosome.
@@ -9,6 +9,7 @@
 #' @examples
 #' # get the TP53-locus in an experiment mapped to hg19
 #' ss_out <- select.subset(experiment = WT, chrom = 'chr17', start = 7.5e6, end = 7.6e6)
+#'
 #' # plot the region
 #' image(ss_out$z)
 #' @return A list with the X and Y locations and a matrix (Z) containing the contacts.

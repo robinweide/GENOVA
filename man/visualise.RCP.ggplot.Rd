@@ -9,7 +9,7 @@ visualise.RCP.ggplot(RCPdata, smooth = F, combine = T, ylim = NULL,
   pointWidth = 0.5)
 }
 \arguments{
-\item{RCPdata}{Output of `RCP`}
+\item{RCPdata}{Output of the RCP-function.}
 
 \item{smooth}{Plot a lowess-smoothed line?}
 
@@ -31,7 +31,7 @@ visualise.RCP.ggplot(RCPdata, smooth = F, combine = T, ylim = NULL,
 A ggplot-object
 }
 \description{
-Produces a line-plot per chromosome.
+Produces a line-plot per chromosome and (optionally) per-BED.
 }
 \examples{
 # Run RCP on the first five chromosomes
@@ -43,4 +43,7 @@ visualise.RCP.ggplot(RCP_out,combine = F,smooth = F, lineOnly = F, xlim = c(5,11
 # Plot the RCP-output with a loess-smoothed line without the actual observed points
 # between 5 and 100Mb and combine all chromosomes in one plot.
 visualise.RCP.ggplot(RCP_out,combine = T,smooth = T, lineOnly = T, xlim = c(5,110))
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 }

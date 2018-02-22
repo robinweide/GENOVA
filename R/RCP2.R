@@ -1,18 +1,32 @@
-
-#' Get a per-chromosome scaling plot
+#' Relative Contact Probabilities
 #'
 #' Produce a dataframe with the probabilities of contacts in a set of distance-bins.
 #' Bins are created on a log scale, which leads to equal amounts of datapoints per bin.
 #'
+#' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 #' @param experiment List of experiment-objects from `construct.experiment()`.
-#' @param chromsToUse A vector containing the chromosome-names of interest. If bed is also given, only entries in chromsToUse will be used.
+#' @param chromsToUse A vector containing the chromosome-names of interest. If bedList is also given, only BED-entries in chromsToUse will be used.
 #' @param bedList A named list of BED-like dataframse of the regions of interest. RCP will intersect this with the Hi-C bin by intersecting the middle of both ranges.
 #' @param colors Override colors of experiments. Will be used for BEDs if only one experiment is given.
-#' @param maxDistance The maximal distance to calculate scalings for.
-#' @param outlierCutoff Percentage for the cutoff.
+#' @param maxDistance The maximal distance to calculate RCPs for.
+#' @param outlierCutoff Remove the [outlierCutoff] top and bottom percentages.
 #' @param ignoreLengthWarning Force RCP to use maxDistance instead of longest chromosome if that is smaller than maxDistance.
 #' @param verbose Produces a progress-indication.
-#' @return A data_frame with distance-bin and probabilities.
+#' @return A data.frame, containing:
+#' @return \item{distance}{the distance-bin}
+#' @return \item{prob}{the relative contact probability}
+#' @return \item{SEM}{the SEM of the RCP}
+#' @return \item{BED}{if and which BED is used}
+#' @return \item{color}{the corresponding color of the lines, taken from exp$COL as default}
+#' @return \item{sample}{the corresponding sample-name}
+#' @return \item{chrom}{the corresponding}
+#' @examples
+#' # Calculate the RCP of chromosome 1
+#' RCP_out = RCP(experimentList = list('WT' = WT_1MB),
+#' chromsToUse = 'chr1')
+#'
+#' # Plot the RCP
+#' visualise.RCP.ggplot(RCP_out)
 #' @export
 RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, colors = NULL, maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,verbose = F){
 

@@ -28,3 +28,20 @@ A scatterplot.
 \description{
 Create a scatter plot of the inter and intra TAD contact frequencies.
 }
+\examples{
+# get scores for WT and WAPL data
+TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs,
+                                       max.neighbor = 10,
+                                       exp = WT_10kb)
+TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs,
+                                       max.neighbor = 10,
+                                       exp = WAPL_10kb)
+
+# plot a TAD+N scatterplot
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
+                             exp2 = TAD_N_WAPL, # y
+                             allData = T)
+}
+\author{
+Elzo de Wit, \email{e.d.wit@nki.nl}
+}

@@ -2,32 +2,61 @@
 % Please edit documentation in R/APA.R
 \name{APA}
 \alias{APA}
-\title{Get a z-stack matrix of 2D-regions (e.g. loops).}
+\title{Aggegrate Peak Analysis}
 \usage{
-APA(experiment, loop.bed, smallTreshold = NULL, rmOutlier = F, size = 21,
-  verbose = F, saveRaw = T, outlierCutOff = 40, ...)
+APA(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T, size = 21,
+  verbose = F, outlierCutOff = 0.995, ...)
 }
 \arguments{
-\item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{experiment}{The Hi-C experiment object of a sample:
+produced by construct.experiment().}
 
-\item{loop.bed}{Bedpe file containing the loop positions: produced by read.bedpe().}
+\item{loop.bed}{BEDPE-df containing the loop positions.
+Should have at least six columns, containing the regions of both
+loop-anchors: chrom1/start1/end1/chrom2/start2/end2.}
 
-\item{smallTreshold}{The minimal size of loops. Too small loops lead to messy plots, with the diagonal visible.}
+\item{smallTreshold}{The minimal size of loops. Too small loops lead to
+messy plots, with the diagonal visible.}
 
-\item{rmOutlier}{Try to perform outlier-correction}
+\item{rmOutlier}{Perform outlier-correction by tresholding [outlierCutOff]
+percentile per pixel.}
 
-\item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
+\item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21
+yield an output with 10 Hi-C bins up- and downstream of the anchor).}
 
 \item{verbose}{Produces a progress-indication.}
 
-\item{saveRaw}{Logical: True will output the raw matrices per loop and performs outlier-detection.}
-
-\item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
+\item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff]
+percentile per pixel and set values bigger than that to this value.}
 }
 \value{
-A list of a matrix containing the Z-stack scores (APA), the raw matrices (rawMatList) and the outlier-removed matrix containing the Z-stack scores (APAoutlier).
+\item{APA}{a matrix with the average Z-stack scores}
+
+\item{rawMatList}{the raw underlying matrices per loop}
+
+\item{APAraw}{the uncorrected APA_matrix}
+
+\item{APAxy}{a version for base::image}
+
+\item{RES}{the resolution of the used Hi-C matrix}
+
+\item{OUTLIERCORRECTIONSWITCH}{the outlierCutOff if rmOutlier is
+TRUE, otherwise set to FALSE}
 }
 \description{
-Extract matrices around a defined set of pixels, like possible loops.
-Sums over all matrices to produce a single Z-stack matrix.
+Get a z-stack matrix of 2D-regions (e.g. loops).
+The function extracts matrices around a defined set of pixels, like possible
+loops.
+Next, it averages over all matrices to produce a single Z-stack matrix.
+}
+\examples{
+# Run APA on WT loops
+APA_WT <- APA(experiment = WT_10kb, loop.bed = WT_Loops)
+
+# Visualise the APA-results
+visualise.APA.ggplot(APAlist = list('WT' = APA_WT),
+zTop = c(0,9.5), zBottom = c(-5,5),focus = 1)
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 }

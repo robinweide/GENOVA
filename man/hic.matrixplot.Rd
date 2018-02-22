@@ -14,19 +14,23 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   antoni = F)
 }
 \arguments{
-\item{exp1}{The control Hi-C experiment object: produced by construct.experiment(). (bottom)}
+\item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
 
-\item{exp2}{Optional: the treatment Hi-C experiment object: produced by construct.experiment().}
+\item{exp2}{Optional: a Hi-C experiment object.}
 
-\item{chrom}{Chromosome}
+\item{chrom}{Chromosome of the region of interest}
 
 \item{start}{Start position of the region of interest}
 
 \item{end}{End position of the region of interest}
 
-\item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the negative of this is the lower bound}
+\item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the
+negative of this is the lower bound}
 
-\item{chip}{A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4. Placement is inner-top, outer-top, outer-left, inner-left.}
+\item{chip}{A list of feature tracks, can be bed structure
+(i.e. data frames) or a path to bigwig file (i.e. character variable),
+maximum length of 4. Placement is inner-top, outer-top, outer-left,
+inner-left.}
 
 \item{inferno}{White/Red/black or White/Red coloscale?}
 
@@ -38,19 +42,25 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
 
 \item{yMax}{Set the maximum height of all biwigs.}
 
-\item{type}{Should a rectangle or a triangle be drawn? Note that for a triangle a 6th strand column should be included}
+\item{type}{Should a rectangle or a triangle be drawn?
+Note that for a triangle a 6th strand column should be included}
 
-\item{guessType}{If an element in the chip is a dataframe, infer the type from column 6? If true, column six should hold "+" and "-". If a row has other characters, we view this entry as no-oriention and thus plot a rectangle.}
+\item{guessType}{If an element in the chip is a dataframe,
+infer the type from column 6? If true, column six should hold "+" and "-".
+If a row has other characters, we view this entry as no-oriention and
+thus plot a rectangle.}
 
-\item{coplot}{When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1}
+\item{coplot}{When drawing together two experiments: [dual] is bottom
+triangle exp2, top triangle exp1; [diff] plots a substraction of exp2-exp1}
 
-\item{genes}{Structure with gene information, will only be combined with bed structure}
+\item{genes}{Structure with gene information,
+will only be combined with bed structure}
 
-\item{tads}{BED-like dataframe or a list of these data.frames (not a tibble or a data.table!)}
+\item{tads}{BED-like dataframe or a list of these data.frames}
 
 \item{tads.type}{How to show TADS: upper, lower and or both}
 
-\item{loops}{BED-like dataframe or a list of these data.frames (not a tibble or a data.table!)}
+\item{loops}{BED-like dataframe or a list of these data.frames}
 
 \item{loops.type}{How to show loops: upper, lower and or both}
 
@@ -58,9 +68,10 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
 
 \item{loops.color}{Which color do you want the loops to have?}
 
-\item{skipAnn}{Do not plot outside-annotation. Can be used to plot other things next to the matrix.}
+\item{skipAnn}{Do not plot outside-annotation. Can be used to plot other
+things next to the matrix.}
 
-\item{symmAnn}{Put features 1&2 in also on verical (ignore chip-entries 3 & 4)}
+\item{symmAnn}{Put features 1&2 also on verical (ignore chip-entries 3&4)}
 
 \item{check.genome}{Check if reference genomes in exp1 and exp2 are the same}
 
@@ -71,4 +82,32 @@ A matrix-plot
 }
 \description{
 Plot a matrix (or two) for a region of interest with annotations
+}
+\note{
+To plot genes, a gene-model data.frame must be made. This can be done via a
+multitude of ways (e.g. biomart, UCSC table browser). The resulting
+data.frame must have one exon per row with the following columns:
+geneID | transcriptID | chrom | txStart | txEnd | exonStart | exonEnd |
+strand.
+Alternatively, if you download the knowngene table from UCSC, you can
+directly use this table (with exons combined per row), by renaming
+exonStarts and exonEnds to exonStart and exonEnd.
+}
+\examples{
+# plot two matrices of Hap-1 cells, including their respective loop-calls
+hic.matrixplot(exp1 = Hap1_Haarhuis2017_10kb,
+               exp2 = Hap1_Sanborn2015_10kb,
+               chrom = 'chr7',
+               start = 25e6,
+               end=30e6,
+               loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
+               loops.color = c('blue','green'),
+               loops.type = c('upper','lower'),
+               loops.resize = c(20e3,20e3), # expand for visibility
+               cut.off = 25) # upper limit of contacts
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

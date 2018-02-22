@@ -8,6 +8,15 @@
 #' @param end End position in bp.
 #' @param max.i Maximal size of flanking regions to calculate DI.
 #' @return A vector of DI-scores per Hi-C bin.
+#' @examples
+#' # get the DI at the HOXC-locus in an experiment mapped to hg19
+#' WT_DI <- fastDI(experiment = Hap1_WT_40kb, chrom = 'chr1', start = 235e6, end = 240e6, max.i = 100)
+#'
+#' # plot a matrix of the region with skipAnn = T
+#' hic.matrixplot(exp1 = Hap1_WT_40kb, chrom = 'chr1', start = 235e6, end = 240e6, skipAnn = T, cut.off = 500)
+#'
+#' # insert the DI-plot above the matrix
+#' plot(WT_DI, type='h',lwd = 1.5,ylim=c(-5e2,5e2), axes=F)
 #' @import data.table
 #' @export
 fastDI <- function(experiment, chrom, start, end, max.i = 100){
@@ -44,7 +53,6 @@ fastDI <- function(experiment, chrom, start, end, max.i = 100){
   sel <- sel[sel > 0]
   sel <- sel[sel < length(di)]
   di[sel] <- 0
-  -di
+  return(-di)
 }
 
-# v <- fastDI(WT.sub$z, 100); plot(WT.sub$x, v, type='h',lwd = 1.5,ylim=c(-400,400), xlim=xlim, axes=F); axis(1, at=seq(0,3e9, by=5e5), lab=NA, lwd=3)

@@ -7,11 +7,20 @@
 cisTotal.scores(exp)
 }
 \arguments{
-\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{exp}{The Hi-C experiment object of a sample:
+produced by construct.experiment().}
 }
 \value{
 The genome-wide cis/total ratio
 }
 \description{
-Calculate the ratio of the intrachromosomal interactions over the interchromosomal interactions
+Calculate the genome-wide ratio of the intrachromosomal interactions over
+the interchromosomal interactions
+}
+\examples{
+# calculate the ratios for a 1Mb-resolution experiment
+cis_out <- cisTotal.scores(WT_1MB)
+}
+\author{
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

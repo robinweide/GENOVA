@@ -1,10 +1,11 @@
-#' Plot the stacked TAD results.
+#' visualise.ATA.ggplot
 #'
-#' Takes in a named list of ATA-outputs and plots these next to eachother. It also plots differentials.
+#' Plot the stacked TAD results: takes in a named list of ATA-outputs and plots these next to eachother.
+#' It also plots differentials.
 #'
 #' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 #' @param stackedlist Named list of results from \code{ATA}.
-#' @param title Title to plot
+#' @param title Title-text to plot
 #' @param Focus The index of the sample in \code{stackedlist} thats use to compare against.
 #' @param zlim1 Vector of 2 values, denoting the min and max color-values of the first row
 #' @param zlim2 Vector of 2 values, denoting the min and max color-values of the second row
@@ -13,14 +14,15 @@
 #' A positive value in the differential plots thus means an enrichment in that sample versus the \code{focus}-sample.
 #' @return A \code{grid} object, containing two ggplot-objects.
 #' @examples
-## Not run:
-#' ATA_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs) # run ATA
-#' ATA_Sanbornetal <- ATA(experiment = Sanborn_20k,tad.bed = TADs) # run ATA
+#' # run ATA
+#' ATA_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
+#' ATA_Sanbornetal <- ATA(experiment = Sanborn_20k,tad.bed = TADs)
 #'
-#' ATAlist <- list(Rao = ATA_RAOetal, Sanborn = ATA_Sanbornetal) # make list
+#' # make a named list
+#' ATAlist <- list(Rao = ATA_RAOetal, Sanborn = ATA_Sanbornetal)
 #'
-#' visualise.ATA.ggplot(ATAlist, focus = 1, title = 'Rao vs Sanborn.') # plot
-## End(**Not run**)
+#' # plot the results
+#' visualise.ATA.ggplot(ATAlist, focus = 1, title = 'Rao vs Sanborn.')
 #' @export
 visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = NULL, zlim2 = NULL){
 
@@ -98,37 +100,33 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde] )
 
   # Plot first row
-  # if(require('viridis') == TRUE){
-    plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
-      ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
-      ggplot2::coord_fixed() +
-      ggplot2::scale_fill_gradientn(colours = higlassCol, limits = c(zminAbove, zmaxAbove))+
-      #viridis::scale_fill_viridis(limits = c(zminAbove, zmaxAbove), option = "inferno", direction = -1)  +
-      ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
-      ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
-      ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
-      ggplot2::facet_grid(.~ sample)+
-      ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
-  # } else {
-  #   plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
-  #     ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
-  #     ggplot2::coord_fixed() +
-  #     ggplot2::scale_fill_distiller(limits = c(zminAbove, zmaxAbove), palette = "Spectral")  +
-  #     ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse',labels = c("3' border", "5' border"))+
-  #     ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
-  #     ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
-  #     ggplot2::facet_grid(.~ sample)+
-  #     ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
-  # }
+  upTick = ((1/99) *25)*100
+  downTick = ((1/99) *75)*100
+  shimmy = ((0.5/99) )*100
+
+  plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
+    ggplot2::geom_raster(ggplot2::aes(fill = value),interpolate= F) +
+    ggplot2::coord_fixed(expand = F) +
+    ggplot2::scale_fill_gradientn(colours = higlassCol, limits = c(zminAbove, zmaxAbove))+
+    ggplot2::scale_x_continuous(expand = c(0,0),
+                                breaks = c(upTick+shimmy,downTick-shimmy), trans = 'reverse',labels = c("3' border", "5' border"))+
+    ggplot2::scale_y_continuous(expand = c(0,0),
+                                breaks = c(upTick+shimmy,downTick-shimmy), labels = c("3' border", "5' border"))+
+    GENOVA_THEME() +
+    ggplot2::facet_grid(.~ sample)+
+    ggplot2::labs(title = title,x = "", y = "", fill = "Contacts ")
+
 
   plot2 <- ggplot2::ggplot(belowPlots, ggplot2::aes(Var1, Var2)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = F) +
     ggplot2::facet_grid(.~ sample) +
     ggplot2::scale_fill_gradient2(limits = c(zminBelow, zmaxBelow), low="#2166ac", mid="white", high="#b2182b") +
-    ggplot2::coord_fixed() +
-    ggplot2::scale_x_continuous(breaks = c(26,77), trans = 'reverse', labels = c("3' border", "5' border"))+
-    ggplot2::scale_y_continuous(breaks = c(26,77), labels = c("3' border", "5' border"))+
-    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",colour = NA)) +
+    ggplot2::coord_fixed(expand = F) +
+    ggplot2::scale_x_continuous(expand = c(0,0),
+                                breaks = c(upTick+shimmy,downTick-shimmy), trans = 'reverse', labels = c("3' border", "5' border"))+
+    ggplot2::scale_y_continuous(expand = c(0,0),
+                                breaks = c(upTick+shimmy,downTick-shimmy), labels = c("3' border", "5' border"))+
+    GENOVA_THEME() +
     ggplot2::labs(title = '',x = "", y = "", fill = "Difference")
 
   grid::grid.newpage()

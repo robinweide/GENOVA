@@ -7,7 +7,7 @@
 chromosome.wide.insulation(hic, window.size, chrom)
 }
 \arguments{
-\item{hic}{exp}
+\item{hic}{A GENOVA-experiment}
 
 \item{window.size}{The sliding square size}
 

@@ -7,22 +7,24 @@
 #' @param minComparables The minimal amount of bed-entries for a given chromosome. If this threshold is not reached, PE-SCAn will skip this chromosome.
 #' @param minDist The minimal distance
 #' @param rmOutlier to outlier-correction
+#' @param outlierCutOff outlierCutOff
 #' @param add Add constant value to bed-start and -end.
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @return A score-matrix.
 #' @import data.table
 #' @examples
 #' # Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
-#' SE <- read.delim(superEnhancers.bed, header = F)
-#' SE_vs_WT <- PESCAn(experiment = WT, bed = SE, size = 500e3)
+#' WT_PE_OUT = PESCAn(exp = WT_40kb, bed = superEnhancers)
 #'
-#' # Do a circular perutation by adding 1Mb.
-#' SE_vs_WT_perm <- PESCAn(experiment = WT, bed = SE, size = 500e3, add = 1e6)
+#' # Plot using visualise.PESCAn.ggplot
+#' visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
+#'                         resolution = 40e3,
+#'                         smooth = F)
 #'
-#' # Plot using, for example, persp
+#' # Plot using persp
 #' persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
 #'
-PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,minDist = 5e6, size = 500e3, add = 0 ){
+PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,minDist = 5e6, size = 500e3, add = 0 , outlierCutOff = 0.995){
   #sorting the bed file is essential for the analysis
   bed <- bed[order(bed[,1],bed[,2]),]
   count = 0
@@ -35,7 +37,7 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,mi
     if(nrow(BED) < minComparables){
       next()
       }
-    pe.res <- cov2d(experiment, BED, minDist, size, add, rmOutlier = rmOutlier)
+    pe.res <- cov2d(experiment, BED, minDist, size, add, rmOutlier = rmOutlier, outlierCutOff = outlierCutOff)
     if(exists("score.mat")){
       score.mat <- score.mat + pe.res$score
       count = count + pe.res$count
@@ -52,32 +54,40 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,mi
 
 #' PE-SCAn
 #'
-#' From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan like data structure. Run this per chromosome.
+#' From a ChIP-peaks.BED dataframe, calculate the all-vs-all Hi-C contacts.
 #'
+#' @author Elzo de Wit, \email{e.d.wit@nki.nl}
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
 #' @param bed A bed-dataframe.
 #' @param minDist The minimal distance
 #' @param shift Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.
 #' @param size Size in bp of window.
-#' @param rmOutlier Try to perform outlier-correction
-#' @return A O/E score-matrix.
+#' @param rmOutlier Perform outlier-correction
+#' @param outlierCutOff The severity of outliers. We compute the [outlierCutOff] percentile per pixel and set values bigger than that to this value.
+#' @return An O/E score-matrix (if shift != 0), otherwise an observed score-matrix.
 #' @import data.table
 #' @examples
-#' # Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
-#' SE <- read.delim(superEnhancers.bed, header = F)
+#' # Run PE-SCAn on a bed of super-enhancers,
+#' using WT Hi-C data and a circular permutation of 1Mb
+#' WT_PE_OUT = PESCAn(exp = WT_40kb,
+#'                    bed = superEnhancers,
+#'                    shift = 1e6)
 #'
-#' WT_PE = PESCAn_run(exp = WT_exp, bed = SE)
-#' MUT_PE = PESCAn_run(exp = MUT_exp, bed = SE)
+#' # Plot using visualise.PESCAn.ggplot
+#' visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
+#'                         resolution = 40e3,
+#'                         smooth = F)
 #'
-#' list_PE = list("WT" = WT_PE, 'Mutant' = MUT_PE)
-#' PESCAn_plot(list_PE, 4e4, title = 'PE-SCAn', zTop = c(1,1.5))
-#'
+#' # Plot using persp
+#' RES = 40e3 # resolution of the Hi-C
+#' persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
+#'            y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
+#'            z = WT_PE_OUT)
 #' @export
-#'
 PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlier = F){
 
   # Get signal
-  signal = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size, rmOutlier = rmOutlier))
+  signal = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size, rmOutlier = rmOutlier, outlierCutOff = outlierCutOff))
 
   # Get O/E
   OE = NULL
@@ -85,7 +95,7 @@ PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlie
     OE = signal
   } else { # if a shift value is given
     # Get background
-    background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size))
+    background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size, outlierCutOff =outlierCutOff))
     medianBackground = median(background)
     OE = signal/medianBackground
   }
@@ -95,34 +105,40 @@ PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlie
 
 }
 
-#' Plot the PE-SCAn-results
+#' visualise.PESCAn.ggplot
 #'
-#' @param PESCAnlist A list of results from `PESCAn`.
+#' Plot the PE-SCAn-results and differentials.
+#'
+#' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+#' @param PESCAnlist A list of results from PESCAn.
 #' @param title Text to plot
 #' @param Focus Which sample does need to be the to-compare sample?
-#' @param zTop The min and max colorscale-values for the first row of plots.
-#' @param zBottom The min and max colorscale-values for the first row of plots.
+#' @param zTop The min and max values for the first (observed or OE) row of plots.
+#' @param zBottom The min and max values for the bottom (differential) row of plots.
 #' @return A grid object, containing two ggplot-objects.
+#' @examples
+#' # Run PE-SCAn on a bed of super-enhancers,
+#' using WT Hi-C data and a circular permutation of 1Mb
+#' WT_PE_OUT = PESCAn(exp = WT_40kb,
+#'                    bed = superEnhancers,
+#'                    shift = 1e6)
+#'
+#' # Plot using visualise.PESCAn.ggplot
+#' visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
+#'                         resolution = 40e3,
+#'                         smooth = F)
 #' @export
 visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...) {
   require(ggplot2)
-  require(viridis)
 
   size <- dim(as.data.frame(PESCAnlist[[1]]))[1]
   size.banks <- (size - 1)/2
-  # tickLabelDownstream <- as.character(1 * ((size.banks/2 *  resolution)/1000))
-  # tickLabelUpstream <- as.character(-1 * ((size.banks/2 * resolution)/1000))
-
   allTicks = seq(-1*resolution*size.banks, resolution*size.banks, length.out = size)/1e3
-
-
 
   tickPosDownstream = median(1:size.banks)
   tickPosUpstream = median( (((size-1)/2)+2 ): size )
   tickLabelUpstream = mean(allTicks[c(tickPosDownstream-.5, tickPosDownstream+.5)])
   tickLabelDownstream = mean(allTicks[c(tickPosUpstream-.5, tickPosUpstream+.5)])
-
-
 
   abovePlots <- data.frame(Var1 = integer(), Var2 = integer(),
                            value = numeric(), sample = factor())
@@ -171,24 +187,20 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
   volgorde <- match(names(PESCAnlist), levels(abovePlots$sample))
   belowPlots$sample <- factor(belowPlots$sample, levels = belownames[volgorde])
 
-  # higlassCol <- c("white", "#f5a623", "#d0021b", "black")
-  # divcol = c('#7f3b08','#f7f7f7','#2d004b')
-  # tercol = terrain.colors(100)
+
   spectCol = c('#d53e4f','#f46d43','#fdae61','#fee08b','#ffffbf','#e6f598','#abdda4','#66c2a5','#3288bd')
 
 
   plot1 <- ggplot2::ggplot(abovePlots, ggplot2::aes(Var1, Var2)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = smooth) +
     ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
-    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA",  colour = NA)) +
+    GENOVA_THEME() +
     ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
                                 labels = c(paste0(tickLabelUpstream, "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
     ggplot2::scale_y_continuous(breaks = c(tickPosDownstream,
                                            size.banks + 1, tickPosUpstream),
                                 labels = c(paste0(tickLabelUpstream, "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
     ggplot2::labs(title = title, x = "", y = "", fill = "O/E") +
-    #viridis::scale_fill_viridis( limits = z)
-    #ggplot2::scale_fill_gradientn(colours = spectCol, limits = z)
     ggplot2::scale_fill_gradient2(limits = z, midpoint = 1, low = "#2166ac", mid = "white", high = "#b2182b")
 
 
@@ -211,7 +223,7 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
     ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = smooth) +
     ggplot2::facet_grid(. ~ sample) + ggplot2::coord_fixed() +
     ggplot2::scale_fill_gradient2(limits = z2, midpoint = 0, low = "#2166ac", mid = "white", high = "#b2182b") +
-    ggplot2::theme(panel.background = ggplot2::element_rect(fill = "#FAFAFA", colour = NA)) +
+    GENOVA_THEME() +
     ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
                                 labels = c(paste0(tickLabelUpstream, "kb"), "3'", paste0(tickLabelDownstream, "kb"))) +
     ggplot2::scale_y_continuous(breaks = c(tickPosDownstream,

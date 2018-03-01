@@ -48,6 +48,7 @@ cisTotal.perChrom <- function(exp , chromsToUse = NULL, ...){
 
     # get cis
     tmp <- allRows[V1 %in% chrom.min:chrom.max & V2 %in% chrom.min:chrom.max,3]
+    cisRows <- 0
     if(!nrow(tmp) == 0){
       cisRows = sum(tmp)
       cisSum = cisSum + cisRows

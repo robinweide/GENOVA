@@ -28,6 +28,7 @@
 #' Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #' or see http://www.r-project.org/Licenses/GPL-2
 #' @return An interpolated matrix
+#' @export
 fields.interp.surface <- function(obj, loc) {
 
     # obj is a surface or image  object like the list for contour, persp or image.

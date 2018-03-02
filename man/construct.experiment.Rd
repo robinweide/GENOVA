@@ -22,7 +22,7 @@ construct.experiment(signalPath, indicesPath, name, ignore.checks = F,
 
 \item{comments}{A place to store some comments.}
 
-\item{BPscaling}{Scale contacts to have agenome-wide sum of [BPscaling] reads (default: 1000M).}
+\item{BPscaling}{Scale contacts to have agenome-wide sum of [BPscaling] reads (default: 1000M). Set to NULL to skip this.}
 }
 \value{
 An experiment-object, which is a named list of contacts, indices and metadata for a Hi-C matrix of a given sample at a given resolution.

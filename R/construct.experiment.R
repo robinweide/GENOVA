@@ -9,7 +9,7 @@
 #' @param color Color associated with sample.
 #' @param comments A place to store some comments.
 #' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
-#' @param BPscaling Scale contacts to have agenome-wide sum of [BPscaling] reads (default: 1000M).
+#' @param BPscaling Scale contacts to have agenome-wide sum of [BPscaling] reads (default: 1000M). Set to NULL to skip this.
 #' @note
 #' Some reference genomes have very small "random" or "patch" chromosomes, which can have zero contacts mapped to it (at certain resolutions). Construct.experiment checks this and omits these chromosomes in the resulting experiment-object. The RMCHROM-flag will also be set to TRUE: this will help other GENOVA-functions to deal better with this problem. There is a slight performance-cost during the construction of the experiment, however. Therefore, experienced users can set ignore.checks to TRUE to skip all of this, keeping in mind that some functions will not work properly/at all is there are these zero-coverage chromosomes in their data.
 #' @examples

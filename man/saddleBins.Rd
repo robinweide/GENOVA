@@ -4,7 +4,7 @@
 \alias{saddleBins}
 \title{Compute compartment-v-compartment scores}
 \usage{
-saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5,
+saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5, CS = NULL,
   closeCis = NULL, verbose = T)
 }
 \arguments{
@@ -15,6 +15,8 @@ saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5,
 \item{chromsToUse}{Do the computation for a subset of chromosomes.}
 
 \item{nBins}{The number of bins to split the compartment-score.}
+
+\item{CS}{Use a bedgraph-df of compartment-scores instead of creating it on the fly.The resolution should be the same as the Hi-C.}
 
 \item{closeCis}{Do not take into account interactions close-by (10Mb)}
 

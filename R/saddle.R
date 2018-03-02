@@ -62,7 +62,7 @@ largest.stretch_saddle <- function( x ){
   x[which(temp == with(temp2, values[which.max(lengths)]))]
 }
 
-saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, start = NULL, end = NULL, cutOffQuantile =.995, closeCis = NULL){
+saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, start = NULL, end = NULL, cutOffQuantile =.995, closeCis = NULL, CS = NULL){
   # if start or end is NULL, use whole chrom
   if(is.null(start) | is.null(end)){
     start = 0
@@ -84,8 +84,10 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
   }
 
   # get bins with zero-sum
+  xaxis = inMat$x
   inMat = as.matrix(inMat$z)
   ZSMAT = inMat[colSums(inMat) != 0,colSums(inMat) != 0]
+  xaxis = xaxis[colSums(inMat) != 0]
   if(!is.null(ChIP)){peaks = peaks[colSums(inMat) != 0]}
 
   # get EV of ZSMAT
@@ -96,8 +98,24 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
   OE[OE > Q[2]] = Q[2]
 
   # get compartment-score
-  EV <- eigen(OE-1)
-  EV = EV$vectors[,1]
+  EV = NULL
+  if(is.null(CS)){
+    EV <- eigen(OE-1)
+    EV = EV$vectors[,1]
+  } else {
+    #  xaxis: middel of eacht bin
+
+    # use cut to get mean CS per hi-c bin.
+    cuts = as.numeric(cut(rowMeans(CS[,2:3]),breaks = xaxis, include.lowest = T))
+
+    CSs = tapply(CS[,4], cuts, mean, na.rm = T)
+    tmp = which(!1:ncol(OE) %in%  rownames(CSs))
+    tmp = c(1:ncol(OE))[tmp]
+    CSs = c(CSs, setNames(rep(0, length(tmp)), tmp))
+    CSs = CSs[order(names(CSs))]
+    EV = CSs
+  }
+
 
   if(errEVcorrect){
     tmp = length(EV[EV < 0]) /  length(EV)
@@ -162,6 +180,7 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
 #' @param verbose Produces a progress-indication.
 #' @param nBins The number of bins to split the compartment-score.
 #' @param closeCis Do not take into account interactions close-by (10Mb)
+#' @param CS Use a bedgraph-df of compartment-scores instead of creating it on the fly.The resolution should be the same as the Hi-C.
 #' @note
 #' A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 will produce a plot similar to Bonev et al. (2017). The increase in time with more nBins is in exponential time at this point in time. Future versions will tackle this.
 #' @examples
@@ -178,7 +197,7 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
 #' @return A log2(O/E) matrix and a DF of compartment-scores.
 #' @import data.table
 #' @export
-saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, closeCis = NULL, verbose = T){
+saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL, closeCis = NULL, verbose = T){
 
   if(is.null(chromsToUse)){
     chromsToUse = exp$CHRS
@@ -211,7 +230,7 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, closeCis =
                              start = chromStructure[1,4],
                              end = chromStructure[1,5],
                              nBins = nBins,
-                             closeCis = closeCis)
+                             closeCis = closeCis, CS = CS)
 
       df_this = data.frame(sample = exp$NAME,
                            chrom = C,
@@ -233,7 +252,7 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, closeCis =
                              start = chromStructure[1,2],
                              end = chromStructure[1,3],
                              nBins = nBins,
-                             closeCis = closeCis)
+                             closeCis = closeCis, CS = CS)
 
       df_this = data.frame(sample = exp$NAME,
                            chrom = C,
@@ -252,7 +271,7 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, closeCis =
                              start = chromStructure[1,4],
                              end = chromStructure[1,5],
                              nBins = nBins,
-                             closeCis = closeCis)
+                             closeCis = closeCis, CS = CS)
 
       df_this = data.frame(sample = exp$NAME,
                            chrom = C,

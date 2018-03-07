@@ -23,11 +23,12 @@ plot.triangle <- function( bed, chrom, y1, y2, start, end, rotate=F ){
 
 
   #first plot positive
-  sel.bed <- bed[all(bed[,1] == chrom,
-                     bed[,2] < end,
-                     bed[,3] > start,
-                     bed[,6] == '+'),]
+  sel.bed <- bed[bed[,1] == chrom &
+                 bed[,3] <  end   &
+                 bed[,2] >  start &
+                 bed[,6] == '+',  ]
   if(nrow(sel.bed)>0){
+
     col = "red"
     add <- ifelse(sel.bed[,6]=='+', x.wid, -x.wid)
     add.list <- unique(add)
@@ -44,10 +45,10 @@ plot.triangle <- function( bed, chrom, y1, y2, start, end, rotate=F ){
   }
 
   #then repeat for negative
-  sel.bed <- bed[all(bed[,1] == chrom,
-                     bed[,2] < end,
-                     bed[,3] > start,
-                     bed[,6] == '-'),]
+  sel.bed <- bed[bed[,1] == chrom &
+                 bed[,3] <  end   &
+                 bed[,2] >  start &
+                 bed[,6] == '-',  ]
   if(nrow(sel.bed)>0){
     col="blue"
     add <- ifelse(sel.bed[,6]=='+', x.wid, -x.wid)
@@ -65,11 +66,11 @@ plot.triangle <- function( bed, chrom, y1, y2, start, end, rotate=F ){
   }
 
   # check if there are any without orientation and plot these as rectangles
-  sel.bed <- bed[all(bed[,1] == chrom,
-                     bed[,2] < end,
-                     bed[,3] > start,
-                     bed[,6] != '-',
-                     bed[,6] != '+' ),]
+  sel.bed <- bed[bed[,1] == chrom &
+                 bed[,3] <  end   &
+                 bed[,2] >  start &
+                 bed[,6] != '-'   &
+                 bed[,6] != '+',  ]
   if(nrow(sel.bed)>0){
     col="black"
     add <- ifelse(sel.bed[,6] != '+', 0, 0)

@@ -408,16 +408,17 @@ library(devtools)
 install_github(repo ='bigwrig', username =  'jayhesselberth')
 ```
 
-```{r HMPchip, message=FALSE , fig.cap= "Hi-C matrixplot: ChIPseq. A BED-file of CTCF-sites is plotted at the top and a coverage-track of SMC1 ChIP-seq is plotted beneath this. The symmAnn-option leads to the same tracks being plotted on the left.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
+```{r HMPchip, message=T , fig.cap= "Hi-C matrixplot: ChIPseq. A BED-file of CTCF-sites is plotted at the top and a coverage-track of SMC1 ChIP-seq is plotted beneath this. The symmAnn-option leads to the same tracks being plotted on the left.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
 hic.matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',  start = 26.75e6,  end=28.5e6, 
                loops = WT_Loops, # see APA
                loops.color = '#998ec3', # purple loops
                loops.type = 'upper', # only plot in upper triangle
                loops.resize = 20e3, # expand for visibility
+               type = 'triangle',
                chip = list('data/SMC1_WT.bw', # inner top
                            CTCF),# outer-top
-               symmAnn = T, # place annotations also on left side
+               symmAnn = F, # place annotations also on left side
                cut.off = 65) # upper limit of contacts
 ```
 

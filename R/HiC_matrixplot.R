@@ -614,11 +614,11 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
       higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
       wr <- colorRampPalette(higlassCol)
 
-      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
+      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
 
     } else {
       wr <- colorRampPalette(c("white","red"))
-      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
+      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
     }
 
   } else{
@@ -637,10 +637,10 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
       if(inferno){
         higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
         wr <- colorRampPalette(higlassCol)
-        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
+        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
       } else {
         wr <- colorRampPalette(c("white","red"))
-        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)) )
+        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
       }
 
     }else{
@@ -653,7 +653,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
       mat1$z[mat1$z > cut.off] <- cut.off
       mat1$z[mat1$z < -cut.off] <- -cut.off
       bwr <- colorRampPalette(c("blue","white","red"))
-      image( mat1, col=bwr(500), axes=F, ylim=rev(range(mat1$x)) )
+      image( mat1, col=bwr(500), axes=F, ylim=rev(range(mat1$x)), zlim=c(-cut.off, cut.off) )
     }
 
   }

@@ -234,32 +234,36 @@ visualise.RCP.ggplot(RCPdata = RCP_out)
 ## A- and B-compartments
 ```{r saddle, message=FALSE,  cache=T}
 H3K27acPeaks = read.delim('data/H3K27ac_WT.narrowPeak', h = F)
-saddle_WT = saddleBins(exp = Hap1_WT_1MB, 
-                       ChIP = H3K27acPeaks,
-                       chromsToUse = paste0('chr', 1:10),
-                       nBins = 25, 
-                       verbose = F)
-saddle_WAPL = saddleBins(exp = Hap1_WAPL_1MB, 
-                       ChIP = H3K27acPeaks,
-                       chromsToUse = paste0('chr', 1:10),
-                       nBins = 25,  
+CS = read.delim('/DATA/oidBackup/WAPL_Project/Hi-C/analysis/PCA/PCA/100kb/WT.PC1.bedGraph', h = F, skip = 1)
+saddle_WT = saddleBins(exp = Hap1_WT_40kb, 
+                       ChIP = H3K27acPeaks,CS = CS,
+                       chromsToUse = paste0('chr', 1:15),
+                       nBins = 50, 
+                       verbose = T)
+
+saddle_WAPL = saddleBins(exp = Hap1_WAPL_40kb, 
+                       ChIP = H3K27acPeaks, CS = CS,
+                       chromsToUse = paste0('chr', 1:15),
+                       nBins = 50,  
                        verbose = F)
 ```
 
 ### Saddle-plot
-```{r saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot"}
-visualise.saddle(list(saddle_WT,
-                      saddle_WAPL),
+```{r saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot", fig.width=8}
+visualise.saddle(SBoutList = list(saddle_WT, saddle_WAPL),
                  crossLines = T, 
                  addText = T,
                  zlim = c(-0.5,0.5), 
-                 EVlim = c(-0.5,0.5))
+                 EVlim = c(-50,50))
 ```
 
 ### Compartment-strength
 ```{r saddleStrength, message=FALSE,  cache=T, warning=FALSE, fig.cap= "The per-arm compartment strength", fig.small = T}
-tmp = visualise.compartmentStrength(list(saddle_WT,
+visualise.compartmentStrength(list(saddle_WT,
                                    saddle_WAPL))
+
+visualise.compartmentStrength(list(saddle_WT,
+                                   saddle_WAPL), showInteractions = T)
 ```
 
 # Interaction plots

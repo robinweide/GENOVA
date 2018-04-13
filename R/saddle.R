@@ -62,7 +62,7 @@ largest.stretch_saddle <- function( x ){
   x[which(temp == with(temp2, values[which.max(lengths)]))]
 }
 
-saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, start = NULL, end = NULL, cutOffQuantile =.995, closeCis = NULL, CS = NULL){
+saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, start = NULL, end = NULL, cutOffQuantile =.995, closeCis = NULL, CS = NULL, stricktCS = T){
   # if start or end is NULL, use whole chrom
   if(is.null(start) | is.null(end)){
     start = 0
@@ -72,72 +72,123 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
   # get matrix
   inMat = select.subset(exp, chrom = chrom, start = start,  end =end)
 
+  if(sd(inMat$z) == 0){
+    return(NULL)
+  }
+
   # bin ChIP
   peaks = NULL
+  xaxis = inMat$x
   if(!is.null(ChIP)){
     ChIP[,1] = as.character(ChIP[,1])
-    peaks = ChIP[ChIP[,1] == chrom & ChIP[,2] >= min(inMat$x) & ChIP[,3] <= max(inMat$x),]
+    peaks = ChIP[ChIP[,1] == chrom & ChIP[,2] >= start & ChIP[,3] <= end,]
 
-    cuts = as.numeric(cut(rowMeans(peaks[,2:3]),breaks =  inMat$x, include.lowest = T))
+    cuts = as.numeric(cut(rowMeans(peaks[,2:3]),breaks = xaxis, include.lowest = T))
 
     peaks = table( factor(cuts, levels = 1:max(ncol(inMat$z))))
   }
 
   # get bins with zero-sum
-  xaxis = inMat$x
   inMat = as.matrix(inMat$z)
-  ZSMAT = inMat[colSums(inMat) != 0,colSums(inMat) != 0]
-  xaxis = xaxis[colSums(inMat) != 0]
-  if(!is.null(ChIP)){peaks = peaks[colSums(inMat) != 0]}
+  ZSMAT = inMat
+  #=============================================================================
+  #  remove white lines
+  #=============================================================================
+  # for now, keep white lines in the data... we must add this as an option
+  # ZSMAT = inMat[colSums(inMat) != 0, colSums(inMat) != 0]
+  # xaxis = xaxis[colSums(inMat) != 0]
+  # if(!is.null(ChIP)){
+  #   peaks = peaks[colSums(inMat) != 0]
+  #   }
 
-  # get EV of ZSMAT
-  OE = obs.exp.matrix_saddle(ZSMAT, correct = F, lowess = T)
+  #=============================================================================
+  #  calculate O/E
+  #=============================================================================
+  OE = obs.exp.matrix_saddle(ZSMAT, correct = F, lowess = F)
   OE[!is.finite(OE)] <- 1
   Q = quantile(OE, c(1-cutOffQuantile, cutOffQuantile))
   OE[OE < Q[1]] = Q[1]
   OE[OE > Q[2]] = Q[2]
+  #image(ifelse(OE > 2, 2, OE), zlim = c(0,2), col = colorRampPalette(c('blue', 'red'))(10))
 
-  # get compartment-score
+
+
+  #=============================================================================
+  #  get compartment-score
+  #=============================================================================
   EV = NULL
   if(is.null(CS)){
     EV <- eigen(OE-1)
     EV = EV$vectors[,1]
+
   } else {
-    #  xaxis: middel of eacht bin
+    CS[,1] = as.character(CS[,1])
+    cs_known = CS[CS[,1] == chrom & CS[,2] >= start & CS[,3] <= end,]
 
-    # use cut to get mean CS per hi-c bin.
-    cuts = as.numeric(cut(rowMeans(CS[,2:3]),breaks = xaxis, include.lowest = T))
+    # try to approxumate the given CS to the length of bins in the matrix.
+    tmp = approx(x = 1:length(cs_known[,4]), y = cs_known[,4], n = length(xaxis))
 
-    CSs = tapply(CS[,4], cuts, mean, na.rm = T)
-    tmp = which(!1:ncol(OE) %in%  rownames(CSs))
-    tmp = c(1:ncol(OE))[tmp]
-    CSs = c(CSs, setNames(rep(0, length(tmp)), tmp))
-    CSs = CSs[order(names(CSs))]
-    EV = CSs
+
+    EV = tmp$y
   }
 
+  #=============================================================================
+  #  check if there ar no inbalances in the compartment-score (e.g. only B)
+  #=============================================================================
+  # if(errEVcorrect){
+  # message(C)
+  #
+  #   tmp = length(EV[EV < 0]) /  length(EV)
+  #   if(tmp < 0.1 | tmp > 0.9){ # something is off...
+  #     warning('The ratio A/B on chromosome ',
+  #             C,
+  #             " is strange...")
+  #
+  #     if(is.null(CS)){
+  #           warning("please check and provide a bedgraph-DF for CS.")
+  #           return(list(dat = NULL, EVbins = NULL))
+  #     } else if(!stricktCS){
+  #           # try on-the-fly calc of EV
+  #           EV <- eigen(OE-1)
+  #           EV = EV$vectors[,1]
+  #           tmp = length(EV[EV < 0]) /  length(EV)
+  #           if(tmp < 0.1 | tmp > 0.9){
+  #                 warning("On-the-fly compartment-scoring also did not work.',
+  #                         ' Please check the bedgraph-DF for CS.")
+  #                 return(list(dat = NULL, EVbins = NULL))
+  #           } else {
+  #                 warning("On-the-fly compartment-scoring was performed.",
+  #                         "This can be turned off with stricktCS = T")
+  #           }
+  #     }
+  #
+  #
+  #
+  #   }
+  #
+  #
+  #
+  # }
 
-  if(errEVcorrect){
-    tmp = length(EV[EV < 0]) /  length(EV)
-    if(tmp < 0.1 | tmp > 0.9){
-      #message(paste(exp$NAME,chrom,start))
-      return(list(dat = NULL, EVbins = NULL))
-    }
-  }
-
-  # flip EV on basis of chip-peaks
+  #=============================================================================
+  #  flip EV on basis of chip-peaks
+  #=============================================================================
   if(!is.null(ChIP)){
-    TEST = median(peaks[EV > 0]) > median(peaks[EV < 0])
+    TEST = cor.test(peaks, EV)
     #message( TEST )
-    if(TEST & !is.na(TEST)){
+    if(TEST$p.value < 0.05 & TEST$estimate < 0){ # inverted sign. correlation
       tmp = EV
       EV = tmp*-1
     }
   } else {
-    warning('No ChIP was given.\nIt is highly recommend that you\nadd some active regions such as H3K27ac!')
+    warning('No ChIP was given.\n',
+            'It is highly recommended that you\n',
+            'add some active regions such as H3K27ac-peaks to ChIP!')
   }
 
+  #=============================================================================
   # set close-cis to NA
+  #=============================================================================
   if(!is.null(closeCis)){
     OE[is.na(OE)] = 1
     NAwidth = closeCis / exp$RES
@@ -148,23 +199,27 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
     OE[cbind(idxDF[,1], idxDF[,2])] = NA
   }
 
-  # find Qbins
-  # 1 is A, 5 is B
+  #=============================================================================
+  # find and set Qbins: bin 1 is A (highest positive CS-value)
+  #=============================================================================
   QBINS = quantile(EV*-1, seq(0,1,length.out = nBins+1))
   QCUTS = as.numeric(cut(EV*-1, QBINS, include.lowest = T) )
 
   EVbins = rev(tapply(EV, QCUTS, FUN = mean))
 
-  df = data.frame()
+  outList = list() # this goes faster than every time rbind
+  #df = data.frame()
   for(i in 1:nBins){
     for(j in 1:nBins){
       score = OE[QCUTS == i,QCUTS == j]
       score = mean(score, na.rm = T)
-      df = dplyr::bind_rows(df, data.frame(i,j, score))
+      outList[[length(outList) + 1]] = data.frame(i,j, score)
+      #df = dplyr::bind_rows(df, data.frame(i,j, score))
     }
   }
+  df = dplyr::bind_rows(outList)
 
-    return(list(dat = df, EVbins = EVbins))
+  return(list(dat = df, EVbins = EVbins))
 
 }
 
@@ -181,6 +236,7 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
 #' @param nBins The number of bins to split the compartment-score.
 #' @param closeCis Do not take into account interactions close-by (10Mb)
 #' @param CS Use a bedgraph-df of compartment-scores instead of creating it on the fly.The resolution should be the same as the Hi-C.
+#' @param stricktCS Only use the compartment-scores of CS, instead of trying to calculate them on the fly.
 #' @note
 #' A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 will produce a plot similar to Bonev et al. (2017). The increase in time with more nBins is in exponential time at this point in time. Future versions will tackle this.
 #' @examples
@@ -197,8 +253,13 @@ saddleBinsPerChrom = function(exp, nBins, errEVcorrect = T, ChIP = NULL, chrom, 
 #' @return A log2(O/E) matrix and a DF of compartment-scores.
 #' @import data.table
 #' @export
-saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL, closeCis = NULL, verbose = T){
+saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL,
+                      nBins =5, CS = NULL, closeCis = NULL,
+                      verbose = T, stricktCS = F){
 
+  if(stricktCS & is.null(CS)){
+    stop("stricktCS was set to true, but no CS was given...")
+  }
   if(is.null(chromsToUse)){
     chromsToUse = exp$CHRS
   }
@@ -211,14 +272,23 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL,
     }
     mat <- selectData_saddle( exp, C, C)
 
-    cent <- which(apply(mat$z,1,sum)==0)
-    cent <- largest.stretch_saddle(cent)
-    chromStructure <- data.frame(chrom = C,
-                                 start = 0,
-                                 startC = min(cent)*exp$RES,
-                                 endC = max(cent)*exp$RES,
-                                 end= max(exp$ABS[exp$ABS$V1 == C,3]))
-
+    chromStructure = NULL
+    if(is.null(exp$CENTROMERES)){
+      cent <- which(apply(mat$z,1,sum)==0)
+      cent <- largest.stretch_saddle(cent)
+      chromStructure <- data.frame(chrom = C,
+                                   start = 0,
+                                   startC = min(cent)*exp$RES,
+                                   endC = max(cent)*exp$RES,
+                                   end= max(exp$ABS[exp$ABS$V1 == C,3]))
+    } else {
+      cent = exp$CENTROMERES[exp$CENTROMERES[,1] == C,]
+      chromStructure <- data.frame(chrom = C,
+                                   start = 0,
+                                   startC = cent[,2],
+                                   endC = cent[,3],
+                                   end= max(exp$ABS[exp$ABS$V1 == C,3]))
+    }
 
 
     if( chromStructure[1,3] < 1e6){
@@ -229,21 +299,25 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL,
                              chrom = chromStructure[1,1],
                              start = chromStructure[1,4],
                              end = chromStructure[1,5],
-                             nBins = nBins,
+                             nBins = nBins,stricktCS = stricktCS,
                              closeCis = closeCis, CS = CS)
+      if(!is.null(P)){
+        df_this = data.frame(sample = exp$NAME,
+                             color = exp$COL,
+                             chrom = C,
+                             arm = 'P', P$dat)
+        df = rbind(df, df_this)
 
-      df_this = data.frame(sample = exp$NAME,
-                           chrom = C,
-                           arm = 'Q',
-                           Q$dat)
+        evDF = rbind(evDF,
+                     data.frame(sample = exp$NAME,
+                                color = exp$COL,
+                                chrom = C,
+                                arm = 'Q',
+                                bin = 1:length(Q$EVbins),
+                                EV =  Q$EVbins))
+      }
 
-      df = rbind(df, df_this)
-      evDF = rbind(evDF,
-                   data.frame(sample = exp$NAME,
-                              chrom = C,
-                              arm = 'Q',
-                              bin = 1:length(Q$EVbins),
-                              EV =  Q$EVbins))
+
     } else {
       # Q and P
       P = saddleBinsPerChrom(exp,
@@ -251,39 +325,48 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL,
                              chrom = chromStructure[1,1],
                              start = chromStructure[1,2],
                              end = chromStructure[1,3],
-                             nBins = nBins,
+                             nBins = nBins,stricktCS = stricktCS,
                              closeCis = closeCis, CS = CS)
+      if(!is.null(P)){
+        df_this = data.frame(sample = exp$NAME,
+                             color = exp$COL,
+                             chrom = C,
+                             arm = 'P', P$dat)
+        df = rbind(df, df_this)
 
-      df_this = data.frame(sample = exp$NAME,
-                           chrom = C,
-                           arm = 'P', P$dat)
+        evDF = rbind(evDF, data.frame(sample = exp$NAME,
+                                      color = exp$COL,
+                                      chrom = C,
+                                      arm = 'P',
+                                      bin = 1:length(P$EVbins),
+                                      EV = P$EVbins))
+      }
 
-      df = rbind(df, df_this)
-      evDF = rbind(evDF, data.frame(sample = exp$NAME,
-                                    chrom = C,
-                                    arm = 'P',
-                                    bin = 1:length(P$EVbins),
-                                    EV = P$EVbins))
+
 
       Q = saddleBinsPerChrom(exp = exp,
                              ChIP = ChIP,
                              chrom = chromStructure[1,1],
                              start = chromStructure[1,4],
                              end = chromStructure[1,5],
-                             nBins = nBins,
+                             nBins = nBins,stricktCS = stricktCS,
                              closeCis = closeCis, CS = CS)
+      if(!is.null(Q)){
 
       df_this = data.frame(sample = exp$NAME,
+                           color = exp$COL,
                            chrom = C,
                            arm = 'Q',
                            Q$dat)
 
       df = rbind(df, df_this)
       evDF = rbind(evDF, data.frame(sample = exp$NAME,
+                                    color = exp$COL,
                                     chrom = C,
                                     arm = 'Q',
                                     bin = 1:length(Q$EVbins),
                                     EV = Q$EVbins))
+      }
     }
 
   }
@@ -293,11 +376,19 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL,
 
 }
 
+
+
+
+
+
+
+
 #' Plot compartment-strengths
 #'
 #' Takes the input from saddleBins and produces a boxplot of compartment-strenghts.
 #'
 #' @param SBoutList A list of outputs trom saddleBins.
+#' @param showInteractions Instead of compartment-strength, plot the average AA, BB and AB interactions.
 #' @return A plot and an invisible underlying dataframe containing per-sample and -chromosome-arm the compartment-score.
 #' @examples
 #' # run saddleBins on all chromosomes with 25 bins.
@@ -308,8 +399,10 @@ saddleBins = function(exp, ChIP = NULL, chromsToUse = NULL, nBins =5, CS = NULL,
 #' median(tmp$score)
 #'
 #' @export
-visualise.compartmentStrength = function(SBoutList){
+visualise.compartmentStrength = function(SBoutList, showInteractions = F){
+  require(ggplot2)
   strengthDF = data.frame()
+  interactionDF = data.frame()
   for(i in 1:length(SBoutList)){
     dat = SBoutList[[i]]
     dat$matrix$CC = 'XX'
@@ -323,11 +416,12 @@ visualise.compartmentStrength = function(SBoutList){
     dat$matrix = dat$matrix[dat$matrix$CC != 'XX',]
 
     tmp = dplyr::summarise(dplyr::group_by(dat$matrix,
+                                           color,
                                            sample,
                                            chrom,
                                            arm,
                                            CC),score = mean(unLog))
-
+    interactionDF = rbind(interactionDF, as.data.frame(tmp))
     for(S in unique(tmp$sample)){
 
       # get chroms in this sample
@@ -349,11 +443,30 @@ visualise.compartmentStrength = function(SBoutList){
   RANGE[1] = floor(RANGE[1]) *.95
   RANGE[2] = ceiling(RANGE[2])*1.05
 
+  if(showInteractions != TRUE){
   boxplot(split(strengthDF$score,
                 strengthDF$S),
           ylim = RANGE,
           ylab = "compartment strength")
-  invisible(strengthDF)
+  } else {
+    P <- ggplot2::ggplot(interactionDF, ggplot2::aes(x = sample,
+                                                y = score,
+                                                fill = color)) +
+      ggplot2::facet_wrap("CC") +
+      ggplot2::geom_hline(yintercept = 1, lty = 3) +
+      ggplot2::geom_boxplot() +
+      ggplot2::labs(y = "Average O/E") +
+      GENOVA_THEME() +
+      ggplot2::scale_fill_identity()+
+      ggplot2::guides(fill = F) +
+      ggplot2::theme(axis.title.x = ggplot2::element_blank())
+    print(P)
+  }
+
+
+
+
+  invisible(list(strengthDF, interactionDF))
 }
 
 rotate <- function(x) t(apply(x, 2, rev))
@@ -376,7 +489,9 @@ rotate <- function(x) t(apply(x, 2, rev))
 #' # plot saddle-plot
 #' visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
 #' @export
-visualise.saddle = function(SBoutList, addText = T, zlim = c(-0.5,0.5), EVlim = NULL, square = T, crossLines = NULL){
+visualise.saddle = function(SBoutList, addText = T,
+                            zlim = c(-0.5,0.5), EVlim = NULL,
+                            square = T, crossLines = NULL){
   par_temp = par()
   if(is.null(EVlim)){
     EVlim = zlim
@@ -444,7 +559,10 @@ visualise.saddle = function(SBoutList, addText = T, zlim = c(-0.5,0.5), EVlim = 
   for(Si in 1:NSAMPLE){
     S = SAMPLENAMES[Si]
     tmp = df_mat[df_mat$sample == S,]
-    tmp = setNames(aggregate(tmp$score, by = list(tmp$i, tmp$j), mean), c("x",'y','z') )
+
+
+    tmp = setNames(aggregate(tmp$score, by = list(tmp$i, tmp$j), mean, na.rm = T),
+                   c("x",'y','z') )
     M = matrix(0, nrow = max(tmp$x), ncol = max(tmp$y))
     M[cbind(tmp$x,tmp$y)] = tmp$z
 

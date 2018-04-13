@@ -45,28 +45,32 @@ options(scipen = 1)
 
 ## ----saddle, message=FALSE,  cache=T---------------------------------------
 H3K27acPeaks = read.delim('data/H3K27ac_WT.narrowPeak', h = F)
-saddle_WT = saddleBins(exp = Hap1_WT_1MB, 
-                       ChIP = H3K27acPeaks,
-                       chromsToUse = paste0('chr', 1:10),
-                       nBins = 25, 
-                       verbose = F)
-saddle_WAPL = saddleBins(exp = Hap1_WAPL_1MB, 
-                       ChIP = H3K27acPeaks,
-                       chromsToUse = paste0('chr', 1:10),
-                       nBins = 25,  
+CS = read.delim('/DATA/oidBackup/WAPL_Project/Hi-C/analysis/PCA/PCA/100kb/WT.PC1.bedGraph', h = F, skip = 1)
+saddle_WT = saddleBins(exp = Hap1_WT_40kb, 
+                       ChIP = H3K27acPeaks,CS = CS,
+                       chromsToUse = paste0('chr', 1:15),
+                       nBins = 50, 
+                       verbose = T)
+
+saddle_WAPL = saddleBins(exp = Hap1_WAPL_40kb, 
+                       ChIP = H3K27acPeaks, CS = CS,
+                       chromsToUse = paste0('chr', 1:15),
+                       nBins = 50,  
                        verbose = F)
 
-## ----saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot"----
-visualise.saddle(list(saddle_WT,
-                      saddle_WAPL),
+## ----saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot", fig.width=8----
+visualise.saddle(SBoutList = list(saddle_WT, saddle_WAPL),
                  crossLines = T, 
                  addText = T,
                  zlim = c(-0.5,0.5), 
-                 EVlim = c(-0.5,0.5))
+                 EVlim = c(-50,50))
 
 ## ----saddleStrength, message=FALSE,  cache=T, warning=FALSE, fig.cap= "The per-arm compartment strength", fig.small = T----
 visualise.compartmentStrength(list(saddle_WT,
                                    saddle_WAPL))
+
+visualise.compartmentStrength(list(saddle_WT,
+                                   saddle_WAPL), showInteractions = T)
 
 ## ---- echo =F--------------------------------------------------------------
 knitr::kable(
@@ -77,10 +81,34 @@ knitr::kable(
 #  library(devtools)
 #  install_github(repo ='bigwrig', username =  'jayhesselberth')
 
+## ----HMPchip, message=T , fig.cap= "Hi-C matrixplot: ChIPseq. A BED-file of CTCF-sites is plotted at the top and a coverage-track of SMC1 ChIP-seq is plotted beneath this. The symmAnn-option leads to the same tracks being plotted on the left.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F----
+hic.matrixplot(exp1 = Hap1_WT_10kb,
+               chrom = 'chr7',  start = 26.75e6,  end=28.5e6, 
+               loops = WT_Loops, # see APA
+               loops.color = '#998ec3', # purple loops
+               loops.type = 'upper', # only plot in upper triangle
+               loops.resize = 20e3, # expand for visibility
+               type = 'triangle',
+               chip = list('data/SMC1_WT.bw', # inner top
+                           CTCF),# outer-top
+               symmAnn = F, # place annotations also on left side
+               cut.off = 65) # upper limit of contacts
+
 ## ---- echo =F--------------------------------------------------------------
 knitr::kable(
   head(martExport[,-c(1,2)], 5), caption = 'A data.frame holding the needed columns for plotting genes.'
 )
+
+## ----iiDIFF2, message=FALSE , fig.cap= "Differential TAD-analysis: scatterplot. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T----
+par(mfrow = c(1,2), pty = 's')
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
+                            exp2 = TAD_N_WAPL, 
+                            allData = T, 
+                            main = 'allData == T') # y
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
+                            exp2 = TAD_N_WAPL, 
+                            allData = F, 
+                            main = 'allData == F') # y
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1e9)

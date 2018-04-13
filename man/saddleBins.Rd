@@ -5,7 +5,7 @@
 \title{Compute compartment-v-compartment scores}
 \usage{
 saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5, CS = NULL,
-  closeCis = NULL, verbose = T)
+  closeCis = NULL, verbose = T, stricktCS = F)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -21,6 +21,8 @@ saddleBins(exp, ChIP = NULL, chromsToUse = NULL, nBins = 5, CS = NULL,
 \item{closeCis}{Do not take into account interactions close-by (10Mb)}
 
 \item{verbose}{Produces a progress-indication.}
+
+\item{stricktCS}{Only use the compartment-scores of CS, instead of trying to calculate them on the fly.}
 }
 \value{
 A log2(O/E) matrix and a DF of compartment-scores.

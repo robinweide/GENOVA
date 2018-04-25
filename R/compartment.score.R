@@ -209,7 +209,7 @@ compartment.score <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV
     comparableBed <- comparableBed[comparableBed[,1]==C,]
 
     #overlap the peaks with the windows
-    i <- findInterval(comparableBed[,2], first_startLocVector)
+    i <- findInterval(comparableBed[,2], second_startLocVector)
     comparableBed.window <- table(i+1)
     i.up <- which(compScore > 0)
     i.down <- which(compScore < 0)

@@ -2,15 +2,16 @@
 % Please edit documentation in R/compartment.score.R
 \name{compartment.score}
 \alias{compartment.score}
-\title{Get compartment-scores for a chromosome}
+\title{Get compartment-scores}
 \usage{
-compartment.score(exp, chrom = "chr2", empericalCentromeres = T, pEV = 1,
-  qEV = 1, comparableBed = NULL, comparableTrack = NULL, shuffle = F)
+compartment.score(exp, chromsToUse = NULL, empericalCentromeres = T,
+  pEV = 1, qEV = 1, comparableBed = NULL, comparableTrack = NULL,
+  shuffle = F, verbose = T)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
-\item{chrom}{The chromosome of interest.}
+\item{chromsToUse}{The chromosome(s) of interest. Omitting this leads to the computation of all chromosomes.}
 
 \item{empericalCentromeres}{Emperically determine the centromeres (i.e. based on the largest white stripe in the Hi-C matrix).}
 
@@ -31,7 +32,7 @@ The procedure is an eigenvector decomposition of the observed/expected matrix mi
 }
 \examples{
 # Compute the compartment-scores of chromosome 20.
-WT_40kb_CS = compartment.score(WT_40kb, chrom = 'chr20')
+WT_40kb_CS = compartment.score(WT_40kb, chromsToUse = 'chr20')
 
 # Plot chromosome 20 with skipAnn = T to allow for an
 # insertion op a plot on top.

@@ -74,13 +74,16 @@ largest.stretch <- function( x ){
   x[which(temp == with(temp2, values[which.max(lengths)]))]
 }
 
-#' Get compartment-scores for a chromosome
+
+
+
+#' Get compartment-scores
 #'
 #' This uses the per-arm compartment-score algorithm of G. Fudenberg.
 #' The procedure is an eigenvector decomposition of the observed/expected matrix minus one.
 #'
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
-#' @param chrom The chromosome of interest.
+#' @param chromsToUse The chromosome(s) of interest. Omitting this leads to the computation of all chromosomes.
 #' @param empericalCentromeres Emperically determine the centromeres (i.e. based on the largest white stripe in the Hi-C matrix).
 #' @param comparableBed An optional dataframe of active regions (e.g. H3K27ac-peaks), which will be used to flip the A/B signal.
 #' @param comparableTrack An optional earlier output of compartment.score, which will be used to flip the A/B signal. Or one can use GC-content to ensure that regions with positive scores are postiviely correlated with GC-content.
@@ -89,7 +92,7 @@ largest.stretch <- function( x ){
 #' @return A BED-like dataframe with a fourth column, that holds the compartment-scores, and a fifth column, which holds the name of the experiment.The centromere will be skipped.
 #' @examples
 #' # Compute the compartment-scores of chromosome 20.
-#' WT_40kb_CS = compartment.score(WT_40kb, chrom = 'chr20')
+#' WT_40kb_CS = compartment.score(WT_40kb, chromsToUse = 'chr20')
 #'
 #' # Plot chromosome 20 with skipAnn = T to allow for an
 #' # insertion op a plot on top.
@@ -100,7 +103,30 @@ largest.stretch <- function( x ){
 #' plot(WT_40kb_CS$start, WT_40kb_CS$compartmentScore,
 #' t = 'h', axes = F); axis(2)
 #' @export
-compartment.score <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV = 1, qEV =1, comparableBed = NULL, comparableTrack = NULL, shuffle = F){
+compartment.score <- function(exp, chromsToUse = NULL, empericalCentromeres = T,
+                              pEV = 1, qEV =1, comparableBed = NULL,
+                              comparableTrack = NULL, shuffle = F, verbose = T){
+  if(is.null(chromsToUse)){
+    chromsToUse <- exp$CHRS
+  }
+
+  outList <- list()
+  for(chrom in chromsToUse){
+    if(verbose){message(chrom)}
+    tmp <- compartment.score.chr(exp = exp, chrom = chrom,
+                                 empericalCentromeres = empericalCentromeres,
+                                 pEV = pEV, qEV =qEV,
+                                 comparableBed = comparableBed,
+                                 comparableTrack = comparableTrack,
+                                 shuffle = shuffle)
+    outList[[chrom]] <- tmp
+  }
+  outDF <- data.table::rbindlist(outList)
+
+  return(outDF)
+}
+
+compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV = 1, qEV =1, comparableBed = NULL, comparableTrack = NULL, shuffle = F){
   centChrom = NULL
 
   if(empericalCentromeres){
@@ -118,6 +144,8 @@ compartment.score <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV
   }
 
   chromSize <- max(exp$ABS[exp$ABS$V1 == chrom,3])
+  first_startLocVector <- NULL
+  second_startLocVector <- NULL
 
   ###
   # first_arm
@@ -126,55 +154,63 @@ compartment.score <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV
   S = 0
   E = centChrom[centChrom[,1] == chrom,2]
 
-  # get all bins of this region
-  first_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 <= E,3] - exp$RES
+  if(centChrom[1,2] > ( exp$RES*10)){ # otherwise too small to do
+    # get all bins of this region
+    first_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 <= E,3] - exp$RES
 
-  ss <- select.subset(exp, C, S, E)
-  if(shuffle){
-    ss <- suppressMessages(shuffleHiC(ss))
-  }
-  ss_eigen <- get.eigen(ss)
-  compScore <- ss_eigen$vectors[,pEV] * (ss_eigen$values[pEV]  ** 0.5)
+    ss <- select.subset(exp, C, S, E)
+    if(shuffle){
+      ss <- suppressMessages(shuffleHiC(ss))
+    }
+    ss_eigen <- get.eigen(ss)
+    compScore <- ss_eigen$vectors[,pEV] * (ss_eigen$values[pEV]  ** 0.5)
 
-  # If there is a comparison-vector, now is the chance to use it...
+    # If there is a comparison-vector, now is the chance to use it...
 
-  ##### making a GC-comparison-vector
-  # GCdf <- read.delim('~/Data/References/zebraFish/40kb.gc', h = F,stringsAsFactors = F) # to be made with GCContentByInterval from GATK
-  # library(reshape2)
-  # GGC <- colsplit(GCdf$V1,pattern = '[-:]', names = c('seqnames','start','end'))
-  # GGC$perc <- GCdf$V2
-  # comparableTrack <- GGC[GGC$seqnames ==C,4]
-  ####
+    ##### making a GC-comparison-vector
+    # GCdf <- read.delim('~/Data/References/zebraFish/40kb.gc', h = F,stringsAsFactors = F) # to be made with GCContentByInterval from GATK
+    # library(reshape2)
+    # GGC <- colsplit(GCdf$V1,pattern = '[-:]', names = c('seqnames','start','end'))
+    # GGC$perc <- GCdf$V2
+    # comparableTrack <- GGC[GGC$seqnames ==C,4]
+    ####
 
-  if(!is.null(comparableBed)){
+    if(!is.null(comparableBed)){
 
-    comparableBed <- comparableBed[order(comparableBed[,1],comparableBed[,2]),]
-    comparableBed <- comparableBed[comparableBed[,1]==C,]
+      comparableBed <- comparableBed[order(comparableBed[,1],comparableBed[,2]),]
+      comparableBed <- comparableBed[comparableBed[,1]==C,]
 
-    #overlap the peaks with the windows
-    i <- findInterval(comparableBed[,2], first_startLocVector)
-    comparableBed.window <- table(i+1)
-    i.up <- which(compScore > 0)
-    i.down <- which(compScore < 0)
+      #overlap the peaks with the windows
+      i <- findInterval(comparableBed[,2], first_startLocVector)
+      comparableBed.window <- table(i+1)
+      i.up <- which(compScore > 0)
+      i.down <- which(compScore < 0)
 
-    if(wilcox.test(comparableBed.window[as.character(i.up)], comparableBed.window[as.character(i.down)])$p.value < 1e-5){
-      if(median(comparableBed.window[as.character(i.up)], na.rm=T) < median(comparableBed.window[as.character(i.down)], na.rm=T)){
-        compScore <- -compScore
+      if(wilcox.test(comparableBed.window[as.character(i.up)], comparableBed.window[as.character(i.down)])$p.value < 1e-5){
+        if(median(comparableBed.window[as.character(i.up)], na.rm=T) < median(comparableBed.window[as.character(i.down)], na.rm=T)){
+          compScore <- -compScore
+        }
+      }
+
+    }
+
+    if(!is.null(comparableTrack)){
+      SMPLCOR <- tail(comparableTrack,length(compScore))
+      CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
+      if(CORTEST < 0){
+        if(abs(CORTEST) > 0.25){
+          compScore <- compScore * -1
+        } else {
+          warning("The correlation with the comparable track is lower than |0.25| on the p-arm of ", chrom, ".")
+          compScore <- compScore * -1
+        }
       }
     }
-
+    firstArm <- compScore
+  } else {
+    firstArm <- NULL
   }
 
-  if(!is.null(comparableTrack)){
-    SMPLCOR <- tail(comparableTrack,length(compScore))
-    CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
-    if(CORTEST < 0){
-      compScore <- compScore * -1
-
-    }
-  }
-
-  firstArm <- compScore
 
   ###
   # second_arm
@@ -183,55 +219,62 @@ compartment.score <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV
   S = centChrom[centChrom[,1] == chrom,3]
   E = max(exp$ABS[exp$ABS$V1 == C,3])
 
-  # get all bins of this region
-  second_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 >= S,3] - exp$RES
+  if( (chromSize - centChrom[1,3]) > ( exp$RES*10)){ # otherwise too small to do
+    # get all bins of this region
+    second_startLocVector <-  exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 >= S,3] - exp$RES
 
-  ss <- select.subset(exp, C, S, E)
-  if(shuffle){
-    ss <- suppressMessages(shuffleHiC(ss))
-  }
-  ss_eigen <- get.eigen(ss)
-  compScore <- ss_eigen$vectors[,qEV] * (ss_eigen$values[qEV]  ** 0.5)
+    ss <- select.subset(exp, C, S, E)
+    if(shuffle){
+      ss <- suppressMessages(shuffleHiC(ss))
+    }
+    ss_eigen <- get.eigen(ss)
+    compScore <- ss_eigen$vectors[,qEV] * (ss_eigen$values[qEV]  ** 0.5)
 
-  # If there is a comparison-vector, now is the chance to use it...
+    # If there is a comparison-vector, now is the chance to use it...
 
-  ##### making a GC-comparison-vector
-  # GCdf <- read.delim('~/Data/References/zebraFish/40kb.gc', h = F,stringsAsFactors = F) # to be made with GCContentByInterval from GATK
-  # library(reshape2)
-  # GGC <- colsplit(GCdf$V1,pattern = '[-:]', names = c('seqnames','start','end'))
-  # GGC$perc <- GCdf$V2
-  # comparableTrack <- GGC[GGC$seqnames ==C,4]
-  ####
+    ##### making a GC-comparison-vector
+    # GCdf <- read.delim('~/Data/References/zebraFish/40kb.gc', h = F,stringsAsFactors = F) # to be made with GCContentByInterval from GATK
+    # library(reshape2)
+    # GGC <- colsplit(GCdf$V1,pattern = '[-:]', names = c('seqnames','start','end'))
+    # GGC$perc <- GCdf$V2
+    # comparableTrack <- GGC[GGC$seqnames ==C,4]
+    ####
 
-  if(!is.null(comparableBed)){
+    if(!is.null(comparableBed)){
 
-    comparableBed <- comparableBed[order(comparableBed[,1],comparableBed[,2]),]
-    comparableBed <- comparableBed[comparableBed[,1]==C,]
+      comparableBed <- comparableBed[order(comparableBed[,1],comparableBed[,2]),]
+      comparableBed <- comparableBed[comparableBed[,1]==C,]
 
-    #overlap the peaks with the windows
-    i <- findInterval(comparableBed[,2], first_startLocVector)
-    comparableBed.window <- table(i+1)
-    i.up <- which(compScore > 0)
-    i.down <- which(compScore < 0)
+      #overlap the peaks with the windows
+      i <- findInterval(comparableBed[,2], second_startLocVector)
+      comparableBed.window <- table(i+1)
+      i.up <- which(compScore > 0)
+      i.down <- which(compScore < 0)
 
-    if(wilcox.test(comparableBed.window[as.character(i.up)], comparableBed.window[as.character(i.down)])$p.value < 1e-5){
-      if(median(comparableBed.window[as.character(i.up)], na.rm=T) < median(comparableBed.window[as.character(i.down)], na.rm=T)){
-        compScore <- -compScore
+      if(wilcox.test(comparableBed.window[as.character(i.up)], comparableBed.window[as.character(i.down)])$p.value < 1e-5){
+        if(median(comparableBed.window[as.character(i.up)], na.rm=T) < median(comparableBed.window[as.character(i.down)], na.rm=T)){
+          compScore <- -compScore
+        }
+      }
+
+    }
+
+    if(!is.null(comparableTrack)){
+      SMPLCOR <- tail(comparableTrack,length(compScore))
+      CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
+      if(CORTEST < 0){
+        if(abs(CORTEST) > 0.25){
+          compScore <- compScore * -1
+        } else {
+          warning("The correlation with the comparable track is lower than |0.25| on the q-arm of ", chrom, ".")
+          compScore <- compScore * -1
+        }
       }
     }
-
+    secondArm <- compScore
+  } else {
+    secondArm <- NULL
   }
-
-  if(!is.null(comparableTrack)){
-    SMPLCOR <- tail(comparableTrack,length(compScore))
-    CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
-    if(CORTEST < 0){
-      compScore <- compScore * -1
-
-    }
-  }
-  secondArm <- compScore
-
   ###
   # return
   ###

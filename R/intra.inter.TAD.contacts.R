@@ -72,10 +72,7 @@ intra.inter.TAD.contacts <- function(exp, TAD, max.neighbor = 10, verbose = F){
     tad.x <- chr.id[match( d.chrom$V1, chr.id[,4]),5]
     tad.y <- chr.id[match( d.chrom$V2, chr.id[,4]),5]
     #select tad(combination)s that are not more than max.neighbor apart
-    sel <- all(tad.y - tad.x <= max.neighbor,
-               tad.x > 0 & tad.y > 0,
-               !is.na(tad.x),
-               !is.na(tad.y))
+    sel <- tad.y - tad.x <= max.neighbor & tad.x > 0 & tad.y > 0 & !is.na(tad.x) & !is.na(tad.y)
     tad.x <- tad.x[sel]
     tad.y <- tad.y[sel]
     d.chrom <- d.chrom$V3[sel]

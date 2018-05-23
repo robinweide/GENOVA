@@ -37,10 +37,6 @@ str(Hap1_WT_40kb, width = 60,   vec.len=1, strict.width = 'wrap')
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)
 
-## ----saddleStrength, message=FALSE,  cache=T, warning=FALSE, fig.cap= "The per-arm compartment strength", fig.small = T----
-visualise.compartmentStrength(list(saddle_WT,
-                                   saddle_WAPL))
-
 ## ---- echo =F--------------------------------------------------------------
 knitr::kable(
   head(CTCF, 3), caption = 'A data.frame holding a standard BED6 format.'
@@ -60,6 +56,16 @@ options(scipen = 1e9)
 
 ## ---- echo=F---------------------------------------------------------------
 options(scipen = 1)
+
+## ----quantAPA, message=FALSE , fig.cap= "With quantifyAPA In the WAPL-knockout, we see an increase of contacts at the loop.",cache=T, fig.retina=T----
+quantifyAPA_out <- quantifyAPA(APAlist = list('WT' = APA_Hap1_WT_extended,
+                                              'WAPL' = APA_Hap1_WAPL_extended), 
+                               pixWidth = 3)
+print(quantifyAPA_out$stats)
+
+# pot boxplot with base-R (ggplot2 would be also easy)
+boxplot(split(quantifyAPA_out$data$value, f = quantifyAPA_out$data$sample), 
+        col = c('darkgrey', 'red'), outline = F)
 
 ## ----sesh, echo = F--------------------------------------------------------
 sessionInfo()

@@ -547,6 +547,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
   if(length(chip) < 3){
     symmAnn = T
   }
+
   #some error handling
   if(!is.null(exp2)){
     if(any(exp2$RMCHROM, exp1$RMCHROM)){
@@ -611,6 +612,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
     }
     mat1$z[mat1$z > cut.off] <- cut.off
     if(inferno){
+
       higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
       wr <- colorRampPalette(higlassCol)
 
@@ -632,7 +634,6 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
                 round(cut.off), ".")
       }
       mat1$z[mat1$z > cut.off] <- cut.off
-
 
       if(inferno){
         higlassCol <- c('white', '#f5a623', '#d0021b', 'black')

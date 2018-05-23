@@ -4,7 +4,8 @@
 \alias{differential.TAD.dotplot}
 \title{differential.TAD.dotplot}
 \usage{
-differential.TAD.dotplot(exp1, exp2, color.fun = NULL, ...)
+differential.TAD.dotplot(exp1, exp2, color.fun = NULL, yRange = NULL,
+  pch = ".", title = NULL, cex = 1, ...)
 }
 \arguments{
 \item{exp1}{Output of intra.inter.TAD.contacts for experiment 1.}
@@ -12,10 +13,36 @@ differential.TAD.dotplot(exp1, exp2, color.fun = NULL, ...)
 \item{exp2}{Output of intra.inter.TAD.contacts for experiment 2.}
 
 \item{color.fun}{A color-function like rainbow().}
+
+\item{yRange}{Set the y-axis limits, a two-number vector,
+otherwise use a quantile-based approach to find yRange}
+
+\item{pch}{Which plot-characters?}
+
+\item{title}{Add a title to the plot.}
+
+\item{cex}{How big do you want the points?}
 }
 \value{
 A dotplot
 }
 \description{
-Create a dot plot showing the log-ratio of the intra and inter TAD contact frequencies for different TAD distances.
+Create a dot plot showing the log-ratio of the intra and
+inter TAD contact frequencies for different TAD distances.
+}
+\examples{
+# get scores for WT and WAPL data
+TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs,
+                                       max.neighbor = 10,
+                                       exp = Hap1_WT_10kb)
+TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs,
+                                       max.neighbor = 10,
+                                       exp = Hap1_WAPL_10kb)
+
+# plot a TAD+N dotplot
+differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
+                         exp2 = TAD_N_WAPL) # numerator
+}
+\author{
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

@@ -4,53 +4,110 @@
 \alias{hic.matrixplot}
 \title{hic.matrixplot}
 \usage{
-hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = 0,
-  chip = list(NULL, NULL, NULL, NULL), bed.col = rep(c("red", "blue"), 2),
-  bw.col = rep(c("navy", "darkred"), 2), type = rep("triangle", 4),
-  coplot = "dual", genes = NULL, tads = NULL, tad.type = "lower",
-  loops = NULL, loops.type = "lower", tads.color = "#3288bd",
-  loops.resize = 0, loops.color = "#3288bd")
+hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
+  chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
+  bed.col = rep("black", 4), bw.col = "black", yMax = NULL,
+  type = rep("triangle", 4), guessType = T, coplot = "dual",
+  genes = NULL, tads = NULL, tads.type = "lower", loops = NULL,
+  loops.type = "lower", tads.color = "#3288bd", loops.resize = 0,
+  loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T,
+  antoni = F)
 }
 \arguments{
-\item{exp1}{The control Hi-C experiment object: produced by construct.experiment(). (bottom)}
+\item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
 
-\item{exp2}{Optional: the treatment Hi-C experiment object: produced by construct.experiment().}
+\item{exp2}{Optional: a Hi-C experiment object.}
 
-\item{chrom}{Chromosome}
+\item{chrom}{Chromosome of the region of interest}
 
 \item{start}{Start position of the region of interest}
 
 \item{end}{End position of the region of interest}
 
-\item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the negative of this is the lower bound}
+\item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the
+negative of this is the lower bound}
 
-\item{chip}{A list of feature tracks, can be bed structure (i.e. data frames) or a path to bigwig file (i.e. character variable), maximum length of 4, first two and last two have to be the same (i.e. 1:bed,2:bed,3:path,4:path, but 1:bed,2:NULL,3:path,4:NULL is also allowed)}
+\item{chip}{A list of feature tracks, can be bed structure
+(i.e. data frames) or a path to bigwig file (i.e. character variable),
+maximum length of 4. Placement is inner-top, outer-top, outer-left,
+inner-left.}
+
+\item{inferno}{White/Red/black or White/Red coloscale?}
+
+\item{cexTicks}{Change size of numbers on the axis}
 
 \item{bed.col}{Color of the bed track (max.len is 4)}
 
 \item{bw.col}{Same as bed col, but for the bigwig track}
 
-\item{type}{Should a rectangle or a triangle be drawn? Not that for a triangle a 6th strand column should be included}
+\item{yMax}{Set the maximum height of all biwigs.}
 
-\item{coplot}{When drawing together two experiments, dual is bottom triangle exp1, top triangle exp2; diff plots a substraction of exp2-exp1}
+\item{type}{Should a rectangle or a triangle be drawn?
+Note that for a triangle a 6th strand column should be included}
 
-\item{genes}{Structure with gene information, will only be combined with bed structure}
+\item{guessType}{If an element in the chip is a dataframe,
+infer the type from column 6? If true, column six should hold "+" and "-".
+If a row has other characters, we view this entry as no-oriention and
+thus plot a rectangle.}
 
-\item{tads}{BED-like dataframe (not a tibble or a data.table!)}
+\item{coplot}{When drawing together two experiments: [dual] is bottom
+triangle exp2, top triangle exp1; [diff] plots a substraction of exp2-exp1}
 
-\item{tad.type}{How to show TADS: upper, lower and or both}
+\item{genes}{Structure with gene information,
+will only be combined with bed structure}
 
-\item{loops}{BED-like dataframe (not a tibble or a data.table!)}
+\item{tads}{BED-like dataframe or a list of these data.frames}
+
+\item{tads.type}{How to show TADS: upper, lower and or both}
+
+\item{loops}{BED-like dataframe or a list of these data.frames}
 
 \item{loops.type}{How to show loops: upper, lower and or both}
 
 \item{loops.resize}{Make the loop-boxes bigger by X bp. Can help visibility.}
 
 \item{loops.color}{Which color do you want the loops to have?}
+
+\item{skipAnn}{Do not plot outside-annotation. Can be used to plot other
+things next to the matrix.}
+
+\item{symmAnn}{Put features 1&2 also on verical (ignore chip-entries 3&4)}
+
+\item{check.genome}{Check if reference genomes in exp1 and exp2 are the same}
+
+\item{antoni}{Logical: plot an explorer of the microscopic world}
 }
 \value{
 A matrix-plot
 }
 \description{
 Plot a matrix (or two) for a region of interest with annotations
+}
+\note{
+To plot genes, a gene-model data.frame must be made. This can be done via a
+multitude of ways (e.g. biomart, UCSC table browser). The resulting
+data.frame must have one exon per row with the following columns:
+geneID | transcriptID | chrom | txStart | txEnd | exonStart | exonEnd |
+strand.
+Alternatively, if you download the knowngene table from UCSC, you can
+directly use this table (with exons combined per row), by renaming
+exonStarts and exonEnds to exonStart and exonEnd.
+}
+\examples{
+# plot two matrices of Hap-1 cells, including their respective loop-calls
+hic.matrixplot(exp1 = Hap1_Haarhuis2017_10kb,
+               exp2 = Hap1_Sanborn2015_10kb,
+               chrom = 'chr7',
+               start = 25e6,
+               end=30e6,
+               loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
+               loops.color = c('blue','green'),
+               loops.type = c('upper','lower'),
+               loops.resize = c(20e3,20e3), # expand for visibility
+               cut.off = 25) # upper limit of contacts
+}
+\author{
+Robin H. van der Weide, \email{r.vd.weide@nki.nl}
+
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

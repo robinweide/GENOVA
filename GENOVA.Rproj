@@ -10,7 +10,8 @@ NumSpacesForTab: 2
 Encoding: UTF-8
 
 RnwWeave: knitr
-LaTeX: pdfLaTeX
+LaTeX: XeLaTeX
+RootDocument: vignettes/GENOVA_vignette.pdf
 
 AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes

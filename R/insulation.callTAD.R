@@ -1,32 +1,62 @@
 #' insulation.callTAD
 #'
-#' Call TADs
+#' Call TADs using a similar method as Crane et al. (2015).
+#' Briefly, we take the result of genome.wide.insulation that is stored in experiment$INSULATION.
+#' Next, we compute the local minima of the delta-vector: these are (after some filtering) the TAD-borders
+#' As a last step, we create TADs by combining the borders (which are sorted) two-by-two, creating non-overlapping fully-covering TAD-borders on the genome.
 #'
-#' @param exp1 The Hi-C experiment object: produced by construct.experiment().
-#' @param BEDCOLOR Color of items in the resulting BEDPE-file
+#' @param experiment The Hi-C experiment object: produced by construct.experiment().
+#' @param BEDcolor Color of items in the resulting BEDPE-file
 #' @return A BEDPE-df
 #' @note Call insulation scores first and store these in exp$INSULATION
+#' @examples
+#' # Get the insulation score with window-size 25 and store in the INSULATION-slot.
+#' Hap1_WT_10kb$INSULATION = genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+#'
+#' # Call TAD from the insulation-score.
+#' TADcalls = insulation.callTAD(Hap1_WT_10kb)
+#'
+#' # Plot TADs
+#' hic.matrixplot(exp1 = Hap1_WT_10kb, chrom = 'chr7', start = 25e6, end=30e6, tads = WT_TADs, tads.type = 'lower', cut.off = 25)
 #' @export
-insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
-  if(is.null(exp$INSULATION)){ stop("Call insulation score first and store in exp$INSULATION")}
-  res <- exp$RES
+insulation.callTAD <- function(experiment,  BEDcolor = "127,201,127", verbose = F){
+  if(is.null(experiment$INSULATION)){ stop("Call insulation score first and store in experiment$INSULATION")}
+  res <- experiment$RES
   scooch <- floor(100e3 / res)
   entries <- list()
   df = NULL
-  CHROMS <- unique(exp$INSULATION[,1])
-  
-  exp$INSULATION$V2 <- exp$INSULATION[,2] + exp$RES
-  
+  CHROMS <- unique(experiment$INSULATION[,1])
+
+  experiment$INSULATION$V2 <- experiment$INSULATION[,2] + experiment$RES
+
   for(CCC in CHROMS){
-    #car("Starting chromosome",CCC, "\n")
-    INSU <- exp$INSULATION[exp$INSULATION[,1] == CCC ,]
+    if(verbose){   message("Starting chromosome",CCC, "\n")  }
+
+    INSU <- experiment$INSULATION[experiment$INSULATION[,1] == CCC ,]
     insCol <- INSU[,4]
-    insCol[!is.finite(unlist(insCol))] <- 0
+
+    #determine minimum and maximum values
+    min_value <- min(insCol[insCol != -Inf])
+    max_value <- max(insCol[insCol != Inf])
+    #check for every insulatoin score that is -Inf or Inf if
+    #    the value before or after it is the same
+    #to prevent "sudden" peaks to be filtered out
+    for (i in (2:length(insCol))){
+      insCol[i==-Inf & i - 1 != -Inf & i + 1 != -Inf] <-  min_value *2
+      insCol[i==Inf & i - 1 != Inf & i + 1 != Inf] <-  max_value * 2
+    }
+    # set values of Inf and -Inf that are left to the minimal and maximal value of the chromosome
+    insCol[insCol == -Inf] <- min_value
+    insCol[insCol == Inf] <- max_value
+
+    #set any remaining values that ar not finite (e.g. NA)
+    # to NaN (only for chrY as this only has -Inf and Inf)
+    insCol[!(is.finite(unlist(insCol)))] <- NaN
     INSU <- cbind(INSU[,1:3],scale(insCol, center = TRUE, scale = TRUE))
     colnames(INSU)[4] <- "V4"
     if( length(INSU$V4) == length(which(is.nan(INSU$V4)))){break}
-    #car("Computing the delta-vector...\n")
-    
+
+    if(verbose){   message("Computing the delta-vector...\n")  }
     add <- 1:scooch
     i <- (scooch+1):(nrow(INSU)-scooch)
     i.rep <- rep(i, each=length(add))
@@ -40,7 +70,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
     colnames(deltaDF)[5] <- "delta"
     deltaDF <- dplyr::arrange(deltaDF,  V1,V2)
     deltaDF$ID <- 1:nrow(deltaDF)
-    
+
     ####
     # First find peaks
     ###
@@ -50,7 +80,8 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
     if (deltaDF$V4[[1]] == deltaDF$V4[[2]]) {
       VALLEYS <- VALLEYS[-1]
     }
-    #car("Calling borders...\n")
+    if(verbose){message("Calling borders...\n")}
+
     boundaryCalls <- NULL
     VALLEYS <- sort(unique(c(VALLEYS+1, VALLEYS, VALLEYS-1)))
     VALLEYS <- VALLEYS[VALLEYS > 2]
@@ -81,7 +112,7 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
         }
       }
     }
-    
+
     for(i in 1:nrow(boundaryCalls)){
       if( boundaryCalls[i,3] < boundaryCalls[i,2]  ){
         tmp3 <- boundaryCalls[i,3]
@@ -90,22 +121,21 @@ insulation.callTAD <- function(exp,  BEDCOLOR = "127,201,127"){
         boundaryCalls[i,2] <- tmp3
       }
     }
-    
+
     boundaryCalls <- boundaryCalls[with(boundaryCalls, order(V1, V2)), ]
 
-    #car("Generating bedgraph...\n")
-    
+    if(verbose){message("Generating bedgraph...\n")}
     for(i in 2:nrow(boundaryCalls)){
       if(!boundaryCalls[i-1,1] == boundaryCalls[i,1]){next}
       prev <- boundaryCalls[i-1,3]
       now <- boundaryCalls[i,1:2]
       now[,2] <- now[,2]
       prev <- prev
-      ddd <-cbind(now, prev,now,prev, BEDCOLOR)[c(1,3,2,1,3,2,7)]
+      ddd <-cbind(now, prev,now,prev, BEDcolor)[c(1,3,2,1,3,2,7)]
       colnames(ddd) <- c("a", 'b', 'c', 'd', 'e', 'f', 'g')
       df <- rbind(df, ddd)
     }
   }
-  
+
   return(bedgraph = df)
 }

@@ -4,22 +4,27 @@
 \alias{select.subset}
 \title{Get matrix from a BED-like entry.}
 \usage{
-select.subset(r1, chrom, start, end, bed)
+select.subset(exp, chrom, start, end)
 }
 \arguments{
-\item{r1}{A HiC-pro matrix.}
+\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
 \item{chrom}{Chromosome.}
 
 \item{start}{Start position in bp.}
 
 \item{end}{End position in bp.}
-
-\item{bed}{A HiC-pro index.}
 }
 \value{
-A data.table with normalised counts.
+A list with the X and Y locations and a matrix (Z) containing the contacts.
 }
 \description{
-Extracts a symmetric matrix around the diagonal from *start* to *stop* in chromosome *chrom*.
+Extracts a symmetric matrix around the diagonal from start to stop in chromosome chrom.
+}
+\examples{
+# get the TP53-locus in an experiment mapped to hg19
+ss_out <- select.subset(experiment = WT, chrom = 'chr17', start = 7.5e6, end = 7.6e6)
+
+# plot the region
+image(ss_out$z)
 }

@@ -5,7 +5,7 @@
 \title{Plot pyramid-style HiC-regions.}
 \usage{
 \method{frequency}{from.matrix}(experiment, chrom, start, end, window = 10000,
-  q.val = 0.95, cut.off = 0, extraPadding = 1.75, ylim = c(0, 250),
+  q.val = 0.95, cut.off = NULL, extraPadding = 1.75, ylim = c(0, 250),
   shinyAxis = T, ...)
 }
 \arguments{

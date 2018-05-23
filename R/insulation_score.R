@@ -1,6 +1,6 @@
 #' plot.insulation.single
 #'
-#' Plot a single insulation
+#' Plot a single insulation-score and Hi-C matrix for a region of interest.
 #'
 #' @param exp1 The Hi-C experiment object: produced by construct.experiment().
 #' @param chrom Chromosome
@@ -8,10 +8,13 @@
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for Hi-C scores
 #' @param window.size The sliding square size
-#' @param local Per chromosome?
+#' @param Local or per-chromosome normalisation?
+#' @examples
+#' # Make a matrix-plot of an experiment and the insulation-score for a region of interest.
+#  insulation.plot.dual(exp1 = Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size = 21)
 #' @return A plot
 #' @export
-insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.size = 21, local = T ){
+insulation.plot.single <- function( exp1, chrom, start, end, cut.off=NULL, window.size = 21, local = T ){
 	#create a plotting layout
 	w = 6
 	lay <- matrix(4, nrow=w, ncol=w)
@@ -21,7 +24,13 @@ insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 	#layout
 
 	#get a matrix from the experiment
-	mat1 <- select.subset( exp1$ICE, chrom, start, end, exp1$ABS)
+	mat1 <- select.subset(exp1, chrom, start, end)
+
+	if(is.null(cut.off)){
+	  cut.off = max(quantile(mat1$z, .99))
+	  warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+	}
+
 	mat1$z[mat1$z > cut.off] <- cut.off
 	wr <- colorRampPalette(c("white","red"))
 	image( mat1, col=wr(256), axes=F, ylim=rev(range(mat1$x)) )
@@ -54,7 +63,7 @@ insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 
 #' plot.insulation.dual
 #'
-#' Plot insulation-scores of two experiments
+#' Plot insulation-scores of two experiments, complete with Hi-C matrices, for a region of interest.
 #'
 #' @param exp1 A Hi-C experiment object: produced by construct.experiment().
 #' @param exp2 A Hi-C experiment object: produced by construct.experiment().
@@ -63,11 +72,14 @@ insulation.plot.single <- function( exp1, chrom, start, end, cut.off=0, window.s
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for Hi-C scores
 #' @param window.size The sliding square size
-#' @param local Per chromosome?
-#' @param delta plot the differential insulation scores
+#' @param local Local or per-chromosome normalisation?
+#' @param delta Plot the differential insulation scores (exp1 - exp2)
+#' @examples
+#' # Make a matrix-plot, with two experiments and their respective insulation-scores, for a region of interest.
+#  insulation.plot.dual(exp1 = Hap1_WT_10kb, exp2 = Hap1_WAPL_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size = 21)
 #' @return A plot
 #' @export
-insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, window.size = 21, local = T, delta = F ){
+insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=NULL, window.size = 21, local = T, delta = F ){
 	#make sure the resolutions are the same
 	if(exp1$RES != exp2$RES){
 		stop("The Hi-C matrices should have the same resolution")
@@ -86,10 +98,15 @@ insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, wind
 	#layout
 
 	#get a matrix from the experiment
-	mat1 <- select.subset( exp1$ICE, chrom, start, end, exp1$ABS)
-	mat2 <- select.subset( exp2$ICE, chrom, start, end, exp2$ABS)
+	mat1 <- select.subset( exp1, chrom, start, end)
+	mat2 <- select.subset( exp2, chrom, start, end)
 
 	mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
+
+	if(is.null(cut.off)){
+	  cut.off = max(quantile(mat1$z, .99))
+	  warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+	}
 
 	mat1$z[mat1$z > cut.off] <- cut.off
 	wr <- colorRampPalette(c("white","red"))
@@ -146,19 +163,22 @@ insulation.plot.dual <- function( exp1, exp2, chrom, start, end, cut.off=0, wind
 #'
 #' create a domainogram for the insulation scores
 #'
-#' @param exp1 A Hi-C experiment object: produced by construct.experiment().
-#' @param chrom Chromosome
+#' @param exp A Hi-C experiment object: produced by construct.experiment().
+#' @param chrom Chromosome of the region of interest
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for Hi-C scores
 #' @param window.size1 The minimal sliding square size
 #' @param window.size2 The maximal sliding square size
 #' @param step Thesliding square step-size
-#' @param local Per chromosome?
+#' @param local Local or per-chromosome normalisation?
 #' @param zlim Zlims of the plot
 #' @return A plot
+#' @examples
+#' # Make an domainogram of a locus on chromosome 7 with windowsizes from 1 to 101.
+#  insulation.domainogram(Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size1 = 1, window.size2 = 101, step = 2)
 #' @export
-insulation.domainogram <- function( exp1, chrom, start, end, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim=c(-1, 0.5)){
+insulation.domainogram <- function( exp, chrom, start, end, axes = T, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim=c(-1, 0.5)){
 	if(step %% 2){
 		stop("Step size has to be even")
 	}
@@ -170,8 +190,8 @@ insulation.domainogram <- function( exp1, chrom, start, end, window.size1 = 5, w
 	plot( c(start,end), c(window.size1, window.size2), type='n', xaxs="i", yaxs='i', axes=F, ylab="window size", xlab="chromosomal position")
 	window.vec <- seq(window.size1, window.size2, by=step)
 	for( window.size in window.vec){
-		extend <- exp1$RES*window.size
-		ins.score <- insulation.score( exp1, window.size, chrom, start-extend, end+extend, local=local )
+		extend <- exp$RES*window.size
+		ins.score <- insulation.score( exp, window.size, chrom, start-extend, end+extend, local=local )
 		#set the limits on the values of the insulation score
 		ins.score[ins.score[,2] < zlim[1],2] <- zlim[1]
 		ins.score[ins.score[,2] > zlim[2],2] <- zlim[2]
@@ -183,7 +203,9 @@ insulation.domainogram <- function( exp1, chrom, start, end, window.size1 = 5, w
 		rect(x1, y1, x2, y2, col=color.vec[color.index], border=NA)
 	}
 	at <- seq(1e6*floor(start/1e6), 1e6*floor(end/1e6), by=1e6)
-	axis(1, at=at, lab=at/1e6, lwd=2)
+	if(axes){
+	  axis(1, at=at, lab=at/1e6, lwd=2)
+	}
 	axis(2, lwd=2)
 	box(lwd=2)
 }
@@ -226,7 +248,7 @@ delta.insulation.domainogram <- function( exp1, exp2, chrom, start, end, window.
 }
 
 
-#' insulation.domainogram
+#' insulation.polygon
 #'
 #' create a domainogram for the insulation scores
 #'
@@ -250,18 +272,20 @@ insulation.polygon <- function( ins.score, rotate=F ){
 
 #' insulation.score
 #'
-#' Get insulation scores
+#' Get insulation scores of a region or chromosome.
 #'
-#' @param exp1 A Hi-C experiment object: produced by construct.experiment().
+#' @param hic A Hi-C experiment object: produced by construct.experiment().
 #' @param chrom Chromosome
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
-#' @param cut.off The cut.off for Hi-C scores
 #' @param window.size The sliding square size
 #' @param step Thesliding square step-size
-#' @param local Per chromosome?
+#' @param local Local or per-chromosome normalisation?
 #' @param diag.add Add values to diaginal
 #' @return A plot
+#' @examples
+#' # Get the insulation score with window-size 25 of a locus on chromosome 7.
+#' localInsulationScores = insulation.score(hic = Hap1_WT_10kb, window.size = 25, chrom = 'chr7', start = 25e6, end=30e6, local = T)
 #' @export
 insulation.score <- function( hic, window.size, chrom, start, end, diag.add = 0, local = T ){
 	if((end - start)/hic$RES > 1000 + 2*window.size){
@@ -270,7 +294,7 @@ insulation.score <- function( hic, window.size, chrom, start, end, diag.add = 0,
 	if(window.size %% 2 == 0){
 		stop("Please use an odd window size")
 	}
-	mat <- select.subset( hic$ICE, chrom, start, end, hic$ABS)
+	mat <- select.subset(hic, chrom, start, end)
 	ins.score <- matrix.insulation( mat, window.size )
 	if(local){
 		ins.score[,2] <- log2(ins.score[,2]/mean(ins.score[,2], na.rm=T))
@@ -311,11 +335,10 @@ matrix.insulation <- function( mat, window.size ){
 #'
 #' loop over the entire chromosome and calcute the insulation score for every position, use this to correct if requeste
 #'
-#' @param hic exp
+#' @param hic A GENOVA-experiment
 #' @param window.size The sliding square size
 #' @param chrom Chromosome to use
 #' @return DF with insulation score
-#' @export
 chromosome.wide.insulation <- function( hic, window.size, chrom ){
 	max.pos <- max(hic$ABS[hic$ABS[,1]==chrom,3])
 	window = hic$RES*1000
@@ -329,7 +352,7 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 		end <- start+window+(window.size-1)*hic$RES
 		#update the start so that it also includes a flanking region
 		start <- start - (window.size-1)*hic$RES
-		mat <- select.subset( hic$ICE, chrom, start, end, hic$ABS)
+		mat <- select.subset(hic, chrom, start, end)
 		ins.vec <- matrix.insulation( mat, window.size )
 		chrom.ins.vec <- rbind(chrom.ins.vec, ins.vec )
 	}
@@ -338,17 +361,22 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 
 #' genome.wide.insulation
 #'
-#' Get genome-wide insulation
+#' Get the genome-wide insulation.
 #'
-#' @param hic exp
+#' @param hic A GENOVA-experiment
 #' @param window.size The sliding square size
+#' @param verbose Should this function be chatty?
+#' @param normalize.genome Perform the log2(O/E) normalisation
 #' @return DF with insulation score
+#' @examples
+#' # Get the insulation score with window-size 25 and store in the INSULATION-slot.
+#' Hap1_WT_10kb$INSULATION = genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
 #' @export
-genome.wide.insulation <- function( hic, window.size, normalize.genome = F ){
+genome.wide.insulation <- function( hic, window.size, normalize.genome = F, verbose = F ){
 	chrom.vec <- c(hic$ABS[1,1],hic$ABS[which(head(hic$ABS[,1],-1) != tail(hic$ABS[,1],-1))+1,1])
 	chrom.save <- c(); pos.save <- c(); ins.vec <- c()
 	for( chrom in chrom.vec ){
-		cat("Currently analyzing ", chrom, "\r")
+		if(verbose){cat("Currently analyzing ", chrom, "\r")}
 		#do not analyse chromosomes that are twice the window size
 		if(sum(hic$ABS[,1]==chrom) <= 2*window.size ){
 			next

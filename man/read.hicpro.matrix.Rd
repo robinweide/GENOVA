@@ -9,7 +9,7 @@ read.hicpro.matrix(file, norm = 1e+09)
 \arguments{
 \item{file}{Full path to file.}
 
-\item{norm}{Normalising factor.}
+\item{norm}{Normalising factor. Set to NULL to skip norm.}
 }
 \value{
 A data.table with normalised counts.

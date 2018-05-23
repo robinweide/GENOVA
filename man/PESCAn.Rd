@@ -2,24 +2,50 @@
 % Please edit documentation in R/PESCAn.R
 \name{PESCAn}
 \alias{PESCAn}
-\title{PESCAn}
+\title{PE-SCAn}
 \usage{
-PESCAn(experiment, bed, minDist = 5e+06, size = 5e+05, add = 0)
+PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
+  rmOutlier = F)
 }
 \arguments{
-\item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
 \item{bed}{A bed-dataframe.}
 
+\item{shift}{Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.}
+
+\item{size}{Size in bp of window.}
+
+\item{rmOutlier}{Perform outlier-correction}
+
 \item{minDist}{The minimal distance}
 
-\item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
-
-\item{add}{Add constant value to bed-start and -end.}
+\item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff] percentile per pixel and set values bigger than that to this value.}
 }
 \value{
-A score-matrix.
+An O/E score-matrix (if shift != 0), otherwise an observed score-matrix.
 }
 \description{
-From a ChIP bed file, a HiCpro matrix and a HiCpro bed file calculate a PE-scan like data structure. Run this per chromosome.
+From a ChIP-peaks.BED dataframe, calculate the all-vs-all Hi-C contacts.
+}
+\examples{
+# Run PE-SCAn on a bed of super-enhancers,
+using WT Hi-C data and a circular permutation of 1Mb
+WT_PE_OUT = PESCAn(exp = WT_40kb,
+                   bed = superEnhancers,
+                   shift = 1e6)
+
+# Plot using visualise.PESCAn.ggplot
+visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
+                        resolution = 40e3,
+                        smooth = F)
+
+# Plot using persp
+RES = 40e3 # resolution of the Hi-C
+persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
+           y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
+           z = WT_PE_OUT)
+}
+\author{
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

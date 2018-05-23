@@ -13,17 +13,18 @@
 #' @param ylim The y-start and -stop: zero is at the diagonal,
 #' @return A plot.
 #' @import data.table
-frequency.from.matrix <- function( experiment, chrom, start, end, window = 10e3, q.val=0.95, cut.off=0, extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ... ){
+frequency.from.matrix <- function( experiment, chrom, start, end, window = 10e3, q.val=0.95, cut.off=NULL, extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ... ){
   # Check size: if less than 50 bins: makes no sense...
   resolution <- experiment$RES
-  mat <- select.subset(experiment$ICE, chrom, start- 2e7, end+ 2e7, experiment$ABS  )
+  mat <- select.subset(experiment, chrom, start- 2e7, end+ 2e7)
   pos <- which(mat$z >0 , arr.ind=T)
   mat.start <- min(mat$x)
   cnt <- as.vector(mat$z[mat$z > 0])
   cnt <- cnt[pos[,2]-pos[,1] > 0]
   pos <- pos[pos[,2]-pos[,1] > 0,]
-  if(cut.off == 0){
-    cut.off <- quantile(cnt, q.val)
+  if(is.null(cut.off)){
+    cut.off = max(quantile(cnt, .995))
+    warning("No cut.off was given: using 99.5% percentile: ", round(cut.off), ".")
   }
   cnt[cnt > cut.off ] <- cut.off
   cnt <- cnt/cut.off

@@ -23,3 +23,13 @@ A vector of DI-scores per Hi-C bin.
 \description{
 Extracts a sub-matrix from given coordinates and calculates the Directionality-Index.
 }
+\examples{
+# get the DI at the HOXC-locus in an experiment mapped to hg19
+WT_DI <- fastDI(experiment = Hap1_WT_40kb, chrom = 'chr1', start = 235e6, end = 240e6, max.i = 100)
+
+# plot a matrix of the region with skipAnn = T
+hic.matrixplot(exp1 = Hap1_WT_40kb, chrom = 'chr1', start = 235e6, end = 240e6, skipAnn = T, cut.off = 500)
+
+# insert the DI-plot above the matrix
+plot(WT_DI, type='h',lwd = 1.5,ylim=c(-5e2,5e2), axes=F)
+}

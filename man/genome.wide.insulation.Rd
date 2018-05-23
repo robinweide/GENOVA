@@ -4,16 +4,24 @@
 \alias{genome.wide.insulation}
 \title{genome.wide.insulation}
 \usage{
-genome.wide.insulation(hic, window.size, normalize.genome = F)
+genome.wide.insulation(hic, window.size, normalize.genome = F, verbose = F)
 }
 \arguments{
-\item{hic}{exp}
+\item{hic}{A GENOVA-experiment}
 
 \item{window.size}{The sliding square size}
+
+\item{normalize.genome}{Perform the log2(O/E) normalisation}
+
+\item{verbose}{Should this function be chatty?}
 }
 \value{
 DF with insulation score
 }
 \description{
-Get genome-wide insulation
+Get the genome-wide insulation.
+}
+\examples{
+# Get the insulation score with window-size 25 and store in the INSULATION-slot.
+Hap1_WT_10kb$INSULATION = genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
 }

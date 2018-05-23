@@ -4,18 +4,49 @@
 \alias{intra.inter.TAD.contacts}
 \title{intra.inter.TAD.contacts}
 \usage{
-intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10)
+intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10, verbose = F)
 }
 \arguments{
-\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{exp}{The Hi-C experiment object of a sample from construct.experiment()}
 
-\item{TAD}{A bed-dataframe.}
+\item{TAD}{A bed-dataframe. TADs should be consecutive
+(i.e. the 3' border of TAD1 is the 5' border of TAD2).
+This means that using TAD-calls from Arrowhead is only possible after some
+these internal sub-TADs.}
 
 \item{max.neighbor}{How many surrounding TADs should be taken into account?}
 }
 \value{
-A list containing a dataframe with scores between two TADs and an updated version of the TAD-input file, which now also includes TAD-IDs.
+A list:
+
+\item{hic}{dataframe with indexes of two TADs and interaction-score}
+
+\item{tad}{dataframe with TADs and the index used in the hic-df}
+
+\item{sampleName}{the sample name of the experiment-object}
 }
 \description{
-Combine a bed file with TAD positions and the Hi-C matrix file to calculate the average coverage over a TAD and between two TADs.
+Combine a bed file with TAD positions and the Hi-C matrix file to calculate
+the average coverage over a TAD and between two TADs.
+}
+\examples{
+# get scores for WT and WAPL data
+TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs,
+                                       max.neighbor = 10,
+                                       exp = Hap1_WT_10kb)
+TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs,
+                                       max.neighbor = 10,
+                                       exp = Hap1_WAPL_10kb)
+
+# plot a TAD+N dotplot
+differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
+                         exp2 = TAD_N_WAPL) # numerator
+
+# plot a TAD+N scatterplot
+differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
+                             exp2 = TAD_N_WAPL, # y
+                             allData = T)
+}
+\author{
+Elzo de Wit, \email{e.d.wit@nki.nl}
 }

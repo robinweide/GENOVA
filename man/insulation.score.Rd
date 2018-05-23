@@ -8,6 +8,8 @@ insulation.score(hic, window.size, chrom, start, end, diag.add = 0,
   local = T)
 }
 \arguments{
+\item{hic}{A Hi-C experiment object: produced by construct.experiment().}
+
 \item{window.size}{The sliding square size}
 
 \item{chrom}{Chromosome}
@@ -18,11 +20,7 @@ insulation.score(hic, window.size, chrom, start, end, diag.add = 0,
 
 \item{diag.add}{Add values to diaginal}
 
-\item{local}{Per chromosome?}
-
-\item{exp1}{A Hi-C experiment object: produced by construct.experiment().}
-
-\item{cut.off}{The cut.off for Hi-C scores}
+\item{local}{Local or per-chromosome normalisation?}
 
 \item{step}{Thesliding square step-size}
 }
@@ -30,5 +28,9 @@ insulation.score(hic, window.size, chrom, start, end, diag.add = 0,
 A plot
 }
 \description{
-Get insulation scores
+Get insulation scores of a region or chromosome.
+}
+\examples{
+# Get the insulation score with window-size 25 of a locus on chromosome 7.
+localInsulationScores = insulation.score(hic = Hap1_WT_10kb, window.size = 25, chrom = 'chr7', start = 25e6, end=30e6, local = T)
 }

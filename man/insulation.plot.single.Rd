@@ -4,7 +4,7 @@
 \alias{insulation.plot.single}
 \title{plot.insulation.single}
 \usage{
-insulation.plot.single(exp1, chrom, start, end, cut.off = 0,
+insulation.plot.single(exp1, chrom, start, end, cut.off = NULL,
   window.size = 21, local = T)
 }
 \arguments{
@@ -20,11 +20,14 @@ insulation.plot.single(exp1, chrom, start, end, cut.off = 0,
 
 \item{window.size}{The sliding square size}
 
-\item{local}{Per chromosome?}
+\item{Local}{or per-chromosome normalisation?}
 }
 \value{
 A plot
 }
 \description{
-Plot a single insulation
+Plot a single insulation-score and Hi-C matrix for a region of interest.
+}
+\examples{
+# Make a matrix-plot of an experiment and the insulation-score for a region of interest.
 }

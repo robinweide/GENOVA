@@ -26,6 +26,8 @@ parser.add_argument('-CIS', dest='CIS', default = True, type = bool,
                    help='Only output cis-interactions?')
 parser.add_argument('-force', dest='force', default = False, type = bool,
                    help='Overwrite files?')
+parser.add_argument('-norm', dest='norm', default = "KR", type = str,required=True,
+                   help='KR or raw? (default: KR)')
 
 args = parser.parse_args()
 chromSizesFile = args.chromSizes
@@ -37,11 +39,14 @@ baseOut = args.out
 SIGout = baseOut + ".sig"
 BEDout = baseOut + ".bed"
 CISbool = args.CIS
+juicerDumpNorm = args.norm
+if juicerDumpNorm not in ["KR", "NONE"]:
+    sys.exit("!!!\tPlease choose KR or NONE in -norm\t!!!\n")
 
 # Check if file exists: ask for force
 if os.path.exists(SIGout) or os.path.exists(BEDout):
     if args.force is False:
-        sys.exit("!!!\tOutput files exists.\t\t!!!\n!!!\tUse force=True to overwrite.\t!!!")
+        sys.exit("!!!\tOutput files exists.\t!!!\n!!!\tUse force=True to overwrite.\t!!!")
     else:
         void = subprocess.call(['rm',SIGout])
         void = subprocess.call(['rm',BEDout])
@@ -85,11 +90,12 @@ with open(SIGout, "a") as fp:
             # for all chromosome-chromosome combinations, run juicer-tools dump and store in tmp dir
             #print("Starting", c1,"versus", c2,"\r")
             OUT = "".join([tmpDir,c1,"_", c2,".tmp"])
-            cmd = " ".join(['java', '-jar', juicerTools, 'dump','observed','NONE',juicerFile,c1,c2,"BP",str(resolution),OUT])
+            cmd = " ".join(['java', '-jar', juicerTools, 'dump','observed',juicerDumpNorm,juicerFile,c1,c2,"BP",str(resolution),OUT])
             #print(cmd)
             try:
                 void = subprocess.call(cmd, shell=True)
                 df = pd.read_table(OUT,delimiter="\t",header=None, names = ["pos1","pos2","signal"])
+                df.dropna(inplace = True, how = 'any')
                 # Get idx-numbers
                 for e,row in enumerate(df.itertuples(index=True, name='Pandas')):
                     idxX = C2dic[int(row.pos1)]

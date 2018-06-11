@@ -4,13 +4,15 @@
 \alias{quantifyAPA}
 \title{Get statistics from the centers of APA-results}
 \usage{
-quantifyAPA(APAlist, pixWidth = 3)
+quantifyAPA(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1)
 }
 \arguments{
 \item{APAlist}{A named list of outputs from APA().}
 
-\item{pixWidth}{The width of the square to use. 1 will give you just the
+\item{enrichment}{Calculate log2-enrichment instead of contacts?
 center-point}
+
+\item{pixWidth}{The width of the square to use. 1 will give you just the}
 }
 \value{
 Alist of two dataframes: data (per-loop and -sample average scores)

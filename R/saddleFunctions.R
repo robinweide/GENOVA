@@ -223,10 +223,25 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins){
         # cool. the lengths are the same. the same resolution is used.
         ev <- CS_CA
       } else {
-        warning('The amount on CS-scores and the amount of Hi-C bins
-                is not the same. \nEither call CS with the same resolution
-                or set CS to NULL.\nContinuing with NULL.')
-        ev <- NULL
+
+        # try to find the end of arm of to that of CS
+        altEnd = max(CS_C[CS_C[,3] <= chromStructure$startC, 2])
+
+        CS_C  <- CS[CS[,1] == chrom,]
+        CS_CA <- CS_C[CS_C[,3] <= altEnd, 4]
+        # find out if the length of CS_CA is the same as the #bins in the arm-mat
+        len_abs <- length(exp$ABS[exp$ABS$V1 == chrom &
+                                    exp$ABS$V3 <= altEnd,4])
+        len_CS  <- length(CS_CA)
+        if(len_abs == len_CS){
+          # cool. the lengths are now the same. the same resolution is used.
+          ev <- CS_CA
+        } else {
+          warning('The amount on CS-scores and the amount of Hi-C bins
+                  is not the same. \nEither call CS with the same resolution
+                  or set CS to NULL.\nContinuing with NULL.')
+          ev <- NULL
+        }
       }
     } else {
       ev <- NULL
@@ -261,10 +276,27 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins){
         # cool. the lengths are the same. the same resolution is used.
         ev <- CS_CA
       } else {
-        warning('The amount on CS-scores and the amount of Hi-C bins
+
+        # try to extend start of arm to that of CS
+        altStart = min(CS_C[CS_C[,2] >= chromStructure$endC &
+                              CS_C[,3] <= chromStructure$end, 2])
+        CS_C  <- CS[CS[,1] == chrom,]
+        CS_CA <- CS_C[CS_C[,2] >= altStart &
+                        CS_C[,3] <= chromStructure$end, 4]
+        # find out if the length of CS_CA is the same as the #bins in the arm-mat
+        len_abs <- length(exp$ABS[exp$ABS$V1 == chrom &
+                                    exp$ABS$V2 >= altStart &
+                                    exp$ABS$V3 <= chromStructure$end,4])
+        len_CS  <- length(CS_CA)
+
+        if(len_abs == len_CS){
+          # cool. the lengths are the same. the same resolution is used.
+          ev <- CS_CA
+        } else {warning('The amount on CS-scores and the amount of Hi-C bins
                 is not the same. \nEither call CS with the same resolution
                 or set CS to NULL.\nContinuing with NULL.')
         ev <- NULL
+        }
       }
     } else {
       ev <- NULL
@@ -327,8 +359,19 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins){
 #' @import data.table
 #' @export
 saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10){
-  if(is.null(CS) & is.null(chip)){
-    stop("Either CS or chip must me used!")
+  if(!is.null(CS)){                                                         # CS
+    if(!is.null(chip)){                                                # CS chip
+      stop("Either CS or chip must be used!")
+    } else {                                                           #CS !chip
+      # no chip, so CS will just be used
+    }
+
+  } else {                                                               # ! CS
+    if(is.null(chip)){
+      stop("Either CS or chip must be used!")
+    } else {
+      # no CS, so CS will just be made
+    }
   }
 
   if(!is.null(CS)){

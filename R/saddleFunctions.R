@@ -111,7 +111,7 @@ switch.EV <- function( ev.data, chip, chrom ){
 #===============================================================================
 # core saddle function
 #===============================================================================
-saddle.core <- function(exp, chip, chrom, start, end, CS = NULL, nBins = 10){
+saddle.core <- function(exp, chip, chrom, start, end, CS , nBins ){
   #select a region of the genome
   mat <- select.subset(exp, chrom, start, end)
 
@@ -121,8 +121,10 @@ saddle.core <- function(exp, chip, chrom, start, end, CS = NULL, nBins = 10){
     ev <- eigen.struct( mat )
 
     #orient the eigen vector properly for A and B
-    if(switch.EV( ev, chip, chrom ) ){
-      ev$ev1 <- -ev$ev1
+    if(!is.null(chip)){
+      if(switch.EV( ev, chip, chrom ) ){
+        ev$ev1 <- -ev$ev1
+      }
     }
     ev <- ev$ev1
   } else {
@@ -165,7 +167,7 @@ saddle.core <- function(exp, chip, chrom, start, end, CS = NULL, nBins = 10){
 # chromosome-wide wrapper function (run saddle.core for one or both arms)
 #===============================================================================
 
-saddle.chr <- function(exp, chip, chrom, CS = NULL, nBins = 10){
+saddle.chr <- function(exp, chip, chrom, CS, nBins){
 
   out     <- NULL
   out$MAT <- NULL
@@ -305,7 +307,7 @@ saddle.chr <- function(exp, chip, chrom, CS = NULL, nBins = 10){
 #' Sorts matrix on compartment-score.
 #'
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
-#' @param chip BED-dataframe containing active sites (e.g. H3K27ac-peaks).
+#' @param chip BED-dataframe containing active sites (e.g. H3K27ac-peaks). If CS is NULL, this should be filled in!
 #' @param chromsToUse Do the computation for a subset of chromosomes.
 #' @param nBins The number of bins to split the compartment-score.
 #' @param CS Use a bedgraph-df of compartment-scores instead of creating it on the fly.The resolution should be the same as the Hi-C (therefore, use compartment.score()). Using this will speed things up greatly.
@@ -324,7 +326,11 @@ saddle.chr <- function(exp, chip, chrom, CS = NULL, nBins = 10){
 #' @return A log2(O/E) matrix and a DF of compartment-scores.
 #' @import data.table
 #' @export
-saddle <- function(exp, chip, CS = NULL, chromsToUse = NULL, nBins = 10){
+saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10){
+  if(is.null(CS) & is.null(chip)){
+    stop("Either CS or chip must me used!")
+  }
+
   if(!is.null(CS)){
     CS <- as.data.frame(CS)
   }

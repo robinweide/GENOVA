@@ -4,12 +4,12 @@
 \alias{saddle}
 \title{Compute compartment-v-compartment scores}
 \usage{
-saddle(exp, chip, CS = NULL, chromsToUse = NULL, nBins = 10)
+saddle(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
-\item{chip}{BED-dataframe containing active sites (e.g. H3K27ac-peaks).}
+\item{chip}{BED-dataframe containing active sites (e.g. H3K27ac-peaks). If CS is NULL, this should be filled in!}
 
 \item{CS}{Use a bedgraph-df of compartment-scores instead of creating it on the fly.The resolution should be the same as the Hi-C (therefore, use compartment.score()). Using this will speed things up greatly.}
 

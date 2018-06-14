@@ -425,6 +425,7 @@ visualise.compartmentStrength = function(SBoutList, showInteractions = F){
     MAXbin = max(dat$MAT$Var1)
     # how many binsare in 20%
     binsTOse = floor(MAXbin * .2)
+    binsTOse = max(1, binsTOse)
     dat$MAT$unLog = 2 ** dat$MAT$value
     dat$MAT[dat$MAT$Var1 <= binsTOse & dat$MAT$Var2 <= binsTOse,"CC"] = "BB"
     dat$MAT[dat$MAT$Var2 <= binsTOse & dat$MAT$Var1 >= MAXbin-binsTOse+1,"CC"] = "AB"

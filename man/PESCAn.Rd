@@ -5,7 +5,7 @@
 \title{PE-SCAn}
 \usage{
 PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
-  rmOutlier = F)
+  rmOutlier = F, outlierCutOff = 0.995, verbose = T)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -18,9 +18,9 @@ PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
 
 \item{rmOutlier}{Perform outlier-correction}
 
-\item{minDist}{The minimal distance}
-
 \item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff] percentile per pixel and set values bigger than that to this value.}
+
+\item{minDist}{The minimal distance}
 }
 \value{
 An O/E score-matrix (if shift != 0), otherwise an observed score-matrix.

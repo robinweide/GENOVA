@@ -76,19 +76,23 @@ cov2d <- function( experiment, bed, minDist=5e6, size=500e3, add=0, outlierCutOf
   }
 
   # Convert to 3D array
-  rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
-  sm <- simplify2array(rawMatList)
+  if(length(rawMatList) > 0){
+    rawMatList2 <- rawMatList[!unlist(lapply(rawMatList, is.null))]
+    sm <- simplify2array(rawMatList2)
 
-  #####################
-  #  outlier correct  #
-  #####################
-  DATA = NULL
-  if(rmOutlier){
-    sm = outlier3Darray(ARRAY = sm, Q = outlierCutOff)
-    DATA = apply(sm, c(1,2), sum, na.rm = T)
+    #####################
+    #  outlier correct  #
+    #####################
+    DATA = NULL
+    if(rmOutlier){
+      sm = outlier3Darray(ARRAY = sm, Q = outlierCutOff)
+      DATA = apply(sm, c(1,2), sum, na.rm = T)
+    } else {
+      DATA = apply(sm, c(1,2), sum, na.rm = T)
+    }
+
+    return(list(score=DATA, count=count))
   } else {
-    DATA = apply(sm, c(1,2), sum, na.rm = T)
+    return(NULL)
   }
-
-  return(list(score=DATA, count=count))
 }

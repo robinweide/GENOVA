@@ -24,7 +24,7 @@
 #' # Plot using persp
 #' persp(SE_vs_WT/SE_vs_WT_perm, phi = 30, theta = 30, col = 'skyblue')
 #'
-PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,minDist = 5e6, size = 500e3, add = 0 , outlierCutOff = 0.995){
+PESCAn_covert <- function( experiment, bed, minComparables = 10, rmOutlier = F,minDist = 5e6, size = 500e3, add = 0 , outlierCutOff = 0.995, verbose = T){
   #sorting the bed file is essential for the analysis
   bed <- bed[order(bed[,1],bed[,2]),]
   count = 0
@@ -32,12 +32,16 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,mi
   # there could be circumstances where there is only one bed-entry for a specific chromosome!
   chromsomesToLookAt <- names(which(table(bed[,1]) > 1))
   for( chr in chromsomesToLookAt ){
-    message("Analyzing ", chr)
+    if(verbose){message("Analyzing ", chr)}
+
     BED <- bed[bed[,1]==chr,]
     if(nrow(BED) < minComparables){
       next()
       }
     pe.res <- cov2d(experiment, BED, minDist, size, add, rmOutlier = rmOutlier, outlierCutOff = outlierCutOff)
+    if(is.null(pe.res)){
+      next()
+    }
     if(exists("score.mat")){
       score.mat <- score.mat + pe.res$score
       count = count + pe.res$count
@@ -84,10 +88,11 @@ PESCAn_covert <- function( experiment, bed, minComparables = 5, rmOutlier = F,mi
 #'            y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
 #'            z = WT_PE_OUT)
 #' @export
-PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlier = F){
+PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlier = F, outlierCutOff = 0.995,  verbose = T){
 
   # Get signal
-  signal = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size, rmOutlier = rmOutlier, outlierCutOff = outlierCutOff))
+  if(verbose){message("Computing observed of ", exp$NAME)}
+  signal = PESCAn_covert(experiment = exp, bed = bed, minDist = mindist, size = size, rmOutlier = rmOutlier, outlierCutOff = outlierCutOff, verbose = verbose)
 
   # Get O/E
   OE = NULL
@@ -95,7 +100,8 @@ PESCAn = function(exp, bed, shift = 1e6, mindist = 5e+06, size = 4e+05, rmOutlie
     OE = signal
   } else { # if a shift value is given
     # Get background
-    background = suppressMessages(PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size, outlierCutOff =outlierCutOff))
+    if(verbose){message("Computing shifted of ", exp$NAME)}
+    background = PESCAn_covert(experiment = exp, bed = bed, add = shift, minDist = mindist, size = size, outlierCutOff =outlierCutOff, verbose = verbose)
     medianBackground = median(background)
     OE = signal/medianBackground
   }
@@ -201,7 +207,7 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
                                            size.banks + 1, tickPosUpstream),
                                 labels = c(paste0(tickLabelUpstream, "kb"), "5'", paste0(tickLabelDownstream, "kb"))) +
     ggplot2::labs(title = title, x = "", y = "", fill = "O/E") +
-    ggplot2::scale_fill_gradient2(limits = z, midpoint = 1, low = "#2166ac", mid = "white", high = "#b2182b")
+    ggplot2::scale_fill_gradient2(trans = 'log2' , limits = z, midpoint = 0, low = "#2166ac", mid = "white", high = "#b2182b")
 
 
 

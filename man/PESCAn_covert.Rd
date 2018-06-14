@@ -4,8 +4,9 @@
 \alias{PESCAn_covert}
 \title{PESCAn_covert}
 \usage{
-PESCAn_covert(experiment, bed, minComparables = 5, rmOutlier = F,
-  minDist = 5e+06, size = 5e+05, add = 0, outlierCutOff = 0.995)
+PESCAn_covert(experiment, bed, minComparables = 10, rmOutlier = F,
+  minDist = 5e+06, size = 5e+05, add = 0, outlierCutOff = 0.995,
+  verbose = T)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}

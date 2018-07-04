@@ -8,7 +8,7 @@ visualise.PESCAn.ggplot(PESCAnlist, resolution, title = "PE-SCAn",
   zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...)
 }
 \arguments{
-\item{PESCAnlist}{A list of results from PESCAn.}
+\item{PESCAnlist}{A list of results from PESCAn. Should have the same [shift].}
 
 \item{title}{Text to plot}
 

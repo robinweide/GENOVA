@@ -547,7 +547,7 @@ Use the domanogram to choose a good window size:
 ```{r callTAD, cache=T, cache.lazy=F}
 Hap1_WT_10kb$INSULATION= Hap1_WT_10kb_insulation
 
-TADcalls = insulation.callTAD(Hap1_WT_10kb,BEDCOLOR = "#7ec0ee")
+TADcalls = insulation.callTAD(Hap1_WT_10kb,BEDcolor = "#7ec0ee")
 ```
 
 ```{r plotTADCALLS, cache=T, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."}

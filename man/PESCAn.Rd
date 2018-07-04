@@ -4,8 +4,9 @@
 \alias{PESCAn}
 \title{PE-SCAn}
 \usage{
-PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
-  rmOutlier = F, outlierCutOff = 0.995, verbose = T)
+PESCAn(exp, bed, shift = 1e+06, minComparables = 10, mindist = 5e+06,
+  maxDist = Inf, size = 4e+05, rmOutlier = F, outlierCutOff = 0.995,
+  verbose = T)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -14,16 +15,22 @@ PESCAn(exp, bed, shift = 1e+06, mindist = 5e+06, size = 4e+05,
 
 \item{shift}{Set to X bp for circular permutation. Set to zero for just getting the signal-matrix.}
 
+\item{minComparables}{Minimum amount of BED-entries per chromosome.}
+
+\item{maxDist}{The maximal distance}
+
 \item{size}{Size in bp of window.}
 
 \item{rmOutlier}{Perform outlier-correction}
 
-\item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff] percentile per pixel and set values bigger than that to this value.}
+\item{outlierCutOff}{The severity of outliers. We compute the [outlierCutOff]
+percentile per pixel and set values bigger than that to this value.}
 
 \item{minDist}{The minimal distance}
 }
 \value{
-An O/E score-matrix (if shift != 0), otherwise an observed score-matrix.
+An list with a O/E score-matrix (if shift != 0), otherwise an observed
+score-matrix, the underlying signal and background-matrices and the shift used.
 }
 \description{
 From a ChIP-peaks.BED dataframe, calculate the all-vs-all Hi-C contacts.

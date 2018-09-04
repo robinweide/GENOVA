@@ -5,7 +5,7 @@
 \title{cov2d}
 \usage{
 cov2d(experiment, bed, minDist = 5e+06, maxDist = Inf, size = 5e+05,
-  add = 0, outlierCutOff = 40, rmOutlier = F)
+  add = 0, outlierCutOff = 40, rmOutlier = F, verbose = T)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -21,6 +21,8 @@ cov2d(experiment, bed, minDist = 5e+06, maxDist = Inf, size = 5e+05,
 \item{outlierCutOff}{The severity of outliers: roughly translates to the amount of MADs above the median.}
 
 \item{rmOutlier}{Try to perform outlier-correction}
+
+\item{verbose}{Verbose?}
 
 \item{minDist}{The maximal distance}
 }

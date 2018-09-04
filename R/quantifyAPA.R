@@ -8,23 +8,49 @@ getPixelMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
   return(mean(subMat))
 }
 
+getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
+  if(!is.null(pixWidth)){warning('Pixwidth is decrepated.')}
 
-getDonutMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
-  pixLow  <- ((npix-1 ) /2 ) - ((pixWidth-1 ) /2 )
-  pixHigh <- ((npix-1 ) /2 ) + ((pixWidth-1 ) /2 )
+  # cut to 11x11
+  pixelLoc   <- ((npix-1 )/2)+1
+  MAT <- MAT[(pixelLoc-5):(pixelLoc+5),(pixelLoc-5):(pixelLoc+5)]
+  MAT[is.na(MAT)] <- 0
 
-  donutLow  <- pixLow - pixWidth
-  donutHigh <- pixHigh + pixWidth
+  pixelLoc <- ((ncol(MAT) -1 )/ 2)+1
+  SCORE_pixel <- MAT[pixelLoc,pixelLoc]
 
-  subMat <- MAT[donutLow:donutHigh, donutLow:donutHigh]
-  if(NAasZero){
-    subMat[is.na(subMat)] <- 0
-  }
+  # remove middle 5x5
+  MAT[4:8,
+      4:8] <- NA
 
-  subMat[(pixWidth+1):(pixWidth*2),(pixWidth+1):(pixWidth*2)] <- NA
+  # score H
+  SCORE_h <- MAT[6, ]
+  SCORE_h <- mean(SCORE_h[!is.na(SCORE_h)])
+
+  # score V
+  SCORE_v <- MAT[,6]
+  SCORE_v <- mean(SCORE_v[!is.na(SCORE_v)])
+
+  # remove H and V
+  MAT[, 6] <- NA
+  MAT[6, ] <- NA
+
+  # score quantile
+  SCORE_q <- MAT
+  SCORE_q <- mean(SCORE_q[!is.na(SCORE_q)])
+
+  # score daig. quantile
+  MAT[1:6,] <- NA
+  SCORE_qd <- MAT[,1:6]
+  SCORE_qd <- mean(SCORE_qd[!is.na(SCORE_qd)])
+
+  SCORES <- c(SCORE_pixel, SCORE_qd, SCORE_h, SCORE_v, SCORE_q)
+
+  BOOLOUTCOME <- SCORES[1] >= SCORES[-1] * 1.5
+  MEDIANOUTCOME <- SCORES[1] / median(SCORES[-1])
 
 
-  return(mean(subMat, na.rm = T))
+  return(c(mean(BOOLOUTCOME), MEDIANOUTCOME))
 }
 
 #' Get statistics from the centers of APA-results
@@ -35,8 +61,8 @@ getDonutMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
 #'
 #' @param APAlist A named list of outputs from APA().
 #' @param pixWidth The width of the square to use. 1 will give you just the
-#' @param enrichment Calculate log2-enrichment instead of contacts?
 #' center-point
+#' @param enrichment Calculate log2-enrichment instead of contacts?
 #' @return Alist of two dataframes: data (per-loop and -sample average scores)
 #' and stats (all-vs-all wilcoxon.test p-values and log2-foldchanges.)
 #' @examples
@@ -54,10 +80,17 @@ getDonutMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
 #' ggplot(APAstats$data, aes(x = sample, y = value)) +
 #'   geom_boxplot()
 #' @export
-quantifyAPA <- function(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1){
-
+quantifyAPA <- function(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1,
+                        enrichmentType = 'meanBool'){
+  if((pixWidth %% 2) == 0){
+    stop('Please use an uneven number for pixWidth')
+  }
+  if(!enrichmentType %in% c('meanBool', 'meanScore')){
+    stop('enrichmentType must be either meanBool or meanScore.')
+  }
   outDF <- list() # make a df with a line per loop (add column for color and name)
 
+  resOut <- NULL
   for(i in 1:length(APAlist)){
     apaout <- APAlist[[i]]$rawMatList
     npix   <- nrow(apaout[[1]])
@@ -70,10 +103,15 @@ quantifyAPA <- function(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1){
       if(is.null(speudoCount)){
         speudoCount = min(tmp[tmp != 0])
       }
-      avgsDonut   <- lapply(apaout, getDonutMean, pixWidth = pixWidth, npix = npix)
-      avgsDonut   <- unlist(avgsDonut)
+      donut_out <- lapply(apaout, getDonutMean, npix = npix)
+      donut_out <- unlist(donut_out)
+      donut_out <- matrix(unlist(donut_out), ncol = 2, byrow = T)
+      if(enrichmentType == 'meanBool'){
+        avgs <- donut_out[,1]
+      } else {
+        avgs <- donut_out[,2]
+      }
 
-      avgs <- log2((speudoCount+avgsPix)/(speudoCount + avgsDonut))
     } else {
       avgs <- avgsPix
     }

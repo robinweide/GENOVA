@@ -223,7 +223,7 @@ features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL,
     blabla =  suppressWarnings(plot.bw(chip1, chrom,  min(mat1$x),
                                        max(mat1$x), y.values$chip1.y1,
                                        y.values$chip1.y2, col=bw.col[1],
-                                       rotate=rotate, yMax = yMax))
+                                       rotate=rotate, yMax = yMax[1]))
 
   }
 
@@ -268,7 +268,7 @@ features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL,
     blabla = suppressWarnings(plot.bw(chip2, chrom, min(mat1$x), max(mat1$x),
                                       y.values$chip2.y1, y.values$chip2.y2,
                                       col=bw.col[2], rotate=rotate,
-                                      yMax = yMax))
+                                      yMax = yMax[2]))
 
   }
 
@@ -487,7 +487,7 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "green",
 #' @param cexTicks Change size of numbers on the axis
 #' @param bed.col Color of the bed track (max.len is 4)
 #' @param bw.col Same as bed col, but for the bigwig track
-#' @param yMax Set the maximum height of all biwigs.
+#' @param yMax A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.
 #' @param type Should a rectangle or a triangle be drawn?
 #' Note that for a triangle a 6th strand column should be included
 #' @param guessType If an element in the chip is a dataframe,
@@ -570,6 +570,11 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
   #if only one color is given use it for all feature tracks
   if(length(bw.col)==1){
     bw.col <- rep(bw.col,4)
+  }
+
+  #if only one ymax is given use it for all feature tracks
+  if(length(yMax)==1){
+    yMax <- rep(yMax,4)
   }
 
   #if only one color is given use it for all feature tracks
@@ -700,7 +705,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
 
     #plot the features horizontal
     features( mat1, chrom, genes, chip1 = chip[[1]], chip2 = chip[[2]],
-              autoCHIP = guessType ,yMax = yMax,bed.col = bed.col[1:2],
+              autoCHIP = guessType ,yMax = yMax[3:4], bed.col = bed.col[1:2],
               bw.col = bw.col[1:2], type=type[1:2] )
     # clone 1 and two to feature entries 3 and 4
     if(symmAnn){
@@ -713,7 +718,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
     }
 
     features( mat1, chrom, genes, chip[[3]], chip[[4]], bed.col = bed.col[3:4],
-              autoCHIP = guessType ,yMax = yMax,bw.col = bw.col[3:4],
+              autoCHIP = guessType ,yMax = yMax[3:4],bw.col = bw.col[3:4],
               type=type[3:4], rotate=T )
   }
 }

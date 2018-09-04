@@ -40,7 +40,7 @@ inner-left.}
 
 \item{bw.col}{Same as bed col, but for the bigwig track}
 
-\item{yMax}{Set the maximum height of all biwigs.}
+\item{yMax}{A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.}
 
 \item{type}{Should a rectangle or a triangle be drawn?
 Note that for a triangle a 6th strand column should be included}

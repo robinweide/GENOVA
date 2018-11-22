@@ -5,7 +5,7 @@
 \title{Get statistics from the centers of APA-results}
 \usage{
 quantifyAPA(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1,
-  enrichmentType = "meanBool")
+  enrichmentType = "meanScore")
 }
 \arguments{
 \item{APAlist}{A named list of outputs from APA().}
@@ -14,6 +14,10 @@ quantifyAPA(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1,
 
 \item{pixWidth}{The width of the square to use. 1 will give you just the
 center-point}
+
+\item{enrichmentType}{meanScore gives the pixel/mean(backgroundRegions) score.
+meanBool gives the fraction of background-regions less
+than 50 percent of the pixel (1 = a true loop).}
 }
 \value{
 Alist of two dataframes: data (per-loop and -sample average scores)

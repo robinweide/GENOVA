@@ -6,12 +6,12 @@
 \usage{
 hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
-  bed.col = rep("black", 4), bw.col = "black", yMax = NULL,
-  type = rep("triangle", 4), guessType = T, coplot = "dual",
-  genes = NULL, tads = NULL, tads.type = "lower", loops = NULL,
-  loops.type = "lower", tads.color = "#3288bd", loops.resize = 0,
-  loops.color = "#3288bd", skipAnn = F, symmAnn = F, check.genome = T,
-  antoni = F)
+  chip.color = "black", chip.yMax = NULL, type = rep("triangle", 4),
+  guessType = T, coplot = "dual", genes = NULL, tads = NULL,
+  tads.type = "lower", loops = NULL, loops.type = "lower",
+  tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd",
+  skipAnn = F, symmAnn = F, check.genome = T, smoothNA = F,
+  smoothBandwidth = 0.25, antoni = F)
 }
 \arguments{
 \item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
@@ -36,11 +36,7 @@ inner-left.}
 
 \item{cexTicks}{Change size of numbers on the axis}
 
-\item{bed.col}{Color of the bed track (max.len is 4)}
-
-\item{bw.col}{Same as bed col, but for the bigwig track}
-
-\item{yMax}{A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.}
+\item{chip.yMax}{A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.}
 
 \item{type}{Should a rectangle or a triangle be drawn?
 Note that for a triangle a 6th strand column should be included}
@@ -75,7 +71,13 @@ things next to the matrix.}
 
 \item{check.genome}{Check if reference genomes in exp1 and exp2 are the same}
 
+\item{smoothNA}{Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.}
+
+\item{smoothBandwidth}{Set the bandwidth parameter of the Nadaraya/Watson normalization. Default = 0.25.}
+
 \item{antoni}{Logical: plot an explorer of the microscopic world}
+
+\item{chip.col}{A vector of four, parallel to [chip], of the to use color.}
 }
 \value{
 A matrix-plot

@@ -1,6 +1,6 @@
 getPixelMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
-  low  <- ((npix-1 ) /2 ) - ((pixWidth-1 ) /2 )
-  high <- ((npix-1 ) /2 ) + ((pixWidth-1 ) /2 )
+  low  <- ((npix+1 ) /2 ) - ((pixWidth-1 ) /2 )
+  high <- ((npix+1 ) /2 ) + ((pixWidth-1 ) /2 )
   subMat <- MAT[low:high, low:high]
   if(NAasZero){
     subMat[is.na(subMat)] <- 0
@@ -63,6 +63,9 @@ getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
 #' @param pixWidth The width of the square to use. 1 will give you just the
 #' center-point
 #' @param enrichment Calculate log2-enrichment instead of contacts?
+#' @param enrichmentType meanScore gives the pixel/mean(backgroundRegions) score.
+#' meanBool gives the fraction of background-regions less
+#' than 50 percent of the pixel (1 = a true loop).
 #' @return Alist of two dataframes: data (per-loop and -sample average scores)
 #' and stats (all-vs-all wilcoxon.test p-values and log2-foldchanges.)
 #' @examples
@@ -81,7 +84,7 @@ getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
 #'   geom_boxplot()
 #' @export
 quantifyAPA <- function(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1,
-                        enrichmentType = 'meanBool'){
+                        enrichmentType = 'meanScore'){
   if((pixWidth %% 2) == 0){
     stop('Please use an uneven number for pixWidth')
   }

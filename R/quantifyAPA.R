@@ -20,33 +20,35 @@ getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
   SCORE_pixel <- MAT[pixelLoc,pixelLoc]
 
   # remove middle 5x5
-  MAT[4:8,
-      4:8] <- NA
+  extendedPWwidth = ((pixWidth-1)/2)*2
+
+  MAT[(pixelLoc-extendedPWwidth):(pixelLoc+extendedPWwidth),
+      (pixelLoc-extendedPWwidth):(pixelLoc+extendedPWwidth)] <- NA
 
   # score H
-  SCORE_h <- MAT[6, ]
+  SCORE_h <- MAT[pixelLoc, ]
   SCORE_h <- mean(SCORE_h[!is.na(SCORE_h)])
 
   # score V
-  SCORE_v <- MAT[,6]
+  SCORE_v <- MAT[,pixelLoc]
   SCORE_v <- mean(SCORE_v[!is.na(SCORE_v)])
 
   # remove H and V
-  MAT[, 6] <- NA
-  MAT[6, ] <- NA
+  MAT[, pixelLoc] <- NA
+  MAT[pixelLoc, ] <- NA
 
   # score quantile
   SCORE_q <- MAT
   SCORE_q <- mean(SCORE_q[!is.na(SCORE_q)])
 
   # score daig. quantile
-  MAT[1:6,] <- NA
-  SCORE_qd <- MAT[,1:6]
+  MAT[1:pixelLoc,] <- NA
+  SCORE_qd <- MAT[,1:pixelLoc]
   SCORE_qd <- mean(SCORE_qd[!is.na(SCORE_qd)])
 
   SCORES <- c(SCORE_pixel, SCORE_qd, SCORE_h, SCORE_v, SCORE_q)
 
-  BOOLOUTCOME <- SCORES[1] >= SCORES[-1] * 1.5
+  BOOLOUTCOME <- ((SCORES[1] - SCORES[-1])/SCORES[-1]) > .5
   MEDIANOUTCOME <- SCORES[1] / median(SCORES[-1])
 
 

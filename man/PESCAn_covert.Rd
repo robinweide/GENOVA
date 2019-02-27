@@ -4,8 +4,9 @@
 \alias{PESCAn_covert}
 \title{PESCAn_covert}
 \usage{
-PESCAn_covert(experiment, bed, minComparables = 5, rmOutlier = F,
-  minDist = 5e+06, size = 5e+05, add = 0, outlierCutOff = 0.995)
+PESCAn_covert(experiment, bed, minComparables = 10, rmOutlier = F,
+  minDist = 5e+06, maxDist = Inf, size = 5e+05, add = 0,
+  outlierCutOff = 0.995, verbose = T)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}
@@ -17,6 +18,8 @@ PESCAn_covert(experiment, bed, minComparables = 5, rmOutlier = F,
 \item{rmOutlier}{to outlier-correction}
 
 \item{minDist}{The minimal distance}
+
+\item{maxDist}{The maximal distance}
 
 \item{size}{The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).}
 

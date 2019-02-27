@@ -1,18 +1,11 @@
-# Welcome at GENOVA!
-### GENome Organisation Visual Analytics
-<img src="https://github.com/robinweide/HiSee/raw/master/LOGO.jpg" width="250">
+# Welcome to GENOVA!
 
-# Data structures
-As input for the loop- and TAD-specific analyses, we request a specific input. For loop-analyses, the format is a data.frame containing:
+<img src="https://github.com/robinweide/GENOVA/raw/master/LOGO.jpg" width="200">
 
-| Chromosome of upstream loop-anchor | Start of upstream loop-anchor | Stop of upstream loop-anchor| Chromosome of downstream loop-anchor | Start of downstream loop-anchor | Stop of downstream loop-anchor  |
-| ------------- | ------------- |------------- |------------- |------------- |------------- |
-| chr1  | 100000  |  120000  |  chr1  | 200000  |  220000  | 
+The increase in interest for Hi-C methods in the chromatin community has led to a need for more user-friendly and powerful analysis methods. The few currently available software packages for Hi-C do not allow a researcher to quickly summarize and visualize their data. An easy to use software package, which can generate a comprehensive set of publication-quality plots, would allow researchers to swiftly go from raw Hi-C data to interpretable results. 
 
-For TAD-based analyses, we request a data.frame with:
+Here, we present **GEN**ome **O**rganisation **V**isual **A**nalytics (GENOVA): a software suite to perform in-depth analyses on various levels of genome organisation, using Hi-C data. GENOVA facilitates the comparison between multiple datasets and supports the majority of mapping-pipelines.
 
-| Chromosome of TAD | Start of TAD | Stop of TAD| 
-| ------------- | ------------- |------------- |
-| chr1  | 100000  |  220000  | 
+# Support
+We have provided a quite lengthy [vingnette](https://github.com/robinweide/GENOVA/blob/master/vignettes/GENOVA_vignette.pdf), so please read that first. If there are still unanswered questions, please use the [issue-tracker](https://github.com/robinweide/GENOVA/issues).
 
-We will provide simple format-checker scripts for these in the near future.

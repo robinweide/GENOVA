@@ -45,12 +45,13 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
   tad.length <- length(tad[, 1])
   tad[,1] <- factor(tad[,1], levels=levels(bed[,1]))
 
-
+  outputTAD = list()
   for (i in 1:tad.length) {
     tadSize <- tad[i, 3] - tad[i, 2]
     if (tadSize < smallTreshold) {
         next
     }
+    outputTAD[[i]] = tad[i,]
     if (verbose) {
         cat(i, " of ", tad.length, " tads.", "\r")
     }
@@ -61,6 +62,7 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
     sel.resized <- resize.mat(newMat$z, c(100, 100))
     rawMatList[[i]] <- sel.resized
   }
+  outputTAD = as.data.frame(data.table::rbindlist(outputTAD))
 
   # Convert to 3D array
   rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
@@ -89,7 +91,8 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
   return(list(STACK = ATA[1:99, 1:99],
               STACK.raw = ATAraw[1:99, 1:99],
               STACK.list = rawMatList,
-              OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH ))
+              OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH,
+              TADs.bed = outputTAD))
 
   }
 

@@ -5,7 +5,8 @@
 \title{Construct a HiC-experiment.}
 \usage{
 construct.experiment(signalPath, indicesPath, name, ignore.checks = F,
-  centromeres = NULL, color = 1, comments = NULL, BPscaling = 1e+09)
+  centromeres = NULL, color = 1, comments = NULL,
+  BPscaling = 1e+09)
 }
 \arguments{
 \item{signalPath}{Full path to a HiC-pro-like matrix-file or .sig from juicerToGenova.py}

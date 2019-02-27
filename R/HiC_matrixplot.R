@@ -1,3 +1,52 @@
+getEmptyCols <- function(mat, Nmad = 2, slop = 0.9, lowDiag = 2, highDiag = 10, zeroNA = T){
+
+  if(zeroNA){
+    mat$z[mat$z == 0] <- NA
+  }
+
+  delta <- row(mat$z) - col(mat$z)
+  mat$z[abs(delta) <= lowDiag | abs(delta) >= highDiag] <- NA
+
+  tres =  median(mat$z[!is.na(mat$z)]) - (Nmad*mad(mat$z[!is.na(mat$z)]))
+
+  possibles = table(which(mat$z < tres, arr.ind = TRUE)[, 2] )
+  possiblespossibles = possibles[possibles >= ceiling(max(colSums(!is.na(mat$z)))*slop)]
+
+  foundBins = as.numeric(names(possiblespossibles))
+
+  return(foundBins)
+
+}
+
+# https://stackoverflow.com/questions/29105175/find-neighbouring-elements-of-a-matrix-in-r
+gregor = function(mat) {
+  n = nrow(mat)
+  mat.pad = rbind(NA, cbind(NA, mat, NA), NA)
+  ind = 2:(n + 1) # row/column indices of the "middle"
+  neigh = rbind(SE = as.vector(mat.pad[ind + 1, ind + 1]),
+                NW = as.vector(mat.pad[ind - 1, ind - 1]))
+  return(neigh)
+}
+
+
+fillNAs <- function(mat, MADtreshold = 2){
+
+  # get all NA-locations
+  eCols <- getEmptyCols(mat, Nmad = MADtreshold)
+
+  # make a smoothed version
+  completeSmooth <- gregor(mat$z)
+  completeSmooth[completeSmooth == min(completeSmooth, na.rm = T)] <- NA
+  CSmean = apply(completeSmooth, 2, mean, na.rm = T)
+  CSmat = matrix(CSmean, nrow = nrow(mat$z), ncol = ncol(mat$z))
+
+  # fill in the blanks
+  mat$z[eCols, ] <- CSmat[eCols, ]
+  mat$z[, eCols] <- CSmat[eCols, ]
+
+  return(mat)
+}
+
 draw_exon <- function( genes, chrom, y.pos, width, rotate=F ){
   genes.chr <- genes[genes$chrom==chrom,]
 
@@ -24,9 +73,9 @@ plot.triangle <- function( bed, chrom, y1, y2, start, end, rotate=F ){
 
   #first plot positive
   sel.bed <- bed[bed[,1] == chrom &
-                 bed[,3] <  end   &
-                 bed[,2] >  start &
-                 bed[,6] == '+',  ]
+                   bed[,3] <  end   &
+                   bed[,2] >  start &
+                   bed[,6] == '+',  ]
   if(nrow(sel.bed)>0){
 
     col = "red"
@@ -46,9 +95,9 @@ plot.triangle <- function( bed, chrom, y1, y2, start, end, rotate=F ){
 
   #then repeat for negative
   sel.bed <- bed[bed[,1] == chrom &
-                 bed[,3] <  end   &
-                 bed[,2] >  start &
-                 bed[,6] == '-',  ]
+                   bed[,3] <  end   &
+                   bed[,2] >  start &
+                   bed[,6] == '-',  ]
   if(nrow(sel.bed)>0){
     col="blue"
     add <- ifelse(sel.bed[,6]=='+', x.wid, -x.wid)
@@ -67,10 +116,10 @@ plot.triangle <- function( bed, chrom, y1, y2, start, end, rotate=F ){
 
   # check if there are any without orientation and plot these as rectangles
   sel.bed <- bed[bed[,1] == chrom &
-                 bed[,3] <  end   &
-                 bed[,2] >  start &
-                 bed[,6] != '-'   &
-                 bed[,6] != '+',  ]
+                   bed[,3] <  end   &
+                   bed[,2] >  start &
+                   bed[,6] != '-'   &
+                   bed[,6] != '+',  ]
   if(nrow(sel.bed)>0){
     col="black"
     add <- ifelse(sel.bed[,6] != '+', 0, 0)
@@ -105,10 +154,11 @@ plot.genes <- function( genes, chrom, start, end, y.pos, rotate=F){
 
 features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL,
                      chip2=NULL,  autoCHIP = T, rotate=F,
-                     type=c("triangle","triangle"), bw.col=NULL, bed.col=NULL){
+                     type=c("triangle","triangle"), col=NULL){
+
   # - set bounds for three tracks
-  if(is.null(bed.col)){
-    bed.col <- 'black'
+  if(is.null(col)){
+    col <- 'black'
   }
   if(!is.null(genes)){
     # BW in 1,  bed/null in 2
@@ -210,20 +260,20 @@ features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL,
       blabla = plot.rectangle(chip1[chip1[,6] != '-' & chip1[,6] != '+',],
                               chrom=chrom, y1=y.values$chip1.y1,
                               y2=y.values$chip1.y2, start=min(mat1$x),
-                              end=max(mat1$x), col=bed.col[1], rotate=rotate)
+                              end=max(mat1$x), col=col[1], rotate=rotate)
 
     }else if(type[1]=="rectangle"){
       blabla = plot.rectangle(chip1, chrom=chrom, y1=y.values$chip1.y1,
                               y2=y.values$chip1.y2, start=min(mat1$x),
-                              end=max(mat1$x), col=bed.col[1], rotate=rotate)
+                              end=max(mat1$x), col=col[1], rotate=rotate)
     }
 
   } else if(typeof(chip1) == 'character'){ # BW!
 
     blabla =  suppressWarnings(plot.bw(chip1, chrom,  min(mat1$x),
                                        max(mat1$x), y.values$chip1.y1,
-                                       y.values$chip1.y2, col=bw.col[1],
-                                       rotate=rotate, yMax = yMax))
+                                       y.values$chip1.y2, col=col[1],
+                                       rotate=rotate, yMax = yMax[1]))
 
   }
 
@@ -255,20 +305,20 @@ features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL,
       blabla = plot.rectangle(chip2[chip2[,6] != '-' & chip2[,6] != '+',],
                               chrom=chrom, y1=y.values$chip2.y1,
                               y2=y.values$chip2.y2, start=min(mat1$x),
-                              end=max(mat1$x), col='black', rotate=rotate)
+                              end=max(mat1$x), col=col[2], rotate=rotate)
 
     }else if(type[2]=="rectangle"){
       blabla =  plot.rectangle(chip2, chrom=chrom, y1=y.values$chip2.y1,
                                y2=y.values$chip2.y2, start=min(mat1$x),
-                               end=max(mat1$x), col=bed.col[2], rotate=rotate)
+                               end=max(mat1$x), col=col[2], rotate=rotate)
     }
 
   } else if(typeof(chip2) == 'character'){ # BW!
 
     blabla = suppressWarnings(plot.bw(chip2, chrom, min(mat1$x), max(mat1$x),
                                       y.values$chip2.y1, y.values$chip2.y2,
-                                      col=bw.col[2], rotate=rotate,
-                                      yMax = yMax))
+                                      col=col[2], rotate=rotate,
+                                      yMax = yMax[2]))
 
   }
 
@@ -296,10 +346,10 @@ features <- function(mat1, chrom, yMax = NULL, genes=NULL, chip1=NULL,
 
 
 plot.bw <- function( file, chrom, start, end, y1, y2, col,
-                     yMax = NULL,rotate=F){
+                     yMax = NULL, rotate=F){
   if(require("bigwrig") == F){
     stop("Please install github.com/jayhesselberth/bigwrig\n")
-    }
+  }
 
   #leave here in case something changes
   #official call but don't need it
@@ -318,9 +368,12 @@ plot.bw <- function( file, chrom, start, end, y1, y2, col,
 
   max.val <- max(d[,4])
   d[,4] = as.numeric(d[,4])
+
   if(!is.null(yMax)){
     d[d[,4] > yMax,] = yMax
     max.val = yMax
+  } else {
+    message('chip.yMax not given for a .bw-track: yMax is ', max.val)
   }
 
   y.range <- abs(y1-y2)
@@ -393,74 +446,48 @@ draw.tads <- function( tads, chrom, tads.type="lower", tads.color ="#006837",
 
 }
 
-#overlay loop positions with the hi-c data
-draw.loops <- function( loops, chrom, loops.type="both", loops.color = "green",
-                        lwd=2 , loops.resize ){
+draw1loop <- function(radius, x.midpoint, y.midpoint, lty = 1, col = 'black', lwd = 1) {
 
-  # check if loops is a list of dataframes or a data.frame
-  if(inherits(loops, "list") ){ #this seems to be a loop!
-    if(all(unlist(lapply(loops, inherits, "data.frame")))){ # all DFs in list!
-      loopList = T
-    } else {
-      stop("Loops is not a (list of) data.frame!")
-    }
-  } else if(inherits(loops, "data.frame")) {
-    tmpList = list() # cool. there is one df of loops. Put in a list
-    tmpList[[1]] = loops
-    loops = tmpList
-    rm(tmpList)
-  } else {
-    stop("Loops is not a (list of) data.frame!")
+  x <- seq(x.midpoint-radius, x.midpoint+radius, 1)
+  y <- seq(y.midpoint-radius, y.midpoint+radius, 1)
+
+  curve((  1 * (radius^2 - (x - x.midpoint)^2)^0.5 + y.midpoint), add=TRUE,
+        from = (x.midpoint-radius) , to = (x.midpoint+radius), lty = lty, col = col, lwd = lwd)
+  curve(( -1 * (radius^2 - (x - x.midpoint)^2)^0.5 + y.midpoint), add=TRUE,
+        from = (x.midpoint-radius) , to = (x.midpoint+radius),  lty = lty, col = col, lwd = lwd)
+
+}
+
+
+draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = 'black', lwd = 1, lty = 1, type = "upper"){
+
+
+  subLoop = loops[loops[,1] == chrom & loops[,2] >= start & loops[,6] <= end, 1:6]
+  if(nrow(subLoop) == 0){
+    return()
   }
-  # if you survived this, you will now have a list of dfs!
+  subLoop$xmid = apply(subLoop[,2:3], 1, mean)
+  subLoop$ymid = apply(subLoop[,5:6], 1, mean)
 
-  # get the loops color, resize and type
-  if(length(loops) != length(loops.type)){
-    loops.type = rep(loops.type[1], length(loops))
-  }
+  # all to upper
+  subLoop[subLoop$xmid < subLoop$ymid, ] = setNames(subLoop[subLoop$xmid < subLoop$ymid, c(1:6,8,7)], colnames(subLoop))
 
-  if(length(loops) != length(loops.color)){
-    loops.color = rep(loops.color[1], length(loops))
-  }
-
-  if(length(loops) != length(loops.resize)){
-    loops.resize = rep(loops.resize[1], length(loops))
-  }
-
-  # loops over de list and plot
-  for(listIDX in 1:length(loops)){
-
-    loop = loops[[listIDX]]
-
-    # loops has min. 6 cols : 1 and 4 are the chrom. 2 is outer-edge 5' anchor.
-    # 6 is outer edge 3' anchor
-    loop <- loop[loop[,1]==chrom,]
-
-    # resize loops
-    loop[,2] <- loop[,2] - loops.resize[listIDX]
-    loop[,3] <- loop[,3] + loops.resize[listIDX]
-    loop[,5] <- loop[,5] - loops.resize[listIDX]
-    loop[,6] <- loop[,6] + loops.resize[listIDX]
-
-    if(loops.type[listIDX] == "both"){
-      rect(xleft = loop[,5], ybottom = loop[,3], xright = loop[,6],
-           ytop = loop[,2], border=loops.color[listIDX], lwd=lwd)
-      rect(xleft = loop[,2], ybottom = loop[,6], xright = loop[,3],
-           ytop = loop[,5], border=loops.color[listIDX], lwd=lwd)
-    }else if(loops.type[listIDX] == "lower"){
-
-      rect(xleft = loop[,2], ybottom = loop[,6], xright = loop[,3],
-           ytop = loop[,5], border=loops.color[listIDX], lwd=lwd)
-
-    }else if(loops.type[listIDX] == "upper"){
-      rect(xleft = loop[,5], ybottom = loop[,3], xright = loop[,6],
-           ytop = loop[,2], border=loops.color[listIDX], lwd=lwd)
-    }else{
-      stop("Wrong option for loop plot type: upper, lower and both are allowed")
-    }
-
+  if(type == 'lower'){
+    subLoop = setNames(subLoop[, c(1:6,8,7)], colnames(subLoop))
+  } else if(type == 'both'){
+    subLoopLower = setNames(subLoop[, c(1:6,8,7)], colnames(subLoop))
+    subLoop = rbind(subLoop, subLoopLower)
   }
 
+  for(i in 1:nrow(subLoop)){
+
+    xmid = subLoop[i, "xmid"]
+
+    ymid = subLoop[i, "ymid"]
+
+    draw1loop(radius = radius, x.midpoint = xmid[1],
+              y.midpoint = ymid[1], lty = lty, col = col, lwd = lwd)
+  }
 }
 
 
@@ -485,9 +512,8 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "green",
 #' inner-left.
 #' @param inferno White/Red/black or White/Red coloscale?
 #' @param cexTicks Change size of numbers on the axis
-#' @param bed.col Color of the bed track (max.len is 4)
-#' @param bw.col Same as bed col, but for the bigwig track
-#' @param yMax Set the maximum height of all biwigs.
+#' @param chip.col A vector of four, parallel to [chip], of the to use color.
+#' @param chip.yMax A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.
 #' @param type Should a rectangle or a triangle be drawn?
 #' Note that for a triangle a 6th strand column should be included
 #' @param guessType If an element in the chip is a dataframe,
@@ -502,12 +528,14 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "green",
 #' @param tads.type How to show TADS: upper, lower and or both
 #' @param loops BED-like dataframe or a list of these data.frames
 #' @param loops.type How to show loops: upper, lower and or both
-#' @param loops.resize Make the loop-boxes bigger by X bp. Can help visibility.
+#' @param loops.radius Set the size of the loop-circle to X bp. Can help visibility.
 #' @param loops.color Which color do you want the loops to have?
 #' @param skipAnn Do not plot outside-annotation. Can be used to plot other
 #' things next to the matrix.
 #' @param symmAnn Put features 1&2 also on verical (ignore chip-entries 3&4)
 #' @param check.genome Check if reference genomes in exp1 and exp2 are the same
+#' @param smoothNA Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.
+#' @param fillNAtreshold Set the amount strength of out-lier correction for fillNA.
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @note
 #' To plot genes, a gene-model data.frame must be made. This can be done via a
@@ -534,15 +562,18 @@ draw.loops <- function( loops, chrom, loops.type="both", loops.color = "green",
 #' @export
 hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
                             chip=list(NULL, NULL, NULL, NULL), inferno = T,
-                            cexTicks = 1, bed.col=rep("black",4),
-                            bw.col="black", yMax = NULL,
+                            cexTicks = 1, chip.color="black", chip.yMax = NULL,
                             type=rep("triangle",4), guessType = T,
                             coplot="dual", genes=NULL,
                             tads=NULL, tads.type="lower", loops=NULL,
                             loops.type="lower", tads.color = "#3288bd",
-                            loops.resize = 0, loops.color = "#3288bd",
+                            loops.radius = NULL, loops.color = "#3288bd",
                             skipAnn = F, symmAnn = F,
-                            check.genome = T, antoni = F){
+                            check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F){
+
+  if(is.null(loops.radius)){
+    loops.radius = exp1$RES * 5
+  }
 
   if(length(chip) < 3){
     symmAnn = T
@@ -568,13 +599,15 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
   }
 
   #if only one color is given use it for all feature tracks
-  if(length(bw.col)==1){
-    bw.col <- rep(bw.col,4)
+  if(length(chip.color)==1){
+    chip.color <- rep(chip.color,4)
   }
 
-  #if only one color is given use it for all feature tracks
-  if(length(bed.col) == 1){
-    bed.col <- rep(bed.col,4)
+  #fill up empty yMax-elements
+  if(length(chip.yMax) < 4){
+    for(i in (length(chip.yMax)+1):4){
+      chip.yMax[i] <- chip.yMax[1]
+    }
   }
 
   #if only one color is given use it for all feature tracks
@@ -595,6 +628,18 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
   if(!is.null(exp2)){
     mat2 <- select.subset( exp2, chrom, start, end)
   }
+
+
+
+  if(smoothNA){
+    mat1 <- fillNAs(mat1, MADtreshold = fillNAtreshold)
+
+    if(!is.null(exp2)){
+      mat2 <- fillNAs(mat2, MADtreshold = fillNAtreshold)
+    }
+
+  }
+
 
   if(antoni){
     load(url("https://github.com/robinweide/GENOVA/raw/dev/R/antoni.Rdat"))
@@ -686,8 +731,7 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
 
   #draw loops on the image plot
   if(!is.null(loops)){
-    draw.loops( loops, chrom, loops.type=loops.type,
-                loops.resize = loops.resize, loops.color = loops.color)
+    draw.loops( loops, chrom =  chrom, start = start, end = end, type=loops.type,radius = loops.radius, col = loops.color,lwd = 2)
   }
 
   #fill up empty elements
@@ -700,8 +744,8 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
 
     #plot the features horizontal
     features( mat1, chrom, genes, chip1 = chip[[1]], chip2 = chip[[2]],
-              autoCHIP = guessType ,yMax = yMax,bed.col = bed.col[1:2],
-              bw.col = bw.col[1:2], type=type[1:2] )
+              autoCHIP = guessType ,yMax = chip.yMax[1:2], col = chip.color[1:2], type=type[1:2] )
+
     # clone 1 and two to feature entries 3 and 4
     if(symmAnn){
       if(!is.null(chip[[1]])){
@@ -710,10 +754,13 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
       if(!is.null(chip[[2]])){
         chip[[4]] <- chip[[2]]
       }
+
+      chip.yMax[3:4] <- chip.yMax[1:2]
+      chip.color[3:4] <- chip.color[1:2]
     }
 
-    features( mat1, chrom, genes, chip[[3]], chip[[4]], bed.col = bed.col[3:4],
-              autoCHIP = guessType ,yMax = yMax,bw.col = bw.col[3:4],
+    features( mat1, chrom, genes, chip[[3]], chip[[4]],
+              autoCHIP = guessType ,yMax = chip.yMax[3:4], col = chip.color[3:4],
               type=type[3:4], rotate=T )
   }
 }

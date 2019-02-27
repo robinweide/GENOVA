@@ -164,7 +164,8 @@ switch.EV <- function( ev.data, chip, chrom ){
 #'
 #' Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores
 #'
-#' @param exp A GENOVA experiment-object
+#' @param exp1 A GENOVA experiment-object
+#' @param exp2 A GENOVA experiment-object. If given, all plots show this exp in the lower-left corner.
 #' @param chrom The chromosome that should be drawn
 #' @param arm Which chromosome arm: 'p' or 'q' (for acrocentric this should be set to 'q')
 #' @param cut.off maximum value for the heatmap
@@ -173,6 +174,8 @@ switch.EV <- function( ev.data, chip, chrom ){
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
 #' @param chip A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments
+#' @param smoothNA Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.
+#' Requires fields and is only needed if large white stripes are bothering you.
 #' @note
 #' # Plot a cis-compartment plot of the q-arm of chromosome 14.
 #' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks)
@@ -180,35 +183,65 @@ switch.EV <- function( ev.data, chip, chrom ){
 #' # Plot a observed/expected cis-compartment plot of the q-arm of chromosome 14.
 #' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks, obs.exp = T)
 #' @export
-cis.compartment.plot <- function( exp, chrom, arm="p", cut.off=NULL, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL, chip = NULL){
-	data = exp
+cis.compartment.plot <- function( exp1, exp2 = NULL, chrom, arm="p", cut.off=NULL, obs.exp = F, invert=F, color.scheme="fall", cs.lim=NULL, chip = NULL, smoothNA = F){
+	#exp1 = exp
 
-  mat <- selectData( data, chrom, chrom)
+  mat1 <- selectData( exp1, chrom, chrom)
+  if(!is.null(exp2)){
+    mat2 <- selectData( exp2, chrom, chrom)
+  }
 
-	cent <- which(apply(mat$z,1,sum)==0)
+	cent <- which(apply(mat1$z,1,sum)==0)
 	cent <- largest.stretch(cent)
 
 
-	centromere.pos <- data.frame(chrom=c(chrom,chrom), start=c(min(cent)*data$RES, min(cent)*data$RES), end=c(max(cent)*data$RES, min(cent)*data$RES))
+	centromere.pos <- data.frame(chrom=c(chrom,chrom), start=c(min(cent)*exp1$RES, min(cent)*exp1$RES), end=c(max(cent)*exp1$RES, min(cent)*exp1$RES))
 	if( centromere.pos[1,2] < 1e6 && arm == 'p'){
 		print("No p arm. Enter q as arm")
 		return(NULL)
 	}
 
+
+
+
+
 	#plot the p and q arms
 
-	arm <- select.cis.arm(mat, centromere.pos, arm)
-	oe <- eigen.struct( arm )
+	arm1 <- select.cis.arm(mat1, centromere.pos, arm)
+	oe1 <- eigen.struct( arm1 )
+
+	if(!is.null(exp2)){
+	  arm2 <- select.cis.arm(mat2, centromere.pos, arm)
+	  oe2 <- eigen.struct( arm2 )
+	}
+
 
 	#orient compartment score
 	if(!is.null(chip)){
-		if(switch.EV( oe, chip, chrom) ){
-			oe$ev1 = -oe$ev1
+		if(switch.EV( oe1, chip, chrom) ){
+			oe1$ev1 = -oe1$ev1
 		}
 		#note that if you add a chip track the invert option
 		#is overridden
 		invert=F
 	}
+
+	if(!is.null(exp2)){
+	  if(!is.null(chip)){
+	    if(switch.EV( oe2, chip, chrom) ){
+	      oe2$ev1 = -oe2$ev1
+	    }
+	    #note that if you add a chip track the invert option
+	    #is overridden
+	    invert=F
+	  }
+	}
+
+	if(!is.null(exp2)){
+	  arm1$z[upper.tri(arm1$z)] <- arm2$z[upper.tri(arm2$z)]
+	  oe1$z[upper.tri(oe1$z)] <- oe2$z[upper.tri(oe2$z)]
+	}
+
 
 	#create a plotting layout
 	w = 6
@@ -217,11 +250,24 @@ cis.compartment.plot <- function( exp, chrom, arm="p", cut.off=NULL, obs.exp = F
 	layout(lay)
 	par(mar=rep(1,4), xaxs="i", yaxs="i")
 
+	if(smoothNA){
+	  require(fields)
+	  oe1.5 = oe1
+	  oe1.5$z[oe1.5$z == 0] <- NA
+	  oe1.5$z = fields::image.smooth(oe1.5$z, theta = 0.25)$z
+	  oe1 = oe1.5
+
+	  arm1.5 = arm1
+	  arm1.5$z[arm1.5$z == 0] <- NA
+	  arm1.5$z = fields::image.smooth(arm1.5$z, theta = 0.25)$z
+	  arm1 = arm1.5
+	}
+
 	if(obs.exp){
 		#color scale used: blue, white, red
 		bwr <- colorRampPalette(c("blue","white","red"))
 
-		log.mat <- log2(oe$z)
+		log.mat <- log2(oe1$z)
 
 		if(is.null(cut.off)){
 		  cut.off = max(quantile(log.mat, .99))
@@ -230,8 +276,10 @@ cis.compartment.plot <- function( exp, chrom, arm="p", cut.off=NULL, obs.exp = F
 
 		log.mat[log.mat >  cut.off] <- cut.off
 		log.mat[log.mat < -cut.off] <- -cut.off
-		oe$z <- log.mat
-		image(oe, col=bwr(300), zlim=c(-cut.off,cut.off), axes=F, ylim=rev(range(oe$y)))
+		oe1$z <- log.mat
+		image(oe1, col=bwr(300), zlim=c(-cut.off,cut.off), axes=F, ylim=rev(range(oe1$y)))
+
+
 	}else{
 		if(color.scheme=='fall'){
 			col.fun <- colorRampPalette(c("white", "orange", "darkred", "black"))
@@ -240,28 +288,32 @@ cis.compartment.plot <- function( exp, chrom, arm="p", cut.off=NULL, obs.exp = F
 		}
 
 	  if(is.null(cut.off)){
-	    cut.off = max(quantile(arm$z, .99))
+	    cut.off = max(quantile(arm1$z, .99))
 	    warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
 	  }
 
-		arm$z[arm$z > cut.off] <- cut.off
-		image(arm, col=col.fun(300), zlim=c(0,cut.off), axes=F, ylim=rev(range(oe$y)))
+		arm1$z[arm1$z > cut.off] <- cut.off
+		image(arm1, col=col.fun(300), zlim=c(0,cut.off), axes=F, ylim=rev(range(oe1$y)))
 	}
 	box(lwd=2)
 
-	label <- seq( 10*floor(min(arm$x)/10e6), 10*floor(max(arm$x)/10e6), by=10 )
+	label <- seq( 10*floor(min(arm1$x)/10e6), 10*floor(max(arm1$x)/10e6), by=10 )
 	at <- label*1e6
 	axis(3, at, label)
 	axis(2, at, label)
 
 	#plot the first compartment
-	compartment.score.plot( oe, invert=invert, cs.lim=cs.lim)
+	compartment.score.plot( oe1, invert=invert, cs.lim=cs.lim)
 
 	#plot the second compartment
-	compartment.score.plot( oe, invert=invert, cs.lim=cs.lim, rotate=T)
+	if(!is.null(exp2)){
+	  compartment.score.plot( oe2, invert=invert, cs.lim=cs.lim, rotate=T)
+	} else {
+	  compartment.score.plot( oe1, invert=invert, cs.lim=cs.lim, rotate=T)
+	}
 
-	oe$raw <- arm$z
-	invisible(oe)
+	oe1$raw <- arm1$z
+	invisible(oe1)
 }
 
 

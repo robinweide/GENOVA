@@ -4,8 +4,8 @@
 \alias{APA}
 \title{Aggegrate Peak Analysis}
 \usage{
-APA(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T, size = 21,
-  verbose = F, outlierCutOff = 0.995, ...)
+APA(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
+  size = 21, verbose = F, outlierCutOff = 0.995, ...)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample:

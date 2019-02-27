@@ -4,9 +4,9 @@
 \alias{cis.compartment.plot}
 \title{cis.compartment.plot}
 \usage{
-cis.compartment.plot(exp1, exp2 = NULL, chrom, arm = "p", cut.off = NULL,
-  obs.exp = F, invert = F, color.scheme = "fall", cs.lim = NULL,
-  chip = NULL, smoothNA = F)
+cis.compartment.plot(exp1, exp2 = NULL, chrom, arm = "p",
+  cut.off = NULL, obs.exp = F, invert = F, color.scheme = "fall",
+  cs.lim = NULL, chip = NULL, smoothNA = F)
 }
 \arguments{
 \item{exp1}{A GENOVA experiment-object}

@@ -9,9 +9,9 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   chip.color = "black", chip.yMax = NULL, type = rep("triangle", 4),
   guessType = T, coplot = "dual", genes = NULL, tads = NULL,
   tads.type = "lower", loops = NULL, loops.type = "lower",
-  tads.color = "#3288bd", loops.resize = 0, loops.color = "#3288bd",
-  skipAnn = F, symmAnn = F, check.genome = T, smoothNA = F,
-  smoothBandwidth = 0.25, antoni = F)
+  tads.color = "#3288bd", loops.radius = NULL,
+  loops.color = "#3288bd", skipAnn = F, symmAnn = F,
+  check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F)
 }
 \arguments{
 \item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
@@ -60,7 +60,7 @@ will only be combined with bed structure}
 
 \item{loops.type}{How to show loops: upper, lower and or both}
 
-\item{loops.resize}{Make the loop-boxes bigger by X bp. Can help visibility.}
+\item{loops.radius}{Set the size of the loop-circle to X bp. Can help visibility.}
 
 \item{loops.color}{Which color do you want the loops to have?}
 
@@ -73,7 +73,7 @@ things next to the matrix.}
 
 \item{smoothNA}{Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.}
 
-\item{smoothBandwidth}{Set the bandwidth parameter of the Nadaraya/Watson normalization. Default = 0.25.}
+\item{fillNAtreshold}{Set the amount strength of out-lier correction for fillNA.}
 
 \item{antoni}{Logical: plot an explorer of the microscopic world}
 

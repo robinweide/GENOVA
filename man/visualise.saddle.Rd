@@ -4,8 +4,8 @@
 \alias{visualise.saddle}
 \title{Plot saddle-plots}
 \usage{
-visualise.saddle(SBoutList, addText = T, zlim = c(0.5, 2), EVlim = c(-1.5,
-  1.5), square = T, crossLines = NULL)
+visualise.saddle(SBoutList, addText = T, zlim = c(0.5, 2),
+  EVlim = c(-1.5, 1.5), square = T, crossLines = NULL)
 }
 \arguments{
 \item{SBoutList}{A list of outputs trom saddle().}

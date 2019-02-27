@@ -4,8 +4,8 @@
 \alias{visualise.ATA.ggplot}
 \title{visualise.ATA.ggplot}
 \usage{
-visualise.ATA.ggplot(stackedlist, title = "ATA", focus = 1, zlim1 = NULL,
-  zlim2 = NULL)
+visualise.ATA.ggplot(stackedlist, title = "ATA", focus = 1,
+  zlim1 = NULL, zlim2 = NULL)
 }
 \arguments{
 \item{stackedlist}{Named list of results from \code{ATA}.}

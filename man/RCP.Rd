@@ -4,9 +4,9 @@
 \alias{RCP}
 \title{Relative Contact Probabilities}
 \usage{
-RCP(experimentList, chromsToUse = NULL, bedList = NULL, colors = NULL,
-  maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1,
-  verbose = F)
+RCP(experimentList, chromsToUse = NULL, bedList = NULL,
+  colors = NULL, maxDistance = NULL, ignoreLengthWarning = F,
+  outlierCutoff = 1, verbose = F)
 }
 \arguments{
 \item{chromsToUse}{A vector containing the chromosome-names of interest. If bedList is also given, only BED-entries in chromsToUse will be used.}

@@ -5,8 +5,8 @@
 \title{PE-SCAn}
 \usage{
 PESCAn(exp, bed, shift = 1e+06, minComparables = 10, mindist = 5e+06,
-  maxDist = Inf, size = 4e+05, rmOutlier = F, outlierCutOff = 0.995,
-  verbose = T)
+  maxDist = Inf, size = 4e+05, rmOutlier = F,
+  outlierCutOff = 0.995, verbose = T)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}

@@ -8,12 +8,13 @@ getPixelMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
   return(mean(subMat))
 }
 
-getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
-  if(!is.null(pixWidth)){warning('Pixwidth is decrepated.')}
+getDonutMean <- function(MAT, pixWidth = 3, npix, NAasZero = T){
+#  if(!is.null(pixWidth)){warning('Pixwidth is decrepated.')}
 
-  # cut to 11x11
+  # cut to smaller mat
   pixelLoc   <- ((npix-1 )/2)+1
-  MAT <- MAT[(pixelLoc-5):(pixelLoc+5),(pixelLoc-5):(pixelLoc+5)]
+  cutPix <- ((pixWidth +2) * 2)/2
+  MAT <- MAT[(pixelLoc-cutPix):(pixelLoc+cutPix),(pixelLoc-cutPix):(pixelLoc+cutPix)]
   MAT[is.na(MAT)] <- 0
 
   pixelLoc <- ((ncol(MAT) -1 )/ 2)+1
@@ -66,7 +67,7 @@ getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
 #' center-point
 #' @param enrichment Calculate log2-enrichment instead of contacts?
 #' @param enrichmentType meanScore gives the pixel/mean(backgroundRegions) score.
-#' meanBool gives the fraction of background-regions less
+#' medianBool gives the fraction of background-regions less
 #' than 50 percent of the pixel (1 = a true loop).
 #' @return Alist of two dataframes: data (per-loop and -sample average scores)
 #' and stats (all-vs-all wilcoxon.test p-values and log2-foldchanges.)
@@ -86,12 +87,12 @@ getDonutMean <- function(MAT, pixWidth = NULL, npix, NAasZero = T){
 #'   geom_boxplot()
 #' @export
 quantifyAPA <- function(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1,
-                        enrichmentType = 'meanScore'){
+                        enrichmentType = 'medianScore'){
   if((pixWidth %% 2) == 0){
     stop('Please use an uneven number for pixWidth')
   }
-  if(!enrichmentType %in% c('meanBool', 'meanScore')){
-    stop('enrichmentType must be either meanBool or meanScore.')
+  if(!enrichmentType %in% c('meanBool', 'medianScore')){
+    stop('enrichmentType must be either meanBool or medianScore.')
   }
   outDF <- list() # make a df with a line per loop (add column for color and name)
 
@@ -108,7 +109,7 @@ quantifyAPA <- function(APAlist, enrichment = F, pixWidth = 3, speudoCount = 1,
       if(is.null(speudoCount)){
         speudoCount = min(tmp[tmp != 0])
       }
-      donut_out <- lapply(apaout, getDonutMean, npix = npix)
+      donut_out <- lapply(apaout, getDonutMean, npix = npix, pixWidth = pixWidth)
       donut_out <- unlist(donut_out)
       donut_out <- matrix(unlist(donut_out), ncol = 2, byrow = T)
       if(enrichmentType == 'meanBool'){

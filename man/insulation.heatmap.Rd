@@ -5,9 +5,10 @@
 \title{Plot insulation-heatmaps.}
 \usage{
 insulation.heatmap(insulationList, bed, focus = 1, sortWidth = 10,
-  whatToPlot = "both", profileFunct = mean, flank = 5e+05, zlim = c(-1,
-  1), profileCols = NULL, profileZlim = NULL, heatmapCols = c("#f03b20",
-  "#ffeda0", "white", "#31a354"), rmNonVariateRows = T, verbose = F)
+  whatToPlot = "both", profileFunct = mean, flank = 5e+05,
+  zlim = c(-1, 1), profileCols = NULL, profileZlim = NULL,
+  heatmapCols = c("#f03b20", "#ffeda0", "white", "#31a354"),
+  rmNonVariateRows = T, verbose = F)
 }
 \arguments{
 \item{insulationList}{A named list of results from genome.wide.insulation().}

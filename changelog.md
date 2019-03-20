@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 To generate this file until 0.9.98, I have used [Github](https://github.com/robinweide/GENOVA/compare/8edef82..9951098). 
 
+## [0.9.99] - 20-3-2019
+
+### Added
+- HiCseg.callTAD: a function to call TADs with HiCseq (Levy-Leduc) per chromosome-arm or windowed chromosomes.
+
 ## [0.9.98] - 27-02-2019
 Github-hash: 9951098
 

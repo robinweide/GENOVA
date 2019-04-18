@@ -292,3 +292,235 @@ visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", z
   grid::grid.draw(rbind(ggplot2::ggplotGrob(plot1), ggplot2::ggplotGrob(plot2),
                         size = "last"))
 }
+
+#' Parallel PE-SCAn
+#'
+#' Calculate the all-vs-all Hi-C contacts from a bed-like \code{data.frame}
+#'
+#'@author Teun A.H. van den Brand, \email{t.vd.brand@@nki.nl}
+#' @param explist A list of Hi-C experiments produced by
+#'   \code{\link[GENOVA]{construct.experiment}}.
+#' @param bed \code{data.frame} in bed-like format (chromosome, start, end).
+#' @param shift \code{numeric} Set to X bp for circular permutation. Set to zero
+#'   for just getting the signal-matrix.
+#' @param minComparables \code{integer} Minimum amount of BED-entries per
+#'   chromosome.
+#' @param minDist \code{numeric} The minimal distance in bp.
+#' @param maxDist \code{numeric} The maximal distance in bp.
+#' @param size \code{numeric} Size in bp of window
+#' @param rmOutlier \code{logical}: Perform outlier correction?
+#' @param outlierCutOff \code{numeric} between 0 and 1. Quantile above which
+#'   pixel-values get set to that quantile.
+#' @param ncores \code{integer} between 1 and \code{length(explist)} to set the
+#'   number of cores to use for parallel computation.
+#' @import data.table
+#'
+#' @return If \code{shift != 0}, a list of experiment-wise lists of the
+#'   observed/expected matrix, the underlying signal matrix, and the background
+#'   matrix. Else, a list of experiment-wise list of the signal matrix.
+#' @export
+#'
+#' @examples
+#' # Run PE-SCAn in parallel on a bed of super enhancers, 
+#' # using WT and KO Hi-C data and a circular permuation of 1Mb.
+#' PE_OUT <- PESCAn_parallel(explist = list(WT_40kb, KO_40kb),
+#'                           bed = superEnhancers,
+#'                           shift = 1e6,
+#'                           ncores = 2)
+#' 
+PESCAn_parallel <- function(
+  explist, 
+  bed, 
+  shift = 1e6, 
+  minComparables = 1,
+  minDist = 5e6, 
+  maxDist = Inf, 
+  size = 4e5, 
+  rmOutlier = F,
+  outlierCutOff = 0.995,
+  ncores = 1
+)
+{
+  # Re-list if one exp was given as explist
+  if (c("ICE","ABS","RES") %in% names(explist) || 
+      !is.null(names(explist))) {
+    explist <- list(explist)
+  }
+  
+  # Test equality
+  if (length(explist) > 1) {
+    equal <- vapply(seq_along(explist)[-1], function(i){
+      all.equal(explist[[1]]$ABS, explist[[i]]$ABS)
+    }, logical(1))
+    if(any(!equal)){
+      stop(paste(
+        "Indices of experiment(s)", 
+        paste(which(!equal) + 1, collapse = " & "), 
+        "are not equal to indices of experiment 1"
+      ), call. = FALSE
+      )
+    }
+  }
+  
+  # Initialise
+  res   <- explist[[1]]$RES
+  size  <- seq_len(((size / res)*2 + 1)) # Translate size to bins
+  size  <- floor(size - median(size))    # Center size around 0
+  shift <- round(shift / res)
+  bed   <- as.data.frame(bed, stringsAsFactors = FALSE)
+  if (class(bed[,1]) == "factor") {
+    bed[,1] <- droplevels(bed[,1])
+  }
+  
+  # Check abs
+  abs <- explist[[1]]$ABS
+  if (!all(rownames(abs) == abs[,4])) {
+    stop("The indices violate some assumptions of this function",
+         call. = FALSE)
+  }
+  
+  # Split bed and abs by chromosome
+  abslist <- split(abs, abs[,1])
+  bedlist <- split(rowMeans(bed[,2:3]), bed[,1])
+  is_good_chrom <- rep(TRUE, length(bedlist))
+  if (!all(names(bedlist) %in% names(abslist))) {
+    is_good_chrom <- names(bedlist) %in% names(abslist)
+    badnames <- names(bedlist)[!is_good_chrom]
+    warning(paste0("Chromosome name ", badnames, 
+                   " not found in experiment index\n"))
+    warning(paste0("Continuing without ", 
+                   paste0(badnames, collapse = " ")))
+  }
+  bedlist <- bedlist[is_good_chrom]
+  
+  # Compute indices by chromosome
+  idx <- lapply(names(bedlist), function(i){
+    # Grab correct chromosomes
+    search <- unname(bedlist[[i]])
+    target <- abslist[[i]][,2:3]
+    
+    # Get indices relative to current chromosome
+    idx <- vapply(search, function(j){
+      max(which(j >= target[,1] & j < target[,2]), 0L)[1]
+    }, integer(1))
+    idx <- idx[idx > 0]
+    idx <- t(combn(idx, 2))
+    
+    # Enforce maxdist and mindist
+    target <- rowMeans(target)
+    dist <- abs(target[idx[,1]] - target[idx[,2]])
+    idx  <- idx[dist > minDist & dist < maxDist,]
+    
+    # Translate relative indices to absolute indices
+    idx <- apply(idx, 2, function(j){abslist[[i]][j,4]})
+    
+    if (nrow(idx) >= minComparables) {
+      return(idx)
+    } else {
+      return(NULL)
+    }
+  })
+  
+  # Format and cleanup
+  idx <- do.call(rbind, idx)
+  rm(abslist, bedlist)
+  
+  # Check if size and control regions exceed chromosome limits
+  under_end  <- abs[idx[,2], 1] == abs[idx[,2] + max(size), 1]
+  over_start <- abs[idx[,1], 1] == abs[idx[,1] - min(size), 1]
+  idx <- idx[under_end & over_start,]
+  idx_list <- lapply(seq_len(nrow(idx)), 
+                     function(i){idx[i,]})
+  
+  # Apply shifted indices in an appropriate direction
+  if (shift > 0) {
+    shift_check <- abs[idx + shift + max(size), 1] == abs[idx, 1]
+    shift_idx   <- idx + ifelse(shift_check, shift, -shift)
+    idx_list_shifted <- lapply(seq_len(nrow(shift_idx)), 
+                               function(i){shift_idx[i,]})
+  }
+  
+  # Setup vapply template 
+  mdim <- length(size)
+  template <- matrix(NA_real_, nrow = mdim, ncol = mdim)
+  
+  # Precompute extraction grids
+  egrid <- expand.grid(size, size)
+  x <- egrid$Var1
+  y <- egrid$Var2
+  
+  # Cleanup
+  suppressWarnings(
+    rm(egrid, shift_check, under_end, over_start, idx, shift_idx)
+  )
+  
+  # Set parallel options
+  ncores <- min(ncores, length(explist), detectCores())
+  dt.cores <- data.table::getDTthreads()
+  data.table::setDTthreads(1)
+  
+  # Loop over experiments, do 
+  icemats <- lapply(explist, function(exp){exp$ICE})
+  out <- mclapply(icemats, function(ice){
+    
+    # Get signal
+    mats <- vapply(idx_list, function(i){
+      matrix(ice[list(x + i[1], y + i[2])]$V3, nrow = mdim)
+    }, template)
+    
+    # NA handling: remove all-NA slices, set other NAs to 0
+    keep <- apply(mats, 3, function(x){!all(is.na(x))})
+    mats <- mats[,,keep]
+    mats[is.na(mats)] <- 0
+    
+    # Get background
+    if (shift > 0) {
+      shift.mats <- vapply(idx_list_shifted, function(i){
+        matrix(ice[list(x + i[1], y + i[2])]$V3, nrow = mdim)
+      }, template)
+      
+      # NA handling: remove parallel to signal mats
+      shift.mats <- shift.mats[,,keep]
+      shift.mats[is.na(shift.mats)] <- 0
+    }
+    
+    # Handle outliers
+    if (rmOutlier) {
+      thres <- quantile(mats, outlierCutoff)
+      mats[mats > thres] <- thres
+      if (shift > 0) {
+        thres <- quantile(shift.mats, outlierCutoff)
+        shift.mats[shift.mats > thres] <- thres
+      }
+    }
+    
+    # Summarize
+    signal <- apply(mats, 1:2, mean)
+    if (shift > 0) {
+      bg <- apply(shift.mats, 1:2, mean)
+      OE  <- signal/median(bg, na.rm = T)
+      out <- list("obsexp" = OE, 
+                  "signal" = signal, 
+                  "background" = bg)
+    } else {
+      out <- list("signal" = signal)
+    }
+    
+    # Format dimnames
+    out <- lapply(out, function(m){
+      dimnames(m) <- list(size * res, size * res)
+      return(m)
+    })
+    
+    return(out)
+    
+  }, mc.cores = ncores)
+  
+  # Format sample names
+  names(out) <- vapply(explist, function(exp){exp$NAME}, character(1))
+  
+  # reset data.table core usage
+  data.table::setDTthreads(dt.cores)
+  
+  return(out)
+}

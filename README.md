@@ -7,7 +7,7 @@ The increase in interest for Hi-C methods in the chromatin community has led to 
 Here, we present **GEN**ome **O**rganisation **V**isual **A**nalytics (GENOVA): a software suite to perform in-depth analyses on various levels of genome organisation, using Hi-C data. GENOVA facilitates the comparison between multiple datasets and supports the majority of mapping-pipelines.
 
 # Support
-We have provided a quite lengthy [vingnette](https://github.com/robinweide/GENOVA/blob/master/vignettes/GENOVA_vignette.pdf), so please read that first. If there are still unanswered questions, please use the [issue-tracker](https://github.com/robinweide/GENOVA/issues).
+We have provided a quite lengthy [vignette](https://github.com/robinweide/GENOVA/blob/master/vignettes/GENOVA_vignette.pdf), so please read that first. If there are still unanswered questions, please use the [issue-tracker](https://github.com/robinweide/GENOVA/issues).
 
 ---
 
@@ -15,7 +15,7 @@ We have provided a quite lengthy [vingnette](https://github.com/robinweide/GENOV
 All notable changes to this project will be documented in this file.
 To generate this file until 0.9.98, I have used [Github](https://github.com/robinweide/GENOVA/compare/8edef82..9951098). 
 
-## [0.9.99] - 20-3-2019
+## [0.9.995] - 20-3-2019
 
 ### Added
 - HiCseg.callTAD: a function to call TADs with HiCseq (Levy-Leduc) per chromosome-arm or windowed chromosomes.

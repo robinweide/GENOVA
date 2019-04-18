@@ -54,7 +54,7 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10,
   for(i in 1:length(insulationList)){
     insdDat <- insulationList[[i]]
     insName <-  names(insulationList)[i]
-    results <- align.insulation( insdDat, bed, flank.length=flank,
+    results <- align.insulation( ins.data = insdDat, bed = bed, flank.length=flank,
                                  verbose = verbose)
     #! place zlims and remove infs !
     # results[results < zlim[1]] = zlim[1]
@@ -269,8 +269,7 @@ align.insulation.chrom <- function( ins.data, bed, flank = 10 ){
 
   # add zeroes for first boundaries too close
   if(length(rows2addFront) > 0){
-    align.mat = rbind(matrix(rep(0, ncol(align.mat) * rows2addFront),
-                             ncol =  ncol(align.mat)),
+    align.mat = rbind(matrix(rep(0, ncol(align.mat) * max(rows2addFront)),ncol =  ncol(align.mat)),
                       align.mat)
   }
 
@@ -293,8 +292,7 @@ align.insulation <- function(ins.data, bed, flank.length = 200e3, verbose = F){
   for( chr in chrom.vec){
     if(verbose){message("Analyzing ", chr, "\\r")}
 
-    sub.mat <- align.insulation.chrom( ins.data[ins.data[,1]==chr,],
-                                       bed[bed[,1]==chr,], flank = flank )
+    sub.mat <- align.insulation.chrom( ins.data = ins.data[ins.data[,1]==chr,],bed =  bed[bed[,1]==chr,], flank = flank )
     align.mat <- rbind(align.mat, sub.mat)
   }
   align.mat

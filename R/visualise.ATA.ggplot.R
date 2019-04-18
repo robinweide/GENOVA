@@ -120,7 +120,7 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
   plot2 <- ggplot2::ggplot(belowPlots, ggplot2::aes(Var1, Var2)) +
     ggplot2::geom_raster(ggplot2::aes(fill = value), interpolate = F) +
     ggplot2::facet_grid(.~ sample) +
-    ggplot2::scale_fill_gradient2(limits = c(zminBelow, zmaxBelow), low="#2166ac", mid="white", high="#b2182b") +
+    ggplot2::scale_fill_gradient2(limits = c(zminBelow, zmaxBelow), low = "#009bef", mid = "white", high = "#ff5c49") +
     ggplot2::coord_fixed(expand = F) +
     ggplot2::scale_x_continuous(expand = c(0,0),
                                 breaks = c(upTick+shimmy,downTick-shimmy), trans = 'reverse', labels = c("3' border", "5' border"))+
@@ -131,4 +131,4 @@ visualise.ATA.ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = 
 
   grid::grid.newpage()
   grid::grid.draw(rbind(ggplot2::ggplotGrob(plot1), ggplot2::ggplotGrob(plot2), size = "last"))
-  }
+}

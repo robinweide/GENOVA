@@ -641,6 +641,20 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
   }
 
 
+  ZnormScale = exp1$ZSCORE
+  if(!is.null(exp2)){
+
+    if(exp1$ZSCORE != exp2$ZSCORE){
+      stop('One experiment is Z-normalised and the other is not.')
+    }
+
+    ZnormScale = exp1$ZSCORE | exp2$ZSCORE
+
+  }
+
+  ##############################################################################
+  # plot AVL for fun
+  ##############################################################################
   if(antoni){
     load(url("https://github.com/robinweide/GENOVA/raw/dev/R/antoni.Rdat"))
     CR = colorRampPalette(c('#ffffff','#f0f0f0','#d9d9d9',
@@ -649,56 +663,88 @@ hic.matrixplot <- function( exp1, exp2=NULL, chrom, start, end, cut.off=NULL,
 
     image(  antoni[,nrow(antoni):1 ], col = rev(CR(10)),
             axes=F,ylim=rev(range(antoni)))
+
+  ##############################################################################
+  # plot only exp2
+  ##############################################################################
   } else if(is.null(exp2)){
+
+    # set cutoffs
     if(is.null(cut.off)){
-      cut.off = max(quantile(mat1$z, .99))
+      cut.off = max(quantile(abs(mat1$z), .99))
       warning("No cut.off was given: using 99% percentile: ",
               round(cut.off), ".")
     }
     mat1$z[mat1$z > cut.off] <- cut.off
+    mat1$z[mat1$z < -cut.off] <- -cut.off
+
+
     if(inferno){
 
       higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
       wr <- colorRampPalette(higlassCol)
-
-      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
+      if(ZnormScale){
+        wr <- colorRampPalette(c("#009bef","white","#ff5c49"))
+      }
+      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(ifelse(ZnormScale, -cut.off, 0),cut.off) )
 
     } else {
+
       wr <- colorRampPalette(c("white","red"))
-      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
+      if(ZnormScale){
+        wr <- colorRampPalette(c("#009bef","white","#ff5c49"))
+      }
+      image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(ifelse(ZnormScale, -cut.off, 0),cut.off) )
     }
 
-  } else{
+  }
+  ##############################################################################
+  # plot exp1 and exp2
+  ##############################################################################
+  else{
+
     if(coplot == "dual"){
+
 
       mat1$z[upper.tri(mat1$z)] <- mat2$z[upper.tri(mat2$z)]
 
+      # set cutoffs
       if(is.null(cut.off)){
-        cut.off = max(quantile(mat1$z, .995))
-        warning("No cut.off was given: using 99.5% percentile: ",
-                round(cut.off), ".")
-      }
-      mat1$z[mat1$z > cut.off] <- cut.off
-
-      if(inferno){
-        higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
-        wr <- colorRampPalette(higlassCol)
-        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
-      } else {
-        wr <- colorRampPalette(c("white","red"))
-        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(0,cut.off) )
-      }
-
-    }else{
-      mat1$z <- mat2$z - mat1$z
-      if(is.null(cut.off)){
-        cut.off = max(quantile(mat1$z, .995))
-        warning("No cut.off was given: using 99.5% percentile: ",
+        cut.off = max(quantile(abs(mat1$z), .99))
+        warning("No cut.off was given: using 99% percentile: ",
                 round(cut.off), ".")
       }
       mat1$z[mat1$z > cut.off] <- cut.off
       mat1$z[mat1$z < -cut.off] <- -cut.off
-      bwr <- colorRampPalette(c("blue","white","red"))
+
+      if(inferno){
+        higlassCol <- c('white', '#f5a623', '#d0021b', 'black')
+        wr <- colorRampPalette(higlassCol)
+        if(ZnormScale){
+          wr <- colorRampPalette(c("#009bef","white","#ff5c49"))
+        }
+        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(ifelse(ZnormScale, -cut.off, 0),cut.off) )
+      } else {
+        wr <- colorRampPalette(c("white","red"))
+
+        if(ZnormScale){
+          wr <- colorRampPalette(c("#009bef","white","#ff5c49"))
+        }
+        image( mat1, col=wr(1e4), axes=F, ylim=rev(range(mat1$x)), zlim=c(ifelse(ZnormScale, -cut.off, 0),cut.off) )
+      }
+
+    }else{
+      mat1$z <- mat2$z - mat1$z
+      # set cutoffs
+      if(is.null(cut.off)){
+        cut.off = max(quantile(abs(mat1$z), .99))
+        warning("No cut.off was given: using 99% percentile: ",
+                round(cut.off), ".")
+      }
+      mat1$z[mat1$z > cut.off] <- cut.off
+      mat1$z[mat1$z < -cut.off] <- -cut.off
+
+      bwr <- colorRampPalette(c("#009bef","white","#ff5c49"))
       image( mat1, col=bwr(500), axes=F, ylim=rev(range(mat1$x)), zlim=c(-cut.off, cut.off) )
     }
 

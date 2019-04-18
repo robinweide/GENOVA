@@ -19,6 +19,12 @@ To generate this file until 0.9.98, I have used [Github](https://github.com/robi
 
 ### Added
 - HiCseg.callTAD: a function to call TADs with HiCseq (Levy-Leduc) per chromosome-arm or windowed chromosomes.
+- construct.experiment: added an option to get Z-score normalised experiment-objects.
+- hic.matrixplot: added an option to use Z-score normalised experiment-objects.
+
+### Changed
+- visualise.APA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
+- visualise.ATA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
 
 ## [0.9.98] - 27-02-2019
 Github-hash: 9951098
@@ -60,3 +66,6 @@ Github-hash: 35772ec
 
 ## [0.9.96] - 22-05-2018
 Github-hash: 7deebca
+
+
+

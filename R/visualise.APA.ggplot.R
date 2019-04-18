@@ -123,7 +123,7 @@ visualise.APA.ggplot <- function(APAlist, title = 'APA', zTop = NULL, zBottom = 
     ggplot2::geom_raster(ggplot2::aes(fill = value)) +
     ggplot2::facet_grid(. ~ sample) +
     ggplot2::coord_fixed() +
-    ggplot2::scale_fill_gradient2(limits = z2, midpoint = 0, low = "#2166ac", mid = "white", high = "#b2182b") +
+    ggplot2::scale_fill_gradient2(limits = z2, midpoint = 0, low = "#009bef", mid = "white", high = "#ff5c49") +
     GENOVA_THEME() +
     ggplot2::scale_x_continuous(breaks = c(tickPosDownstream,size.banks + 1, tickPosUpstream),
                                 expand = c(0,0),

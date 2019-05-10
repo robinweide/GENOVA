@@ -10,6 +10,7 @@ To generate this file until 0.9.98, I have used [Github](https://github.com/robi
 - hic.matrixplot: added an option to use Z-score normalised experiment-objects.
 
 ### Changed
+- APA: sped up by using a vapply loop (@MarijneMia)
 - visualise.APA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
 - visualise.ATA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
 

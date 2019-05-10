@@ -130,48 +130,36 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   }
 
 
-  ##########################
-  # loop over loops (haha) #
-  ##########################
-  lx <- length(x.pos)
-  for( i in 1:lx){
-    if(verbose){cat(paste0(i, ' of ', lx, ' loops.'), "\r")}
-
-    # Get Indeces of 10 up/downstream of anchor
-    sel.x <- (x.pos[i]-size.offset):(x.pos[i]+size.offset)
-    sel.y <- (y.pos[i]-size.offset):(y.pos[i]+size.offset)
-
-    # Exract scores from HiC
-    s <- select.sub.2D(hicdata, sel.x,sel.y)
-    s$V1 <- (s$V1 - min(sel.x)) + 1
-    s$V2 <- (s$V2 - min(sel.y)) + 1
-
-    # Check for 21x21 mat:
-    if(length(unique(s$V2)) < size){
-      cols <- 1:size
-      toADD <- cols[!cols %in% unique(s$V2)]
-      newdf <- data.frame(unique(cbind(rep(1:size, each = size),
-                                       rep(toADD, length = size),0)))
-      colnames(newdf) <- c("V1","V2","V3")
-      s <- rbind(s, newdf)
-    }
-    if(length(unique(s$V1)) < size){
-      cols <- 1:size
-      toADD <- cols[!cols %in% unique(s$V1)]
-      newdf <- data.frame(unique(cbind(rep(toADD, length = size),
-                                       rep(1:size, each = size),0)))
-      colnames(newdf) <- c("V1","V2","V3")
-      s <- rbind(s, newdf)
-    }
-
-    # Make matrix
-    s.mat <- reshape2::acast(s, V1~V2, value.var="V3")
-    s.mat[is.na(s.mat)] <- 0
-
-    # Add to rawMatList
-    rawMatList[[i]] <- s.mat
-
-  }
+  #####################
+  # vapply over loops #
+  #####################
+  
+  pos.list <- data.frame(x = x.pos, y = y.pos) %>% split(., seq(nrow(.))) 
+  
+  old_threads <- getDTthreads()
+  setDTthreads(1)
+  
+  rawMatArray <- vapply(pos.list, FUN.VALUE = matrix(NA_real_, nrow = size, ncol = size), FUN = function(pos){
+    
+    sel.x <- (pos$x-size.offset):(pos$x+size.offset)
+    sel.y <- (pos$y-size.offset):(pos$y+size.offset)
+    
+    pos.all <- expand.grid(sel.x, sel.y)
+    
+    hic.mat <- hicdata[.(pos.all)]
+    #hic.mat <- hicdata[V1 %between% c(pos$x + c(-1,1)*size.offset)][V2 %between% c(pos$y + c(-1,1)*size.offset)]
+    
+    hic.mat$V3[which(is.na(hic.mat$V3))] <- 0
+    
+    hic.mat <- reshape2::acast(hic.mat, V1~V2, value.var="V3")
+    
+    return(hic.mat)
+    
+  })
+  
+  setDTthreads(old_threads)
+  
+  rawMatList <- lapply(seq(dim(rawMatArray)[3]), function(x) rawMatArray[ , , x])
 
   # Convert to 3D array
   rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]

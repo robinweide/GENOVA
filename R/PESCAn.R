@@ -457,6 +457,7 @@ PESCAn_parallel <- function(
   # Set parallel options
   ncores <- min(ncores, length(explist), detectCores())
   dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
   
   # Loop over experiments, do 
@@ -518,9 +519,6 @@ PESCAn_parallel <- function(
   
   # Format sample names
   names(out) <- vapply(explist, function(exp){exp$NAME}, character(1))
-  
-  # reset data.table core usage
-  data.table::setDTthreads(dt.cores)
   
   return(out)
 }

@@ -137,6 +137,7 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   pos.list <- data.frame(x = x.pos, y = y.pos) %>% split(., seq(nrow(.))) 
   
   old_threads <- getDTthreads()
+  on.exit(setDTthreads(old_threads))
   setDTthreads(1)
   
   rawMatArray <- vapply(pos.list, FUN.VALUE = matrix(NA_real_, nrow = size, ncol = size), FUN = function(pos){
@@ -156,8 +157,7 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
     return(hic.mat)
     
   })
-  
-  setDTthreads(old_threads)
+ 
   
   rawMatList <- lapply(seq(dim(rawMatArray)[3]), function(x) rawMatArray[ , , x])
 

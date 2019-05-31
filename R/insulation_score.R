@@ -367,32 +367,33 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 #' @param window.size The sliding square size
 #' @param verbose Should this function be chatty?
 #' @param normalize.genome Perform the log2(O/E) normalisation
+#' @param pseudocount Set to 1 to stabilise scores.
 #' @return DF with insulation score
 #' @examples
 #' # Get the insulation score with window-size 25 and store in the INSULATION-slot.
 #' Hap1_WT_10kb$INSULATION = genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
 #' @export
-genome.wide.insulation <- function( hic, window.size, normalize.genome = F, verbose = F ){
-	chrom.vec <- c(hic$ABS[1,1],hic$ABS[which(head(hic$ABS[,1],-1) != tail(hic$ABS[,1],-1))+1,1])
-	chrom.save <- c(); pos.save <- c(); ins.vec <- c()
-	for( chrom in chrom.vec ){
-		if(verbose){cat("Currently analyzing ", chrom, "\r")}
-		#do not analyse chromosomes that are twice the window size
-		if(sum(hic$ABS[,1]==chrom) <= 2*window.size ){
-			next
-		}
-		ins.data <- chromosome.wide.insulation( hic, window.size, chrom )
-		#normalize per chromosome
-		if( ! normalize.genome ){
-			ins.data[,2] <- log2(ins.data[,2]/median(ins.data[,2]))
-		}
-		chrom.save <- c(chrom.save,rep(chrom, nrow(ins.data)))
-		pos.save <- c(pos.save, ins.data[,1])
-		ins.vec <- c(ins.vec, ins.data[,2])
-	}
-	if(normalize.genome){
-		ins.vec <- log2(ins.vec/median(ins.vec))
-	}
-	#note substract/add half of the resolution because we create a bed-like structure
-	data.frame(chrom=chrom.save, start=pos.save-hic$RES/2, end=pos.save+hic$RES/2, insulation=ins.vec)
+genome.wide.insulation <- function( hic, window.size, normalize.genome = F, verbose = F, pseudocount = 1 ){
+  chrom.vec <- c(hic$ABS[1,1],hic$ABS[which(head(hic$ABS[,1],-1) != tail(hic$ABS[,1],-1))+1,1])
+  chrom.save <- c(); pos.save <- c(); ins.vec <- c()
+  for( chrom in chrom.vec ){
+    if(verbose){cat("Currently analyzing ", chrom, "\r")}
+    #do not analyse chromosomes that are twice the window size
+    if(sum(hic$ABS[,1]==chrom) <= 2*window.size ){
+      next
+    }
+    ins.data <- chromosome.wide.insulation( hic, window.size, chrom )
+    #normalize per chromosome
+    if( ! normalize.genome ){
+      ins.data[,2] <- log2( (pseudocount+ins.data[,2])/(pseudocount+median(ins.data[,2])))
+    }
+    chrom.save <- c(chrom.save,rep(chrom, nrow(ins.data)))
+    pos.save <- c(pos.save, ins.data[,1])
+    ins.vec <- c(ins.vec, ins.data[,2])
+  }
+  if(normalize.genome){
+    ins.vec <- log2( (ins.vec+pseudocount)  / (median(ins.vec) + pseudocount) )
+  }
+  #note substract/add half of the resolution because we create a bed-like structure
+  data.frame(chrom=chrom.save, start=pos.save-hic$RES/2, end=pos.save+hic$RES/2, insulation=ins.vec)
 }

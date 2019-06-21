@@ -8,7 +8,7 @@ insulation.heatmap(insulationList, bed, focus = 1, sortWidth = 10,
   whatToPlot = "both", profileFunct = mean, flank = 5e+05,
   zlim = c(-1, 1), profileCols = NULL, profileZlim = NULL,
   heatmapCols = c("#f03b20", "#ffeda0", "white", "#31a354"),
-  rmNonVariateRows = T, verbose = F)
+  rmNonVariateRows = T, leftNorm = F, verbose = F)
 }
 \arguments{
 \item{insulationList}{A named list of results from genome.wide.insulation().}
@@ -35,6 +35,8 @@ insulation.heatmap(insulationList, bed, focus = 1, sortWidth = 10,
 \item{heatmapCols}{A vector of colors for the heatmap-gradient.}
 
 \item{rmNonVariateRows}{Ignore rows with an sd of 0.}
+
+\item{leftNorm}{Normalise data on median on most upstream bin.}
 
 \item{verbose}{Should this function be chatty?}
 }

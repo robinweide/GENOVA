@@ -17,6 +17,7 @@ To generate this file until 0.9.98, I have used [Github](https://github.com/robi
 - visualise.APA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
 - visualise.ATA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
 - genome.wide.insulation: added speudocounts
+- compartment.score: uses a more robust handing of comparable tracks.
 
 ## [0.9.98] - 27-02-2019
 Github-hash: 9951098

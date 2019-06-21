@@ -92,13 +92,12 @@ RCP <- function(experimentList, chromsToUse = NULL,  bedList = NULL, colors = NU
                   prob = numeric(),
                   sample = integer())
   dat <- NULL
+  bedCHROMS = as.character(unique(unlist(lapply(bedList, function(x) unique(x[,1])) ) ))
   for(Ci in 1:length(chromsToUse)){
     chrom <- unique(chromsToUse[Ci])
     # check if we have a bed and, if yes, entries on this chomosome
     if( !is.null(bedList) ) { # bed present
-      bedCHROMS = as.character(unique(unlist(lapply(bedList, function(x) unique(x[,1])) ) ))
       if( ! chrom %in% bedCHROMS   ){ # chrom not in bed
-
         next()
       }
     }

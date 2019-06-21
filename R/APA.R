@@ -133,32 +133,34 @@ APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   #####################
   # vapply over loops #
   #####################
-  
-  pos.list <- data.frame(x = x.pos, y = y.pos) %>% split(., seq(nrow(.))) 
-  
-  old_threads <- getDTthreads()
-  setDTthreads(1)
-  
+
+  pos.list <- data.frame(x = x.pos, y = y.pos)
+  pos.list <- split(pos.list, seq(nrow(pos.list)))
+
+  old_threads <- data.table::getDTthreads()
+  data.table::setDTthreads(1)
+
+
   rawMatArray <- vapply(pos.list, FUN.VALUE = matrix(NA_real_, nrow = size, ncol = size), FUN = function(pos){
-    
+
     sel.x <- (pos$x-size.offset):(pos$x+size.offset)
     sel.y <- (pos$y-size.offset):(pos$y+size.offset)
-    
+
     pos.all <- expand.grid(sel.x, sel.y)
-    
+
     hic.mat <- hicdata[.(pos.all)]
     #hic.mat <- hicdata[V1 %between% c(pos$x + c(-1,1)*size.offset)][V2 %between% c(pos$y + c(-1,1)*size.offset)]
-    
+
     hic.mat$V3[which(is.na(hic.mat$V3))] <- 0
-    
+
     hic.mat <- reshape2::acast(hic.mat, V1~V2, value.var="V3")
-    
+
     return(hic.mat)
-    
+
   })
-  
-  setDTthreads(old_threads)
-  
+
+  data.table::setDTthreads(old_threads)
+
   rawMatList <- lapply(seq(dim(rawMatArray)[3]), function(x) rawMatArray[ , , x])
 
   # Convert to 3D array

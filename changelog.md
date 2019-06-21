@@ -8,11 +8,15 @@ To generate this file until 0.9.98, I have used [Github](https://github.com/robi
 - HiCseg.callTAD: a function to call TADs with HiCseq (Levy-Leduc) per chromosome-arm or windowed chromosomes.
 - construct.experiment: added an option to get Z-score normalised experiment-objects.
 - hic.matrixplot: added an option to use Z-score normalised experiment-objects.
+- insulation.heatmap: added option to set leftlost bin to 0
 
 ### Changed
 - APA: sped up by using a vapply loop (@MarijneMia)
+- ATA: sped up by using a vapply loop
+- select.subset: sped up the pos-lookup
 - visualise.APA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
 - visualise.ATA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
+- genome.wide.insulation: added speudocounts
 
 ## [0.9.98] - 27-02-2019
 Github-hash: 9951098

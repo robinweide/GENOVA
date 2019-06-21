@@ -18,6 +18,7 @@
 #' @param profileCols Vector of line-colors for profiles
 #' @param profileZlim The profile-zlims c(min,max).
 #' @param heatmapCols A vector of colors for the heatmap-gradient.
+#' @param leftNorm Normalise data on median on most upstream bin.
 #' @param rmNonVariateRows Ignore rows with an sd of 0.
 #' @param verbose Should this function be chatty?
 #' @return A plot plus an (invisible) dataframe of the underlying matrix.
@@ -40,7 +41,7 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10,
                                                                    "#ffeda0",
                                                                    "white",
                                                                    "#31a354"),
-                               rmNonVariateRows = T, verbose = F ){
+                               rmNonVariateRows = T, leftNorm =F, verbose = F ){
 
   if(!whatToPlot %in% c('profile', 'heatmap', 'both')){
     stop('whatToPlot should be "profile", "heatmap" or "both".')
@@ -113,6 +114,10 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10,
   }
   df <- data.table::rbindlist(dfList)
   df$sample <- factor(df$sample, levels = sampleNames)
+
+  if(leftNorm){
+    df = normHM2left(df)
+  }
 
   # plot profiles
   groupedDF <- dplyr::group_by(df, sample, Var1)
@@ -239,7 +244,24 @@ insulation.heatmap <- function(insulationList, bed,  focus = 1, sortWidth = 10,
 
 }
 
+normHM2left = function(HM, profileFunct = mean){
 
+  tmp = lapply(split(HM, f = HM$sample), function(x){
+
+    x$value[is.na(x$value)] = 0
+    minvval = min(x$value[is.finite(x$value)])
+    x$value[x$value == -Inf] = minvval
+
+    left = profileFunct(unlist(x[x$Var1 ==1, 'value']))
+    x$norm = x$value - (left-0)
+    x$value = x$norm
+    x$norm = NULL
+
+    x
+
+  })
+  return(dplyr::bind_rows(tmp))
+}
 
 
 align.insulation.chrom <- function( ins.data, bed, flank = 10 ){

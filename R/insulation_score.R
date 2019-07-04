@@ -284,15 +284,15 @@ insulation.polygon <- function( ins.score, rotate=F ){
 #' @param diag.add Add values to diaginal
 #' @return A plot
 #' @examples
-#' # Get the insulation score with window-size 25 of a locus on chromosome 7.
-#' localInsulationScores = insulation.score(hic = Hap1_WT_10kb, window.size = 25, chrom = 'chr7', start = 25e6, end=30e6, local = T)
+#' # Get the insulation score with window-size 20 of a locus on chromosome 7.
+#' localInsulationScores = insulation.score(hic = Hap1_WT_10kb, window.size = 20, chrom = 'chr7', start = 25e6, end=30e6, local = T)
 #' @export
 insulation.score <- function( hic, window.size, chrom, start, end, diag.add = 0, local = T ){
 	if((end - start)/hic$RES > 1000 + 2*window.size){
 		stop("Please use a region that is smaller than 1000 times the resolution (+2 times the window size)")
 	}
-	if(window.size %% 2 == 0){
-		stop("Please use an odd window size")
+	if(window.size %% 2 != 0){
+		stop("Please use an even window size")
 	}
 	mat <- select.subset(hic, chrom, start, end)
 	ins.score <- matrix.insulation( mat, window.size )
@@ -354,6 +354,9 @@ chromosome.wide.insulation <- function( hic, window.size, chrom ){
 		start <- start - (window.size-1)*hic$RES
 		mat <- select.subset(hic, chrom, start, end)
 		ins.vec <- matrix.insulation( mat, window.size )
+
+		# select.sub takes centorid of bin, this sets it to the upstream end.
+		ins.vec[,1] = ins.vec[,1]- (hic$RES/2)
 		chrom.ins.vec <- rbind(chrom.ins.vec, ins.vec )
 	}
 	chrom.ins.vec
@@ -395,4 +398,5 @@ genome.wide.insulation <- function( hic, window.size, normalize.genome = F, verb
 	}
 	#note substract/add half of the resolution because we create a bed-like structure
 	data.frame(chrom=chrom.save, start=pos.save-hic$RES/2, end=pos.save+hic$RES/2, insulation=ins.vec)
+
 }

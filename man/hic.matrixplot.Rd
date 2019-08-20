@@ -9,8 +9,8 @@ hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   chip.color = "black", chip.yMax = NULL, type = rep("triangle", 4),
   guessType = T, coplot = "dual", genes = NULL, tads = NULL,
   tads.type = "lower", loops = NULL, loops.type = "lower",
-  tads.color = "#3288bd", loops.radius = NULL,
-  loops.color = "#3288bd", skipAnn = F, symmAnn = F,
+  tads.color = "#1faee3", loops.radius = NULL,
+  loops.color = "#1faee3", skipAnn = F, symmAnn = F,
   check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F)
 }
 \arguments{

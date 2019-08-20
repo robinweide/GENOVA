@@ -12,6 +12,20 @@ We have provided a quite lengthy [vignette](https://github.com/robinweide/GENOVA
 ---
 
 # Changelog
+All notable changes to this project will be documented in this file.
+To generate this file until 0.9.98, I have used [Github](https://github.com/robinweide/GENOVA/compare/8edef82..9951098). 
+
+## [0.9.995] - 20-3-2019
+
+### Added
+- HiCseg.callTAD: a function to call TADs with HiCseq (Levy-Leduc) per chromosome-arm or windowed chromosomes.
+- construct.experiment: added an option to get Z-score normalised experiment-objects.
+- hic.matrixplot: added an option to use Z-score normalised experiment-objects.
+
+### Changed
+- visualise.APA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
+- visualise.ATA.ggplot: better divergent colors (same as Z-score colors in hic.matrixplot)
+
 ## [0.9.98] - 27-02-2019
 Github-hash: 9951098
 
@@ -43,3 +57,15 @@ Github-hash: 9951098
 - visualise.compartmentStrength: at least one bin is used (bugfix). 
 - saddle: extra effort to use the CS is taken by matching the CS-vector and the eigen-vector. This will fix problems due to big centromeres or shaky/different centromere-calls.
 - vignette: fixed typo's
+
+## [0.9.971] - 13-06-2018
+Github-hash: 8edef82
+
+## [0.9.97] - 11-06-2018
+Github-hash: 35772ec
+
+## [0.9.96] - 22-05-2018
+Github-hash: 7deebca
+
+
+

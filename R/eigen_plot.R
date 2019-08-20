@@ -1,26 +1,3 @@
-#create an observed over expected matrix
-obs.exp.matrix <- function( mat, correct=F, outlier.correct = 0.995, lowess = F ){
-	pos <- which(mat$z > -1, arr.ind=T)
-	val <- mat$z[mat$z > -1]
-	d <- abs(pos[,1]-pos[,2])
-	if(correct){
-		norm.factor <- tapply(val, d, function(x) mean( x[x < quantile(x, outlier.correct)] ) )
-	}else{
-		norm.factor <- tapply(val, d, mean)
-	}
-	if(lowess){
-		x <- as.numeric(names(norm.factor)); y <- norm.factor
-		norm.lowess <- lowess(x, y, f = 0.01, iter=20)
-		norm.factor <- norm.lowess$y
-		names(norm.factor) <- norm.lowess$x
-	}
-
-	val <- val/norm.factor[as.character(d)]
-	obs.exp <- matrix(val, ncol = length(val)**0.5)
-	list(x=mat$x, y=mat$y, z=obs.exp)
-}
-
-
 #input is an observed over expected matrix
 get.eigen <- function( mat, with.eigen.value = T, outlier.correct = 0.995 ){
 	oe <- obs.exp.matrix( mat )

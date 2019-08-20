@@ -74,9 +74,6 @@ largest.stretch <- function( x ){
   x[which(temp == with(temp2, values[which.max(lengths)]))]
 }
 
-
-
-
 #' Get compartment-scores
 #'
 #' This uses the per-arm compartment-score algorithm of G. Fudenberg.
@@ -110,6 +107,10 @@ compartment.score <- function(exp, chromsToUse = NULL, empericalCentromeres = T,
     chromsToUse <- exp$CHRS
   }
 
+  if(!is.null(comparableTrack)){
+    comparableTrack = as.data.frame(comparableTrack)
+  }
+
   outList <- list()
   for(chrom in chromsToUse){
     if(verbose){message(chrom)}
@@ -125,6 +126,7 @@ compartment.score <- function(exp, chromsToUse = NULL, empericalCentromeres = T,
 
   return(outDF)
 }
+
 
 compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T, pEV = 1, qEV =1, comparableBed = NULL, comparableTrack = NULL, shuffle = F){
   centChrom = NULL
@@ -195,8 +197,12 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     }
 
     if(!is.null(comparableTrack)){
-      SMPLCOR <- tail(comparableTrack,length(compScore))
-      CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
+      tmpTrack = cbind(ss$x-(exp$RES/2), compScore)
+
+      compArm = comparableTrack[comparableTrack[,1] == chrom &
+                                  comparableTrack[,2] <= max(tmpTrack[,1]),]
+
+      CORTEST <- cor(compArm$compartmentScore,tmpTrack[,2], method = 'spearman')
       if(CORTEST < 0){
         if(abs(CORTEST) > 0.25){
           compScore <- compScore * -1
@@ -259,8 +265,12 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     }
 
     if(!is.null(comparableTrack)){
-      SMPLCOR <- tail(comparableTrack,length(compScore))
-      CORTEST <- cor(compScore,SMPLCOR, method = 'spearman')
+      tmpTrack = cbind(ss$x-(exp$RES/2), compScore)
+
+      compArm = comparableTrack[comparableTrack[,1] == chrom &
+                                  comparableTrack[,2] >= min(tmpTrack[,1]),]
+
+      CORTEST <- cor(compArm$compartmentScore,tmpTrack[,2], method = 'spearman')
       if(CORTEST < 0){
         if(abs(CORTEST) > 0.25){
           compScore <- compScore * -1
@@ -278,10 +288,10 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
   # return
   ###
   outDF <- data.frame(seqnames = C,
-             start = c(first_startLocVector,second_startLocVector),
-             end = c(first_startLocVector,second_startLocVector)+exp$RES,
-             compartmentScore = c(firstArm,secondArm),
-             name = exp$NAME)
+                      start = c(first_startLocVector,second_startLocVector),
+                      end = c(first_startLocVector,second_startLocVector)+exp$RES,
+                      compartmentScore = c(firstArm,secondArm),
+                      name = exp$NAME)
 
   return(outDF)
 }

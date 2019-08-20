@@ -28,6 +28,9 @@ select.subset <- function(exp, chrom, start, end){
   index <- cbind(r2.s$V2-start.i+1,r2.s$V1-start.i+1)
   sub.mat[index] <- r2.s$V3
   #take the middle of the window as the position int the genome
-  pos <- (exp$ABS[exp$ABS[,4]%in%(start.i:end.i),2]+exp$ABS[exp$ABS[,4]%in%(start.i:end.i),3])/2
+
+  pos = exp$ABS[exp$ABS$V4 %in% (start.i:end.i), 2:3]
+  pos <- base::rowSums(pos)/2
+
   list(x=pos, y=pos, z=sub.mat)
 }

@@ -27,7 +27,7 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
                                    no = outlierCutOff)
 
 	if(any(tad.bed[,2] > tad.bed[,3])){
-		warning("5' TAD border downstream then 3' TAD border for some entries")
+		stop("5' TAD border downstream then 3' TAD border for some entries")
 	}
   rawMatList = list()
 
@@ -44,31 +44,39 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
   tad <- tad.bed[, c(1, 2, 3)]
   tad.length <- length(tad[, 1])
   tad[,1] <- factor(tad[,1], levels=levels(bed[,1]))
+  outputTAD = tad
 
-  outputTAD = list()
-  for (i in 1:tad.length) {
-    tadSize <- tad[i, 3] - tad[i, 2]
-    if (tadSize < smallTreshold) {
-        next
-    }
-    outputTAD[[i]] = tad[i,]
-    if (verbose) {
-        cat(i, " of ", tad.length, " tads.", "\r")
-    }
-		#select TAD data from select.subset
-    halftadSize <- floor((tadSize/resolution)/2) * resolution
-		newMat <- select.subset( experiment, tad[i,1], tad[i,2] - halftadSize, tad[i,3] + halftadSize)
-
-    sel.resized <- resize.mat(newMat$z, c(100, 100))
-    rawMatList[[i]] <- sel.resized
-  }
-  outputTAD = as.data.frame(data.table::rbindlist(outputTAD))
-
-  # Convert to 3D array
-  rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
-  sm <- simplify2array(rawMatList)
 
   #####################
+  #       vapply      #
+  #####################
+  old_threads <- data.table::getDTthreads()
+  data.table::setDTthreads(1)
+
+  tad$size = as.numeric(abs(tad[,3]- tad[,2]))
+  tad$halftadSize <- round(tad$size/2)
+  tad$regionStart = tad[,2] - tad$halftadSize
+  tad$regionEnd = tad[,3] + tad$halftadSize
+
+
+  tad.list <- split(tad, seq(nrow(tad)))
+
+  rawMatList = vapply(tad.list, FUN.VALUE = matrix(NA_real_, nrow = 100, ncol = 100), FUN = function(x){
+
+    newMat <- select.subset(exp =  experiment,
+                            chrom = x[,1],
+                            start =  x[,6],
+                            end =  x[,7])
+    resize.mat(newMat$z, c(100, 100))
+
+  })
+
+  data.table::setDTthreads(old_threads)
+
+  # Convert to 3D arra
+  sm <- rawMatList #simplify2array(rawMatList)
+
+    #####################
   #  outlier correct  #
   #####################
   if(rmOutlier){

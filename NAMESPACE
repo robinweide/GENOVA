@@ -2,6 +2,7 @@
 
 export(APA)
 export(ATA)
+export(HiCseg.callTAD)
 export(PESCAn)
 export(RCP)
 export(centromere.telomere.analysis)
@@ -37,4 +38,5 @@ export(visualise.PESCAn.ggplot)
 export(visualise.RCP.ggplot)
 export(visualise.compartmentStrength)
 export(visualise.saddle)
+import(HiCseg)
 import(data.table)

@@ -4,17 +4,23 @@
 \alias{insulation.heatmap}
 \title{Plot insulation-heatmaps.}
 \usage{
-insulation.heatmap(insulationList, bed, focus = 1, sortWidth = 10,
-  whatToPlot = "both", profileFunct = mean, flank = 5e+05,
-  zlim = c(-1, 1), profileCols = NULL, profileZlim = NULL,
-  heatmapCols = c("#f03b20", "#ffeda0", "white", "#31a354"),
-  rmNonVariateRows = T, verbose = F)
+insulation.heatmap(insulationList, bed = NULL, borders = NULL,
+  focus = 1, sortWidth = 10, whatToPlot = "both",
+  profileFunct = mean, flank = 5e+05, zlim = c(-1, 1),
+  profileCols = NULL, profileZlim = NULL,
+  heatmapCols = rev(c("white", "white", "white", "red", "black")),
+  leftNorm = F, verbose = F)
 }
 \arguments{
 \item{insulationList}{A named list of results from genome.wide.insulation().}
 
 \item{bed}{A BED-df with TAD-calls. Only the first three columns
-(chrom, start & stop) are important.}
+(chrom, start & stop) are important. Will use unique borders.}
+
+\item{borders}{A df with borders-calls. Only the first three columns
+(chrom, start & stop) are important: the middle of the region will be used
+for the alignment. If given, this function will ignore the bed-agument. Will
+use all borders, regardless of uniqueness.}
 
 \item{focus}{Sort on which sample? (give the index-number of the list)}
 
@@ -34,7 +40,7 @@ insulation.heatmap(insulationList, bed, focus = 1, sortWidth = 10,
 
 \item{heatmapCols}{A vector of colors for the heatmap-gradient.}
 
-\item{rmNonVariateRows}{Ignore rows with an sd of 0.}
+\item{leftNorm}{Normalise data on median on most upstream bin.}
 
 \item{verbose}{Should this function be chatty?}
 }

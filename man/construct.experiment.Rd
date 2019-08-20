@@ -4,9 +4,9 @@
 \alias{construct.experiment}
 \title{Construct a HiC-experiment.}
 \usage{
-construct.experiment(signalPath, indicesPath, name, ignore.checks = F,
-  centromeres = NULL, color = 1, comments = NULL,
-  BPscaling = 1e+09)
+construct.experiment(signalPath, indicesPath, name, Znorm = F,
+  ignore.checks = F, centromeres = NULL, color = 1,
+  comments = NULL, BPscaling = 1e+09)
 }
 \arguments{
 \item{signalPath}{Full path to a HiC-pro-like matrix-file or .sig from juicerToGenova.py}
@@ -14,6 +14,8 @@ construct.experiment(signalPath, indicesPath, name, ignore.checks = F,
 \item{indicesPath}{Full path the HiC-pro-like index-file or .bed from juicerToGenova.py}
 
 \item{name}{The name of the sample.}
+
+\item{Znorm}{Normalise the matrices per-chromosome with a Z-score.}
 
 \item{ignore.checks}{Skip the checks for empty matrices: EXPERT-ONLY!}
 

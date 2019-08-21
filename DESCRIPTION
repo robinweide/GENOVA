@@ -21,3 +21,4 @@ Suggests: knitr,
     rmarkdown,
     bigwrig
 VignetteBuilder: knitr
+Remotes: git::https://github.com/rnabioco/RcppLibBigWig.git

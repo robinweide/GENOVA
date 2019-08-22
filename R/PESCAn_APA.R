@@ -26,7 +26,7 @@
 #'   elements contain the results of the APA per experiment.
 #' @export
 APA2 <- function(explist, bedpe,
-                 dist_thres = c(0, Inf),
+                 dist_thres = NULL,
                  size_bin = 21, size_bp = NULL,
                  outlier_filter = c(0, 1),
                  anchors = NULL, raw = TRUE
@@ -38,12 +38,16 @@ APA2 <- function(explist, bedpe,
   res <- explist[[1]]$RES
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
 
+  if (is.null(dist_thres)) {
+    dist_thres <- c((diff(range(rel_pos)) + 3) * res)
+  }
+
   # Calculate anchors
   if (is.null(anchors)) {
     anchors <- anchors_APA(
       explist[[1]]$ABS,
       explist[[1]]$RES,
-      bed,
+      bedpe,
       dist_thres
     )
   }
@@ -174,7 +178,8 @@ parse_rel_pos <- function(res, size_bin, size_bp) {
     rel_pos  <- floor(rel_pos - median(rel_pos))
   } else if (!is.null(size_bin)) {
 
-    rel_pos <- seq.int(-1 * size_bin, size_bin, by = 1)
+    rel_pos <- seq.int(size_bin)
+    rel_pos <- floor(rel_pos - median(rel_pos))
 
   } else {
     stop("Supply either 'size_bin' or 'size_bp'",

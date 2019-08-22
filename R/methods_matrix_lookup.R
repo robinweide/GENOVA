@@ -43,10 +43,10 @@ rep_mat_lookup <- function(
     # Calculate true values
     arr <- matrix_lookup(explist[[i]]$ICE, anchors, rel_pos)
     mat_mu <- summarize_lookup(arr, outlier_filter)
-    dimnames(mat_mu$mat) <- list(dnames, dnames)
+    dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
       dimnames(arr) <- list(paste0(anchors[, 1], ",", anchors[, 2]),
-                            dnames, dnames)
+                            rev(dnames), dnames)
       arr <- arr[mat_mu$keep, , ]
     } else {
       arr <- NULL
@@ -78,7 +78,7 @@ rep_mat_lookup <- function(
     }
 
     results <- list(
-      obsexp = mat_mu$mat / median(shifted_mu, na.rm = TRUE),
+      obsexp = obsexp,
       signal = mat_mu$mat,
       signal_raw = arr,
       shifted = shifted_mu,

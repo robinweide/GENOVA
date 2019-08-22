@@ -4,7 +4,7 @@
 \alias{cisTotal.perChrom}
 \title{cisTotal.perChrom}
 \usage{
-cisTotal.perChrom(exp, chromsToUse = NULL, ...)
+cisTotal.perChrom(exp, chromsToUse = NULL, plot = TRUE, ...)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample:

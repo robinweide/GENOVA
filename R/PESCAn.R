@@ -99,7 +99,7 @@ PESCAn_covert <- function( experiment, bed, minComparables = 10, rmOutlier = F,
 #'            y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
 #'            z = WT_PE_OUT)
 #' @export
-PESCAn = function(exp, bed, shift = 1e6, minComparables = 10, mindist = 5e+06, maxDist = Inf,
+PESCAn_old = function(exp, bed, shift = 1e6, minComparables = 10, mindist = 5e+06, maxDist = Inf,
                   size = 4e+05, rmOutlier = F, outlierCutOff = 0.995,
                   verbose = T){
 

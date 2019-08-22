@@ -36,7 +36,7 @@
 #' TRUE, otherwise set to FALSE}
 #' @import data.table
 #' @export
-APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
+APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
                 size = 21, verbose = F,  outlierCutOff = 0.995, ...){
 
   #########################

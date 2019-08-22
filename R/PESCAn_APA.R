@@ -25,7 +25,7 @@
 #' @return A \code{list} of the same length as \code{explist} wherein list
 #'   elements contain the results of the APA per experiment.
 #' @export
-APA2 <- function(explist, bedpe,
+APA <- function(explist, bedpe,
                  dist_thres = NULL,
                  size_bin = 21, size_bp = NULL,
                  outlier_filter = c(0, 1),
@@ -92,7 +92,7 @@ APA2 <- function(explist, bedpe,
 #' pescan <- PESCAn2(explist = list(WT_40kb),
 #'                   anchors = anchors,
 #'                   shift = 0)
-PESCAn2 <- function(explist, bed, shift = 1e6L,
+PESCAn <- function(explist, bed, shift = 1e6L,
                     dist_thres = c(5e6L, Inf),
                     size_bin = NULL, size_bp = 4e5,
                     outlier_filter = c(0, 1),

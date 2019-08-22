@@ -16,17 +16,21 @@ visualise.APA.ggplot(APAlist, title = "APA", zTop = NULL,
 
 \item{zBottom}{The min and max values for the first row of plots.}
 
-\item{focus}{Which sample will be the to-compare sample in the differential row?}
+\item{focus}{Which sample will be the to-compare sample in the differential
+row?}
 }
 \value{
 A grid object, containing two ggplot-objects.
 }
 \description{
-Plot the APA-results and the differential results.
+Plot the APA-results and the differential results. Works for
+\code{\link[GENOVA]{APA_old}} results.
 }
 \details{
-By substracting the values from each sample with the values from the \code{focus}-sample, we generate the differentials.
-A positive value in the differential plots thus means an enrichment in that sample versus the \code{focus}-sample.
+By substracting the values from each sample with the values from the
+\code{focus}-sample, we generate the differentials. A positive value in the
+differential plots thus means an enrichment in that sample versus the
+\code{focus}-sample.
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

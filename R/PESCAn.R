@@ -65,6 +65,8 @@ PESCAn_covert <- function( experiment, bed, minComparables = 10, rmOutlier = F,
 
 #' PE-SCAn
 #'
+#' There is a newer version of the \code{\link[GENOVA]{PESCAn}}.
+#'
 #' From a ChIP-peaks.BED dataframe, calculate the all-vs-all Hi-C contacts.
 #'
 #' @author Elzo de Wit, \email{e.d.wit@nki.nl}
@@ -134,14 +136,18 @@ PESCAn_old = function(exp, bed, shift = 1e6, minComparables = 10, mindist = 5e+0
 
 #' visualise.PESCAn.ggplot
 #'
-#' Plot the PE-SCAn-results and differentials.
+#' Plot the PE-SCAn-results and differentials. Works with
+#' \code{\link[GENOVA]{PESCAn_old}}.
 #'
 #' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
-#' @param PESCAnlist A list of results from PESCAn. Should have the same [shift].
+#' @param PESCAnlist A list of results from PESCAn. Should have the same
+#'   [shift].
 #' @param title Text to plot
 #' @param Focus Which sample does need to be the to-compare sample?
-#' @param zTop The min and max values for the first (observed or OE) row of plots.
-#' @param zBottom The min and max values for the bottom (differential) row of plots.
+#' @param zTop The min and max values for the first (observed or OE) row of
+#'   plots.
+#' @param zBottom The min and max values for the bottom (differential) row of
+#'   plots.
 #' @return A grid object, containing two ggplot-objects.
 #' @examples
 #' # Run PE-SCAn on a bed of super-enhancers,

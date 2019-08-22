@@ -16,9 +16,13 @@
 #' @param raw A \code{logical} of length 1: should a bare mimimum plot be
 #'   returned?
 #'
-#' @details The \code{raw = TRUE} argument allows customisation of the plot: it
-#'   returns a plot object with no position or fill scales and no theme
-#'   settings.
+#' @details Difference (\u0394) panels are created by subtracting the values of each
+#'   sample by the values of the sample indicated by the \code{subtract}
+#'   argument. Hence, a clear positive signal in the difference panels indicates
+#'   enrichment in that sample versus the \code{subtract}-sample.
+#'
+#'   The \code{raw = TRUE} argument allows customisation of the plot: it returns
+#'   a plot object with no position or fill scales and no theme settings.
 #'
 #'   When \code{raw = TRUE} and \code{subtract} is not \code{NULL}, the plot
 #'   will not render unless a continuous fill scale is supplied with the

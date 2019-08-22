@@ -12,8 +12,8 @@ anchors_APA(ABS, RES, bedpe, dist_thres = c(0, Inf), mode = c("both",
 
 \item{RES}{The resolution slot of a GENOVA experiment.}
 
-\item{bedpe}{A \code{data.frame} with 6 columns in BEDPE format containing the
-regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
+\item{bedpe}{A \code{data.frame} with 6 columns in BEDPE format containing
+the regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints.}

@@ -1,5 +1,7 @@
 #' Aggegrate Peak Analysis
 #'
+#' There is newer version of the \code{\link[GENOVA]{APA}}.
+#'
 #' Get a z-stack matrix of 2D-regions (e.g. loops).
 #' The function extracts matrices around a defined set of pixels, like possible
 #' loops.

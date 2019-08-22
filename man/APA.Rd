@@ -5,14 +5,14 @@
 \title{Aggregrate Peak Analysis}
 \usage{
 APA(explist, bedpe, dist_thres = NULL, size_bin = 21, size_bp = NULL,
-  outlier_filter = c(0, 1), anchors = NULL, raw = TRUE)
+  outlier_filter = c(0, 0.995), anchors = NULL, raw = TRUE)
 }
 \arguments{
 \item{explist}{Either a single GENOVA experiment or a list of GENOVA
 experiments.}
 
-\item{bedpe}{A \code{data.frame} with 6 columns in BEDPE format containing the
-regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
+\item{bedpe}{A \code{data.frame} with 6 columns in BEDPE format containing
+the regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints.}
@@ -32,13 +32,30 @@ performs no outlier correction.}
 pre-computed anchor indices. If this is set, skips calculation of anchor
 indices and uses these instead.}
 
-\item{raw}{A \code{logical} of length 1: should the raw array underlying
-the summary matrices be returned in the output?}
+\item{raw}{A \code{logical} of length 1: should the raw array underlying the
+summary matrices be returned in the output?}
 }
 \value{
 A \code{list} of the same length as \code{explist} wherein list
   elements contain the results of the APA per experiment.
 }
 \description{
-Aggregrate Peak Analysis
+Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
+regions, for example loops.
+}
+\examples{
+# Typical usage: APA for loops
+apa <- APA(list(WT = WT_10kb, KO = KO_10kb), bedpe = WT_loops)
+
+# Alternative usage with pre-calculated anchors
+anchors <- anchors_APA(WT_10kb$ABS, WT_10kb$RES,
+                       bedpe = WT_loops)
+apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
+
+# Visualising results
+autoplot(apa)
+}
+\seealso{
+\code{\link[GENOVA]{APA_visualisation}} for visualising
+  results.
 }

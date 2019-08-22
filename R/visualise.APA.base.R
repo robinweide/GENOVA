@@ -1,19 +1,22 @@
 #' visualise.APA.ggplot
 #'
-#' Plot the APA-results and the differential results.
+#' Plot the APA-results and the differential results. Works for
+#' \code{\link[GENOVA]{APA_old}}.
 #'
 #' @author Elzo de Wit, \email{e.d.wit@nki.nl}
 #' @param APAlist A list of results from the APA-function.
 #' @param title Title-text to plot.
-#' @param focus Which sample will be the to-compare sample in the differential row?
+#' @param focus Which sample will be the to-compare sample in the differential
+#'   row?
 #' @param color.fun1 Optional color function for the first row
 #' @param color.fun2 Optional color function for the second row
 #' @param abs.max Optional Z-max of the first row
 #' @param rel.max Optional Z-max of the second row
 #' @return A plot
-#' @details
-#' By substracting the values from each sample with the values from the \code{focus}-sample, we generate the differentials.
-#' A positive value in the differential plots thus means an enrichment in that sample versus the \code{focus}-sample.
+#' @details By substracting the values from each sample with the values from the
+#' \code{focus}-sample, we generate the differentials. A positive value in the
+#' differential plots thus means an enrichment in that sample versus the
+#' \code{focus}-sample.
 #' @export
 visualise.APA.base <- function( APAlist, title, focus = 1, color.fun1=NULL, color.fun2=NULL, abs.max=NULL, rel.max=NULL, ...){
 	#set the margins and store the old settings

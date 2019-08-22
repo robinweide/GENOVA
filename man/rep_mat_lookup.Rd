@@ -27,8 +27,8 @@ indicating quantiles of data to be used as thresholds. Data outside these
 thresholds are set to the nearest threshold. Setting this to \code{c(0, 1)}
 performs no outlier correction.}
 
-\item{raw}{A \code{logical} of length 1: should the raw array underlying
-the summary matrices be returned in the output?}
+\item{raw}{A \code{logical} of length 1: should the raw array underlying the
+summary matrices be returned in the output?}
 }
 \value{
 A \code{list} of the same length as \code{explist} wherein list

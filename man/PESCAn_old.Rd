@@ -33,6 +33,9 @@ An list with a O/E score-matrix (if shift != 0), otherwise an observed
 score-matrix, the underlying signal and background-matrices and the shift used.
 }
 \description{
+There is a newer version of the \code{\link[GENOVA]{PESCAn}}.
+}
+\details{
 From a ChIP-peaks.BED dataframe, calculate the all-vs-all Hi-C contacts.
 }
 \examples{

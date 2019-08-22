@@ -5,7 +5,7 @@
 #' Takes all pairwise interactions of locations on the genome and maps these to
 #' indices of the Hi-C matrix.
 #'
-#' @inheritParams PESCAn2
+#' @inheritParams PESCAn
 #' @param ABS The indices slot of a GENOVA experiment.
 #' @param RES The resolution slot of a GENOVA experiment.
 #' @param mode A \code{character} vector of length 1 indicating which
@@ -21,7 +21,7 @@
 #'   reported. \code{"cis"} returns pairwise interactions within a chromosome;
 #'   \code{"trans"} gives these between chromosomes and \code{"bot"}.
 #'
-#' @seealso \code{\link[GENOVA]{PESCAn2}} for context.
+#' @seealso \code{\link[GENOVA]{PESCAn}} for context.
 #'
 #'   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
 #'   \code{data.frame}s to Hi-C indices.
@@ -88,7 +88,7 @@ anchors_PESCAn <- function(ABS, RES, bed,
 #'
 #' Transforms a BEDPE formatted \code{data.frame} to indices of the Hi-C matrix.
 #'
-#' @inheritParams APA2
+#' @inheritParams APA
 #' @inheritParams anchors_PESCAn
 #'
 #' @return A \code{matrix} with two columns.
@@ -100,7 +100,7 @@ anchors_PESCAn <- function(ABS, RES, bed,
 #'   reported. \code{"cis"} returns entries within chromosomes;
 #'   \code{"trans"} gives these between chromosomes and \code{"bot"}.
 #'
-#' @seealso \code{\link[GENOVA]{APA2}} for context.
+#' @seealso \code{\link[GENOVA]{APA}} for context.
 #'
 #'   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
 #'   \code{data.frame}s to Hi-C indices.
@@ -173,7 +173,7 @@ anchors_APA <- function(ABS, RES, bedpe,
 #'   An index is considered out of bounds when that index plus the shift size
 #'   and maximum relative position would belong to a different chromosome.
 #'
-#' @seealso \code{\link[GENOVA]{PESCAn2}} for context.
+#' @seealso \code{\link[GENOVA]{PESCAn}} for context.
 #'
 #'   \code{\link[GENOVA]{anchors_filter_oob}} for general out of bounds
 #'   filtering of anchors.

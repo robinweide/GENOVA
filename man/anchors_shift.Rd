@@ -33,7 +33,7 @@ The resulting matrix contains indices to the Hi-C matrix slot in the
   and maximum relative position would belong to a different chromosome.
 }
 \seealso{
-\code{\link[GENOVA]{PESCAn2}} for context.
+\code{\link[GENOVA]{PESCAn}} for context.
 
   \code{\link[GENOVA]{anchors_filter_oob}} for general out of bounds
   filtering of anchors.

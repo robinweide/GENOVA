@@ -7,7 +7,7 @@
 #' This function acts as a common method for the lookup and summary of such
 #' repeated lookups for these analyses.
 #'
-#' @inheritParams PESCAn2
+#' @inheritParams PESCAn
 #' @param anchors A \code{matrix} with two columns containing pre-computed
 #'   anchor indices.
 #' @param rel_pos An \code{integer} vector indicating relative positions in
@@ -17,7 +17,7 @@
 #'   elements contain the results of the repeated lookup per experiment.
 #' @export
 #'
-#' @seealso \code{\link[GENOVA]{APA2}} and \code{\link[GENOVA]{PESCAn2}}
+#' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
 rep_mat_lookup <- function(
   explist, anchors, rel_pos, shift = 0, outlier_filter = c(0, 1), raw = FALSE
 ) {
@@ -142,7 +142,7 @@ matrix_lookup <- function(ICE, anchors, rel_pos) {
 #' \code{0} and then takes the mean along the first dimension of a
 #' threedimensional array.
 #'
-#' @inheritParams APA2
+#' @inheritParams APA
 #' @param array A threedimensional \code{array}.
 #' @param keep A \code{logical} vector of length \code{dim(array)[1]} indicated
 #'   which slices to keep. If \code{NULL}, independently filters out

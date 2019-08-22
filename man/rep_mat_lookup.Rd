@@ -41,5 +41,5 @@ This function acts as a common method for the lookup and summary of such
 repeated lookups for these analyses.
 }
 \seealso{
-\code{\link[GENOVA]{APA2}} and \code{\link[GENOVA]{PESCAn2}}
+\code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
 }

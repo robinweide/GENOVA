@@ -41,7 +41,7 @@ The resulting matrix contains ordered indices to the Hi-C matrix
   \code{"trans"} gives these between chromosomes and \code{"bot"}.
 }
 \seealso{
-\code{\link[GENOVA]{PESCAn2}} for context.
+\code{\link[GENOVA]{PESCAn}} for context.
 
   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
   \code{data.frame}s to Hi-C indices.

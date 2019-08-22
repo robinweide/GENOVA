@@ -1,6 +1,6 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
-#' @inheritParams PESCAn2
+#' @inheritParams PESCAn
 #' @param mode A \code{character} of length 1 indicating what position of the
 #'   \code{bed} argument to match with the indices. Possible values:
 #'   \code{"center"}, \code{"start"} or \code{"end"}.

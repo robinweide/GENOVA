@@ -28,7 +28,7 @@
 APA <- function(explist, bedpe,
                  dist_thres = NULL,
                  size_bin = 21, size_bp = NULL,
-                 outlier_filter = c(0, 1),
+                 outlier_filter = c(0, 0.995),
                  anchors = NULL, raw = TRUE
 ) {
   # Verify experiment compatability
@@ -63,7 +63,7 @@ APA <- function(explist, bedpe,
 #'
 #' Performs an all-to-all Hi-C contact analysis for specified regions.
 #'
-#' @inheritParams APA2
+#' @inheritParams APA
 #' @param bed A \code{data.frame} with 3 columns in BED format, containing the
 #'   regions to anchor in pairwise manner.
 #' @param shift An \code{integer} of length 1 indicating how many basepairs the
@@ -81,7 +81,7 @@ APA <- function(explist, bedpe,
 #' @examples
 #' # Typical usage: PESCAn for super enhancers using a 1 MB
 #' # circular permutation on a pair of experiments.
-#' pescan <- PESCAn2(explist = list(WT_40kb, KO_40kb),
+#' pescan <- PESCAn(explist = list(WT_40kb, KO_40kb),
 #'                   bed = super_enhancers,
 #'                   shift = 1e6)
 #'
@@ -89,7 +89,7 @@ APA <- function(explist, bedpe,
 #' anchors <- anchors_PESCAn(WT_40kb$ABS, WT_40kb$RES,
 #'                           genes_tss,
 #'                           dist_thres = c(5e6, 15e6))
-#' pescan <- PESCAn2(explist = list(WT_40kb),
+#' pescan <- PESCAn(explist = list(WT_40kb),
 #'                   anchors = anchors,
 #'                   shift = 0)
 PESCAn <- function(explist, bed, shift = 1e6L,
@@ -128,7 +128,7 @@ PESCAn <- function(explist, bed, shift = 1e6L,
 #'
 #' Checks if the indices (ABS slot) across experiments are identical.
 #'
-#' @inheritParams APA2
+#' @inheritParams APA
 #'
 #' @return A \code{list} of GENOVA experiment(s).
 #'
@@ -166,7 +166,7 @@ check_compat_exp <- function(explist) {
 #' Parse size and resolution to relative positions
 #'
 #' @param res The RES slot of a GENOVA Hi-C experiment.
-#' @inheritParams APA2
+#' @inheritParams APA
 #'
 #' @return A \code{integer} vector of relative positions.
 #' @keywords internal

@@ -41,8 +41,8 @@ number of pairwise interactions on a chromosome to consider.}
 pre-computed anchor indices. If this is set, skips calculation of anchor
 indices and uses these instead.}
 
-\item{raw}{A \code{logical} of length 1: should the raw array underlying
-the summary matrices be returned in the output?}
+\item{raw}{A \code{logical} of length 1: should the raw array underlying the
+summary matrices be returned in the output?}
 }
 \value{
 A \code{list} of the same length as \code{explist} wherein list
@@ -65,4 +65,11 @@ anchors <- anchors_PESCAn(WT_40kb$ABS, WT_40kb$RES,
 pescan <- PESCAn(explist = list(WT_40kb),
                   anchors = anchors,
                   shift = 0)
+
+# Visualising PE-SCAns
+autoplot(pescan)
+}
+\seealso{
+\code{\link[GENOVA]{PESCAn_visualisation}} for visualising
+  results.
 }

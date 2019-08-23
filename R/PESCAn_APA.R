@@ -2,10 +2,13 @@
 
 #' Aggregrate Peak Analysis
 #'
+#' Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
+#' regions, for example loops.
+#'
 #' @param explist Either a single GENOVA experiment or a list of GENOVA
 #'   experiments.
-#' @param bedpe A \code{data.frame} with 6 columns in BEDPE format containing the
-#'   regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.
+#' @param bedpe A \code{data.frame} with 6 columns in BEDPE format containing
+#'   the regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.
 #' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
 #'   and maximum distances in basepairs between anchorpoints.
 #' @param size_bin The size of the lookup regions in bins (i.e. a score of 21
@@ -19,12 +22,28 @@
 #' @param anchors (Optional) A \code{matrix} with two columns containing
 #'   pre-computed anchor indices. If this is set, skips calculation of anchor
 #'   indices and uses these instead.
-#' @param raw A \code{logical} of length 1: should the raw array underlying
-#'   the summary matrices be returned in the output?
+#' @param raw A \code{logical} of length 1: should the raw array underlying the
+#'   summary matrices be returned in the output?
 #'
 #' @return A \code{list} of the same length as \code{explist} wherein list
 #'   elements contain the results of the APA per experiment.
+#'
+#' @seealso \code{\link[GENOVA]{APA_visualisation}} for visualising
+#'   results.
+#'
 #' @export
+#'
+#' @examples
+#' # Typical usage: APA for loops
+#' apa <- APA(list(WT = WT_10kb, KO = KO_10kb), bedpe = WT_loops)
+#'
+#' # Alternative usage with pre-calculated anchors
+#' anchors <- anchors_APA(WT_10kb$ABS, WT_10kb$RES,
+#'                        bedpe = WT_loops)
+#' apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
+#'
+#' # Visualising results
+#' autoplot(apa)
 APA <- function(explist, bedpe,
                  dist_thres = NULL,
                  size_bin = 21, size_bp = NULL,
@@ -78,6 +97,9 @@ APA <- function(explist, bedpe,
 #'
 #' @export
 #'
+#' @seealso \code{\link[GENOVA]{PESCAn_visualisation}} for visualising
+#'   results.
+#'
 #' @examples
 #' # Typical usage: PESCAn for super enhancers using a 1 MB
 #' # circular permutation on a pair of experiments.
@@ -92,6 +114,9 @@ APA <- function(explist, bedpe,
 #' pescan <- PESCAn(explist = list(WT_40kb),
 #'                   anchors = anchors,
 #'                   shift = 0)
+#'
+#' # Visualising PE-SCAns
+#' autoplot(pescan)
 PESCAn <- function(explist, bed, shift = 1e6L,
                     dist_thres = c(5e6L, Inf),
                     size_bin = NULL, size_bp = 4e5,

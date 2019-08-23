@@ -44,6 +44,9 @@ percentile per pixel and set values bigger than that to this value.}
 TRUE, otherwise set to FALSE}
 }
 \description{
+There is newer version of the \code{\link[GENOVA]{APA}}.
+}
+\details{
 Get a z-stack matrix of 2D-regions (e.g. loops).
 The function extracts matrices around a defined set of pixels, like possible
 loops.

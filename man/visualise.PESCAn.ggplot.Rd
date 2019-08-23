@@ -8,13 +8,16 @@ visualise.PESCAn.ggplot(PESCAnlist, resolution, title = "PE-SCAn",
   zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...)
 }
 \arguments{
-\item{PESCAnlist}{A list of results from PESCAn. Should have the same [shift].}
+\item{PESCAnlist}{A list of results from PESCAn. Should have the same
+[shift].}
 
 \item{title}{Text to plot}
 
-\item{zTop}{The min and max values for the first (observed or OE) row of plots.}
+\item{zTop}{The min and max values for the first (observed or OE) row of
+plots.}
 
-\item{zBottom}{The min and max values for the bottom (differential) row of plots.}
+\item{zBottom}{The min and max values for the bottom (differential) row of
+plots.}
 
 \item{Focus}{Which sample does need to be the to-compare sample?}
 }
@@ -22,7 +25,8 @@ visualise.PESCAn.ggplot(PESCAnlist, resolution, title = "PE-SCAn",
 A grid object, containing two ggplot-objects.
 }
 \description{
-Plot the PE-SCAn-results and differentials.
+Plot the PE-SCAn-results and differentials. Works with
+\code{\link[GENOVA]{PESCAn_old}}.
 }
 \examples{
 # Run PE-SCAn on a bed of super-enhancers,

@@ -324,7 +324,7 @@ coreRCP = function(m.chrom, resolu, breaks, outlierCutoff, bedi = NULL){
   rcpsem[is.na(rcpsem)] <- 0
   ###
   m.sum <- sum(m.chrom$V3)
-  dat <- dplyr::data_frame(breaks[as.numeric(names(rcp))],
+  dat <- dplyr::tibble(breaks[as.numeric(names(rcp))],
                            rcp/m.sum,rcpsem/m.sum)
   colnames(dat) <- c("distance", "prob", "SEM")
   return(dat)

@@ -23,7 +23,7 @@
 #' plot( cisChrom_out$perChrom, las=2 )
 #' abline( h = cisChrom_out$genomeWide, col = 'red' )
 #' @export
-cisTotal.perChrom <- function(exp , chromsToUse = NULL, ...){
+cisTotal.perChrom <- function(exp , chromsToUse = NULL, plot = TRUE, ...){
   if(is.null(chromsToUse)){
     chromsToUse = exp$CHRS
   }
@@ -74,7 +74,8 @@ cisTotal.perChrom <- function(exp , chromsToUse = NULL, ...){
   GW = 100*(cisSum/total)
 
 
-  # plot!
+# plot!
+if (plot) {
   df =  data.frame(chromosomes = names(cis),
                    `percentage cis` = as.numeric(cis)*100)
   df$chromosomes = factor(df$chromosomes, levels = exp$CHRS)
@@ -84,16 +85,17 @@ cisTotal.perChrom <- function(exp , chromsToUse = NULL, ...){
                     pch = 20,
                     plot = F)
   boxplot(df[,2],ylim = c(0,100), ylab = 'Percentage Cis', pch = 20)
-
+  
   abline(h = GW, col = 'red', lty = 3)
   text(.5,GW, labels = round(GW,2) , adj = c(0,-.5), col = 'red')
-
+  
   if(length(df[which(df[,2] %in% bxpdat$out),1]) > 0){
     text(bxpdat$group,
          bxpdat$out,
          df[which(df[,2] %in% bxpdat$out),1],
          pos = c(2,4)[rep(c(1,2), length(names(cis)))[order(bxpdat$out)]])
   }
+}
 
   invisible(list(perChrom = df, genomeWide = GW))
 

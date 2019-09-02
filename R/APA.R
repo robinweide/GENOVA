@@ -1,5 +1,7 @@
 #' Aggegrate Peak Analysis
 #'
+#' There is newer version of the \code{\link[GENOVA]{APA}}.
+#'
 #' Get a z-stack matrix of 2D-regions (e.g. loops).
 #' The function extracts matrices around a defined set of pixels, like possible
 #' loops.
@@ -36,7 +38,7 @@
 #' TRUE, otherwise set to FALSE}
 #' @import data.table
 #' @export
-APA <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
+APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
                 size = 21, verbose = F,  outlierCutOff = 0.995, ...){
 
   #########################

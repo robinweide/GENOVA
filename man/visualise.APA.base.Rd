@@ -12,7 +12,8 @@ visualise.APA.base(APAlist, title, focus = 1, color.fun1 = NULL,
 
 \item{title}{Title-text to plot.}
 
-\item{focus}{Which sample will be the to-compare sample in the differential row?}
+\item{focus}{Which sample will be the to-compare sample in the differential
+row?}
 
 \item{color.fun1}{Optional color function for the first row}
 
@@ -26,11 +27,14 @@ visualise.APA.base(APAlist, title, focus = 1, color.fun1 = NULL,
 A plot
 }
 \description{
-Plot the APA-results and the differential results.
+Plot the APA-results and the differential results. Works for
+\code{\link[GENOVA]{APA_old}}.
 }
 \details{
-By substracting the values from each sample with the values from the \code{focus}-sample, we generate the differentials.
-A positive value in the differential plots thus means an enrichment in that sample versus the \code{focus}-sample.
+By substracting the values from each sample with the values from the
+\code{focus}-sample, we generate the differentials. A positive value in the
+differential plots thus means an enrichment in that sample versus the
+\code{focus}-sample.
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

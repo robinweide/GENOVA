@@ -17,6 +17,7 @@
 #' @param sortWidth Percentage of columns to sort on (aligned on center)
 #' @param whatToPlot Do you want to plot a profile, heatmap or both?
 #' @param profileFunct Function to make profile-plots (mean, median, sum)
+#' @param title Title for plot
 #' @param flank Amount of flanking bp.
 #' @param zlim The heatmap-zlims c(min,max).
 #' @param profileCols Vector of line-colors for profiles
@@ -38,7 +39,7 @@
 #'                             zlim = c(-.5,0.25), profileZlim = c(-.75,-.1))
 #' @export
 insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus = 1, sortWidth = 10,
-                               whatToPlot = 'both',  profileFunct = mean,
+                               whatToPlot = 'both',  profileFunct = mean, title = NULL,
                                flank=500e3, zlim = c(-1,1), profileCols = NULL,
                                profileZlim = NULL, heatmapCols = rev(c('white',
                                                                        'white',
@@ -201,14 +202,14 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
       ggplot2::scale_x_continuous(expand=c(0,0),
                                   breaks = tickPoss,
                                   labels = tickLabs) +
-      geom_line(data = profDF, mapping = aes(x = variable, y = val, col = sample), inherit.aes = F) +
-      geom_blank(data    = data.frame(dummy = 'profile', x = 1, y = profileZlim),
-                 mapping = aes(x = x, y = y),
+      ggplot2::geom_line(data = profDF, mapping = ggplot2::aes(x = variable, y = val, col = sample), inherit.aes = F) +
+      ggplot2::geom_blank(data    = data.frame(dummy = 'profile', x = 1, y = profileZlim),
+                 mapping = ggplot2::aes(x = x, y = y),
                  inherit.aes = F)+
-      geom_blank(data    = data.frame(dummy = 'heatmap', x = 1, y = zlim),
-                 mapping = aes(x = x, y = y),
+      ggplot2::geom_blank(data    = data.frame(dummy = 'heatmap', x = 1, y = zlim),
+                 mapping = ggplot2::aes(x = x, y = y),
                  inherit.aes = F) +
-      coord_cartesian(expand = F) +
+      ggplot2::coord_cartesian(expand = F) +
       GENOVA:::GENOVA_THEME() +
       ggplot2::labs( x = '', y = '') +
       ggplot2::guides(col = F, fill = F) +
@@ -216,13 +217,27 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
       ggplot2::scale_fill_gradientn(colours = heatmapCols)+
       ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
                      axis.title.x     = ggplot2::element_blank(),
-                     strip.text.y = element_blank())
+                     strip.text.y = ggplot2::element_blank())
+
+    if(!is.null(title)){
+      BOT = BOT + ggplot2::ggtitle(label = title)
+    }
     plot(BOT)
     invisible(outDF)
   } else if(whatToPlot == 'heatmap'){
+
+    if(!is.null(title)){
+      HTMPS = HTMPS + ggplot2::ggtitle(label = title)
+    }
+
     plot(HTMPS)
     invisible(outDF)
   } else {
+
+    if(!is.null(title)){
+      PRFLS = PRFLS + ggplot2::ggtitle(label = title)
+    }
+
     plot(PRFLS)
     invisible(outDF)
   }

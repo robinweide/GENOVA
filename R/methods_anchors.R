@@ -34,13 +34,13 @@ anchors_PESCAn <- function(ABS, RES, bed,
 
   # Match and clean indices
   newbed <- cbind(bed, idx = bed2idx(ABS, bed, mode = "centre"))
-  newbed <- newbed[!is.na(newbed$idx),]
-  newbed <- newbed[order(newbed$idx),]
+  newbed <- newbed[!is.na(newbed$idx), ]
+  newbed <- newbed[order(newbed$idx), ]
 
   if (mode == "cis") {
 
     # Generate cis combinations
-    idx <- split(newbed$idx, newbed[,1])
+    idx <- split(newbed$idx, newbed[, 1])
     idx <- idx[lengths(idx) >= max(min_compare, 2)]
     if (length(idx) == 0) {
       stop("Too few comparable positions per chromosome.", call. = FALSE)
@@ -48,7 +48,6 @@ anchors_PESCAn <- function(ABS, RES, bed,
     idx <- lapply(idx, function(x) t(combn(x, 2)))
     idx <- do.call(rbind, idx)
     is_cis <- TRUE
-
   } else {
 
     # Generate all combinations
@@ -60,7 +59,7 @@ anchors_PESCAn <- function(ABS, RES, bed,
     if (mode == "trans") {
 
       # Exclude cis when trans
-      idx <- idx[!is_cis,]
+      idx <- idx[!is_cis, ]
       is_cis <- FALSE
     }
   }
@@ -72,13 +71,13 @@ anchors_PESCAn <- function(ABS, RES, bed,
     dist_thres <- sort(dist_thres)
 
     # Exclude cis combinations based on min/max_dist
-    cis  <- idx[is_cis, ]
+    cis <- idx[is_cis, ]
     dist <- abs(cis[, 1] - cis[, 2])
-    cis  <- cis[dist >= dist_thres[1] & dist <= dist_thres[2], ]
+    cis <- cis[dist >= dist_thres[1] & dist <= dist_thres[2], ]
 
     # Recombine and order
-    idx  <- rbind(idx[!is_cis, ], cis)
-    idx  <- idx[order(idx[, 1], idx[, 2]),]
+    idx <- rbind(idx[!is_cis, ], cis)
+    idx <- idx[order(idx[, 1], idx[, 2]), ]
   }
 
   idx
@@ -112,16 +111,19 @@ anchors_APA <- function(ABS, RES, bedpe,
 
   # Convert bedpe to idx matrix
   newbed <- cbind(bedpe[, 1:6],
-                  idx1 = bed2idx(ABS, bedpe[, 1:3], mode = "centre"),
-                  idx2 = bed2idx(ABS, bedpe[, 4:6], mode = "centre"))
+    idx1 = bed2idx(ABS, bedpe[, 1:3], mode = "centre"),
+    idx2 = bed2idx(ABS, bedpe[, 4:6], mode = "centre")
+  )
   newbed <- na.exclude(newbed)
   newbed <- newbed[!duplicated(newbed[, 7:8]), ]
 
   # Shortcut when no additional filtering is needed
   if (identical(dist_thres, c(0, Inf)) && mode == "both") {
     # Ordering
-    idx <- cbind(pmin(newbed$idx1, newbed$idx2),
-                 pmax(newbed$idx1, newbed$idx2))
+    idx <- cbind(
+      pmin(newbed$idx1, newbed$idx2),
+      pmax(newbed$idx1, newbed$idx2)
+    )
     idx <- idx[order(idx[, 1]), ]
     return(idx)
   }
@@ -136,9 +138,9 @@ anchors_APA <- function(ABS, RES, bedpe,
     dist_thres <- sort(dist_thres)
 
     # Filter cis on distances
-    cis  <- newbed[newbed$is_cis, ]
+    cis <- newbed[newbed$is_cis, ]
     dist <- abs(cis$idx1 - cis$idx2)
-    cis  <- cis[dist >= dist_thres[1] & dist <= dist_thres[2], ]
+    cis <- cis[dist >= dist_thres[1] & dist <= dist_thres[2], ]
     if (mode == "cis") {
       newbed <- cis
     } else {
@@ -147,8 +149,10 @@ anchors_APA <- function(ABS, RES, bedpe,
   }
 
   # Ordering
-  idx <- cbind(pmin(newbed$idx1, newbed$idx2),
-               pmax(newbed$idx1, newbed$idx2))
+  idx <- cbind(
+    pmin(newbed$idx1, newbed$idx2),
+    pmax(newbed$idx1, newbed$idx2)
+  )
   idx <- idx[order(idx[, 1]), ]
   return(idx)
 }
@@ -181,7 +185,7 @@ anchors_APA <- function(ABS, RES, bedpe,
 #' @export
 anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
   # Translate indices to chromosomes
-  chrom   <- ABS[match(anchors, ABS[, 4]), 1]
+  chrom <- ABS[match(anchors, ABS[, 4]), 1]
   shifted <- ABS[match(anchors + shift + max(rel_pos), ABS[, 4]), 1]
 
   # Check chromosome is same after shift
@@ -215,7 +219,7 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
 anchors_filter_oob <- function(ABS, anchors, rel_pos) {
 
   # Match idx +/- relative position to chrom
-  plus  <- ABS[match(anchors + max(rel_pos), ABS[, 4]), 1]
+  plus <- ABS[match(anchors + max(rel_pos), ABS[, 4]), 1]
   minus <- ABS[match(anchors + min(rel_pos), ABS[, 4]), 1]
 
   # Check wether chromosomes have changed

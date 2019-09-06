@@ -19,15 +19,17 @@
 #'
 #' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
 rep_mat_lookup <- function(
-  explist, anchors, rel_pos, shift = 0, outlier_filter = c(0, 1), raw = FALSE
-) {
-
-  anchors <- anchors_filter_oob(explist[[1]]$ABS,
-                                anchors, rel_pos)
+                           explist, anchors, rel_pos, shift = 0, outlier_filter = c(0, 1), raw = FALSE) {
+  anchors <- anchors_filter_oob(
+    explist[[1]]$ABS,
+    anchors, rel_pos
+  )
 
   if (shift > 0) {
-    shift_anchors <- anchors_shift(explist[[1]]$ABS,
-                                   anchors, rel_pos, shift)
+    shift_anchors <- anchors_shift(
+      explist[[1]]$ABS,
+      anchors, rel_pos, shift
+    )
   }
 
   dnames <- rel_pos * explist[[1]]$RES
@@ -45,8 +47,10 @@ rep_mat_lookup <- function(
     mat_mu <- summarize_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
-      dimnames(arr) <- list(paste0(anchors[, 1], ",", anchors[, 2]),
-                            rev(dnames), dnames)
+      dimnames(arr) <- list(
+        paste0(anchors[, 1], ",", anchors[, 2]),
+        rev(dnames), dnames
+      )
       arr <- arr[mat_mu$keep, , ]
     } else {
       arr <- NULL
@@ -55,12 +59,13 @@ rep_mat_lookup <- function(
     # Calculate shifted values
     if (shift > 0) {
       shifted_arr <- matrix_lookup(explist[[i]]$ICE, shift_anchors, rel_pos)
-      shifted_mu  <- summarize_lookup(shifted_arr,
-                                      outlier_filter,
-                                      keep = mat_mu$keep)$mat
+      shifted_mu <- summarize_lookup(shifted_arr,
+        outlier_filter,
+        keep = mat_mu$keep
+      )$mat
       dimnames(shifted_mu) <- dimnames(mat_mu$mat)
       if (raw) {
-        shifted_arr <- shifted_arr[mat_mu$keep, ,]
+        shifted_arr <- shifted_arr[mat_mu$keep, , ]
         dimnames(shifted_arr) <- dimnames(arr)
       } else {
         shifted_arr <- NULL
@@ -94,7 +99,9 @@ rep_mat_lookup <- function(
 
   # Format experiment names
   names(results) <- if (is.null(names(explist))) {
-    vapply(explist, function(exp) {exp$NAME}, character(1L))
+    vapply(explist, function(exp) {
+      exp$NAME
+    }, character(1L))
   } else {
     names(explist)
   }
@@ -121,18 +128,23 @@ rep_mat_lookup <- function(
 matrix_lookup <- function(ICE, anchors, rel_pos) {
   # Setup a grid of relative positions
   grid <- expand.grid(rel_pos, rel_pos)
-  idx  <- seq_len(nrow(grid))
+  idx <- seq_len(nrow(grid))
 
   # Loop over grid entries, get scores at all anchor positions
   mats <- vapply(idx, function(i) {
-    ICE[list(grid[i, 1] + anchors[, 1],
-             grid[i, 2] + anchors[, 2])]$V3
-  }, as.numeric(anchors[,1]))
+    ICE[list(
+      grid[i, 1] + anchors[, 1],
+      grid[i, 2] + anchors[, 2]
+    )]$V3
+  }, as.numeric(anchors[, 1]))
 
   # Cast results in array
   array(mats,
-        dim = c(nrow(anchors),
-                length(rel_pos)[c(1,1)]))
+    dim = c(
+      nrow(anchors),
+      length(rel_pos)[c(1, 1)]
+    )
+  )
 }
 
 #' Summarise the results of a repeated matrix lookup
@@ -156,8 +168,7 @@ matrix_lookup <- function(ICE, anchors, rel_pos) {
 #'
 #' @keywords internal
 summarize_lookup <- function(
-  array, outlier_filter = c(0, 1), keep = NULL
-) {
+                             array, outlier_filter = c(0, 1), keep = NULL) {
   if (is.null(keep)) {
     keep <- apply(array, 1, function(slice) {
       !all(is.na(slice))
@@ -165,7 +176,7 @@ summarize_lookup <- function(
   }
 
   # Remove all-NA slices, set other NAs to 0
-  array <- array[keep,,]
+  array <- array[keep, , ]
   array[is.na(array)] <- 0
 
   # Do outlier filtering

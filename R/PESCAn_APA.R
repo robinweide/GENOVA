@@ -39,17 +39,17 @@
 #'
 #' # Alternative usage with pre-calculated anchors
 #' anchors <- anchors_APA(WT_10kb$ABS, WT_10kb$RES,
-#'                        bedpe = WT_loops)
+#'   bedpe = WT_loops
+#' )
 #' apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
 #'
 #' # Visualising results
 #' autoplot(apa)
 APA <- function(explist, bedpe,
-                 dist_thres = NULL,
-                 size_bin = 21, size_bp = NULL,
-                 outlier_filter = c(0, 0.995),
-                 anchors = NULL, raw = TRUE
-) {
+                dist_thres = NULL,
+                size_bin = 21, size_bp = NULL,
+                outlier_filter = c(0, 0.995),
+                anchors = NULL, raw = TRUE) {
   # Verify experiment compatability
   explist <- check_compat_exp(explist)
 
@@ -71,9 +71,11 @@ APA <- function(explist, bedpe,
     )
   }
 
-  results <- rep_mat_lookup(explist, anchors, rel_pos = rel_pos,
-                            shift = 0, outlier_filter = outlier_filter,
-                            raw = raw)
+  results <- rep_mat_lookup(explist, anchors,
+    rel_pos = rel_pos,
+    shift = 0, outlier_filter = outlier_filter,
+    raw = raw
+  )
 
   structure(results, class = "APA_results")
 }
@@ -103,27 +105,31 @@ APA <- function(explist, bedpe,
 #' @examples
 #' # Typical usage: PESCAn for super enhancers using a 1 MB
 #' # circular permutation on a pair of experiments.
-#' pescan <- PESCAn(explist = list(WT_40kb, KO_40kb),
-#'                   bed = super_enhancers,
-#'                   shift = 1e6)
+#' pescan <- PESCAn(
+#'   explist = list(WT_40kb, KO_40kb),
+#'   bed = super_enhancers,
+#'   shift = 1e6
+#' )
 #'
 #' # Alternative usage with pre-calculated anchors and no permutation
 #' anchors <- anchors_PESCAn(WT_40kb$ABS, WT_40kb$RES,
-#'                           genes_tss,
-#'                           dist_thres = c(5e6, 15e6))
-#' pescan <- PESCAn(explist = list(WT_40kb),
-#'                   anchors = anchors,
-#'                   shift = 0)
+#'   genes_tss,
+#'   dist_thres = c(5e6, 15e6)
+#' )
+#' pescan <- PESCAn(
+#'   explist = list(WT_40kb),
+#'   anchors = anchors,
+#'   shift = 0
+#' )
 #'
 #' # Visualising PE-SCAns
 #' autoplot(pescan)
 PESCAn <- function(explist, bed, shift = 1e6L,
-                    dist_thres = c(5e6L, Inf),
-                    size_bin = NULL, size_bp = 4e5,
-                    outlier_filter = c(0, 1),
-                    min_compare = 10,
-                    anchors = NULL, raw = FALSE
-) {
+                   dist_thres = c(5e6L, Inf),
+                   size_bin = NULL, size_bp = 4e5,
+                   outlier_filter = c(0, 1),
+                   min_compare = 10,
+                   anchors = NULL, raw = FALSE) {
   explist <- check_compat_exp(explist)
 
   # Initialise parameters
@@ -135,14 +141,17 @@ PESCAn <- function(explist, bed, shift = 1e6L,
   if (is.null(anchors)) {
     anchors <- anchors_PESCAn(
       explist[[1]]$ABS, explist[[1]]$RES,
-      bed, dist_thres, min_compare = min_compare
+      bed, dist_thres,
+      min_compare = min_compare
     )
   }
 
-  results <- rep_mat_lookup(explist, anchors, rel_pos = rel_pos,
-                            shift = shift,
-                            outlier_filter = outlier_filter,
-                            raw = raw)
+  results <- rep_mat_lookup(explist, anchors,
+    rel_pos = rel_pos,
+    shift = shift,
+    outlier_filter = outlier_filter,
+    raw = raw
+  )
 
   structure(results, class = "PESCAn_results")
 }
@@ -161,27 +170,27 @@ PESCAn <- function(explist, bed, shift = 1e6L,
 check_compat_exp <- function(explist) {
   if (!is.list(explist)) {
     stop("Supply either a GENOVA experiment or list of GENOVA experiments",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 
   # Re-list of only one experiment was given
-  if (any(c("ICE","ABS","RES") %in% names(explist))) {
+  if (any(c("ICE", "ABS", "RES") %in% names(explist))) {
     explist <- list(explist)
   }
 
   # Test equality of experiments in list
   if (length(explist) > 1) {
-    equal <- vapply(seq_along(explist)[-1], function(i){
+    equal <- vapply(seq_along(explist)[-1], function(i) {
       all.equal(explist[[1]]$ABS, explist[[i]]$ABS)
     }, logical(1))
 
-    if(any(!equal)){
+    if (any(!equal)) {
       stop(paste(
         "Indices of experiment(s)",
         paste(which(!equal) + 1, collapse = " & "),
         "are not equal to indices of experiment 1"
-      ), call. = FALSE
-      )
+      ), call. = FALSE)
     }
   }
 
@@ -198,17 +207,16 @@ check_compat_exp <- function(explist) {
 parse_rel_pos <- function(res, size_bin, size_bp) {
   if (is.null(size_bin) & !(is.null(size_bp))) {
     # Translate size to relative positions
-    rel_pos  <- seq_len(((size_bp / res)*2 + 1))
+    rel_pos <- seq_len(((size_bp / res) * 2 + 1))
     # Center size around 0
-    rel_pos  <- floor(rel_pos - median(rel_pos))
+    rel_pos <- floor(rel_pos - median(rel_pos))
   } else if (!is.null(size_bin)) {
-
     rel_pos <- seq.int(size_bin)
     rel_pos <- floor(rel_pos - median(rel_pos))
-
   } else {
     stop("Supply either 'size_bin' or 'size_bp'",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
   return(rel_pos)
 }

@@ -7,10 +7,11 @@
 #' @param file Full path to file.
 #' @param norm Normalising factor. Set to NULL to skip norm.
 #' @return A data.table with normalised counts.
-read.hicpro.matrix <- function(file, norm=1e9){
+read.hicpro.matrix <- function(file, norm = 1e9) {
   data <- data.table::fread(file)
   data.table::setkey(data, "V1", "V2")
-  if(!is.null(norm)){
-    data$V3 <- norm*data$V3/sum(data$V3)
+  if (!is.null(norm)) {
+    data$V3 <- norm * data$V3 / sum(data$V3)
   }
-  return(data)}
+  return(data)
+}

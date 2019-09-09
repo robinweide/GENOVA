@@ -4,7 +4,7 @@
 \alias{visualise.saddle}
 \title{Plot saddle-plots}
 \usage{
-visualise.saddle(SBoutList, addText = T, zlim = c(0.5, 2),
+\method{visualise}{saddle}(SBoutList, addText = T, zlim = c(0.5, 2),
   EVlim = c(-1.5, 1.5), square = T, crossLines = NULL)
 }
 \arguments{
@@ -29,7 +29,7 @@ Also plot a lowess-smoothed summary track of the sorted compartment-scores on to
 }
 \examples{
 # run saddle() on all chromosomes with 25 bins.
-saddle_WT = saddle(exp = Hap1_WT_1MB, chip = H3K27acPeaks, nBins = 25)
+saddle_WT <- saddle(exp = Hap1_WT_1MB, chip = H3K27acPeaks, nBins = 25)
 
 # plot saddle-plot
 visualise.saddle(list(saddle_WT), crossLines = T, addText = T)

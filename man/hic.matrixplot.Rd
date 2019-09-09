@@ -97,16 +97,18 @@ exonStarts and exonEnds to exonStart and exonEnd.
 }
 \examples{
 # plot two matrices of Hap-1 cells, including their respective loop-calls
-hic.matrixplot(exp1 = Hap1_Haarhuis2017_10kb,
-               exp2 = Hap1_Sanborn2015_10kb,
-               chrom = 'chr7',
-               start = 25e6,
-               end=30e6,
-               loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
-               loops.color = c('blue','green'),
-               loops.type = c('upper','lower'),
-               loops.resize = c(20e3,20e3), # expand for visibility
-               cut.off = 25) # upper limit of contacts
+hic.matrixplot(
+  exp1 = Hap1_Haarhuis2017_10kb,
+  exp2 = Hap1_Sanborn2015_10kb,
+  chrom = "chr7",
+  start = 25e6,
+  end = 30e6,
+  loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
+  loops.color = c("blue", "green"),
+  loops.type = c("upper", "lower"),
+  loops.resize = c(20e3, 20e3), # expand for visibility
+  cut.off = 25
+) # upper limit of contacts
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

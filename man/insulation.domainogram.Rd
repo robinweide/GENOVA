@@ -37,4 +37,5 @@ create a domainogram for the insulation scores
 }
 \examples{
 # Make an domainogram of a locus on chromosome 7 with windowsizes from 1 to 101.
+#  insulation.domainogram(Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size1 = 1, window.size2 = 101, step = 2)
 }

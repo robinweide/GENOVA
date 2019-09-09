@@ -25,11 +25,11 @@ Call insulation scores first and store these in exp$INSULATION
 }
 \examples{
 # Get the insulation score with window-size 25 and store in the INSULATION-slot.
-Hap1_WT_10kb$INSULATION = genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
 
 # Call TAD from the insulation-score.
-TADcalls = insulation.callTAD(Hap1_WT_10kb)
+TADcalls <- insulation.callTAD(Hap1_WT_10kb)
 
 # Plot TADs
-hic.matrixplot(exp1 = Hap1_WT_10kb, chrom = 'chr7', start = 25e6, end=30e6, tads = WT_TADs, tads.type = 'lower', cut.off = 25)
+hic.matrixplot(exp1 = Hap1_WT_10kb, chrom = "chr7", start = 25e6, end = 30e6, tads = WT_TADs, tads.type = "lower", cut.off = 25)
 }

@@ -6,8 +6,8 @@
 \usage{
 insulation.heatmap(insulationList, bed = NULL, borders = NULL,
   focus = 1, sortWidth = 10, whatToPlot = "both",
-  profileFunct = mean, flank = 5e+05, zlim = c(-1, 1),
-  profileCols = NULL, profileZlim = NULL,
+  profileFunct = mean, title = NULL, flank = 5e+05, zlim = c(-1,
+  1), profileCols = NULL, profileZlim = NULL,
   heatmapCols = rev(c("white", "white", "white", "red", "black")),
   leftNorm = F, verbose = F)
 }
@@ -29,6 +29,8 @@ use all borders, regardless of uniqueness.}
 \item{whatToPlot}{Do you want to plot a profile, heatmap or both?}
 
 \item{profileFunct}{Function to make profile-plots (mean, median, sum)}
+
+\item{title}{Title for plot}
 
 \item{flank}{Amount of flanking bp.}
 
@@ -53,15 +55,17 @@ average profile.
 }
 \examples{
 # Get the insulation score with window-size 25 of two experiments.
-WT_10kb_ins = genome.wide.insulation(hic = WT_10kb, window.size = 25)
-SCC4_10kb_ins = genome.wide.insulation(hic = SCC4_10kb, window.size = 25)
+WT_10kb_ins <- genome.wide.insulation(hic = WT_10kb, window.size = 25)
+SCC4_10kb_ins <- genome.wide.insulation(hic = SCC4_10kb, window.size = 25)
 
 # Store insulation-scores in a named list
-inList = list(WT = WT_10kb_ins, SCC4 = SCC4_10kb_ins )
+inList <- list(WT = WT_10kb_ins, SCC4 = SCC4_10kb_ins)
 
 # Plot the heatmap and profile and store the underlying df in df.out.
-df.out = insulation.heatmap(inList, bed = WT_TADs,
-                            zlim = c(-.5,0.25), profileZlim = c(-.75,-.1))
+df.out <- insulation.heatmap(inList,
+  bed = WT_TADs,
+  zlim = c(-.5, 0.25), profileZlim = c(-.75, -.1)
+)
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

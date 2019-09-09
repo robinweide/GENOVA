@@ -34,8 +34,8 @@ counted twice (for the two interacting chromosomes)
 cisChrom_out <- cisTotal.perChrom(WT_1MB)
 
 # using the underlying data, make a barplot
-plot( cisChrom_out$perChrom, las=2 )
-abline( h = cisChrom_out$genomeWide, col = 'red' )
+plot(cisChrom_out$perChrom, las = 2)
+abline(h = cisChrom_out$genomeWide, col = "red")
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

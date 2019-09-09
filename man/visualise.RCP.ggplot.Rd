@@ -4,9 +4,9 @@
 \alias{visualise.RCP.ggplot}
 \title{Plot the RCP results}
 \usage{
-visualise.RCP.ggplot(RCPdata, smooth = F, combine = T, ylim = NULL,
-  xlim = NULL, lineOnly = T, lineWidth = 1, errWidth = 1,
-  pointWidth = 0.5)
+\method{visualise}{RCP.ggplot}(RCPdata, smooth = F, combine = T,
+  ylim = NULL, xlim = NULL, lineOnly = T, lineWidth = 1,
+  errWidth = 1, pointWidth = 0.5)
 }
 \arguments{
 \item{RCPdata}{Output of the RCP-function.}
@@ -35,14 +35,14 @@ Produces a line-plot per chromosome and (optionally) per-BED.
 }
 \examples{
 # Run RCP on the first five chromosomes
-RCP_out <- RCP(list(WT,Mut1), chromsToUse = paste0('chr',1:5))
+RCP_out <- RCP(list(WT, Mut1), chromsToUse = paste0("chr", 1:5))
 
 # Plot the RCP-output between 5 and 100Mb per chromosome.
-visualise.RCP.ggplot(RCP_out,combine = F,smooth = F, lineOnly = F, xlim = c(5,110))
+visualise.RCP.ggplot(RCP_out, combine = F, smooth = F, lineOnly = F, xlim = c(5, 110))
 
 # Plot the RCP-output with a loess-smoothed line without the actual observed points
 # between 5 and 100Mb and combine all chromosomes in one plot.
-visualise.RCP.ggplot(RCP_out,combine = T,smooth = T, lineOnly = T, xlim = c(5,110))
+visualise.RCP.ggplot(RCP_out, combine = T, smooth = T, lineOnly = T, xlim = c(5, 110))
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

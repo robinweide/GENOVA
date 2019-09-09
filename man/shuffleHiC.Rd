@@ -19,9 +19,9 @@ ShuffleHiC shuffles a matrix from `select.subset()`` diagonal-wise. That is, eve
 }
 \examples{
 ## Shuffle a region on chromosome 1
-HiCregion <- select.subset(EXP, chrom = 'chr1', start = 15e6, end = 20e6)
+HiCregion <- select.subset(EXP, chrom = "chr1", start = 15e6, end = 20e6)
 HiCregion_shuffled <- shuffleHiC(HiCregion)
 
 # plot observed/expected
-image(HiCregion$z/HiCregion_shuffled$z)
+image(HiCregion$z / HiCregion_shuffled$z)
 }

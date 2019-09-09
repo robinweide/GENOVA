@@ -30,4 +30,5 @@ Plot a single insulation-score and Hi-C matrix for a region of interest.
 }
 \examples{
 # Make a matrix-plot of an experiment and the insulation-score for a region of interest.
+#  insulation.plot.dual(exp1 = Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size = 21)
 }

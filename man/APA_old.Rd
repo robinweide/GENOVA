@@ -57,8 +57,10 @@ Next, it averages over all matrices to produce a single Z-stack matrix.
 APA_WT <- APA(experiment = WT_10kb, loop.bed = WT_Loops)
 
 # Visualise the APA-results
-visualise.APA.ggplot(APAlist = list('WT' = APA_WT),
-zTop = c(0,9.5), zBottom = c(-5,5),focus = 1)
+visualise.APA.ggplot(
+  APAlist = list("WT" = APA_WT),
+  zTop = c(0, 9.5), zBottom = c(-5, 5), focus = 1
+)
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

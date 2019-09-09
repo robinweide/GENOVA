@@ -31,21 +31,29 @@ the average coverage over a TAD and between two TADs.
 }
 \examples{
 # get scores for WT and WAPL data
-TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs,
-                                       max.neighbor = 10,
-                                       exp = Hap1_WT_10kb)
-TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs,
-                                       max.neighbor = 10,
-                                       exp = Hap1_WAPL_10kb)
+TAD_N_WT <- intra.inter.TAD.contacts(
+  TAD = WT_TADs,
+  max.neighbor = 10,
+  exp = Hap1_WT_10kb
+)
+TAD_N_WAPL <- intra.inter.TAD.contacts(
+  TAD = WT_TADs,
+  max.neighbor = 10,
+  exp = Hap1_WAPL_10kb
+)
 
 # plot a TAD+N dotplot
-differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
-                         exp2 = TAD_N_WAPL) # numerator
+differential.TAD.dotplot(
+  exp1 = TAD_N_WT, # denominator
+  exp2 = TAD_N_WAPL
+) # numerator
 
 # plot a TAD+N scatterplot
-differential.TAD.scatterplot(exp1 = TAD_N_WT, # x
-                             exp2 = TAD_N_WAPL, # y
-                             allData = T)
+differential.TAD.scatterplot(
+  exp1 = TAD_N_WT, # x
+  exp2 = TAD_N_WAPL, # y
+  allData = T
+)
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

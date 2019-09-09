@@ -32,5 +32,5 @@ Get insulation scores of a region or chromosome.
 }
 \examples{
 # Get the insulation score with window-size 20 of a locus on chromosome 7.
-localInsulationScores = insulation.score(hic = Hap1_WT_10kb, window.size = 20, chrom = 'chr7', start = 25e6, end=30e6, local = T)
+localInsulationScores <- insulation.score(hic = Hap1_WT_10kb, window.size = 20, chrom = "chr7", start = 25e6, end = 30e6, local = T)
 }

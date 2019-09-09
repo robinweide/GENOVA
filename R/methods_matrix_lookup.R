@@ -106,6 +106,23 @@ rep_mat_lookup <- function(
     names(explist)
   }
 
+  merge_res <- names(results[[1]])
+  results <- lapply(merge_res, function(res) {
+    objects <- lapply(results, `[[`, res)
+    # Return array if rawdata
+    if (inherits(objects[[1]], "array")) {
+      return(objects)
+    }
+    # Simplify matrix to array
+    newobject <- do.call(c, objects)
+    dim(newobject) <- c(dim(objects[[1]]),
+                        length(results))
+    dimnames(newobject) <- c(dimnames(objects[[1]]),
+                             list(names(results)))
+    newobject
+  })
+  names(results) <- merge_res
+
   results
 }
 

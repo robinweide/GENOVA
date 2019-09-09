@@ -27,8 +27,10 @@
 #' APA_WT <- APA(experiment = WT_10kb, loop.bed = WT_Loops)
 #'
 #' # Visualise the APA-results
-#' visualise.APA.ggplot(APAlist = list('WT' = APA_WT),
-#' zTop = c(0,9.5), zBottom = c(-5,5),focus = 1)
+#' visualise.APA.ggplot(
+#'   APAlist = list("WT" = APA_WT),
+#'   zTop = c(0, 9.5), zBottom = c(-5, 5), focus = 1
+#' )
 #' @return \item{APA}{a matrix with the average Z-stack scores}
 #' @return \item{rawMatList}{the raw underlying matrices per loop}
 #' @return \item{APAraw}{the uncorrected APA_matrix}
@@ -39,7 +41,7 @@
 #' @import data.table
 #' @export
 APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
-                size = 21, verbose = F,  outlierCutOff = 0.995, ...){
+                    size = 21, verbose = F, outlierCutOff = 0.995, ...) {
 
   #########################
   # experiment operations #
@@ -47,71 +49,79 @@ APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
 
   hicdata <- experiment$ICE
   # Check for setkey
-  if(is.null(data.table::key(hicdata))){data.table::setkey(hicdata, V1, V2)}
+  if (is.null(data.table::key(hicdata))) {
+    data.table::setkey(hicdata, V1, V2)
+  }
 
   bed <- experiment$ABS
   # Make chr:pos index of HiC-index
-  bed.p <- paste0(bed[,1], ":", bed[,2])
+  bed.p <- paste0(bed[, 1], ":", bed[, 2])
 
   ########################
   # misc initialisations #
   ########################
 
-  if(is.null(smallTreshold )){
-    smallTreshold = experiment$RES*  (((size+2)) )
+  if (is.null(smallTreshold)) {
+    smallTreshold <- experiment$RES * (((size + 2)))
   }
 
-  if(((size-1) /2 )%%1 != 0){stop("Size should be an even number +1")}
-  size.offset = (size-1)/2
+  if (((size - 1) / 2) %% 1 != 0) {
+    stop("Size should be an even number +1")
+  }
+  size.offset <- (size - 1) / 2
 
   resolution <- experiment$RES
-  pos <- seq(-(size-1)/2, (size-1)/2)*resolution
+  pos <- seq(-(size - 1) / 2, (size - 1) / 2) * resolution
 
   #####################
   #  set output-vars  #
   #####################
-  OUTLIERCORRECTIONSWITCH = ifelse(rmOutlier,
-                                   yes = T,
-                                   no = outlierCutOff)
-  APA = NULL
-  APAraw = NULL
-  APAxy = NULL
-  RES =  experiment$RES
-  rawMatList = list()
+  OUTLIERCORRECTIONSWITCH <- ifelse(rmOutlier,
+    yes = T,
+    no = outlierCutOff
+  )
+  APA <- NULL
+  APAraw <- NULL
+  APAxy <- NULL
+  RES <- experiment$RES
+  rawMatList <- list()
 
   #####################
   #   prepare loops   #
   #####################
 
   # Remove smaller loops
-  loop.bed <- loop.bed[abs(loop.bed[,6]-loop.bed[,2]) >= smallTreshold ,]
+  loop.bed <- loop.bed[abs(loop.bed[, 6] - loop.bed[, 2]) >= smallTreshold, ]
 
   # Is BED 1 upstream of BED2?
-  lb = loop.bed
-  loop.bed[loop.bed[,2] > loop.bed[,5],] <- lb[lb[,2] > lb[,5],c(4,5,6,1,2,3)]
+  lb <- loop.bed
+  loop.bed[loop.bed[, 2] > loop.bed[, 5], ] <- lb[lb[, 2] > lb[, 5], c(4, 5, 6, 1, 2, 3)]
 
   # Prune NA-rows
-  loop.bed <- na.exclude(loop.bed[,1:6])
+  loop.bed <- na.exclude(loop.bed[, 1:6])
 
   # Get start positions of the loop, floored to 10kb, and make chr:pos index
   # the tmp is just because Robin is anal about linelengths.
-  tmp = ((abs(loop.bed[,3] - loop.bed[,2])/2) + loop.bed[,2])/resolution
-  tmp = floor(tmp)
-  loop.bed1.p <- paste0(loop.bed[,1], ":", as.integer(resolution*tmp))
+  tmp <- ((abs(loop.bed[, 3] - loop.bed[, 2]) / 2) + loop.bed[, 2]) / resolution
+  tmp <- floor(tmp)
+  loop.bed1.p <- paste0(loop.bed[, 1], ":", as.integer(resolution * tmp))
 
-  tmp = ((abs(loop.bed[,6] - loop.bed[,5])/2) + loop.bed[,5])/resolution
-  tmp = floor(tmp)
-  loop.bed2.p <- paste0(loop.bed[,4], ":",as.integer(resolution*tmp ))
+  tmp <- ((abs(loop.bed[, 6] - loop.bed[, 5]) / 2) + loop.bed[, 5]) / resolution
+  tmp <- floor(tmp)
+  loop.bed2.p <- paste0(loop.bed[, 4], ":", as.integer(resolution * tmp))
 
   # Bugfix: in some cases paste0 yields an extra whitespace
   loop.bed1.p <- gsub(" ", "", loop.bed1.p, fixed = TRUE)
   loop.bed2.p <- gsub(" ", "", loop.bed2.p, fixed = TRUE)
 
   # Check if loops are all found:
-  if(!all(loop.bed1.p %in% bed.p)){
-    if(!all(loop.bed2.p %in% bed.p) ){
-      msg = paste0('Not all loop-anchors can be found in HiC-file.\n\t',
-                   'Are you sure that both are from the same reference?')
+  if (!all(loop.bed1.p %in% bed.p)) {
+    if (!all(loop.bed2.p %in% bed.p)) {
+      msg <- paste0(
+        "Not all loop-anchors can be found in HiC-file.
+	",
+        "Are you sure that both are from the same reference?"
+      )
       warning(msg)
     }
   }
@@ -121,12 +131,12 @@ APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   #####################
 
   # Get anchor HiC-indexes
-  x.pos <- bed[match(loop.bed1.p,bed.p),4]
-  y.pos <- bed[match(loop.bed2.p,bed.p),4]
+  x.pos <- bed[match(loop.bed1.p, bed.p), 4]
+  y.pos <- bed[match(loop.bed2.p, bed.p), 4]
 
   # check for empty indexes
-  na.pos <- unique(c(which(is.na(x.pos)) ,which(is.na(y.pos)) ))
-  if(length(na.pos) != 0){
+  na.pos <- unique(c(which(is.na(x.pos)), which(is.na(y.pos))))
+  if (length(na.pos) != 0) {
     x.pos <- x.pos[-na.pos]
     y.pos <- y.pos[-na.pos]
   }
@@ -143,27 +153,25 @@ APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   data.table::setDTthreads(1)
 
 
-  rawMatArray <- vapply(pos.list, FUN.VALUE = matrix(NA_real_, nrow = size, ncol = size), FUN = function(pos){
-
-    sel.x <- (pos$x-size.offset):(pos$x+size.offset)
-    sel.y <- (pos$y-size.offset):(pos$y+size.offset)
+  rawMatArray <- vapply(pos.list, FUN.VALUE = matrix(NA_real_, nrow = size, ncol = size), FUN = function(pos) {
+    sel.x <- (pos$x - size.offset):(pos$x + size.offset)
+    sel.y <- (pos$y - size.offset):(pos$y + size.offset)
 
     pos.all <- expand.grid(sel.x, sel.y)
 
     hic.mat <- hicdata[.(pos.all)]
-    #hic.mat <- hicdata[V1 %between% c(pos$x + c(-1,1)*size.offset)][V2 %between% c(pos$y + c(-1,1)*size.offset)]
+    # hic.mat <- hicdata[V1 %between% c(pos$x + c(-1,1)*size.offset)][V2 %between% c(pos$y + c(-1,1)*size.offset)]
 
     hic.mat$V3[which(is.na(hic.mat$V3))] <- 0
 
-    hic.mat <- reshape2::acast(hic.mat, V1~V2, value.var="V3")
+    hic.mat <- reshape2::acast(hic.mat, V1 ~ V2, value.var = "V3")
 
     return(hic.mat)
-
   })
 
   data.table::setDTthreads(old_threads)
 
-  rawMatList <- lapply(seq(dim(rawMatArray)[3]), function(x) rawMatArray[ , , x])
+  rawMatList <- lapply(seq(dim(rawMatArray)[3]), function(x) rawMatArray[, , x])
 
   # Convert to 3D array
   rawMatList <- rawMatList[!unlist(lapply(rawMatList, is.null))]
@@ -172,17 +180,17 @@ APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   #####################
   #  outlier correct  #
   #####################
-  if(rmOutlier){
-    sm.bk = sm
-    sm = outlier3Darray(ARRAY = sm, Q = outlierCutOff)
+  if (rmOutlier) {
+    sm.bk <- sm
+    sm <- outlier3Darray(ARRAY = sm, Q = outlierCutOff)
     # par(mfrow = c(1,2), pty = 's')
     # image(apply(sm.bk, c(1,2), mean) , zlim = c(0,50), main = 'raw')
     # image(apply(sm, c(1,2), mean) , zlim = c(0,50), main = 'corrected')
-    APAraw = apply(sm.bk, c(1,2), mean)
-    APA = apply(sm, c(1,2), mean)
+    APAraw <- apply(sm.bk, c(1, 2), mean)
+    APA <- apply(sm, c(1, 2), mean)
   } else {
-    APAraw = apply(sm, c(1,2), mean)
-    APA = apply(sm, c(1,2), mean)
+    APAraw <- apply(sm, c(1, 2), mean)
+    APA <- apply(sm, c(1, 2), mean)
   }
 
 
@@ -198,17 +206,19 @@ APA_old <- function(experiment, loop.bed, smallTreshold = NULL, rmOutlier = T,
   colnames(APA) <- 1:size
 
   # make a image-ready list
-  APAxy=list(x=pos, y=pos, z=APA)
+  APAxy <- list(x = pos, y = pos, z = APA)
 
   ##########################
   #       so long and      #
   #  thanks for the fish!  #
   ##########################
 
-  return(list(APA = APA,
-              rawMatList = rawMatList,
-              APAraw = APAraw,
-              APAxy= APAxy,
-              RES = RES,
-              OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH ))
+  return(list(
+    APA = APA,
+    rawMatList = rawMatList,
+    APAraw = APAraw,
+    APAxy = APAxy,
+    RES = RES,
+    OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH
+  ))
 }

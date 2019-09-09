@@ -16,35 +16,35 @@
 #' @return \item{STACK.list}{raw matrices per TAD}
 #' @return \item{OUTLIERCORRECTIONSWITCH}{the outlierCutOff if rmOutlier is TRUE, otherwise set to FALSE}
 #' @examples
-## Not run:
-#' ATA_results_of_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
-## End(**Not run**)
+#' ## Not run:
+#' ATA_results_of_RAOetal <- ATA(experiment = Rao_20k, tad.bed = TADs)
+#' ## End(**Not run**)
 #' @export
-ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verbose = F, outlierCutOff = .995){
+ATA <- function(experiment, tad.bed, smallTreshold = 225000, rmOutlier = F, verbose = F, outlierCutOff = .995) {
+  OUTLIERCORRECTIONSWITCH <- ifelse(rmOutlier,
+    yes = T,
+    no = outlierCutOff
+  )
 
-  OUTLIERCORRECTIONSWITCH = ifelse(rmOutlier,
-                                   yes = T,
-                                   no = outlierCutOff)
-
-	if(any(tad.bed[,2] > tad.bed[,3])){
-		stop("5' TAD border downstream then 3' TAD border for some entries")
-	}
-  rawMatList = list()
+  if (any(tad.bed[, 2] > tad.bed[, 3])) {
+    stop("5' TAD border downstream then 3' TAD border for some entries")
+  }
+  rawMatList <- list()
 
   bed <- experiment$ABS
 
-  bed[,1] <- as.factor(bed[, 1])
+  bed[, 1] <- as.factor(bed[, 1])
   resolution <- experiment$RES
   if (is.null(data.table::key(experiment$ICE))) {
-      data.table::setkey(experiment$ICE, V1, V2)
+    data.table::setkey(experiment$ICE, V1, V2)
   }
 
-  tad.bed <- tad.bed[abs(tad.bed[, 3] - tad.bed[, 2]) >= smallTreshold,]
+  tad.bed <- tad.bed[abs(tad.bed[, 3] - tad.bed[, 2]) >= smallTreshold, ]
   tad.bed <- na.exclude(tad.bed[1:3])
   tad <- tad.bed[, c(1, 2, 3)]
   tad.length <- length(tad[, 1])
-  tad[,1] <- factor(tad[,1], levels=levels(bed[,1]))
-  outputTAD = tad
+  tad[, 1] <- factor(tad[, 1], levels = levels(bed[, 1]))
+  outputTAD <- tad
 
 
   #####################
@@ -53,41 +53,41 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
   old_threads <- data.table::getDTthreads()
   data.table::setDTthreads(1)
 
-  tad$size = as.numeric(abs(tad[,3]- tad[,2]))
-  tad$halftadSize <- round(tad$size/2)
-  tad$regionStart = tad[,2] - tad$halftadSize
-  tad$regionEnd = tad[,3] + tad$halftadSize
+  tad$size <- as.numeric(abs(tad[, 3] - tad[, 2]))
+  tad$halftadSize <- round(tad$size / 2)
+  tad$regionStart <- tad[, 2] - tad$halftadSize
+  tad$regionEnd <- tad[, 3] + tad$halftadSize
 
 
   tad.list <- split(tad, seq(nrow(tad)))
 
-  rawMatList = vapply(tad.list, FUN.VALUE = matrix(NA_real_, nrow = 100, ncol = 100), FUN = function(x){
-
-    newMat <- select.subset(exp =  experiment,
-                            chrom = x[,1],
-                            start =  x[,6],
-                            end =  x[,7])
+  rawMatList <- vapply(tad.list, FUN.VALUE = matrix(NA_real_, nrow = 100, ncol = 100), FUN = function(x) {
+    newMat <- select.subset(
+      exp = experiment,
+      chrom = x[, 1],
+      start = x[, 6],
+      end = x[, 7]
+    )
     resize.mat(newMat$z, c(100, 100))
-
   })
 
   data.table::setDTthreads(old_threads)
 
   # Convert to 3D arra
-  sm <- rawMatList #simplify2array(rawMatList)
+  sm <- rawMatList # simplify2array(rawMatList)
 
-    #####################
+  #####################
   #  outlier correct  #
   #####################
-  if(rmOutlier){
-    sm.bk = sm
-    sm = outlier3Darray(ARRAY = sm, Q = outlierCutOff)
+  if (rmOutlier) {
+    sm.bk <- sm
+    sm <- outlier3Darray(ARRAY = sm, Q = outlierCutOff)
 
-    ATAraw = apply(sm.bk, c(1,2), mean)
-    ATA = apply(sm, c(1,2), mean)
+    ATAraw <- apply(sm.bk, c(1, 2), mean)
+    ATA <- apply(sm, c(1, 2), mean)
   } else {
-    ATAraw = apply(sm, c(1,2), mean)
-    ATA = apply(sm, c(1,2), mean)
+    ATAraw <- apply(sm, c(1, 2), mean)
+    ATA <- apply(sm, c(1, 2), mean)
   }
 
 
@@ -96,22 +96,23 @@ ATA <- function (experiment, tad.bed, smallTreshold = 225000, rmOutlier = F,verb
   #  thanks for the fish!  #
   ##########################
 
-  return(list(STACK = ATA[1:99, 1:99],
-              STACK.raw = ATAraw[1:99, 1:99],
-              STACK.list = rawMatList,
-              OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH,
-              TADs.bed = outputTAD))
+  return(list(
+    STACK = ATA[1:99, 1:99],
+    STACK.raw = ATAraw[1:99, 1:99],
+    STACK.list = rawMatList,
+    OUTLIERCORRECTIONSWITCH = OUTLIERCORRECTIONSWITCH,
+    TADs.bed = outputTAD
+  ))
+}
 
-  }
+outlier3Darray <- function(ARRAY, Q = .995) {
+  ARRAY[is.na(ARRAY)] <- 0
+  tmp <- apply(ARRAY, c(1, 2), quantile, probs = Q, na.rm = TRUE)
+  tmp.bk <- tmp
 
-outlier3Darray = function(ARRAY, Q = .995){
-  ARRAY[is.na(ARRAY)] = 0
-  tmp = apply(ARRAY, c(1,2), quantile, probs = Q, na.rm = TRUE)
-  tmp.bk = tmp
-
-  for(i in 1:nrow(tmp)){
-    for(j in 1:ncol(tmp)){
-      ARRAY[i,j,ARRAY[i, j , ] > tmp[i,j]] = tmp[i,j]
+  for (i in 1:nrow(tmp)) {
+    for (j in 1:ncol(tmp)) {
+      ARRAY[i, j, ARRAY[i, j, ] > tmp[i, j]] <- tmp[i, j]
     }
   }
 

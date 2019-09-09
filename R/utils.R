@@ -17,25 +17,26 @@ bed2idx <- function(ABS, bed, mode = c("centre", "start", "end")) {
 
   # Reformat bed depending on mode
   bed <- cbind.data.frame(
-    V1 = bed[,1],
+    V1 = bed[, 1],
     V2 = switch(mode,
-                "centre" = (bed[,2] + bed[,3])/2,
-                "start"  = bed[,2],
-                "end"    = bed[,3])
+      "centre" = (bed[, 2] + bed[, 3]) / 2,
+      "start" = bed[, 2],
+      "end" = bed[, 3]
+    )
   )
 
   # Assign entries to shared chromosomes
-  chroms <- intersect(ABS[,1], bed[,1])
-  bed_group <- match(bed[,1], chroms)
-  ABS_group <- match(ABS[,1], chroms)
+  chroms <- intersect(ABS[, 1], bed[, 1])
+  bed_group <- match(bed[, 1], chroms)
+  ABS_group <- match(ABS[, 1], chroms)
 
   # Split by chromosome
   bed_chrom <- split(bed[, 2], bed_group)
-  ABS_chrom <- split(ABS[, c(2,4)], ABS_group)
+  ABS_chrom <- split(ABS[, c(2, 4)], ABS_group)
 
   # Match bed entry to idx
   out <- mapply(function(i, j) {
-    j[pmax(findInterval(i, j[,1]), 1), 2]
+    j[pmax(findInterval(i, j[, 1]), 1), 2]
   }, i = bed_chrom, j = ABS_chrom)
   unsplit(out, bed_group)
 }

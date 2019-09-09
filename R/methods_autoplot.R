@@ -48,7 +48,6 @@
 #' # Handling 'raw' plots
 #' autoplot(pescan, raw = TRUE) +
 #'   ggplot2::scale_fill_gradient(aesthetics = "fill2")
-
 #' @export
 #' @rdname APA_PESCAn_visualisation
 autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
@@ -81,8 +80,12 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
     # Warnings are supressed because ggplot doesn't recognise
     # the fill2 aesthetic (YET!)
     suppressWarnings(
-      g <- g + ggplot2::geom_raster(data = function(x) {x[x$mode == "\u0394",]},
-                                    aes(fill2 = value)) +
+      g <- g + ggplot2::geom_raster(
+        data = function(x) {
+          x[x$mode == "\u0394", ]
+        },
+        aes(fill2 = value)
+      ) +
         ggplot2::facet_grid(mode ~ sample, switch = "y")
     )
 
@@ -91,7 +94,7 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
         colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
         aesthetics = "fill2",
         name = "\u0394",
-        limits = c(-1,1) * max(abs(melts$value[melts$mode == "\u0394"]))
+        limits = c(-1, 1) * max(abs(melts$value[melts$mode == "\u0394"]))
       )
       # Hack for scale
       g$scales$scales[[1]]$guide <- ggplot2::guide_colourbar()
@@ -109,19 +112,24 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
       old_nahandle(data, params)
     }
     new_geom <- ggplot2::ggproto(paste0(sample(1e6, 1), class(old_geom)),
-                                 old_geom, handle_na = new_nahandle)
+      old_geom,
+      handle_na = new_nahandle
+    )
     names(new_geom$default_aes)[1] <- "fill2"
     new_geom$non_missing_aes <- "fill2"
     g$layers[[1]]$geom <- new_geom
-
   } else {
     # No special treatment needed for just one colourscale
-    g <- g + ggplot2::facet_grid(~ sample)
+    g <- g + ggplot2::facet_grid(~sample)
   }
 
   # Add the non-diff plots
-  g <- g + ggplot2::geom_raster(data = function(x) {x[x$mode == "Individual",]},
-                                aes(fill = value))
+  g <- g + ggplot2::geom_raster(
+    data = function(x) {
+      x[x$mode == "Individual", ]
+    },
+    aes(fill = value)
+  )
 
   if (raw) {
     return(g)
@@ -135,7 +143,7 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
   ) +
     ggplot2::scale_x_continuous(
       name = "",
-      expand = c(0,0),
+      expand = c(0, 0),
       breaks = function(x) {
         x <- scales::extended_breaks()(x)
         if (length(x) > 3) {
@@ -144,12 +152,13 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
           x
         }
       },
-      labels = function(x){
-        ifelse(x == 0, "3'", paste0(x/1000, "kb"))
-      }) +
+      labels = function(x) {
+        ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+      }
+    ) +
     ggplot2::scale_y_continuous(
       name = "",
-      expand = c(0,0),
+      expand = c(0, 0),
       breaks = function(x) {
         x <- scales::extended_breaks()(x)
         if (length(x) > 3) {
@@ -158,9 +167,10 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
           x
         }
       },
-      labels = function(x){
-        ifelse(x == 0, "5'", paste0(x/1000, "kb"))
-      }) +
+      labels = function(x) {
+        ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+      }
+    ) +
     ggplot2::theme(
       aspect.ratio = 1,
       strip.placement = "outside",
@@ -210,7 +220,7 @@ autoplot.PESCAn_results <- function(results,
       g <- g + ggplot2::scale_fill_gradientn(
         colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
         name = expression(frac("Observed", "Expected")),
-        limits = c(-1,1) * max(abs(g$data$value[g$data$mode == "Individual"] -1)) + 1,
+        limits = c(-1, 1) * max(abs(g$data$value[g$data$mode == "Individual"] - 1)) + 1,
         guide = guide_colourbar(order = 1)
       )
     }

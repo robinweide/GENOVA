@@ -30,7 +30,7 @@ rep_mat_lookup <- function(
                                    anchors, rel_pos, shift)
   }
 
-  dnames <- rel_pos * explist[[1]]$RES
+  dnames <- format(rel_pos * explist[[1]]$RES, trim = TRUE)
 
   # Set data.table core usage
   dt.cores <- data.table::getDTthreads()

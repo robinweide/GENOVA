@@ -92,7 +92,7 @@ construct.experiment <- function(signalPath, indicesPath, name, Znorm = F, ignor
   }
 
   # Contruct list
-  list(
+  structure(list(
     # Iced HiC-matrix in three-column format (i.e. from HiC-pro)
     ICE = ICE,
 
@@ -125,7 +125,7 @@ construct.experiment <- function(signalPath, indicesPath, name, Znorm = F, ignor
 
     # Did we normalise with Z?
     ZSCORE = Znorm
-  )
+  ), class = "contacts", package = "GENOVA")
 }
 
 clean_centromeres <- function(centros, resolution) {

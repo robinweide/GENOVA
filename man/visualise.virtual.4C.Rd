@@ -4,7 +4,7 @@
 \alias{visualise.virtual.4C}
 \title{Plot the virtual 4C results.}
 \usage{
-visualise.virtual.4C(data)
+\method{visualise}{virtual.4C}(data)
 }
 \arguments{
 \item{data}{Output of `virtual.4C`.}

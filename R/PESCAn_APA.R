@@ -77,7 +77,7 @@ APA <- function(explist, bedpe,
     raw = raw
   )
 
-  structure(results, class = "APA_results")
+  structure(results, class = "APA_discovery")
 }
 
 #' Paired-end spatial chromatin analysis
@@ -153,7 +153,7 @@ PESCAn <- function(explist, bed, shift = 1e6L,
     raw = raw
   )
 
-  structure(results, class = "PESCAn_results")
+  structure(results, class = "PESCAn_discovery")
 }
 
 # Internals ---------------------------------------------------------------

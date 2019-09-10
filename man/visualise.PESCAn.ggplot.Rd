@@ -4,8 +4,9 @@
 \alias{visualise.PESCAn.ggplot}
 \title{visualise.PESCAn.ggplot}
 \usage{
-visualise.PESCAn.ggplot(PESCAnlist, resolution, title = "PE-SCAn",
-  zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...)
+\method{visualise}{PESCAn.ggplot}(PESCAnlist, resolution,
+  title = "PE-SCAn", zTop = NULL, zBottom = NULL, focus = 1,
+  smooth = F, ...)
 }
 \arguments{
 \item{PESCAnlist}{A list of results from PESCAn. Should have the same

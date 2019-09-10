@@ -30,12 +30,11 @@ A binsize of 5 will produce a plot similar to FLyamer et al. (2017), while 100 w
 }
 \examples{
 # run saddle() on all chromosomes with 25 bins.
-saddle_WT = saddle(exp = Hap1_WT_1MB, chip = H3K27acPeaks, nBins = 25)
+saddle_WT <- saddle(exp = Hap1_WT_1MB, chip = H3K27acPeaks, nBins = 25)
 
 # plot saddle-plot
 visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
 
 # plot compartment-strengths
 visualise.compartmentStrength(list(saddle_WT))
-
 }

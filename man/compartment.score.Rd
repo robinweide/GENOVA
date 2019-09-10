@@ -32,14 +32,18 @@ The procedure is an eigenvector decomposition of the observed/expected matrix mi
 }
 \examples{
 # Compute the compartment-scores of chromosome 20.
-WT_40kb_CS = compartment.score(WT_40kb, chromsToUse = 'chr20')
+WT_40kb_CS <- compartment.score(WT_40kb, chromsToUse = "chr20")
 
 # Plot chromosome 20 with skipAnn = T to allow for an
 # insertion op a plot on top.
-hic.matrixplot(WT_40kb, chrom = 'chr20', start = 0,
-end = 63025520, skipAnn = T, cut.off = 25)
+hic.matrixplot(WT_40kb,
+  chrom = "chr20", start = 0,
+  end = 63025520, skipAnn = T, cut.off = 25
+)
 
 # Plot the compartment-score as a histogram
 plot(WT_40kb_CS$start, WT_40kb_CS$compartmentScore,
-t = 'h', axes = F); axis(2)
+  t = "h", axes = F
+)
+axis(2)
 }

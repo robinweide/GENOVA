@@ -35,7 +35,7 @@ Please use only low-resolution matrices with this (e.g. 1Mb resolution)
 }
 \examples{
 # use chromosomeMatrix without chromosome M and Y.
-chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"), cut.off = 2)
+chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM", "chrY"), cut.off = 2)
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

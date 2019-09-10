@@ -32,7 +32,7 @@ rep_mat_lookup <- function(
     )
   }
 
-  dnames <- rel_pos * explist[[1]]$RES
+  dnames <- format(rel_pos * explist[[1]]$RES, trim = TRUE)
 
   # Set data.table core usage
   dt.cores <- data.table::getDTthreads()
@@ -44,7 +44,7 @@ rep_mat_lookup <- function(
 
     # Calculate true values
     arr <- matrix_lookup(explist[[i]]$ICE, anchors, rel_pos)
-    mat_mu <- summarize_lookup(arr, outlier_filter)
+    mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
       dimnames(arr) <- list(
@@ -59,9 +59,9 @@ rep_mat_lookup <- function(
     # Calculate shifted values
     if (shift > 0) {
       shifted_arr <- matrix_lookup(explist[[i]]$ICE, shift_anchors, rel_pos)
-      shifted_mu <- summarize_lookup(shifted_arr,
-        outlier_filter,
-        keep = mat_mu$keep
+      shifted_mu <- summarise_lookup(shifted_arr,
+                                     outlier_filter,
+                                     keep = mat_mu$keep
       )$mat
       dimnames(shifted_mu) <- dimnames(mat_mu$mat)
       if (raw) {
@@ -105,6 +105,23 @@ rep_mat_lookup <- function(
   } else {
     names(explist)
   }
+
+  merge_res <- names(results[[1]])
+  results <- lapply(merge_res, function(res) {
+    objects <- lapply(results, `[[`, res)
+    # Return array if rawdata
+    if (inherits(objects[[1]], "array")) {
+      return(objects)
+    }
+    # Simplify matrix to array
+    newobject <- do.call(c, objects)
+    dim(newobject) <- c(dim(objects[[1]]),
+                        length(results))
+    dimnames(newobject) <- c(dimnames(objects[[1]]),
+                             list(names(results)))
+    newobject
+  })
+  names(results) <- merge_res
 
   results
 }
@@ -167,7 +184,7 @@ matrix_lookup <- function(ICE, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-summarize_lookup <- function(
+summarise_lookup <- function(
                              array, outlier_filter = c(0, 1), keep = NULL) {
   if (is.null(keep)) {
     keep <- apply(array, 1, function(slice) {

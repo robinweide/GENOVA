@@ -49,7 +49,8 @@ apa <- APA(list(WT = WT_10kb, KO = KO_10kb), bedpe = WT_loops)
 
 # Alternative usage with pre-calculated anchors
 anchors <- anchors_APA(WT_10kb$ABS, WT_10kb$RES,
-                       bedpe = WT_loops)
+  bedpe = WT_loops
+)
 apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
 
 # Visualising results

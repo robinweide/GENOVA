@@ -4,8 +4,9 @@
 \alias{visualise.APA.base}
 \title{visualise.APA.ggplot}
 \usage{
-visualise.APA.base(APAlist, title, focus = 1, color.fun1 = NULL,
-  color.fun2 = NULL, abs.max = NULL, rel.max = NULL, ...)
+\method{visualise}{APA.base}(APAlist, title, focus = 1,
+  color.fun1 = NULL, color.fun2 = NULL, abs.max = NULL,
+  rel.max = NULL, ...)
 }
 \arguments{
 \item{APAlist}{A list of results from the APA-function.}

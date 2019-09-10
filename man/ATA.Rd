@@ -35,7 +35,9 @@ which leads to all start- and end-position of TADs overlapping. Next, it average
 a single Z-stack matrix.
 }
 \examples{
-ATA_results_of_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
+## Not run:
+ATA_results_of_RAOetal <- ATA(experiment = Rao_20k, tad.bed = TADs)
+## End(**Not run**)
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

@@ -4,7 +4,7 @@
 \alias{visualise.ATA.ggplot}
 \title{visualise.ATA.ggplot}
 \usage{
-visualise.ATA.ggplot(stackedlist, title = "ATA", focus = 1,
+\method{visualise}{ATA.ggplot}(stackedlist, title = "ATA", focus = 1,
   zlim1 = NULL, zlim2 = NULL)
 }
 \arguments{
@@ -31,14 +31,14 @@ A positive value in the differential plots thus means an enrichment in that samp
 }
 \examples{
 # run ATA
-ATA_RAOetal <- ATA(experiment = Rao_20k,tad.bed = TADs)
-ATA_Sanbornetal <- ATA(experiment = Sanborn_20k,tad.bed = TADs)
+ATA_RAOetal <- ATA(experiment = Rao_20k, tad.bed = TADs)
+ATA_Sanbornetal <- ATA(experiment = Sanborn_20k, tad.bed = TADs)
 
 # make a named list
 ATAlist <- list(Rao = ATA_RAOetal, Sanborn = ATA_Sanbornetal)
 
 # plot the results
-visualise.ATA.ggplot(ATAlist, focus = 1, title = 'Rao vs Sanborn.')
+visualise.ATA.ggplot(ATAlist, focus = 1, title = "Rao vs Sanborn.")
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

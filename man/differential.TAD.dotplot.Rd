@@ -32,16 +32,22 @@ inter TAD contact frequencies for different TAD distances.
 }
 \examples{
 # get scores for WT and WAPL data
-TAD_N_WT   <- intra.inter.TAD.contacts(TAD = WT_TADs,
-                                       max.neighbor = 10,
-                                       exp = Hap1_WT_10kb)
-TAD_N_WAPL <- intra.inter.TAD.contacts(TAD = WT_TADs,
-                                       max.neighbor = 10,
-                                       exp = Hap1_WAPL_10kb)
+TAD_N_WT <- intra.inter.TAD.contacts(
+  TAD = WT_TADs,
+  max.neighbor = 10,
+  exp = Hap1_WT_10kb
+)
+TAD_N_WAPL <- intra.inter.TAD.contacts(
+  TAD = WT_TADs,
+  max.neighbor = 10,
+  exp = Hap1_WAPL_10kb
+)
 
 # plot a TAD+N dotplot
-differential.TAD.dotplot(exp1 = TAD_N_WT, # denominator
-                         exp2 = TAD_N_WAPL) # numerator
+differential.TAD.dotplot(
+  exp1 = TAD_N_WT, # denominator
+  exp2 = TAD_N_WAPL
+) # numerator
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

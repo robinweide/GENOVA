@@ -4,7 +4,7 @@
 \alias{visualise.compartmentStrength}
 \title{Plot compartment-strengths}
 \usage{
-visualise.compartmentStrength(SBoutList, showInteractions = F)
+\method{visualise}{compartmentStrength}(SBoutList, showInteractions = F)
 }
 \arguments{
 \item{SBoutList}{A list of outputs trom saddle().}
@@ -19,9 +19,8 @@ Takes the input from saddle() and produces a boxplot of compartment-strenghts.
 }
 \examples{
 # run saddle() on all chromosomes with 25 bins.
-saddle_WT = saddle(exp = Hap1_WT_1MB, chip = H3K27acPeaks,nBins = 25)
+saddle_WT <- saddle(exp = Hap1_WT_1MB, chip = H3K27acPeaks, nBins = 25)
 
 # plot compartment-strengths
-CS_out = visualise.compartmentStrength(list(saddle_WT))
-
+CS_out <- visualise.compartmentStrength(list(saddle_WT))
 }

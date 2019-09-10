@@ -16,7 +16,7 @@
 #' @param raw A \code{logical} of length 1: should a bare mimimum plot be
 #'   returned?
 #'
-#' @details Difference (\u0394) panels are created by subtracting the values of each
+#' @details Difference panels are created by subtracting the values of each
 #'   sample by the values of the sample indicated by the \code{subtract}
 #'   argument. Hence, a clear positive signal in the difference panels indicates
 #'   enrichment in that sample versus the \code{subtract}-sample.
@@ -50,30 +50,53 @@
 #'   ggplot2::scale_fill_gradient(aesthetics = "fill2")
 #' @export
 #' @rdname APA_PESCAn_visualisation
-autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
-  # Name by order if names are missing
-  if (is.null(names(results))) {
-    names(results) <- seq_along(results)
-  }
-  # Melt matrices to data.frames
-  mats <- lapply(results, `[[`, "signal")
-  melts <- lapply(names(mats), function(i) {
-    cbind(reshape2::melt(mats[[i]]), mode = "Individual", sample = i)
+visualise.APA_discovery <- function(discovery, subtract = 1, raw = FALSE) {
+
+  mats <- discovery$signal
+
+  # Format dimnames if missing
+  dims <- dim(mats)
+  names_dims <- dimnames(mats)
+  names_dims <- lapply(seq_along(dims), function(i) {
+    if (is.null(names_dims[[i]])) {
+      return(seq_len(dims[i]))
+    } else {
+      return(names_dims[[i]])
+    }
   })
-  melts <- do.call(rbind, melts)
+
+  # Setup coordinates
+  coords <- data.frame(
+    x = as.numeric(names_dims[[2]][as.vector(col(mats[,,1]))]),
+    y = as.numeric(names_dims[[1]][as.vector(row(mats[,,1]))])
+  )
+
+  # Fill coordinates with experiment data
+  df <- lapply(seq_len(dims[3]), function(i) {
+    cbind.data.frame(coords,
+                     name = names_dims[[3]][i],
+                     mode = "Individual",
+                     value = as.vector(mats[,,i]))
+  })
+  df <- do.call(rbind, df)
 
   # Calculate diff data if subtract is supplied
   if (!is.null(subtract)) {
-    ref <- mats[[subtract]]
-    diffs <- lapply(names(mats), function(i) {
-      cbind(reshape2::melt(mats[[i]] - ref), mode = "\u0394", sample = i)
+    diff <- as.vector(mats[,,subtract])
+    diff <- as.vector(mats) - rep(diff, dims[3])
+    dim(diff) <- dim(mats)
+    diff <- lapply(seq_len(dims[3]), function(i) {
+      cbind.data.frame(coords,
+                       name = names_dims[[3]][i],
+                       mode = "Difference",
+                       value = as.vector(diff[,,i]))
     })
-    diffs <- do.call(rbind, diffs)
-    melts <- rbind(melts, diffs)
+    diff <- do.call(rbind, diff)
+    df <- rbind(df, diff)
   }
 
   # Setup base of plot
-  g <- ggplot2::ggplot(melts, aes(Var1, Var2))
+  g <- ggplot2::ggplot(df, ggplot2::aes(x, y))
 
   if (!is.null(subtract)) {
     # Setup basics of the diff plots
@@ -82,19 +105,19 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
     suppressWarnings(
       g <- g + ggplot2::geom_raster(
         data = function(x) {
-          x[x$mode == "\u0394", ]
+          x[x$mode == "Difference", ]
         },
-        aes(fill2 = value)
+        ggplot2::aes(fill2 = value)
       ) +
-        ggplot2::facet_grid(mode ~ sample, switch = "y")
+        ggplot2::facet_grid(mode ~ name, switch = "y")
     )
 
     if (!raw) {
       g <- g + ggplot2::scale_fill_gradientn(
         colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
         aesthetics = "fill2",
-        name = "\u0394",
-        limits = c(-1, 1) * max(abs(melts$value[melts$mode == "\u0394"]))
+        name = "Difference",
+        limits = c(-1, 1) * max(abs(df$value[df$mode == "Difference"]))
       )
       # Hack for scale
       g$scales$scales[[1]]$guide <- ggplot2::guide_colourbar()
@@ -120,7 +143,7 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
     g$layers[[1]]$geom <- new_geom
   } else {
     # No special treatment needed for just one colourscale
-    g <- g + ggplot2::facet_grid(~sample)
+    g <- g + ggplot2::facet_grid(~ name)
   }
 
   # Add the non-diff plots
@@ -128,7 +151,7 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
     data = function(x) {
       x[x$mode == "Individual", ]
     },
-    aes(fill = value)
+    ggplot2::aes(fill = value)
   )
 
   if (raw) {
@@ -138,8 +161,8 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
   # Decorating of the plot
   g <- g + ggplot2::scale_fill_gradientn(
     colours = c("white", "orange", "red", "black"),
-    guide = guide_colourbar(order = 1),
-    name = "\u03bc Contacts"
+    guide = ggplot2::guide_colourbar(order = 1),
+    name = expression(mu*" Contacts")
   ) +
     ggplot2::scale_x_continuous(
       name = "",
@@ -174,32 +197,33 @@ autoplot.APA_results <- function(results, subtract = 1, raw = FALSE) {
     ggplot2::theme(
       aspect.ratio = 1,
       strip.placement = "outside",
-      strip.background = element_blank(),
-      panel.border = element_rect(fill = NA, colour = "grey30")
+      strip.background = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(fill = NA, colour = "grey30")
     )
   g
 }
 
 #' @export
 #' @rdname APA_PESCAn_visualisation
-autoplot.PESCAn_results <- function(results,
-                                    subtract = 1,
-                                    mode = c("obsexp", "signal"),
-                                    raw = FALSE) {
+visualise.PESCAn_discovery <- function(discovery,
+                                       subtract = 1,
+                                       mode = c("obsexp", "signal"),
+                                       raw = FALSE) {
   # Handle mode settings
   mode <- match.arg(mode)
-  hasobsexp <- all(sapply(results, function(res) "obsexp" %in% names(res)))
+  hasobsexp <- "obsexp" %in% names(discovery)
+  if (mode == "obsexp" & !hasobsexp) {
+    warning("Mode was set to 'obsexp' but no such result was found")
+  }
   hasobsexp <- hasobsexp && mode == "obsexp"
-  res <- lapply(results, function(res) {
-    if (hasobsexp) {
-      list(signal = res$obsexp)
-    } else {
-      list(signal = res$signal)
-    }
-  })
+  res <- if (hasobsexp) {
+    setNames(discovery[names(discovery) %in% "obsexp"], "signal")
+  } else {
+    discovery
+  }
 
   # Cannibalise the APA autoplot function
-  g <- autoplot.APA_results(res, subtract = subtract, raw = raw)
+  g <- visualise.APA_discovery(res, subtract = subtract, raw = raw)
 
   # Adjust for PESCAn
   if (hasobsexp) {
@@ -221,7 +245,7 @@ autoplot.PESCAn_results <- function(results,
         colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
         name = expression(frac("Observed", "Expected")),
         limits = c(-1, 1) * max(abs(g$data$value[g$data$mode == "Individual"] - 1)) + 1,
-        guide = guide_colourbar(order = 1)
+        guide = ggplot2::guide_colourbar(order = 1)
       )
     }
   }

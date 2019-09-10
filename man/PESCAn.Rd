@@ -54,17 +54,22 @@ Performs an all-to-all Hi-C contact analysis for specified regions.
 \examples{
 # Typical usage: PESCAn for super enhancers using a 1 MB
 # circular permutation on a pair of experiments.
-pescan <- PESCAn(explist = list(WT_40kb, KO_40kb),
-                  bed = super_enhancers,
-                  shift = 1e6)
+pescan <- PESCAn(
+  explist = list(WT_40kb, KO_40kb),
+  bed = super_enhancers,
+  shift = 1e6
+)
 
 # Alternative usage with pre-calculated anchors and no permutation
 anchors <- anchors_PESCAn(WT_40kb$ABS, WT_40kb$RES,
-                          genes_tss,
-                          dist_thres = c(5e6, 15e6))
-pescan <- PESCAn(explist = list(WT_40kb),
-                  anchors = anchors,
-                  shift = 0)
+  genes_tss,
+  dist_thres = c(5e6, 15e6)
+)
+pescan <- PESCAn(
+  explist = list(WT_40kb),
+  anchors = anchors,
+  shift = 0
+)
 
 # Visualising PE-SCAns
 autoplot(pescan)

@@ -51,6 +51,37 @@ print.contacts <- function(x) {
 
 #' @export
 #' @keywords internal
+print.ATA_discovery <- function(x) {
+  res <- abs(median(diff(as.numeric(dimnames(x$signal)[[1]]))))
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+
+  string <- paste0("A ", attr(x, "package"), " ATA_discovery object involving the following ",
+                   dim(x$signal)[3],
+                   ' experiment(s):\n"',
+                   paste0(dimnames(x$signal)[[3]], collapse  = '", "'),
+                   '" at a resolution of ', res, '.\n\n')
+  slots0 <- paste0("Contains the following slots:\n")
+  slots1 <- paste0("- signal:\tAn ", dim(x$signal)[1], " x ", dim(x$signal)[2],
+                   " x ", dim(x$signal)[3], " array with summarised ATA results.\n")
+  slots2 <- if ("signal_raw" %in% names(x)) {
+    paste0("- signal_raw:\tA list of length ", length(x$signal_raw),
+           " containing arrays of unsummarised results.\n")
+  } else {""}
+
+  cat(string)
+  cat(slots0)
+  cat(slots1)
+  cat(slots2)
+}
+
+#' @export
+#' @keywords internal
 print.APA_discovery <- function(x) {
   res <- abs(median(diff(as.numeric(dimnames(x$signal)[[1]]))))
   res <- if (res %% 1e6 == 0) {

@@ -80,6 +80,7 @@ anchors_PESCAn <- function(ABS, RES, bed,
     idx <- idx[order(idx[, 1], idx[, 2]), ]
   }
 
+  attr(idx, "type") <- "PESCAn"
   idx
 }
 
@@ -154,6 +155,7 @@ anchors_APA <- function(ABS, RES, bedpe,
     pmax(newbed$idx1, newbed$idx2)
   )
   idx <- idx[order(idx[, 1]), ]
+  attr(idx, "type") <- "APA"
   return(idx)
 }
 
@@ -274,20 +276,21 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
 #'
 #' @export
 anchors_filter_oob <- function(ABS, anchors, rel_pos) {
-
-  if (!is.null(attr(anchors, "type"))) {
-    if (attr(anchors, "type") == "TADs") {
+  typetest <- !is.null(attr(anchors, "type"))
+  if (typetest) {
+    type <- attr(anchors, "type")
+    if (type == "TADs") {
       left  <- ABS[match(anchors[, 1], ABS[, 4]), 1]
       right <- ABS[match(anchors[, 2], ABS[, 4]), 1]
       keep <- left == right
       anchors <- anchors[keep, ]
-      attr(anchors, "type") <- "TADs"
+      attr(anchors, "type") <- type
       return(anchors)
     }
   }
 
   # Match idx +/- relative position to chrom
-  plus <- ABS[match(anchors + max(rel_pos), ABS[, 4]), 1]
+  plus  <- ABS[match(anchors + max(rel_pos), ABS[, 4]), 1]
   minus <- ABS[match(anchors + min(rel_pos), ABS[, 4]), 1]
 
   # Check wether chromosomes have changed
@@ -295,5 +298,9 @@ anchors_filter_oob <- function(ABS, anchors, rel_pos) {
   inbounds <- apply(inbounds, 1, all)
 
   # Return anchors that are not out of bounds
-  anchors[inbounds, , drop = FALSE]
+  anchors <- anchors[inbounds, , drop = FALSE]
+  if (typetest) {
+    attr(anchors, "type") <- type
+  }
+  anchors
 }

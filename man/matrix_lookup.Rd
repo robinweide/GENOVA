@@ -21,7 +21,7 @@ A threedimensional \code{array} wherein the first dimension is
   are of length \code{m}.
 }
 \description{
-It looks up parts of the Hi-C matrix of a single experiment.
+It looks up square parts of equal size in the Hi-C matrix of a single experiment.
 }
 \seealso{
 \code{\link[GENOVA]{rep_mat_lookup}}

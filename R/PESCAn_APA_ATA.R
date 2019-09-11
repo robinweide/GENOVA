@@ -58,7 +58,7 @@ APA <- function(explist, bedpe,
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
 
   if (is.null(dist_thres)) {
-    dist_thres <- c((diff(range(rel_pos)) + 3) * res)
+    dist_thres <- c((diff(range(rel_pos)) + 3) * res, Inf)
   }
 
   # Calculate anchors
@@ -77,7 +77,7 @@ APA <- function(explist, bedpe,
     raw = raw
   )
 
-  structure(results, class = "APA_discovery")
+  structure(results, class = "APA_discovery", package = "GENOVA")
 }
 
 #' Paired-end spatial chromatin analysis
@@ -153,7 +153,55 @@ PESCAn <- function(explist, bed, shift = 1e6L,
     raw = raw
   )
 
-  structure(results, class = "PESCAn_discovery")
+  structure(results, class = "PESCAn_discovery", package = "GENOVA")
+}
+
+#' Aggregate TAD analysis
+#'
+#' Extracts Hi-C matrices around TADs, resizes these to a uniform size and
+#' averages the results for all TADs.
+#'
+#' @inheritParams PESCAn
+#' @param bed A \code{data.frame} with 3 columns in BED format, containing the
+#'   TAD boundary positions per row.
+#' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
+#'   and maximum sizes of TADs to include in basepairs.
+#' @param size A code \code{integer} vector of length 1 noting the dimensions of
+#'   the output.
+#'
+#' @return An \code{ATA_discovery} object containing arrays with the results of
+#'   the ATA for the experiments.
+#' @export
+ATA <- function(explist, bed,
+                dist_thres = c(225000, Inf),
+                size = 100L,
+                outlier_filter = c(0, 0.995),
+                anchors = NULL, raw = TRUE) {
+  # Verify experiment compatibility
+  explist <- check_compat_exp(explist)
+
+  # Initialise parameters
+  res <- explist[[1]]$RES
+  rel_pos <- seq.int(size)
+
+  if (is.null(anchors)) {
+    anchors <- anchors_ATA(
+      explist[[1]]$ABS,
+      bed,
+      dist_thres
+    )
+  }
+  pad <- if ("padding" %in% names(attributes(anchors))) {
+    attr(anchors, "padding")
+  } else {
+    "unknown"
+  }
+
+  results <- rep_mat_lookup(explist, anchors, rel_pos = rel_pos,
+                            shift = 0, outlier_filter = outlier_filter,
+                            raw = raw)
+
+  structure(results, class = "ATA_discovery", package = "GENOVA", padding = pad)
 }
 
 # Internals ---------------------------------------------------------------

@@ -161,7 +161,7 @@ PESCAn_old = function(exp, bed, shift = 1e6, minComparables = 10, mindist = 5e+0
 #'                         resolution = 40e3,
 #'                         smooth = F)
 #' @export
-visualise.PESCAn.ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...) {
+visualise_PESCAn_ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...) {
   require(ggplot2)
 
   # check if all have OE or O:

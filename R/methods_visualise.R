@@ -4,7 +4,7 @@
 #'
 #' @name RMT_visualisation
 #' @aliases APA_visualisation PESCAn_visualisation
-#' @param results A results object as returned by the \code{APA} function or the
+#' @param discovery A results object as returned by the \code{APA} function or the
 #'   \code{PESCAn} function.
 #' @param subtract An \code{integer} or \code{character} matching an experiment
 #'   name of length 1, specifying which sample should be subtracted to make the
@@ -36,17 +36,17 @@
 #' @examples
 #' # APA
 #' apa <- APA(list(WT = WT_40kb, KO = KO_40kb), WT_loops)
-#' autoplot(apa)
+#' visualise(apa)
 #'
 #' # PE-SCAn
 #' pescan <- PESCAn(list(WT = WT_40kb, KO = KO_40kb), super_enhancers)
-#' autoplot(pescan)
+#' visualise(pescan)
 #'
 #' # To plot PE-SCAn without background correction
-#' autoplot(pescan, mode = "signal")
+#' visualise(pescan, mode = "signal")
 #'
 #' # Handling 'raw' plots
-#' autoplot(pescan, raw = TRUE) +
+#' visualise(pescan, raw = TRUE) +
 #'   ggplot2::scale_fill_gradient(aesthetics = "fill2")
 #' @export
 #' @rdname APA_PESCAn_visualisation
@@ -250,5 +250,37 @@ visualise.PESCAn_discovery <- function(discovery,
     }
   }
 
+  g
+}
+
+#' @export
+#' @rdname APA_PESCAn_visualisation
+visualise.ATA_discovery <- function(discovery,
+                                    subtract = 1,
+                                    raw = FALSE) {
+  haspad <- "padding" %in% names(attributes(discovery))
+  if (haspad) {
+    padding <- attr(discovery, "padding")
+    padfun <- function(x) {
+      cumsum(c(padding - 0.5, 1)) / (2 * padding) * diff(x) + min(x)
+    }
+  } else {
+    padfun <- function(x) {
+      seq(x[1], x[2], length.out = 5)[c(2,4)]
+    }
+  }
+
+  # Cannibalise the APA autoplot function
+  g <- GENOVA:::visualise.APA_discovery(discovery, subtract, raw)
+
+  if (!raw) {
+    g$scales$scales[[3]]$breaks <- g$scales$scales[[4]]$breaks <- padfun
+    g$scales$scales[[3]]$labels <- g$scales$scales[[4]]$labels <-
+      c("5' border", "3' border")
+    if (!is.null(subtract)) {
+      g$scales$scales[[2]]$limits <- quantile(g$data$value, c(0.1, 0.95))
+      g$scales$scales[[2]]$oob <- scales::squish
+    }
+  }
   g
 }

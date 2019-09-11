@@ -16,7 +16,7 @@
 #' differential plots thus means an enrichment in that sample versus the
 #' \code{focus}-sample.
 #' @export
-visualise.APA.ggplot <- function(APAlist, title = "APA", zTop = NULL, zBottom = NULL, focus = 1, ...) {
+visualise_APA_ggplot <- function(APAlist, title = "APA", zTop = NULL, zBottom = NULL, focus = 1, ...) {
   OL <- c()
   for (i in 1:length(APAlist)) {
     OL <- c(OL, APAlist[[i]]$OUTLIERCORRECTIONSWITCH)

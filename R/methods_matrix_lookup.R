@@ -39,11 +39,18 @@ rep_mat_lookup <- function(
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
 
+  lookup_fun <- if (!is.null(attr(anchors, "type")) &
+                    attr(anchors, "type") == "TADs") {
+    getFromNamespace("lookup_resizer", "GENOVA")
+  } else {
+    getFromNamespace("matrix_lookup", "GENOVA")
+  }
+
   # Loop over experiments, calculate PESCAn
   results <- lapply(seq_along(explist), function(i) {
 
     # Calculate true values
-    arr <- matrix_lookup(explist[[i]]$ICE, anchors, rel_pos)
+    arr <- lookup_fun(explist[[i]]$ICE, anchors, rel_pos)
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
@@ -130,7 +137,7 @@ rep_mat_lookup <- function(
 
 #' Engine for repeated matrix lookups
 #'
-#' It looks up parts of the Hi-C matrix of a single experiment.
+#' It looks up square parts of equal size in the Hi-C matrix of a single experiment.
 #'
 #' @param ICE The Hi-C matrix slot of a GENOVA experiment object.
 #' @inheritParams rep_mat_lookup
@@ -162,6 +169,76 @@ matrix_lookup <- function(ICE, anchors, rel_pos) {
       length(rel_pos)[c(1, 1)]
     )
   )
+}
+
+
+#' Engine for repeated matrix lookup and resizing
+#'
+#' It looks up square parts of unequal size around the diagonal of a single Hi-C
+#' experiment and resizes these to a single size.
+#'
+#' @param ICE The Hi-C matrix slot of a GENOVA experiment object.
+#' @param anchors A \code{matrix} with two columns containing pre-computed
+#'   indices between which a square is looked up.
+#' @param rel_pos A \code{integer} sequence ranging from \code{[0-n]} wherein
+#'   \code{n} is the target size to which individual squares are resized.
+#'
+#'   \code{anchors} specify two points on the diagonal between which the region
+#'   should be looked up.
+#'
+#' @return A threedimensional \code{array} wherein the first dimension is
+#'   parallel to the rows in \code{anchors}, and the second and third dimensions
+#'   are of length \code{m}.
+#'
+#' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
+#'
+#' @keywords internal
+lookup_resizer <- function(ICE, anchors, rel_pos) {
+  template <- matrix(0, tail(rel_pos, 1), tail(rel_pos, 1))
+  coords <- as.matrix(expand.grid(rel_pos, rel_pos))
+  max_pos <- max(rel_pos)
+
+  # Array transpose to match rep_mat_lookup expectation
+  base::aperm(vapply(seq_len(nrow(anchors)), function(j) {
+    # Prep parameters
+    i <- seq.int(anchors[j, 1], anchors[j, 2])
+    len <- length(i)
+    seqs <- as.double(seq.int(len))
+    min <- i[1] - 1
+
+    # Setup indices
+    idx <- data.table(V1 = rep(i, each = len),
+                      V2 = rep.int(i, len),
+                      key = c("V1", "V2"))
+
+    # Lookup matrix
+    mat <- ICE[idx, dt_matrix(V3, V1, V2, len, min),
+               nomatch = NULL]
+
+    # Interpolate coordinates
+    xy <- (coords - 1) * (len - 1) / (max_pos - 1) + 1
+    x <- xy[, 1]
+    y <- xy[, 2]
+
+    # Match to current coordinates
+    dx <- x - {flx <- floor(x)}
+    dy <- y - {fly <- floor(y)}
+
+    # Mellow out the extremes
+    dx[flx == len] <- 1
+    dy[fly == len] <- 1
+    flx[flx == len] <- len - 1
+    fly[fly == len] <- len - 1
+
+    # Interpolate values
+    template[coords] <-
+      mat[cbind(flx, fly)] * (1 - dx) * (1 - dy) +
+      mat[cbind(flx + 1, fly)] * dx * (1 - dy) +
+      mat[cbind(flx, fly + 1)] * (1 - dx) * dy +
+      mat[cbind(flx + 1, fly + 1)] * dx * dy
+
+    template
+  }, template), c(3, 1, 2))
 }
 
 #' Summarise the results of a repeated matrix lookup

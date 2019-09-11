@@ -220,7 +220,7 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins) {
           ev <- CS_CA
         } else {
           warning("The amount on CS-scores and the amount of Hi-C bins
-                  is not the same. 
+                  is not the same.
 Either call CS with the same resolution
                   or set CS to NULL.
 Continuing with NULL.")
@@ -280,7 +280,7 @@ Continuing with NULL.")
           ev <- CS_CA
         } else {
           warning("The amount on CS-scores and the amount of Hi-C bins
-                is not the same. 
+                is not the same.
 Either call CS with the same resolution
                 or set CS to NULL.
 Continuing with NULL.")
@@ -400,7 +400,7 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
 #' # plot compartment-strengths
 #' CS_out <- visualise.compartmentStrength(list(saddle_WT))
 #' @export
-visualise.compartmentStrength <- function(SBoutList, showInteractions = F) {
+visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
   require(ggplot2)
   strengthDF <- data.frame()
   interactionDF <- data.frame()
@@ -503,7 +503,7 @@ rotate <- function(x) t(apply(x, 2, rev))
 #' # plot saddle-plot
 #' visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
 #' @export
-visualise.saddle <- function(SBoutList, addText = T,
+visualise_saddle <- function(SBoutList, addText = T,
                              zlim = c(0.5, 2), EVlim = c(-1.5, 1.5),
                              square = T, crossLines = NULL) {
   # par_temp = par()

@@ -7,6 +7,7 @@
 \alias{APA_visualisation}
 \alias{PESCAn_visualisation}
 \alias{visualise.PESCAn_discovery}
+\alias{visualise.ATA_discovery}
 \title{Visualise APA and PE-SCAn results}
 \usage{
 visualise(discovery, ...)
@@ -15,8 +16,13 @@ visualise(discovery, ...)
 
 \method{visualise}{PESCAn_discovery}(discovery, subtract = 1,
   mode = c("obsexp", "signal"), raw = FALSE)
+
+\method{visualise}{ATA_discovery}(discovery, subtract = 1, raw = FALSE)
 }
 \arguments{
+\item{discovery}{A results object as returned by the \code{APA} function or the
+\code{PESCAn} function.}
+
 \item{subtract}{An \code{integer} or \code{character} matching an experiment
 name of length 1, specifying which sample should be subtracted to make the
 difference panels. Alternatively, set to \code{NULL} for no difference
@@ -28,9 +34,6 @@ returned?}
 \item{mode}{(PE-SCAn only) A \code{character} vector of length 1 with
 \code{"obsexp"} for plotting the observed over expected or \code{"signal"}
 for plotting the signal only (no background correction).}
-
-\item{results}{A results object as returned by the \code{APA} function or the
-\code{PESCAn} function.}
 }
 \value{
 A \code{\link[ggplot2]{ggplot}} object.
@@ -55,17 +58,17 @@ Difference panels are created by subtracting the values of each
 \examples{
 # APA
 apa <- APA(list(WT = WT_40kb, KO = KO_40kb), WT_loops)
-autoplot(apa)
+visualise(apa)
 
 # PE-SCAn
 pescan <- PESCAn(list(WT = WT_40kb, KO = KO_40kb), super_enhancers)
-autoplot(pescan)
+visualise(pescan)
 
 # To plot PE-SCAn without background correction
-autoplot(pescan, mode = "signal")
+visualise(pescan, mode = "signal")
 
 # Handling 'raw' plots
-autoplot(pescan, raw = TRUE) +
+visualise(pescan, raw = TRUE) +
   ggplot2::scale_fill_gradient(aesthetics = "fill2")
 }
 \seealso{

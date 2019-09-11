@@ -58,7 +58,7 @@ APA <- function(explist, bedpe,
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
 
   if (is.null(dist_thres)) {
-    dist_thres <- c((diff(range(rel_pos)) + 3) * res)
+    dist_thres <- c((diff(range(rel_pos)) + 3) * res, Inf)
   }
 
   # Calculate anchors

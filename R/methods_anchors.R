@@ -213,6 +213,7 @@ anchors_ATA <- function(ABS, bed,
 
   # Attribute to let matrix lookup methods know it is performing ATA
   attr(idx, "type") <- "TADs"
+  attr(idx, "padding") <- padding
   return(idx)
 }
 

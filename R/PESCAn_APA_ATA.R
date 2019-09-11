@@ -191,12 +191,17 @@ ATA <- function(explist, bed,
       dist_thres
     )
   }
+  pad <- if ("padding" %in% names(attributes(anchors))) {
+    attr(anchors, "padding")
+  } else {
+    "unknown"
+  }
 
   results <- rep_mat_lookup(explist, anchors, rel_pos = rel_pos,
                             shift = 0, outlier_filter = outlier_filter,
                             raw = raw)
 
-  structure(results, class = "ATA_discovery", package = "GENOVA")
+  structure(results, class = "ATA_discovery", package = "GENOVA", padding = pad)
 }
 
 # Internals ---------------------------------------------------------------

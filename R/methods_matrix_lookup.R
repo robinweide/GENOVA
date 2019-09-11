@@ -208,8 +208,8 @@ lookup_resizer <- function(ICE, anchors, rel_pos) {
 
     # Setup indices
     idx <- data.table(V1 = rep(i, each = len),
-                      V2 = rep.int(i, len))
-    setkey(idx, V1, V2)
+                      V2 = rep.int(i, len),
+                      key = c("V1", "V2"))
 
     # Lookup matrix
     mat <- ICE[idx, dt_matrix(V3, V1, V2, len, min),

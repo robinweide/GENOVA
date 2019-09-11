@@ -157,6 +157,63 @@ anchors_APA <- function(ABS, RES, bedpe,
   return(idx)
 }
 
+#' Anchor positions for ATA
+#'
+#' Transforms a BED-formatted \code{data.frame} containing TAD positions into
+#' indices to the Hi-C matrix.
+#'
+#' @inheritParams anchors_PESCAn
+#' @param bed A \code{data.frame} with 3 columns in BED format, containing TAD
+#'   boundary positions for one TAD at each row.
+#' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
+#'   and maximum TAD sizes to include.
+#' @param padding A \code{numeric} of length 1 to determine the padding around
+#'   TADs, expressed in TAD widths.
+#'
+#' @return A \code{matrix} with two columns.
+#'
+#' @details The resulting matrix contains ordered indices to the Hi-C matrix
+#'   slot in the GENOVA experiment.
+#'
+#' @seealso \code{\link[GENOVA]{ATA}} for context.
+#'
+#'   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
+#'   \code{data.frame}s to Hi-C indices.
+#' @export
+anchors_ATA <- function(ABS, bed,
+                        dist_thres = c(225000, Inf),
+                        padding = 1) {
+  if (!inherits(bed, "data.frame")) {
+    bed <- as.data.frame(bed)[, 1:3]
+  }
+
+  # Setup parameters
+  width <- abs((bed[, 3] - bed[, 2]))
+  mid <- round((bed[, 2] + bed[, 3]) / 2)
+  keep <- width  > dist_thres[1] & width < dist_thres[2]
+
+  # Resize regions
+  bed <- data.frame(bed[,1],
+                    mid - width * padding,
+                    mid + width * padding)[keep, ]
+
+  # Translate to Hi-C indices
+  idx <- cbind(
+    bed2idx(ABS, bed, mode = "start"),
+    bed2idx(ABS, bed, mode = "end")
+  )
+  # Sort
+  idx <- cbind(
+    pmin(idx[, 1], idx[, 2]),
+    pmax(idx[, 1], idx[, 2])
+  )
+  idx <- idx[order(idx[, 1]), ]
+
+  # Attribute to let matrix lookup methods know it is performing ATA
+  attr(idx, "type") <- "TADs"
+  return(idx)
+}
+
 # Manipulations ---------------------------------------------------------
 
 #' Shift anchors
@@ -217,6 +274,17 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
 #'
 #' @export
 anchors_filter_oob <- function(ABS, anchors, rel_pos) {
+
+  if (!is.null(attr(anchors, "type"))) {
+    if (attr(anchors, "type") == "TADs") {
+      left  <- ABS[match(anchors[, 1], ABS[, 4]), 1]
+      right <- ABS[match(anchors[, 2], ABS[, 4]), 1]
+      keep <- left == right
+      anchors <- anchors[keep, ]
+      attr(anchors, "type") <- "TADs"
+      return(anchors)
+    }
+  }
 
   # Match idx +/- relative position to chrom
   plus <- ABS[match(anchors + max(rel_pos), ABS[, 4]), 1]

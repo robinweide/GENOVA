@@ -18,7 +18,7 @@
 #' differential plots thus means an enrichment in that sample versus the
 #' \code{focus}-sample.
 #' @export
-visualise.APA.base <- function(APAlist, title, focus = 1, color.fun1 = NULL, color.fun2 = NULL, abs.max = NULL, rel.max = NULL, ...) {
+visualise_APA_base <- function(APAlist, title, focus = 1, color.fun1 = NULL, color.fun2 = NULL, abs.max = NULL, rel.max = NULL, ...) {
   # set the margins and store the old settings
   opar <- par(mar = rep(3, 4))
 

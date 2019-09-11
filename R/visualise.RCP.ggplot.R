@@ -24,7 +24,7 @@
 #' visualise.RCP.ggplot(RCP_out, combine = T, smooth = T, lineOnly = T, xlim = c(5, 110))
 #' @return A ggplot-object
 #' @export
-visualise.RCP.ggplot <- function(RCPdata, smooth = F, combine = T, ylim = NULL, xlim = NULL, lineOnly = T, lineWidth = 1, errWidth = 1, pointWidth = 0.5) {
+visualise_RCP_ggplot <- function(RCPdata, smooth = F, combine = T, ylim = NULL, xlim = NULL, lineOnly = T, lineWidth = 1, errWidth = 1, pointWidth = 0.5) {
   cols <- RCPdata$color
   p <- NULL
   colorOnBed <- F

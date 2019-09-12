@@ -7,19 +7,19 @@
 shuffleHiC(MAT, symmetric = T)
 }
 \arguments{
-\item{MAT}{A Hi-C matrix: can be produced by `select.subset()`.}
+\item{MAT}{A Hi-C matrix: can be produced by `select_subset()`.}
 
 \item{symmetric}{In some special cases you might not want to get a symmetric matrix back. Set this argument on FALSE.}
 }
 \value{
-A shuffled version of the input: either a list with the shuffled `z` (when using `select.subset`) or a shuffled matrix.
+A shuffled version of the input: either a list with the shuffled `z` (when using `select_subset`) or a shuffled matrix.
 }
 \description{
-ShuffleHiC shuffles a matrix from `select.subset()`` diagonal-wise. That is, every diagonal in the matrix is shuffled independently.
+ShuffleHiC shuffles a matrix from `select_subset()`` diagonal-wise. That is, every diagonal in the matrix is shuffled independently.
 }
 \examples{
 ## Shuffle a region on chromosome 1
-HiCregion <- select.subset(EXP, chrom = "chr1", start = 15e6, end = 20e6)
+HiCregion <- select_subset(EXP, chrom = "chr1", start = 15e6, end = 20e6)
 HiCregion_shuffled <- shuffleHiC(HiCregion)
 
 # plot observed/expected

@@ -27,7 +27,7 @@ insulation.plot.single <- function(exp1, chrom, start, end, cut.off = NULL, wind
   # layout
 
   # get a matrix from the experiment
-  mat1 <- select.subset(exp1, chrom, start, end)
+  mat1 <- select_subset(exp1, chrom, start, end)
 
   if (is.null(cut.off)) {
     cut.off <- max(quantile(mat1$z, .99))
@@ -104,8 +104,8 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
   # layout
 
   # get a matrix from the experiment
-  mat1 <- select.subset(exp1, chrom, start, end)
-  mat2 <- select.subset(exp2, chrom, start, end)
+  mat1 <- select_subset(exp1, chrom, start, end)
+  mat2 <- select_subset(exp2, chrom, start, end)
 
   mat1$z[lower.tri(mat1$z)] <- mat2$z[lower.tri(mat2$z)]
 
@@ -297,7 +297,7 @@ insulation.score <- function(hic, window.size, chrom, start, end, diag.add = 0, 
   if (window.size %% 2 != 0) {
     stop("Please use an even window size")
   }
-  mat <- select.subset(hic, chrom, start, end)
+  mat <- select_subset(hic, chrom, start, end)
   ins.score <- matrix.insulation(mat, window.size)
   if (local) {
     ins.score[, 2] <- log2(ins.score[, 2] / mean(ins.score[, 2], na.rm = T))
@@ -356,7 +356,7 @@ chromosome.wide.insulation <- function(hic, window.size, chrom) {
     end <- start + window + (window.size - 1) * hic$RES
     # update the start so that it also includes a flanking region
     start <- start - (window.size - 1) * hic$RES
-    mat <- select.subset(hic, chrom, start, end)
+    mat <- select_subset(hic, chrom, start, end)
     ins.vec <- matrix.insulation(mat, window.size)
 
     # select.sub takes centorid of bin, this sets it to the upstream end.

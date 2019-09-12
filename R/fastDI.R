@@ -21,7 +21,7 @@
 #' @export
 fastDI <- function(experiment, chrom, start, end, max.i = 100) {
   resolution <- experiment$RES
-  mat <- select.subset(experiment, chrom, start, end)$z
+  mat <- select_subset(experiment, chrom, start, end)$z
 
   data.vec <- as.vector(mat)
   iv <- as.vector(col(mat))

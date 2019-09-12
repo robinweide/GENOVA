@@ -92,7 +92,7 @@ switch.EV <- function(ev.data, chip, chrom) {
 # ===============================================================================
 saddle.core <- function(exp, chip, chrom, start, end, CS, nBins) {
   # select a region of the genome
-  mat <- select.subset(exp, chrom, start, end)
+  mat <- select_subset(exp, chrom, start, end)
 
   ev <- NULL
   if (is.null(CS)) {

@@ -76,3 +76,38 @@ dt_matrix <- function(x, i, j, dim, offset) {
   m[i] <- c(x, x)
   m
 }
+
+
+#' Get a matrix from a BED-like entry
+#'
+#' Extracts a square symmetric matrix around the diagonal from a \code{contacts}
+#' object.
+#'
+#' @param exp The \code{contacts} objects produced by
+#'   \code{construct.experiment()}
+#' @param chrom A \code{character} of length 1: the chromosome.
+#' @param start An \code{integer} of length 1 noting the start position in bp.
+#' @param end An \code{integer} of length 1 noting the end position in bp.
+#'
+#' @return A list with the \code{X} and \code{Y} coordinates and a \code{matrix
+#'   Z} containing the contacts at these coordinates.
+#' @export
+#'
+#' @examples
+#' # Get the TP53-locus in an experiment mapped to hg19
+#' mat <- select_subset(WT, "chr17", 75e5, 76e5)
+#'
+#' # Plot the region
+#' image(mat)
+select_subset <- function(exp, chrom, start, end) {
+  idx <- which(exp$ABS[, 1] == chrom & exp$ABS[, 2] >= start & exp$ABS[, 2] <= end)
+  pos <- rowMeans(exp$ABS[idx, 2:3])
+  i <- exp$ABS[idx, 4]
+  min <- i[1] - 1
+  len <- length(i)
+  list(x = locs,
+       y = locs,
+       z = exp$ICE[CJ(V1 = i, V2 = i),
+                   dt_matrix(V3, V1, V2, len, min),
+                   nomatch = NULL])
+}

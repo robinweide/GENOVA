@@ -62,7 +62,7 @@ ATA_old <- function(experiment, tad.bed, smallTreshold = 225000, rmOutlier = F, 
   tad.list <- split(tad, seq(nrow(tad)))
 
   rawMatList <- vapply(tad.list, FUN.VALUE = matrix(NA_real_, nrow = 100, ncol = 100), FUN = function(x) {
-    newMat <- select.subset(
+    newMat <- select_subset(
       exp = experiment,
       chrom = x[, 1],
       start = x[, 6],

@@ -173,7 +173,7 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     # get all bins of this region
     first_startLocVector <- exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 <= E, 3] - exp$RES
 
-    ss <- select.subset(exp, C, S, E)
+    ss <- select_subset(exp, C, S, E)
     if (shuffle) {
       ss <- suppressMessages(shuffleHiC(ss))
     }
@@ -239,7 +239,7 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
   if ((chromSize - centChrom[1, 3]) > (exp$RES * 10)) { # otherwise too small to do
     # get all bins of this region
     second_startLocVector <- exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 >= S, 3] - exp$RES
-    ss <- select.subset(exp, C, S, E)
+    ss <- select_subset(exp, C, S, E)
     if (shuffle) {
       ss <- suppressMessages(shuffleHiC(ss))
     }

@@ -668,9 +668,9 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   # layout
 
   # get a matrix from the experiment
-  mat1 <- select.subset(exp1, chrom, start, end)
+  mat1 <- select_subset(exp1, chrom, start, end)
   if (!is.null(exp2)) {
-    mat2 <- select.subset(exp2, chrom, start, end)
+    mat2 <- select_subset(exp2, chrom, start, end)
   }
 
 

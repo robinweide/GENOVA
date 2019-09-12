@@ -18,8 +18,8 @@
 #' @export
 #'
 #' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
-rep_mat_lookup <- function(
-                           explist, anchors, rel_pos, shift = 0, outlier_filter = c(0, 1), raw = FALSE) {
+rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
+                           outlier_filter = c(0, 1), raw = FALSE) {
   anchors <- anchors_filter_oob(
     explist[[1]]$ABS,
     anchors, rel_pos
@@ -46,7 +46,7 @@ rep_mat_lookup <- function(
     getFromNamespace("matrix_lookup", "GENOVA")
   }
 
-  # Loop over experiments, calculate PESCAn
+  # Loop over experiments, perform matrix lookup
   results <- lapply(seq_along(explist), function(i) {
 
     # Calculate true values
@@ -206,13 +206,9 @@ lookup_resizer <- function(ICE, anchors, rel_pos) {
     seqs <- as.double(seq.int(len))
     min <- i[1] - 1
 
-    # Setup indices
-    idx <- data.table(V1 = rep(i, each = len),
-                      V2 = rep.int(i, len),
-                      key = c("V1", "V2"))
-
     # Lookup matrix
-    mat <- ICE[idx, dt_matrix(V3, V1, V2, len, min),
+    mat <- ICE[CJ(V1 = i, V2 = i),
+               dt_matrix(V3, V1, V2, len, min),
                nomatch = NULL]
 
     # Interpolate coordinates

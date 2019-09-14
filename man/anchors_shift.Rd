@@ -7,7 +7,7 @@
 anchors_shift(ABS, anchors, rel_pos, shift = 1)
 }
 \arguments{
-\item{ABS}{The indices slot of a GENOVA experiment.}
+\item{ABS}{The indices slot of a GENOVA \code{contacts} object.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}
@@ -19,7 +19,7 @@ bins, indicating ranges around anchors to lookup.}
 anchors should be shifted.}
 }
 \value{
-A \code{matrix} with two columns.
+A \code{anchors} object with two columns in \code{matrix} format.
 }
 \description{
 Shifts anchors upstream by a specified amount, unless they become out of
@@ -33,8 +33,7 @@ The resulting matrix contains indices to the Hi-C matrix slot in the
   and maximum relative position would belong to a different chromosome.
 }
 \seealso{
-\code{\link[GENOVA]{PESCAn}} for context.
-
-  \code{\link[GENOVA]{anchors_filter_oob}} for general out of bounds
-  filtering of anchors.
+\code{\link[GENOVA]{PESCAn}} for context and
+  \code{\link[GENOVA]{anchors}}. \code{\link[GENOVA]{anchors_filter_oob}} for
+  general out of bounds filtering of anchors.
 }

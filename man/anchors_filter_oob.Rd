@@ -7,7 +7,7 @@
 anchors_filter_oob(ABS, anchors, rel_pos)
 }
 \arguments{
-\item{ABS}{The indices slot of a GENOVA experiment.}
+\item{ABS}{The indices slot of a GENOVA \code{contacts} object.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}
@@ -16,7 +16,7 @@ anchor indices.}
 bins, indicating ranges around anchors to lookup.}
 }
 \value{
-A \code{matrix} with two columns.
+A \code{anchors} object with two columns in \code{matrix} format.
 }
 \description{
 Discards anchors for which a lookup will result in any lookup bins that are
@@ -27,5 +27,9 @@ The resulting matrix contains indices to the Hi-C matrix slot in the
   GENOVA experiment.
 
   An index is considered out of bounds when that index plus the maximum, or
-  minus the minimum, relative position would belong to a different chromosome.
+  minus the minimum, relative position would belong to a different
+  chromosome.
+}
+\seealso{
+\code{\link[GENOVA]{anchors}}.
 }

@@ -230,7 +230,7 @@ ARA <- function(explist, bed,
                             raw = raw
   )
   results$signal <- results$signal + aperm(results$signal, c(2,1,3))
-  results
+  structure(results, class = "ARA_discovery", package = "GENOVA")
 }
 
 

@@ -24,12 +24,14 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     explist[[1]]$ABS,
     anchors, rel_pos
   )
+  class(anchors) <- "matrix"
 
   if (shift > 0) {
     shift_anchors <- anchors_shift(
       explist[[1]]$ABS,
       anchors, rel_pos, shift
     )
+    class(shift_anchors) <- matrix
   }
 
   dnames <- format(rel_pos * explist[[1]]$RES, trim = TRUE)

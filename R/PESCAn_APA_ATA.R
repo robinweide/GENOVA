@@ -204,6 +204,36 @@ ATA <- function(explist, bed,
   structure(results, class = "ATA_discovery", package = "GENOVA", padding = pad)
 }
 
+#' @export
+ARA <- function(explist, bed,
+                size_bin = 21, size_bp = NULL,
+                outlier_filter = c(0, 1),
+                anchors = NULL, raw = FALSE) {
+  # Verify experiment compatability
+  explist <- check_compat_exp(explist)
+
+  # Initialise parameters
+  res <- explist[[1]]$RES
+  rel_pos <- parse_rel_pos(res, size_bin, size_bp)
+
+  # Calculate anchors
+  if (is.null(anchors)) {
+    anchors <- anchors_ARA(
+      explist[[1]]$ABS,
+      bed
+    )
+  }
+
+  results <- rep_mat_lookup(explist, anchors,
+                            rel_pos = rel_pos,
+                            shift = 0, outlier_filter = outlier_filter,
+                            raw = raw
+  )
+  results$signal <- results$signal + aperm(results$signal, c(2,1,3))
+  results
+}
+
+
 # Internals ---------------------------------------------------------------
 
 #' Check compatability of a list of GENOVA experiments

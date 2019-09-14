@@ -217,6 +217,21 @@ anchors_ATA <- function(ABS, bed,
   return(idx)
 }
 
+#' @export
+anchors_ARA <- function(ABS, bed) {
+  if (!inherits(bed, "data.frame")) {
+    bed <- as.data.frame(bed)[, 1:3]
+  }
+  idx <- bed2idx(ABS, bed)
+  is_dup <- duplicated(idx)
+  idx <- idx[!is_dup]
+  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "forward", "reverse"))
+  idx <- unname(cbind(idx, idx))
+  attr(idx, "type") <- "ARA"
+  attr(idx, "dir") <- f
+  return(idx)
+}
+
 # Manipulations ---------------------------------------------------------
 
 #' Shift anchors
@@ -277,8 +292,9 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
 #'
 #' @export
 anchors_filter_oob <- function(ABS, anchors, rel_pos) {
-  typetest <- !is.null(attr(anchors, "type"))
-  if (typetest) {
+  attrs <- attributes(anchors)
+  attrs <- attrs[setdiff(names(attrs), c("dim", "dimnames"))]
+  if (length(attrs) > 0) {
     type <- attr(anchors, "type")
     if (type == "TADs") {
       left  <- ABS[match(anchors[, 1], ABS[, 4]), 1]
@@ -300,8 +316,9 @@ anchors_filter_oob <- function(ABS, anchors, rel_pos) {
 
   # Return anchors that are not out of bounds
   anchors <- anchors[inbounds, , drop = FALSE]
-  if (typetest) {
-    attr(anchors, "type") <- type
+  if ("dir" %in% names(attrs)) {
+    attrs[["dir"]] <- rle(inverse.rle(attrs[["dir"]])[inbounds])
   }
+  attributes(anchors) <- c(attributes(anchors), attrs)
   anchors
 }

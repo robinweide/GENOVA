@@ -39,12 +39,12 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
 
-  lookup_fun <- if (!is.null(attr(anchors, "type")) &
-                    attr(anchors, "type") == "TADs") {
-    getFromNamespace("lookup_resizer", "GENOVA")
-  } else {
-    getFromNamespace("matrix_lookup", "GENOVA")
-  }
+  # Decide on engine
+  lookup_fun <- switch(attr(anchors, "type"),
+                       "TADs" = "lookup_resizer",
+                       "ARA" = "directional_matrix_lookup",
+                       "matrix_lookup")
+  lookup_fun <- getFromNamespace(lookup_fun, "GENOVA")
 
   # Loop over experiments, perform matrix lookup
   results <- lapply(seq_along(explist), function(i) {
@@ -169,6 +169,44 @@ matrix_lookup <- function(ICE, anchors, rel_pos) {
       length(rel_pos)[c(1, 1)]
     )
   )
+}
+
+#' @export
+directional_matrix_lookup <- function(ICE, anchors, rel_pos) {
+
+  grid <- as.matrix(CJ(rel_pos, rel_pos))
+  idx <- seq_len(nrow(grid))
+
+  # Loop over grid entries, get scores at all anchor positions
+  mats <- vapply(idx, function(i) {
+    ICE[list(
+      grid[i, 1] + anchors[, 1],
+      grid[i, 2] + anchors[, 2]
+    )]$V3
+  }, as.numeric(anchors[, 1]))
+
+  # Cast results in array
+  arr <- array(mats,
+        dim = c(
+          nrow(anchors),
+          length(rel_pos)[c(1, 1)]
+        )
+  )
+
+  # Split off reverse orientation
+  dir <- inverse.rle(attr(anchors, "dir"))
+  revidx <- which(dir == "reverse")
+  rev <- arr[revidx,,]
+
+  # Flip reverse
+  dimseq <- seq_len(dim(rev)[2])
+  rev[, dimseq, dimseq] <- rev[, rev(dimseq), rev(dimseq)]
+  rev <- aperm(rev, c(1,3,2))
+
+  # Recombine
+  arr[revidx,,] <- rev
+  attr(arr, "dir") <- attr(anchors, "dir")
+  arr
 }
 
 

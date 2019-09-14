@@ -1,41 +1,47 @@
-#' Visualise APA and PE-SCAn results
+# Documentation -----------------------------------------------------------
+
+#' @name visualise
+#' @title Visualise discoveries
 #'
-#' Plot APA and PE-SCAn results, by default with comparisons of differences.
+#' @description Plot the results of \code{discovery} objects. By default
+#'   contrasts one sample with the others.
 #'
-#' @name RMT_visualisation
-#' @aliases APA_visualisation PESCAn_visualisation
-#' @param discovery A results object as returned by the \code{APA} function or the
-#'   \code{PESCAn} function.
-#' @param subtract An \code{integer} or \code{character} matching an experiment
-#'   name of length 1, specifying which sample should be subtracted to make the
-#'   difference panels. Alternatively, set to \code{NULL} for no difference
-#'   panels.
-#' @param mode (PE-SCAn only) A \code{character} vector of length 1 with
-#'   \code{"obsexp"} for plotting the observed over expected or \code{"signal"}
-#'   for plotting the signal only (no background correction).
-#' @param raw A \code{logical} of length 1: should a bare mimimum plot be
+#' @param discovery A \code{discovery} object as returned by GENOVA analysis
+#'   functions.
+#' @param contrast An \code{integer} or \code{character} matching an experiment
+#'   (name) of length 1, specifying which sample should be used to make a
+#'   contrast with all other samples. Alternatively, set to \code{NULL} to not
+#'   plot contrast panels.
+#' @param metric A \code{character} of length 1: what contrast metric should be
+#'   used? \code{"diff"} for difference by subtraction or \code{"lfc"} for
+#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.
+#' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
+#' @param mode (PESCAn_discovery only) What result slot should be used for
+#'   visualisation? \code{"obsexp"} for the observed over expected metric or
+#'   \code{"signal"} for mean contacts at unshifted anchors.
 #'
-#' @details Difference panels are created by subtracting the values of each
-#'   sample by the values of the sample indicated by the \code{subtract}
-#'   argument. Hence, a clear positive signal in the difference panels indicates
-#'   enrichment in that sample versus the \code{subtract}-sample.
+#' @details The \code{"diff"} \code{metric} value creates contrast panels by
+#'   subtracting the values of each sample by the values of the sample indicated
+#'   by the '\code{contrast}' argument. The \code{"lfc"} \code{metric} value
+#'   creates contrast panels by dividing every samples' values by the sample
+#'   indicated by the '\code{contrast}' argument and then taking the base 2
+#'   logarithm of that division.
 #'
-#'   The \code{raw = TRUE} argument allows customisation of the plot: it returns
-#'   a plot object with no position or fill scales and no theme settings.
+#'   The '\code{raw = TRUE}' argument allows custimisation of the plots. The
+#'   returned plot will not have position- or fill-scales and no theme settings,
+#'   which can be set freely afterwards to match personal aesthetic tastes. When
+#'   '\code{raw = TRUE}' and '\code{subtract}' is not \code{NULL}, the fill
+#'   scale of the contrast panels can be manipulated by setting the
+#'   '\code{aesthetics = "altfill"}' inside ggplot2's fill scale functions.
 #'
-#'   When \code{raw = TRUE} and \code{subtract} is not \code{NULL}, the plot
-#'   will not render unless a continuous fill scale is supplied with the
-#'   argument \code{aesthetics = "fill2"}. This a small trade-off for having two
-#'   independent fill scales in a single plot.
-#'
-#' @return A \code{\link[ggplot2]{ggplot}} object.
-#'
-#' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
+#' @note For \code{ATA_discovery} and \code{ARA_discovery} objects which include
+#'   the matrix's diagonal, the upper limit for the contacts fill scale is set to
+#'   the 95th percentile of the data to increase the dynamic range of colours.
 #'
 #' @examples
 #' # APA
-#' apa <- APA(list(WT = WT_40kb, KO = KO_40kb), WT_loops)
+#' apa <- APA(list(WT = WT_40kb, KO = KO_40kb), loops)
 #' visualise(apa)
 #'
 #' # PE-SCAn
@@ -45,13 +51,39 @@
 #' # To plot PE-SCAn without background correction
 #' visualise(pescan, mode = "signal")
 #'
+#' # ATA
+#' ata <- APA(list(WT = WT_10kb, KO = KO_10kb), tads)
+#' visualise(ata)
+#'
+#' # ARA
+#' ara <- ARA(list(WT = WT_20kb, KO = KO_20kb), ctcf_sites)
+#' visualise(ara)
+#'
 #' # Handling 'raw' plots
 #' visualise(pescan, raw = TRUE) +
-#'   ggplot2::scale_fill_gradient(aesthetics = "fill2")
-#' @export
-#' @rdname APA_PESCAn_visualisation
-visualise.APA_discovery <- function(discovery, subtract = 1, raw = FALSE) {
+#'   ggplot2::scale_fill_gradient(aesthetics = "altfill")
+NULL
 
+# Default -----------------------------------------------------------------
+
+# If you fail, it is best to fail graciously
+
+#' @export
+#' @rdname visualise
+#' @usage NULL
+visualise.default <- function(discovery, ...) {
+  stop("No visualise method for class '", class(discovery),
+       "' has been implemented.", call. = FALSE)
+}
+
+
+# Common elements ---------------------------------------------------------
+
+# Common ancestor for aggregate repeated matrix lookup analysis plots
+visualise.ARMLA <- function(discovery, contrast = 1,
+                            metric = c("diff", "lfc"),
+                            raw = FALSE, altfillscale) {
+  metric <- match.arg(metric)
   mats <- discovery$signal
 
   # Format dimnames if missing
@@ -80,66 +112,71 @@ visualise.APA_discovery <- function(discovery, subtract = 1, raw = FALSE) {
   })
   df <- do.call(rbind, df)
 
-  # Calculate diff data if subtract is supplied
-  if (!is.null(subtract)) {
-    diff <- as.vector(mats[,,subtract])
-    diff <- as.vector(mats) - rep(diff, dims[3])
-    dim(diff) <- dim(mats)
-    diff <- lapply(seq_len(dims[3]), function(i) {
+  # Calculate metric if contrast is supplied
+  if (!is.null(contrast)) {
+    contrast <- as.vector(mats[,,contrast])
+    contrast <- switch(
+      metric,
+      "diff" = as.vector(mats) - rep(contrast, dims[3]),
+      "lfc" = log2(as.vector(mats) / rep(contrast, dims[3]))
+    )
+    dim(contrast) <- dim(mats)
+    contrast_name <- switch(metric,
+                            "diff" = "Difference",
+                            "lfc" = "Change")
+    contrast <- lapply(seq_len(dims[3]), function(i) {
       cbind.data.frame(coords,
                        name = names_dims[[3]][i],
-                       mode = "Difference",
-                       value = as.vector(diff[,,i]))
+                       mode = contrast_name,
+                       value = as.vector(contrast[,,i]))
     })
-    diff <- do.call(rbind, diff)
-    df <- rbind(df, diff)
+    contrast <- do.call(rbind, contrast)
+    outcontrast <<- contrast
+    df <- rbind(df, contrast)
   }
 
   # Setup base of plot
   g <- ggplot2::ggplot(df, ggplot2::aes(x, y))
 
-  if (!is.null(subtract)) {
+  if (!is.null(contrast)) {
     # Setup basics of the diff plots
     # Warnings are supressed because ggplot doesn't recognise
-    # the fill2 aesthetic (YET!)
+    # the altfill aesthetic (YET!)
     suppressWarnings(
       g <- g + ggplot2::geom_raster(
         data = function(x) {
-          x[x$mode == "Difference", ]
+          x[x$mode == contrast_name, ]
         },
-        ggplot2::aes(fill2 = value)
+        ggplot2::aes(altfill = value)
       ) +
         ggplot2::facet_grid(mode ~ name, switch = "y")
     )
 
     if (!raw) {
-      g <- g + ggplot2::scale_fill_gradientn(
-        colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
-        aesthetics = "fill2",
-        name = "Difference",
-        limits = c(-1, 1) * max(abs(df$value[df$mode == "Difference"]))
-      )
+      g <- g + altfillscale
       # Hack for scale
       g$scales$scales[[1]]$guide <- ggplot2::guide_colourbar()
-      g$scales$scales[[1]]$guide$available_aes[[3]] <- "fill2"
+      g$scales$scales[[1]]$guide$available_aes[[3]] <- "altfill"
       g$scales$scales[[1]]$guide$order <- 2
     } else {
-      g <- g + guides("fill2" = guide_colourbar(available_aes = "fill2"))
+      g <- g + ggplot2::guides(
+        "altfill" = ggplot2::guide_colourbar(available_aes = "altfill")
+      )
     }
 
     # Good old ggnomics-style hack for different fill scales
     old_geom <- g$layers[[1]]$geom
     old_nahandle <- old_geom$handle_na
     new_nahandle <- function(self, data, params) {
-      colnames(data)[colnames(data) %in% "fill2"] <- "fill"
+      colnames(data)[colnames(data) %in% "altfill"] <- "fill"
       old_nahandle(data, params)
     }
     new_geom <- ggplot2::ggproto(paste0(sample(1e6, 1), class(old_geom)),
-      old_geom,
-      handle_na = new_nahandle
+                                 old_geom,
+                                 handle_na = new_nahandle
     )
-    names(new_geom$default_aes)[1] <- "fill2"
-    new_geom$non_missing_aes <- "fill2"
+    names(new_geom$default_aes)[1] <- "altfill"
+    new_geom$non_missing_aes <- "altfill"
     g$layers[[1]]$geom <- new_geom
   } else {
     # No special treatment needed for just one colourscale
@@ -156,59 +193,84 @@ visualise.APA_discovery <- function(discovery, subtract = 1, raw = FALSE) {
 
   if (raw) {
     return(g)
-  }
-
-  # Decorating of the plot
-  g <- g + ggplot2::scale_fill_gradientn(
-    colours = c("white", "orange", "red", "black"),
-    guide = ggplot2::guide_colourbar(order = 1),
-    name = expression(mu*" Contacts")
-  ) +
-    ggplot2::scale_x_continuous(
-      name = "",
-      expand = c(0, 0),
-      breaks = function(x) {
-        x <- scales::extended_breaks()(x)
-        if (length(x) > 3) {
-          head(tail(x, -1), -1)
-        } else {
-          x
-        }
-      },
-      labels = function(x) {
-        ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
-      }
-    ) +
-    ggplot2::scale_y_continuous(
-      name = "",
-      expand = c(0, 0),
-      breaks = function(x) {
-        x <- scales::extended_breaks()(x)
-        if (length(x) > 3) {
-          head(tail(x, -1), -1)
-        } else {
-          x
-        }
-      },
-      labels = function(x) {
-        ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
-      }
-    ) +
-    ggplot2::theme(
+  } else {
+    g <- g + ggplot2::theme(
       aspect.ratio = 1,
       strip.placement = "outside",
       strip.background = ggplot2::element_blank(),
       panel.border = ggplot2::element_rect(fill = NA, colour = "grey30")
     )
+    return(g)
+  }
+}
+
+# Discovery objects -------------------------------------------------------
+
+#' @rdname visualise
+#' @export
+visualise.APA_discovery <- function(discovery, contrast = 1,
+                                    metric = c("diff", "lfc"),
+                                    raw = FALSE) {
+  metric <- match.arg(metric)
+
+  altfillscale <- ggplot2::scale_fill_gradientn(
+    colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    aesthetics = "altfill",
+    name = switch (metric,
+      "diff" = "Difference",
+      "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
+    ),
+    limits = function(x){c(-1, 1) * max(abs(x))}
+  )
+
+  # Get a default plot
+  g <- visualise.ARMLA(
+    discovery = discovery,
+    contrast = contrast,
+    metric = metric, raw = raw,
+    altfillscale = altfillscale
+  )
+  if (raw) {
+    return(g)
+  }
+
+  pos_breaks <- function(x) {
+    x <- scales::extended_breaks()(x)
+    if (length(x) > 3) head(tail(x, -1), -1) else x
+  }
+
+  g <- g + ggplot2::scale_fill_gradientn(
+    colours = c('white', '#f5a623', '#d0021b', 'black'),
+    guide = ggplot2::guide_colourbar(order = 1),
+    name = expression(mu*" Contacts")
+  ) +
+  ggplot2::scale_x_continuous(
+    name = "",
+    expand = c(0, 0),
+    breaks = pos_breaks,
+    labels = function(x) {
+      ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+    }
+  ) +
+    ggplot2::scale_y_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = function(x) {
+        ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+      }
+    )
+
   g
 }
 
+#' @rdname visualise
 #' @export
-#' @rdname APA_PESCAn_visualisation
-visualise.PESCAn_discovery <- function(discovery,
-                                       subtract = 1,
+visualise.PESCAn_discovery <- function(discovery, contrast = 1,
+                                       metric = c("diff", "lfc"),
                                        mode = c("obsexp", "signal"),
                                        raw = FALSE) {
+  metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
   hasobsexp <- "obsexp" %in% names(discovery)
@@ -222,65 +284,209 @@ visualise.PESCAn_discovery <- function(discovery,
     discovery
   }
 
-  # Cannibalise the APA autoplot function
-  g <- visualise.APA_discovery(res, subtract = subtract, raw = raw)
-
-  # Adjust for PESCAn
-  if (hasobsexp) {
-    # Strip scale
-    scales <- g$scales$scales
-    if (length(scales) == 4) {
-      scales[[2]] <- NULL
-      scales[[1]]$palette <- scales::gradient_n_pal(
-        colours = c("#7b3294", "#c2a5cf", "#f7f7f7", "#a6dba0", "#008837")
-      )
-    } else if (length(scales) == 3) {
-      scales[[1]] <- NULL
-    }
-    g$scales$scales <- scales
-
-    # Add new scales if non-raw output is desired
-    if (!raw) {
-      g <- g + ggplot2::scale_fill_gradientn(
-        colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
-        name = expression(frac("Observed", "Expected")),
-        limits = c(-1, 1) * max(abs(g$data$value[g$data$mode == "Individual"] - 1)) + 1,
-        guide = ggplot2::guide_colourbar(order = 1)
-      )
-    }
+  altcols <- if (hasobsexp) {
+    c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+  } else {
+    c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
   }
+  altfillscale <- ggplot2::scale_fill_gradientn(
+    colours = altcols,
+    aesthetics = "altfill",
+    name = switch (metric,
+                   "diff" = "Difference",
+                   "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
+    ),
+    limits = function(x){c(-1, 1) * max(abs(x))}
+  )
+
+  # Get a default plot
+  g <- visualise.ARMLA(
+    discovery = res,
+    contrast = contrast,
+    metric = metric, raw = raw,
+    altfillscale = altfillscale
+  )
+  if (raw) {
+    return(g)
+  }
+
+  fillscale <- if (hasobsexp) {
+    ggplot2::scale_fill_gradientn(
+      colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(frac("Observed", "Expected")),
+      limits = function(x) {
+        c(-1, 1) * max(abs(x - 1)) + 1
+      }
+    )
+  } else {
+    ggplot2::scale_fill_gradientn(
+      colours = c('white', '#f5a623', '#d0021b', 'black'),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(mu*" Contacts")
+    )
+  }
+
+  pos_breaks <- function(x) {
+    x <- scales::extended_breaks()(x)
+    if (length(x) > 3) head(tail(x, -1), -1) else x
+  }
+
+  g <- g + fillscale +
+    ggplot2::scale_x_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = function(x) {
+        ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+      }
+    ) +
+    ggplot2::scale_y_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = function(x) {
+        ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+      }
+    )
 
   g
 }
 
+#' @rdname visualise
 #' @export
-#' @rdname APA_PESCAn_visualisation
-visualise.ATA_discovery <- function(discovery,
-                                    subtract = 1,
+visualise.ATA_discovery <- function(discovery, contrast = 1,
+                                    metric = c("diff", "lfc"),
                                     raw = FALSE) {
+  metric <- match.arg(metric)
+
+  altfillscale <- ggplot2::scale_fill_gradientn(
+    colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    aesthetics = "altfill",
+    name = switch (metric,
+                   "diff" = "Difference",
+                   "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
+    ),
+    limits = function(x){c(-1, 1) * max(abs(x))}
+  )
+
+  # Get a default plot
+  g <- visualise.ARMLA(
+    discovery = discovery,
+    contrast = contrast,
+    metric = metric, raw = raw,
+    altfillscale = altfillscale
+  )
+  if (raw) {
+    return(g)
+  }
+
   haspad <- "padding" %in% names(attributes(discovery))
   if (haspad) {
     padding <- attr(discovery, "padding")
-    padfun <- function(x) {
+    pos_breaks <- function(x) {
       cumsum(c(padding - 0.5, 1)) / (2 * padding) * diff(x) + min(x)
     }
   } else {
-    padfun <- function(x) {
+    pos_breaks <- function(x) {
       seq(x[1], x[2], length.out = 5)[c(2,4)]
     }
   }
 
-  # Cannibalise the APA autoplot function
-  g <- GENOVA:::visualise.APA_discovery(discovery, subtract, raw)
+  upperq <- quantile(discovery$signal, 0.95)
 
-  if (!raw) {
-    g$scales$scales[[3]]$breaks <- g$scales$scales[[4]]$breaks <- padfun
-    g$scales$scales[[3]]$labels <- g$scales$scales[[4]]$labels <-
-      c("5' border", "3' border")
-    if (!is.null(subtract)) {
-      g$scales$scales[[2]]$limits <- quantile(g$data$value, c(0.1, 0.95))
-      g$scales$scales[[2]]$oob <- scales::squish
-    }
-  }
+  g <- g +
+    ggplot2::scale_fill_gradientn(
+      colours = c('white', '#f5a623', '#d0021b', 'black'),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(mu*" Contacts"),
+      limits = c(NA, upperq),
+      oob = scales::squish
+    ) +
+    ggplot2::scale_x_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = c("5' border", "3' border")
+    ) +
+    ggplot2::scale_y_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = c("5' border", "3' border")
+    )
+
   g
+}
+
+#' @rdname visualise
+#' @export
+visualise.ARA_discovery <- function(discovery, contrast = 1,
+                                    metric = c("diff", "lfc"),
+                                    raw = FALSE) {
+  metric <- match.arg(metric)
+
+  altfillscale <- ggplot2::scale_fill_gradientn(
+    colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    aesthetics = "altfill",
+    name = switch (metric,
+                   "diff" = "Difference",
+                   "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
+    ),
+    limits = function(x){c(-1, 1) * max(abs(x))}
+  )
+
+  # Get a default plot
+  g <- GENOVA:::visualise.ARMLA(
+    discovery = discovery,
+    contrast = contrast,
+    metric = metric, raw = raw,
+    altfillscale = altfillscale
+  )
+  if (raw) {
+    return(g)
+  }
+
+  pos_breaks <- function(x) {
+    x <- scales::extended_breaks()(x)
+    if (length(x) > 3) head(tail(x, -1), -1) else x
+  }
+
+  upperq <- quantile(discovery$signal, 0.95)
+
+  g <- g + ggplot2::scale_fill_gradientn(
+    colours = c('white', '#f5a623', '#d0021b', 'black'),
+    guide = ggplot2::guide_colourbar(order = 1),
+    name = expression(mu*" Contacts"),
+    limits = c(NA, upperq),
+    oob = scales::squish
+  ) +
+    ggplot2::scale_x_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = function(x) {
+        ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+      }
+    ) +
+    ggplot2::scale_y_continuous(
+      name = "",
+      expand = c(0, 0),
+      breaks = pos_breaks,
+      labels = function(x) {
+        ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+      }
+    )
+
+  g
+}
+
+# Utilities ---------------------------------------------------------------
+
+# Makes sure no errors are returned when visualise(..., raw = TRUE)
+# Unfortunately has to be exported, but is better than throwing errors
+#' @export
+#' @keywords internal
+scale_altfill_continuous <- function(...) {
+  ggplot2::scale_fill_gradient2(..., aesthetics = "altfill")
 }

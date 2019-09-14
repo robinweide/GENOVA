@@ -1,5 +1,5 @@
 #' @export
-#' @rdname APA_PESCAn_visualisation
+#' @rdname visualise
 visualise <- function(discovery, ...) {
   UseMethod("visualise", discovery)
 }

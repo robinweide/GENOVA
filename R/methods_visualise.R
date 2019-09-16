@@ -17,9 +17,9 @@
 #'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
-#' @param mode (PESCAn_discovery only) What result slot should be used for
-#'   visualisation? \code{"obsexp"} for the observed over expected metric or
-#'   \code{"signal"} for mean contacts at unshifted anchors.
+#' @param mode (PESCAn_discovery and ARA_discovery only) What result slot should
+#'   be used for visualisation? \code{"obsexp"} for the observed over expected
+#'   metric or \code{"signal"} for mean contacts at unshifted anchors.
 #'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
 #'   subtracting the values of each sample by the values of the sample indicated
@@ -35,9 +35,10 @@
 #'   scale of the contrast panels can be manipulated by setting the
 #'   '\code{aesthetics = "altfill"}' inside ggplot2's fill scale functions.
 #'
-#' @note For \code{ATA_discovery} and \code{ARA_discovery} objects which include
-#'   the matrix's diagonal, the upper limit for the contacts fill scale is set to
-#'   the 95th percentile of the data to increase the dynamic range of colours.
+#' @note For \code{ATA_discovery} objects which include the matrix's diagonal,
+#'   the upper limit for the contacts fill scale is set to the 95th percentile
+#'   of the data to increase the dynamic range of colours. The same is true for
+#'   \code{ARA_discovery}, when '\code{mode = "signal"}'.
 #'
 #' @examples
 #' # APA
@@ -423,11 +424,29 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
+                                    mode = c("obsexp", "signal"),
                                     raw = FALSE) {
   metric <- match.arg(metric)
+  # Handle mode settings
+  mode <- match.arg(mode)
+  hasobsexp <- "obsexp" %in% names(discovery)
+  if (mode == "obsexp" & !hasobsexp) {
+    warning("Mode was set to 'obsexp' but no such result was found")
+  }
+  hasobsexp <- hasobsexp && mode == "obsexp"
+  res <- if (hasobsexp) {
+    setNames(discovery[names(discovery) %in% "obsexp"], "signal")
+  } else {
+    discovery
+  }
 
+  altcols <- if (hasobsexp) {
+    c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+  } else {
+    c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+  }
   altfillscale <- ggplot2::scale_fill_gradientn(
-    colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    colours = altcols,
     aesthetics = "altfill",
     name = switch (metric,
                    "diff" = "Difference",
@@ -438,7 +457,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 
   # Get a default plot
   g <- GENOVA:::visualise.ARMLA(
-    discovery = discovery,
+    discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
     altfillscale = altfillscale
@@ -454,19 +473,32 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 
   upperq <- quantile(discovery$signal, 0.95)
 
-  g <- g + ggplot2::scale_fill_gradientn(
-    colours = c('white', '#f5a623', '#d0021b', 'black'),
-    guide = ggplot2::guide_colourbar(order = 1),
-    name = expression(mu*" Contacts"),
-    limits = c(NA, upperq),
-    oob = scales::squish
-  ) +
+  fillscale <- if (hasobsexp) {
+    ggplot2::scale_fill_gradientn(
+      colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(frac("Observed", "Expected")),
+      limits = function(x) {
+        c(-1, 1) * max(abs(x - 1)) + 1
+      }
+    )
+  } else {
+    ggplot2::scale_fill_gradientn(
+      colours = c('white', '#f5a623', '#d0021b', 'black'),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(mu*" Contacts"),
+      limits = c(NA, upperq),
+      oob = scales::squish
+    )
+  }
+
+  g <- g + fillscale +
     ggplot2::scale_x_continuous(
       name = "",
       expand = c(0, 0),
       breaks = pos_breaks,
       labels = function(x) {
-        ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+        paste0(x / 1000, "kb")
       }
     ) +
     ggplot2::scale_y_continuous(
@@ -474,7 +506,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
       expand = c(0, 0),
       breaks = pos_breaks,
       labels = function(x) {
-        ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+        paste0(x / 1000, "kb")
       }
     )
 

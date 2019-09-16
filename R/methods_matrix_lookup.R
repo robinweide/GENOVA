@@ -24,15 +24,15 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     explist[[1]]$ABS,
     anchors, rel_pos
   )
-  class(anchors) <- "matrix"
 
   if (shift > 0) {
     shift_anchors <- anchors_shift(
       explist[[1]]$ABS,
       anchors, rel_pos, shift
     )
-    class(shift_anchors) <- matrix
+    class(shift_anchors) <- "matrix"
   }
+  class(anchors) <- "matrix"
 
   dnames <- format(rel_pos * explist[[1]]$RES, trim = TRUE)
 
@@ -42,17 +42,17 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   data.table::setDTthreads(1)
 
   # Decide on engine
-  lookup_fun <- switch(attr(anchors, "type"),
+  run_engine <- switch(attr(anchors, "type"),
                        "TADs" = "lookup_resizer",
                        "ARA" = "directional_matrix_lookup",
                        "matrix_lookup")
-  lookup_fun <- getFromNamespace(lookup_fun, "GENOVA")
+  run_engine <- getFromNamespace(run_engine, "GENOVA")
 
   # Loop over experiments, perform matrix lookup
   results <- lapply(seq_along(explist), function(i) {
 
     # Calculate true values
-    arr <- lookup_fun(explist[[i]]$ICE, anchors, rel_pos)
+    arr <- run_engine(explist[[i]]$ICE, anchors, rel_pos)
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
@@ -67,7 +67,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
     # Calculate shifted values
     if (shift > 0) {
-      shifted_arr <- matrix_lookup(explist[[i]]$ICE, shift_anchors, rel_pos)
+      shifted_arr <- run_engine(explist[[i]]$ICE, shift_anchors, rel_pos)
       shifted_mu <- summarise_lookup(shifted_arr,
                                      outlier_filter,
                                      keep = mat_mu$keep

@@ -205,7 +205,7 @@ ATA <- function(explist, bed,
 }
 
 #' @export
-ARA <- function(explist, bed,
+ARA <- function(explist, bed, shift = 1e6,
                 size_bin = 21, size_bp = NULL,
                 outlier_filter = c(0, 1),
                 anchors = NULL, raw = FALSE) {
@@ -215,6 +215,7 @@ ARA <- function(explist, bed,
   # Initialise parameters
   res <- explist[[1]]$RES
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
+  shift <- round(shift / res)
 
   # Calculate anchors
   if (is.null(anchors)) {
@@ -226,13 +227,30 @@ ARA <- function(explist, bed,
 
   results <- rep_mat_lookup(explist, anchors,
                             rel_pos = rel_pos,
-                            shift = 0, outlier_filter = outlier_filter,
+                            shift = shift,
+                            outlier_filter = outlier_filter,
                             raw = raw
   )
-  results$signal <- results$signal + aperm(results$signal, c(2,1,3))
+  results$signal <- results$signal + aperm(results$signal, c(2, 1, 3))
+  if ("shifted" %in% names(results)) {
+    results$shifted <- results$shifted + aperm(results$shifted, c(2, 1, 3))
+  }
+  if (all("obsexp" %in% names(results))) {
+    # Expected per band from diagonal
+    obs <- results$signal
+    exp <- results$shifted
+    rows <- row(obs[,,1]) ; cols <- col(obs[,,1])
+    i <- cols - rows
+    i <- i - min(i) + 1
+    nexp <- apply(exp, 3, function(x) {
+      mu <- vapply(split(x, i), function(x){.Internal(mean(x))}, numeric(1))
+      mu[i]
+    })
+    dim(nexp) <- dim(obs)
+    results$obsexp <- obs / nexp
+  }
   structure(results, class = "ARA_discovery", package = "GENOVA")
 }
-
 
 # Internals ---------------------------------------------------------------
 

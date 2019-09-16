@@ -77,7 +77,8 @@ APA <- function(explist, bedpe,
     raw = raw
   )
 
-  structure(results, class = "APA_discovery", package = "GENOVA")
+  structure(results, class = c("APA_discovery", "ARMLA_discovery"),
+            resolution = res, package = "GENOVA")
 }
 
 #' Paired-end spatial chromatin analysis
@@ -153,7 +154,8 @@ PESCAn <- function(explist, bed, shift = 1e6L,
     raw = raw
   )
 
-  structure(results, class = "PESCAn_discovery", package = "GENOVA")
+  structure(results, class = c("PESCAn_discovery", "ARMLA_discovery"),
+            resolution = res, package = "GENOVA")
 }
 
 #' Aggregate TAD analysis
@@ -201,7 +203,8 @@ ATA <- function(explist, bed,
                             shift = 0, outlier_filter = outlier_filter,
                             raw = raw)
 
-  structure(results, class = "ATA_discovery", package = "GENOVA", padding = pad)
+  structure(results, class = c("ATA_discovery", "ARMLA_discovery"),
+            package = "GENOVA", resolution = res, padding = pad)
 }
 
 #' @export
@@ -249,7 +252,8 @@ ARA <- function(explist, bed, shift = 1e6,
     dim(nexp) <- dim(obs)
     results$obsexp <- obs / nexp
   }
-  structure(results, class = "ARA_discovery", package = "GENOVA")
+  structure(results, class = c("ARA_discovery", "ARMLA_discovery"),
+            resolution = res, package = "GENOVA")
 }
 
 # Internals ---------------------------------------------------------------

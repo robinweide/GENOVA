@@ -1,4 +1,4 @@
-loadJuicer = function(juicerPath, resolution){
+loadJuicer = function(juicerPath, resolution, norm = 1e9, balancing = T){
 
   require(strawr)
 
@@ -16,10 +16,11 @@ loadJuicer = function(juicerPath, resolution){
   expandedChromosomes = rbind(as.data.frame(cbind(juicer_metadata[[1]]$chrom,juicer_metadata[[1]]$chrom)),
                               expandedChromosomes)
 
+  strawNorm = ifelse(balancing, 'KR', "NONE")
   juicerList = apply(expandedChromosomes, 1, function(ec){
 
     juicer_in <- tryCatch(
-      {strawr::straw(norm = "KR",
+      {strawr::straw(norm = strawNorm,
                      fname =juicerPath,
                      chr1loc =  ec[2],
                      chr2loc =  ec[1],
@@ -53,11 +54,20 @@ loadJuicer = function(juicerPath, resolution){
   juicer_data = data.table::rbindlist(juicerList)
 
   # split into index and signal-files
+  SA = splitJuicerData(juicer_data, resolution)
 
+  SIG = SA[[1]]
+  ABS = SA[[2]]
 
+  if (!is.null(norm)) {
+    SIG$V3 <- norm * SIG$V3 / sum(SIG$V3)
+  }
 
+  return(list(SIG, ABS))
 
 }
+
+
 
 get_juicer_metadata = function(juicerPath){
   file2read = file(juicerPath, "rb")
@@ -98,3 +108,37 @@ get_juicer_metadata = function(juicerPath){
 
   return(list(chrom_name_length, resolutions))
 }
+
+
+splitJuicerData = function(juicer_data, resolution){
+
+  # get all unique bins
+  bins_x = stats::setNames(unique(juicer_data[, 1:2]), c('V1', 'V2'))
+  bins_y = stats::setNames(unique(juicer_data[, 3:4]), c('V1', 'V2'))
+
+  # make abs
+  ABS = unique(rbind(bins_x,bins_y))
+  ABS$V3 = ABS$V2 + resolution
+  data.table::setkeyv(ABS, c('V1','V2'))
+  ABS$index = 1:nrow(ABS)
+
+  # make sig
+  SIG = stats::setNames(juicer_data, c('V1','V2','Y1','Y2','signal'))
+  data.table::setkeyv(SIG, c('V1','V2'))
+
+  # merge first
+  SIG$index1 <- SIG[ABS, index, nomatch = 0]
+  SIG[,1:2] = NULL
+  colnames(SIG)[1:2] = c('V1','V2')
+  data.table::setkeyv(SIG, c('V1','V2'))
+
+  # second round
+  SIG$index2 <- SIG[ABS, index, nomatch = 0]
+
+  SIG = stats::setNames(SIG[,c(4,5,3)], paste0('V',1:3))
+
+  colnames(ABS) = paste0('V', 1:4)
+  return(list(SIG, ABS))
+}
+
+

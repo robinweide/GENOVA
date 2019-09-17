@@ -1,4 +1,4 @@
-loadCooler = function(cooler, balancing = T){
+loadCooler = function(cooler, balancing = T, norm = NULL){
 
   require(rhdf5)
 
@@ -28,7 +28,12 @@ loadCooler = function(cooler, balancing = T){
 
   colnames(SIG) = paste0('V', 1:3)
 
-  list(SIG, ABS)
+  if (!is.null(norm)) {
+    SIG$V3 <- norm * SIG$V3 / sum(SIG$V3)
+  }
+
+  return(list(SIG, ABS))
+
 }
 
 

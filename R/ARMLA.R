@@ -1,3 +1,5 @@
+# Note: ARMLA is the abbreviation for Aggregate Repeated Matrix Lookup Analysis.
+
 # User facing -------------------------------------------------------------
 
 #' Aggregrate Peak Analysis
@@ -25,11 +27,10 @@
 #' @param raw A \code{logical} of length 1: should the raw array underlying the
 #'   summary matrices be returned in the output?
 #'
-#' @return A \code{list} of the same length as \code{explist} wherein list
-#'   elements contain the results of the APA per experiment.
+#' @return An \code{APA_discovery} object with the APA results.
 #'
-#' @seealso \code{\link[GENOVA]{APA_visualisation}} for visualising
-#'   results.
+#' @seealso The \code{\link[GENOVA]{discovery}} class.
+#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
 #'
 #' @export
 #'
@@ -44,7 +45,7 @@
 #' apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
 #'
 #' # Visualising results
-#' autoplot(apa)
+#' visualise(apa)
 APA <- function(explist, bedpe,
                 dist_thres = NULL,
                 size_bin = 21, size_bp = NULL,
@@ -95,13 +96,12 @@ APA <- function(explist, bedpe,
 #' @param min_compare An \code{integer} of length 1 indicating the minimum
 #'   number of pairwise interactions on a chromosome to consider.
 #'
-#' @return A \code{list} of the same length as \code{explist} wherein list
-#'   elements contain the results of the PE-SCAn per experiment.
+#' @return A \code{PESCAn_discovery} object with the PE-SCAn results.
+#'
+#' @seealso The \code{\link[GENOVA]{discovery}} class.
+#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
 #'
 #' @export
-#'
-#' @seealso \code{\link[GENOVA]{PESCAn_visualisation}} for visualising
-#'   results.
 #'
 #' @examples
 #' # Typical usage: PESCAn for super enhancers using a 1 MB
@@ -171,8 +171,10 @@ PESCAn <- function(explist, bed, shift = 1e6L,
 #' @param size A code \code{integer} vector of length 1 noting the dimensions of
 #'   the output.
 #'
-#' @return An \code{ATA_discovery} object containing arrays with the results of
-#'   the ATA for the experiments.
+#' @return An \code{ATA_discovery} object with the ATA results.
+#'
+#' @seealso The \code{\link[GENOVA]{discovery}} class.
+#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
 #' @export
 ATA <- function(explist, bed,
                 dist_thres = c(225000, Inf),
@@ -207,7 +209,42 @@ ATA <- function(explist, bed,
             package = "GENOVA", resolution = res, padding = pad)
 }
 
+
+#' Aggregate Region Analysis
+#'
+#' Extracts Hi-C matrices centered around regions and averages the results for
+#' all regions.
+#'
+#' @inheritParams PESCAn
+#' @param bed A \code{data.frame} with 3 columns in BED format, containing the
+#'   regions to anchor in pairwise manner. Entries wherein the second column is
+#'   larger than the third column are considered in the reverse direction.
+#'
+#' @return An \code{ARA_discovery} object with the ARA results.
+#'
+#' @details By default, \code{ARA} also calculates the results for shifted
+#'   anchors and normalises the \code{"obsexp"} slot by off-diagonal bands.
+#'
+#'   The '\code{bed}' argument can take in oriented entries, wherein entries
+#'   with a start site larger than the end site are considered to be in the
+#'   reverse direction. The reverse sites are flipped during analysis, so the
+#'   orientation is the same as in the forward sites.
+#'
+#' @seealso The \code{\link[GENOVA]{discovery}} class.
+#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
+#'
 #' @export
+#'
+#' @examples
+#' # Typical usage
+#' ara <- ARA(list(WT_20kb, KO_20kb), ctcf_sites)
+#'
+#' # Alternative usage with pre-calculated anchors
+#' anchors <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
+#' ara <- ARA(list(WT_20kb, KO_20kb))
+#'
+#' # Visualisation
+#' visualise(ara)
 ARA <- function(explist, bed, shift = 1e6,
                 size_bin = 21, size_bp = NULL,
                 outlier_filter = c(0, 1),

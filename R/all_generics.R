@@ -18,5 +18,5 @@ bundle <- function(..., collapse = "_") {
 #' @export
 #' @rdname unbundle
 unbundle <- function(discovery, ...) {
-  UseMethod("unbundle", disovery)
+  UseMethod("unbundle", discovery)
 }

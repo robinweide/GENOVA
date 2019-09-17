@@ -1,7 +1,6 @@
 # Documentation -----------------------------------------------------------
 
-#' @name anchor_docs
-#' @aliases anchors
+#' @name anchors
 #' @title Anchors for Hi-C
 #'
 #' @description Anchors are indices to the matrix in a \code{contacts} object.
@@ -107,7 +106,7 @@ NULL
 
 # Types --------------------------------------------------------------
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
 anchors_PESCAn <- function(ABS, RES, bed,
                            dist_thres = c(5e6L, Inf),
@@ -168,7 +167,7 @@ anchors_PESCAn <- function(ABS, RES, bed,
   idx
 }
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
 anchors_APA <- function(ABS, RES, bedpe,
                         dist_thres = c(0, Inf),
@@ -225,7 +224,7 @@ anchors_APA <- function(ABS, RES, bedpe,
   return(idx)
 }
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
 anchors_ATA <- function(ABS, bed,
                         dist_thres = c(225000, Inf),
@@ -263,7 +262,7 @@ anchors_ATA <- function(ABS, bed,
   return(idx)
 }
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
 anchors_ARA <- function(ABS, bed) {
   if (!inherits(bed, "data.frame")) {

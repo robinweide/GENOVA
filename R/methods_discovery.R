@@ -3,8 +3,34 @@
 #' @title Discovery class
 #' @name discovery
 #'
-#' @description The discovery class contains the results of many analysis
+#' @description The discovery class contains the results of the analysis
 #'   functions within GENOVA.
+#'
+#' @details Next to the results, the \code{discovery} objects may also contain
+#'   useful metadata on the analysis that was run, such as which resolution was
+#'   used.
+#'
+#'   Functions that generate \code{discovery} objects are the following:
+#'   \describe{
+#'    \item{\code{\link[GENOVA]{PESCAn}}}{\code{PESCAn_discovery} objects}
+#'     \item{\code{\link[GENOVA]{APA}}}{\code{APA_discovery} objects}
+#'     \item{\code{\link[GENOVA]{ATA}}}{\code{ATA_discovery} objects}
+#'     \item{\code{\link[GENOVA]{ARA}}}{\code{ARA_discovery} objects}
+#'   }
+#'
+#' @section Operations: \subsection{Subsetting}{\code{discovery} objects can be
+#'   subsetted by using \code{subset(discovery, i)} wherein \code{i} is an
+#'   \code{integer} or \code{character} corresponding to the intended
+#'   sample(s).} \subsection{Combining}{\code{discovery} objects of the same
+#'   type can be combined by using \code{\link[GENOVA]{bundle}(discovery_A,
+#'   discovery_B)}.} \subsection{Splitting}{\code{discovery} objects can be
+#'   split to individual samples by using
+#'   \code{\link[GENOVA]{unbundle}(discovery)}.}
+#'   \subsection{Visualisation}{\code{discovery} objects can be visualised using
+#'   \code{\link[GENOVA]{visualise}(discovery)}}
+#'   \subsection{Quantification}{\code{discovery} objects can be quantified
+#'   using \code{\link[GENOVA]{quantify}(discovery)}}
+NULL
 
 # Bundle documentation ----------------------------------------------------
 
@@ -31,6 +57,7 @@
 #'   same resolutions.
 #'
 #' @seealso The \code{\link[GENOVA]{discovery}} class.
+#'   \code{\link[GENOVA]{unbundle}} for splitting \code{discovery} objects.
 #'
 #' @return A \code{discovery}-class object of the same type.
 #'
@@ -44,9 +71,12 @@
 #'
 #' # Visualising the combined results
 #' visualise(cata)
+NULL
 
 # Bundle functions --------------------------------------------------------
 
+#' @rdname bundle
+#' @export
 bundle.ARMLA_discovery <- function(..., collapse = "_") {
   # Yeah groovy, baby!
   discos <- list(...)
@@ -133,19 +163,33 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 
 # Unbundle documentation --------------------------------------------------
 
-#' Split discovery objects
+#' @title Split discovery objects
 #' @name unbundle
 #'
-#'   \code{unbundle} takes a \code{discovery} object and splits these out to
-#'   individual experiments.
+#' @description \code{unbundle} takes a \code{discovery} object and splits these
+#'   out to individual experiments.
 #'
-#' @param discovery A \code{discovery} object
+#' @param discovery A \code{discovery} object with more than 1 sample.
 #'
 #' @return A \code{list} wherein each element is a \code{discovery} object for a
 #'   single sample.
-#' @export
+#'
+#' @details In case the \code{discovery} contains incomplete samples with
+#'   missing slots, \code{NULL} is returned.
+#'
+#' @seealso \code{\link[GENOVA]{bundle}} for the opposite of \code{unbundle}.
+#'   The \code{\link[GENOVA]{discovery}} class.
 #'
 #' @examples
+#' # Getting a discovery object
+#' apa <- APA(list(WT_20kb, KO_20kb), loops)
+#'
+#' # Splitting the results
+#' split <- unbundle(apa)
+#'
+#' # Plotting the first result only
+#' visualise(split[[1]])
+NULL
 
 # Unbundle functions ------------------------------------------------------
 

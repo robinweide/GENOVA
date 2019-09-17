@@ -100,6 +100,10 @@ dt_matrix <- function(x, i, j, dim, offset) {
 #' # Plot the region
 #' image(mat)
 select_subset <- function(exp, chrom, start, end) {
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
+
   idx <- which(exp$ABS[, 1] == chrom & exp$ABS[, 2] >= start & exp$ABS[, 2] <= end)
   pos <- rowMeans(exp$ABS[idx, 2:3])
   i <- exp$ABS[idx, 4]
@@ -110,4 +114,23 @@ select_subset <- function(exp, chrom, start, end) {
        z = exp$ICE[CJ(V1 = i, V2 = i),
                    dt_matrix(V3, V1, V2, len, min),
                    nomatch = NULL])
+}
+
+# taken from ggplot
+try_require <- function(package, fun, source = NULL) {
+  if (requireNamespace(package, quietly = TRUE)) {
+    return(invisible())
+  }
+
+  if(source == 'BIOC'){
+    stop("Package `", package, "` required for `", fun , "`.\n",
+         "Please install from Bioconductor and try again.", call. = FALSE)
+  } else   if(source == 'github'){
+    stop("Package `", package, "` required for `", fun , "`.\n",
+         "Please install from github and try again.", call. = FALSE)
+  } else {
+    stop("Package `", package, "` required for `", fun , "`.\n",
+         "Please install and try again.", call. = FALSE)
+  }
+
 }

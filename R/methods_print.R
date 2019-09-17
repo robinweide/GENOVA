@@ -54,12 +54,8 @@ print.contacts <- function(x) {
 
 # Discovery classes -------------------------------------------------------
 
-
-
-#' @export
-#' @keywords internal
-print.ATA_discovery <- function(x) {
-  res <- abs(median(diff(as.numeric(dimnames(x$signal)[[1]]))))
+print.ARMLA_discovery <- function(x) {
+  res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
   } else if (res %% 1e3 == 0) {
@@ -68,93 +64,44 @@ print.ATA_discovery <- function(x) {
     paste0(res, " bp")
   }
 
-  string <- paste0("A ", attr(x, "package"), " ATA_discovery object involving the following ",
-                   dim(x$signal)[3],
-                   ' experiment(s):\n"',
-                   paste0(dimnames(x$signal)[[3]], collapse  = '", "'),
-                   '" at a resolution of ', res, '.\n\n')
-  slots0 <- paste0("Contains the following slots:\n")
-  slots1 <- paste0("- signal:\tAn ", dim(x$signal)[1], " x ", dim(x$signal)[2],
-                   " x ", dim(x$signal)[3], " array with summarised ATA results.\n")
-  slots2 <- if ("signal_raw" %in% names(x)) {
-    paste0("- signal_raw:\tA list of length ", length(x$signal_raw),
-           " containing arrays of unsummarised results.\n")
-  } else {""}
-
-  cat(string)
-  cat(slots0)
-  cat(slots1)
-  cat(slots2)
-}
-
-#' @export
-#' @keywords internal
-print.APA_discovery <- function(x) {
-  res <- abs(median(diff(as.numeric(dimnames(x$signal)[[1]]))))
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
+  myclass <- class(x)[[1]]
+  miniclass <- strsplit(myclass, "_")[[1]][[1]]
+  aan <- if(startsWith(myclass, "A")) {
+    "An"
   } else {
-    paste0(res, " bp")
+    "A"
   }
-  string <- paste0("A", attr(x, "package"), "APA_discovery object involving the following ",
-                   dim(x$signal)[3],
-                   ' experiment(s):\n"',
-                   paste0(dimnames(x$signal)[[3]], collapse = '", "'),
-                   '" at a resolution of ', res,'.\n\n')
-  slots0 <- paste0("Contains the following slots:\n")
-  slots1 <- paste0("- signal:\tAn ", dim(x$signal)[1], " x ", dim(x$signal)[2],
-                   " x ", dim(x$signal)[3], " array with summarised APA results.\n")
-  slots2 <- if("signal_raw" %in% names(x)) {
-    paste0("- signal_raw:\tA list of length ", length(x$signal_raw),
-           " containing arrays of unsummarised results.\n")
-  } else {""}
 
-  cat(string)
-  cat(slots0)
-  cat(slots1)
-  cat(slots2)
-}
+  opening <- paste0(
+    aan, " ", attr(x, "package"), " '", myclass, "' object involving the ",
+    "following ", dim(x$signal)[3],' experiments:\n"',
+    paste0(dimnames(x$signal)[[3]], collapse = '", "'),
+    '" at a resolution of ', res, '.\n\n'
+  )
 
-#' @export
-#' @keywords internal
-print.PESCAn_discovery <- function(x) {
-  res <- abs(median(diff(as.numeric(dimnames(x$signal)[[1]]))))
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  string <- paste0("A ", attr(x, "package"), " PESCAn_discovery object involving the following ",
-                   dim(x$signal)[3], ' experiments(s):\n"',
-                   paste0(dimnames(x$signal)[[3]], collapse = '", "'),
-                   '" at a resolution of ', res, '.\n\n')
   slots0 <- paste0("Contains the following slots:\n")
-  slots1 <- if ("obsexp" %in% names(x)) {
-    paste0("- obsexp:\tAn ", dim(x$obsexp)[1], " x ", dim(x$obsexp)[2], " x ",
-           dim(x$obsexp)[3], " array with summarised PESCAn results.\n")
-  } else {""}
-  slots2 <- if ("signal" %in% names(x)) {
-    paste0("- signal:\tAn ", dim(x$signal)[1], " x ", dim(x$signal)[2], " x ",
-           dim(x$signal)[3], " array with the summarised signal for the anchors.\n")
-  } else {""}
+  slots1 <- paste0("- signal:\tAn ", paste0(dim(x$signal), collapse = " x "),
+                   " array with summarised ", miniclass, " results at",
+                   " anchor positions.\n")
+  slots2 <- if ("obsexp" %in% names(x)) {
+    paste0("- obsexp:\tAn ", paste0(dim(x$obsexp), collapse = " x "),
+           " array with summarised and normalised ", miniclass, " results.\n")
+  } else ""
   slots3 <- if ("shifted" %in% names(x)) {
-    paste0("- shifted:\tAn ", dim(x$shifted)[1], " x ", dim(x$shifted)[2], " x ",
-           dim(x$shifted)[3], " array with the summarised signal for shifted anchors.\n")
-  }
+    paste0("- shifted:\tAn ", paste0(dim(x$shifted), collapse = " x "),
+           " array with summarised ", miniclass, " results at shifted ",
+           "anchor positions.\n")
+  } else ""
   slots4 <- if ("signal_raw" %in% names(x)) {
     paste0("- signal_raw:\tA list of length ", length(x$signal_raw),
-           " containing arrays of unsummarised results for the anchors.\n")
-  } else {""}
-  slots5 <- if ("shifted_raw" %in% names(x)) {
+          " containing raw results at each anchor position.\n")
+  } else ""
+  slots5 <- if("shifted_raw" %in% names(x)) {
     paste0("- shifted_raw:\tA list of length ", length(x$shifted_raw),
-           " containing arrays of unsummarised results for the shifted anchors.\n")
-  }
+           " containing raw results at each shifted anchor position.\n")
+  } else ""
 
-  cat(string)
+  cat(opening)
   cat(slots0)
   cat(slots1)
   cat(slots2)
@@ -162,7 +109,6 @@ print.PESCAn_discovery <- function(x) {
   cat(slots4)
   cat(slots5)
 }
-
 
 # Other classes -----------------------------------------------------------
 

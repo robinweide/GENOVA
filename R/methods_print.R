@@ -1,3 +1,5 @@
+# Contacts class ----------------------------------------------------------
+
 #' @export
 #' @keywords internal
 print.contacts <- function(x) {
@@ -48,6 +50,11 @@ print.contacts <- function(x) {
   cat(centros)
   cat(comment)
 }
+
+
+# Discovery classes -------------------------------------------------------
+
+
 
 #' @export
 #' @keywords internal
@@ -155,3 +162,40 @@ print.PESCAn_discovery <- function(x) {
   cat(slots4)
   cat(slots5)
 }
+
+
+# Other classes -----------------------------------------------------------
+
+#' @export
+#' @keywords internal
+print.anchors <- function(x) {
+  str1 <- paste0("An 'anchors' object of type '", attr(x, "type"),
+                 "' of length ", nrow(x),":\n")
+  class(x) <- "matrix"
+  x <- x[T,]
+  cat(str1)
+  p <- print(head(x))
+  outp <<- p
+  n <- max(nchar(p))
+  if (is.null(dimnames(p))) {
+    if (nrow(x) > nrow(p)) {
+      space <- "."
+      str2 <- paste0("[", space, ",] ",
+                     paste0(rep(".", n), collapse = ""), " ",
+                     paste0(rep(".", n), collapse = ""))
+      cat(str2)
+    }
+  } else {
+    m <- max(nchar(dimnames(p)[[1]]))
+    val <- tail(dimnames(p)[[1]], 1)
+    val <- as.numeric(substr(val, 2, m - 2))
+    if (nrow(x) > val) {
+      space <- paste0(rep(".", m - 3), collapse = "")
+      str2 <- paste0("[", space, ",] ",
+                     paste0(rep(".", n), collapse = ""), " ",
+                     paste0(rep(".", n), collapse = ""))
+      cat(str2)
+    }
+  }
+}
+

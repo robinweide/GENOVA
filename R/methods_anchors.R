@@ -1,30 +1,113 @@
-# Strategies --------------------------------------------------------------
+# Documentation -----------------------------------------------------------
 
-#' Anchor positions for PE-SCAn
+#' @name anchor_docs
+#' @aliases anchors
+#' @title Anchors for Hi-C
 #'
-#' Takes all pairwise interactions of locations on the genome and maps these to
-#' indices of the Hi-C matrix.
+#' @description Anchors are indices to the matrix in a \code{contacts} object.
+#'   Anchor functions translate genomic coordinates, typically BED-formatted
+#'   \code{data.frame}s, into indices corresponding to locations in the Hi-C
+#'   matrix. Anchors are used in aggregate analysis functions to indicate where
+#'   parts of the matrix should be looked up. Anchors come in different types,
+#'   depending on the aggregate analysis functions they are used for.
 #'
-#' @inheritParams PESCAn
-#' @param ABS The indices slot of a GENOVA experiment.
-#' @param RES The resolution slot of a GENOVA experiment.
+#' @param ABS The indices slot of a GENOVA \code{contacts} object.
+#' @param RES The resolution slot of a GENOVA \code{contacts} object.\emph{ Not
+#'   for ATA}.
+#' @param bed A BED-formatted \code{data.frame} with the following 3 columns:
+#'   \enumerate{ \item A \code{character} giving the chromosome names. \item An
+#'   \code{integer} with start positions. \item An \code{integer} with end
+#'   positions. }
+#' @param bedpe A BEDPE-formatted \code{data.frame} with the following 6
+#'   columns. \emph{APA only}: \enumerate{ \item A \code{character} giving the
+#'   chromosome names of the first coordinate. \item An \code{integer} giving
+#'   the start positions of the first coordinate. \item An \code{integer} giving
+#'   the end positions of the first coordinate. \item A \code{character} giving
+#'   the chromosome names of the second coordinate. \item An \code{integer}
+#'   giving the start positions of the second coordinate. \item An
+#'   \code{integer} giving the end positions of the second coordinate. }
 #' @param mode A \code{character} vector of length 1 indicating which
-#'   interaction to take. Possible values: \code{"cis"}, \code{"trans"} or
-#'   \code{"both"}.
+#'   interactions to retain. Possible values: \code{"cis"}, \code{"trans"} or
+#'   \code{"both"}. \emph{PE-SCAn and APA only}.
+#' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
+#'   and maximum distances in basepairs between anchorpoints. For ATA-type
+#'   anchors, the minimum and maximum sizes of TADs.
+#' @param min_compare An \code{integer} vector of length 1 indicating the
+#'   minimum number of pairwise interactions on a chromosome to consider.
+#'   \emph{PE-SCAn only}.
+#' @param padding A \code{numeric} of length 1 to determine the padding around
+#'   TADs, expressed in TAD widths. \emph{ATA only}.
 #'
-#' @return A \code{matrix} with two columns.
+#' @return A \code{anchors} object with two colums in \code{matrix} format.
 #'
-#' @details The resulting matrix contains ordered indices to the Hi-C matrix
-#'   slot in the GENOVA experiment.
+#' @details Anchors are calculated within aggregate repeated matrix lookup
+#'   analysis, but can also be provided as the '\code{anchors}' argument for these
+#'   functions.
 #'
-#'   The \code{mode} argument determines what pairwise interactions are
-#'   reported. \code{"cis"} returns pairwise interactions within a chromosome;
-#'   \code{"trans"} gives these between chromosomes and \code{"bot"}.
+#'   Anchors are specific for a resolution of a \code{contacts} object and
+#'   cannot be interchanged freely between resolutions.
 #'
-#' @seealso \code{\link[GENOVA]{PESCAn}} for context.
+#'   The  \code{mode}' argument determines what pairwise interactions are reported
+#'   for \code{APA} and \code{PE-SCAn}. \code{"cis"} returns pairwise
+#'   interactions within a chromosome; \code{"trans"} gives these between
+#'   chromosomes and \code{"both"} returns both these types of interactions.
 #'
-#'   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
-#'   \code{data.frame}s to Hi-C indices.
+#' @section Anchor types:
+#'
+#'   \subsection{PE-SCAn anchors}{ \code{anchors_PESCAn()} takes all pairwise
+#'   interactions of genomic coordinates from a BED-like \code{data.frame} and
+#'   maps these to indices of the Hi-C matrix. It is used within the
+#'   \code{\link[GENOVA]{PESCAn}} function. Wether these pairwise interactions
+#'   are allowed to cross chromosome boundaries is determined by the '\code{mode}'
+#'   argument, which default to \code{"cis"} to only take pairwise interactions
+#'   on the same chromosome.}
+#'
+#'   \subsection{APA anchors}{ \code{anchors_APA()} takes a BEDPE-formatted
+#'   \code{data.frame} and translates the coordinates in the first 3 and last 3
+#'   columns to indices of the Hi-C matrix. It is used within the
+#'   \code{\link[GENOVA]{APA}} function. The '\code{mode}' argument defaults to
+#'   \code{"both"} but optionally allows for both cis- and trans-interactions. }
+#'
+#'   \subsection{ATA anchors}{ \code{anchors_ATA()} takes the genomic coordinates
+#'   of TADs in a BED-formatted \code{data.frame} and translates to indices of
+#'   the Hi-C matrix. It is used within the \code{\link[GENOVA]{ATA}} function.
+#'   In contrast to the PE-SCAn anchors and ATA anchors, ATA anchors are
+#'   positions on the matrix's diagonal. The '\code{padding}' argument controls
+#'   how large the region around a TAD should be expanded. Since TADs have
+#'   variable sizes, ATA anchors can be calculated without resolution.}
+#'
+#'   \subsection{ARA anchors}{ \code{anchors_ARA()} takes a BED-formatted
+#'   \code{data.frame} and translates these to Hi-C matrix indices on the
+#'   diagonal. It is used within the \code{\link[GENOVA]{ARA} function}. In
+#'   contrast to other anchors, ARA anchors can take on a directionality. If the
+#'   start positions are larger than the end positions, the anchor is assigned a
+#'   \emph{reverse} direction. Else they are given the \emph{forward}
+#'   direction.}
+#'
+#' @seealso \code{\link[GENOVA]{bed2idx}} for general genomic coordinates to
+#'   Hi-C index conversion.
+#'
+#' @examples
+#' # PE-SCAn
+#' anch <- anchors_PESCAn(WT_20kb$ABS, WT_20kb$RES, super_enhancers)
+#' PESCAn(list(WT_20kb, KO_20kb), anchors = anch)
+#'
+#' # APA
+#' anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
+#' APA(list(WT_20kb, KO_20kb), anchors = anch)
+#'
+#' # ATA
+#' anch <- anchors_ATA(WT_10kb$ABS, tads)
+#' ATA(list(WT_10kb, KO_10kb), anchors = anch)
+#'
+#' # ARA
+#' anch <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
+#' ARA(list(WT_20kb, KO_20kb), anchors = anch)
+NULL
+
+# Types --------------------------------------------------------------
+
+#' @rdname anchor_docs
 #' @export
 anchors_PESCAn <- function(ABS, RES, bed,
                            dist_thres = c(5e6L, Inf),
@@ -80,30 +163,12 @@ anchors_PESCAn <- function(ABS, RES, bed,
     idx <- idx[order(idx[, 1], idx[, 2]), ]
   }
 
+  class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "PESCAn"
   idx
 }
 
-#' Anchor positions for APA
-#'
-#' Transforms a BEDPE formatted \code{data.frame} to indices of the Hi-C matrix.
-#'
-#' @inheritParams APA
-#' @inheritParams anchors_PESCAn
-#'
-#' @return A \code{matrix} with two columns.
-#'
-#' @details The resulting matrix contains ordered indices to the Hi-C matrix
-#'   slot in the GENOVA experiment.
-#'
-#'   The \code{mode} argument determines what entries are
-#'   reported. \code{"cis"} returns entries within chromosomes;
-#'   \code{"trans"} gives these between chromosomes and \code{"bot"}.
-#'
-#' @seealso \code{\link[GENOVA]{APA}} for context.
-#'
-#'   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
-#'   \code{data.frame}s to Hi-C indices.
+#' @rdname anchor_docs
 #' @export
 anchors_APA <- function(ABS, RES, bedpe,
                         dist_thres = c(0, Inf),
@@ -155,32 +220,12 @@ anchors_APA <- function(ABS, RES, bedpe,
     pmax(newbed$idx1, newbed$idx2)
   )
   idx <- idx[order(idx[, 1]), ]
+  class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "APA"
   return(idx)
 }
 
-#' Anchor positions for ATA
-#'
-#' Transforms a BED-formatted \code{data.frame} containing TAD positions into
-#' indices to the Hi-C matrix.
-#'
-#' @inheritParams anchors_PESCAn
-#' @param bed A \code{data.frame} with 3 columns in BED format, containing TAD
-#'   boundary positions for one TAD at each row.
-#' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
-#'   and maximum TAD sizes to include.
-#' @param padding A \code{numeric} of length 1 to determine the padding around
-#'   TADs, expressed in TAD widths.
-#'
-#' @return A \code{matrix} with two columns.
-#'
-#' @details The resulting matrix contains ordered indices to the Hi-C matrix
-#'   slot in the GENOVA experiment.
-#'
-#' @seealso \code{\link[GENOVA]{ATA}} for context.
-#'
-#'   \code{\link[GENOVA]{bed2idx}} for general conversion of BED-like
-#'   \code{data.frame}s to Hi-C indices.
+#' @rdname anchor_docs
 #' @export
 anchors_ATA <- function(ABS, bed,
                         dist_thres = c(225000, Inf),
@@ -212,12 +257,34 @@ anchors_ATA <- function(ABS, bed,
   idx <- idx[order(idx[, 1]), ]
 
   # Attribute to let matrix lookup methods know it is performing ATA
+  class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "TADs"
   attr(idx, "padding") <- padding
   return(idx)
 }
 
-# Manipulations ---------------------------------------------------------
+#' @rdname anchor_docs
+#' @export
+anchors_ARA <- function(ABS, bed) {
+  if (!inherits(bed, "data.frame")) {
+    bed <- as.data.frame(bed)[, 1:3]
+  }
+  # Translate to indices
+  idx <- bed2idx(ABS, bed)
+  is_dup <- duplicated(idx)
+  idx <- idx[!is_dup]
+  idx <- unname(cbind(idx, idx))
+
+  # Attach direction if necessary
+  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "forward", "reverse"))
+
+  class(idx) <- c("anchors", "matrix")
+  attr(idx, "type") <- "ARA"
+  attr(idx, "dir") <- f
+  return(idx)
+}
+
+# Utilities ---------------------------------------------------------------
 
 #' Shift anchors
 #'
@@ -229,7 +296,7 @@ anchors_ATA <- function(ABS, bed,
 #' @param shift An \code{integer} of length 1 indicating how many bins the
 #'   anchors should be shifted.
 #'
-#' @return A \code{matrix} with two columns.
+#' @return A \code{anchors} object with two columns in \code{matrix} format.
 #'
 #' @details The resulting matrix contains indices to the Hi-C matrix slot in the
 #'   GENOVA experiment.
@@ -237,10 +304,9 @@ anchors_ATA <- function(ABS, bed,
 #'   An index is considered out of bounds when that index plus the shift size
 #'   and maximum relative position would belong to a different chromosome.
 #'
-#' @seealso \code{\link[GENOVA]{PESCAn}} for context.
-#'
-#'   \code{\link[GENOVA]{anchors_filter_oob}} for general out of bounds
-#'   filtering of anchors.
+#' @seealso \code{\link[GENOVA]{PESCAn}} for context and
+#'   \code{\link[GENOVA]{anchors}}. \code{\link[GENOVA]{anchors_filter_oob}} for
+#'   general out of bounds filtering of anchors.
 #'
 #' @export
 anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
@@ -258,8 +324,6 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
   anchors + c(shifted, shifted)
 }
 
-# Quality control ---------------------------------------------------------
-
 #' Filter anchors that become out of bounds.
 #'
 #' Discards anchors for which a lookup will result in any lookup bins that are
@@ -267,27 +331,29 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
 #'
 #' @inheritParams anchors_shift
 #'
-#' @return A \code{matrix} with two columns.
+#' @return A \code{anchors} object with two columns in \code{matrix} format.
 #'
 #' @details The resulting matrix contains indices to the Hi-C matrix slot in the
 #'   GENOVA experiment.
 #'
 #'   An index is considered out of bounds when that index plus the maximum, or
-#'   minus the minimum, relative position would belong to a different chromosome.
+#'   minus the minimum, relative position would belong to a different
+#'   chromosome.
+#'
+#' @seealso \code{\link[GENOVA]{anchors}}.
 #'
 #' @export
 anchors_filter_oob <- function(ABS, anchors, rel_pos) {
-  typetest <- !is.null(attr(anchors, "type"))
-  if (typetest) {
-    type <- attr(anchors, "type")
-    if (type == "TADs") {
-      left  <- ABS[match(anchors[, 1], ABS[, 4]), 1]
-      right <- ABS[match(anchors[, 2], ABS[, 4]), 1]
-      keep <- left == right
-      anchors <- anchors[keep, ]
-      attr(anchors, "type") <- type
-      return(anchors)
-    }
+  type <- attr(anchors, "type")
+
+  # ATA has slightly different oob rules
+  if (type == "TADs") {
+    left  <- ABS[match(anchors[, 1], ABS[, 4]), 1]
+    right <- ABS[match(anchors[, 2], ABS[, 4]), 1]
+    keep <- left == right
+    anchors <- anchors[keep, ]
+    attr(anchors, "type") <- type
+    return(anchors)
   }
 
   # Match idx +/- relative position to chrom
@@ -300,8 +366,91 @@ anchors_filter_oob <- function(ABS, anchors, rel_pos) {
 
   # Return anchors that are not out of bounds
   anchors <- anchors[inbounds, , drop = FALSE]
-  if (typetest) {
-    attr(anchors, "type") <- type
-  }
   anchors
 }
+
+
+#' Coerce to anchors
+#'
+#' Function to coerce to \code{anchors} if possible.
+#'
+#' @param x A two column \code{matrix} or \code{data.frame} with integers.
+#'
+#' @return An object of class \code{anchors}.
+#'
+#' @details The resulting \code{anchors} has the default '\code{type}' attribute
+#'   \code{"custom"}.
+#' @export
+#'
+#' @seealso \code{\link[GENOVA]{anchors}}
+#'
+#' @examples
+#' as_anchors(matrix(1:20, 2))
+as_anchors <- function(x) {
+  if (is.null(dim(x)) || length(dim(x)) > 2) {
+    stop(paste0("An object of class ", class(x),
+                " cannot be converted to anchors.\nUse a ",
+                "'matrix' or 'data.frame' object with 2 integer ",
+                "columns instead."),
+         call. = FALSE)
+  }
+  if (dim(x)[2] != 2) {
+    stop(paste0("Anchors require 2 columns, not ", dim(x)[2], "."),
+         call. = FALSE)
+  }
+  x <- as.matrix(x)
+  if (storage.mode(x) != "integer") {
+    stop(paste0("Cannot convert ", storage.mode(x),
+                " type to anchors. Use integers instead."),
+         call. = FALSE)
+  }
+  class(x) <- c("anchors", "matrix")
+  attr(x, "type") <- "custom"
+  x
+}
+
+#' Test object is anchors
+#'
+#' Function to check if an object is \code{anchors}.
+#'
+#' @param x Any \R object.
+#'
+#' @return A \code{logical} vector of length 1.
+#' @export
+#'
+#' @seealso \code{\link[GENOVA]{anchors}}
+#'
+#' @examples
+#' m <- matrix(1:20, 10)
+#' is_anchors(m) # FALSE
+#'
+#' m <- as_anchors(m)
+#' is_anchors(m) # TRUE
+is_anchors <- function(x) {
+  inherits(x, "anchors")
+}
+
+# Need subsetting function to allow attribute inheritance.
+#' @export
+#' @keywords internal
+`[.anchors` <- function(x, i, j, ..., drop = TRUE) {
+  # Treat as matrix
+  y <- x
+  class(y) <- "matrix"
+  y <- y[i, j, ..., drop = drop]
+  if (is.null(dim(y))) {
+    return(y)
+  }
+  # Ensure resulting object inherits attributes from parent
+  attrs <- setdiff(names(attributes(x)),
+                   names(attributes(y)))
+  x_attr <- attributes(x)[attrs]
+  # Take particular care that direction is subsetted as rows
+  if ("dir" %in% names(x_attr)) {
+    x_attr[["dir"]] <- rle(inverse.rle(attr(x, "dir"))[i])
+  }
+  attributes(y) <- c(attributes(y), x_attr)
+  y
+}
+
+

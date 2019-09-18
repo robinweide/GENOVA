@@ -211,6 +211,8 @@ loadContacts = function(signalPath,
   
   
   if(legacy){
+    warning("Legacy is a soft deprecation option, which ~someday~ will be removed.\nUsing the legacy option means you're longing for the good old days.
+            Don't: the future has zoomy functions and shiny plots.")
     out = legacy_out(out)
   }
   

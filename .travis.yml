@@ -1,0 +1,5 @@
+# Use R language
+language: r
+
+# Set one of you dependencies from github
+r_github_packages: rnabioco/RcppLibBigWig

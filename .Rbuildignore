@@ -1,2 +1,4 @@
+misc
+misc/*
 ^.*\.Rproj$
 ^\.Rproj\.user$

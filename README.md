@@ -5,7 +5,7 @@
 
 ![GitHub](https://img.shields.io/github/license/robinweide/GENOVA?color=succes?branch=dev)
 [![Build
-Status](https://travis-ci.org/robinweide/tagmeppr.svg?branch=dev)](https://travis-ci.org/robinweide/GENOVA)
+Status](https://travis-ci.org/robinweide/GENOVA.svg?branch=dev)](https://travis-ci.org/robinweide/GENOVA)
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
@@ -43,7 +43,11 @@ breaking nearly every analysis. To provide legacy support, we made the
 [ye olde
 lighthouse](https://github.com/robinweide/GENOVA/releases/tag/v0.95)
 release. This can be installed with
-`devtools::install_github("robinweide/GENOVA@v0.95")`.
+`devtools::install_github("robinweide/GENOVA@v0.95")`. Furthermore, if
+you have custom scripts based on the output of `construct.experiment()`,
+you can use v1 and set `legacy=TRUE` in `loadContacts()` to get a
+similar output. This, of course, also allows you to load .cooler and
+.hic files in pre-v1 versions :+1:.
 
 ## Support
 

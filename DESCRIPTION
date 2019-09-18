@@ -1,6 +1,6 @@
 Package: GENOVA
 Title: GENOVA: expore the Hi-C
-Version: 0.9.995
+Version: 1
 Authors@R: c(
   person("Robin H.", "van der Weide", email = "r.vd.weide@nki.nl", role = c("aut", "cre")),
   person("Elzo", "de Wit", email = "e.d.wit@nki.nl", role = "aut"))
@@ -12,13 +12,11 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports:
-    dplyr,
-    grid,
-    reshape2,
     ggplot2
 RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
     bigwrig,
-    strawr
+    strawr,
+    rhdf5
 VignetteBuilder: knitr

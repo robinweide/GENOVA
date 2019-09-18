@@ -22,7 +22,8 @@ visualise(discovery, ...)
   metric = c("diff", "lfc"), raw = FALSE)
 
 \method{visualise}{ARA_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), raw = FALSE)
+  metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
+  raw = FALSE)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -35,15 +36,14 @@ plot contrast panels.}
 
 \item{metric}{A \code{character} of length 1: what contrast metric should be
 used? \code{"diff"} for difference by subtraction or \code{"lfc"} for
-\ifelse{html}{\out{p_<sub>x</sub>(1)=Pr(y=1|x)}}{\eqn{p_x(1)=Pr(y=1|x)}}
-fold changes.}
+\ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
 
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
 
-\item{mode}{(PESCAn_discovery only) What result slot should be used for
-visualisation? \code{"obsexp"} for the observed over expected metric and
-\code{"signal"} for mean contacts at unshifted anchors.}
+\item{mode}{(PESCAn_discovery and ARA_discovery only) What result slot should
+be used for visualisation? \code{"obsexp"} for the observed over expected
+metric or \code{"signal"} for mean contacts at unshifted anchors.}
 }
 \description{
 Plot the results of \code{discovery} objects. By default
@@ -65,9 +65,10 @@ The \code{"diff"} \code{metric} value creates contrast panels by
   '\code{aesthetics = "altfill"}' inside ggplot2's fill scale functions.
 }
 \note{
-For \code{ATA_discovery} and \code{ARA_discovery} objects which include
-  the matrix's diagonal the upper limit for the contacts fill scale is set to
-  the 95th percentile of the data to increase the dynamic range of colours.
+For \code{ATA_discovery} objects which include the matrix's diagonal,
+  the upper limit for the contacts fill scale is set to the 95th percentile
+  of the data to increase the dynamic range of colours. The same is true for
+  \code{ARA_discovery}, when '\code{mode = "signal"}'.
 }
 \examples{
 # APA

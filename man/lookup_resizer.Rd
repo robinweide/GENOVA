@@ -4,11 +4,9 @@
 \alias{lookup_resizer}
 \title{Engine for repeated matrix lookup and resizing}
 \usage{
-lookup_resizer(ICE, anchors, rel_pos)
+lookup_resizer(MAT, anchors, rel_pos)
 }
 \arguments{
-\item{ICE}{The Hi-C matrix slot of a GENOVA experiment object.}
-
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 indices between which a square is looked up.}
 
@@ -17,6 +15,8 @@ indices between which a square is looked up.}
 
   \code{anchors} specify two points on the diagonal between which the region
   should be looked up.}
+
+\item{ICE}{The Hi-C matrix slot of a GENOVA experiment object.}
 }
 \value{
 A threedimensional \code{array} wherein the first dimension is

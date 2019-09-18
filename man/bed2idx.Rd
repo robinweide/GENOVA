@@ -4,7 +4,7 @@
 \alias{bed2idx}
 \title{Match bed-like entries to Hi-C bin indices}
 \usage{
-bed2idx(ABS, bed, mode = c("centre", "start", "end"))
+bed2idx(IDX, bed, mode = c("centre", "start", "end"))
 }
 \arguments{
 \item{bed}{A \code{data.frame} with 3 columns in BED format, containing the

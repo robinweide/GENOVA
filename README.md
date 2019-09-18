@@ -30,7 +30,7 @@ levels of genome organisation, using Hi-C data. GENOVA facilitates the
 comparison between multiple datasets and supports the majority of
 mapping-pipelines.
 
-GENOVA supports data from:
+GENOVA directly reads data from:
 
   - HiC-pro
   - cooler
@@ -38,7 +38,7 @@ GENOVA supports data from:
 
 ## Note to long-time users
 
-Version 1.0 will contain a massive overhaul, which will results in
+Version 1.0 will contain a massive overhaul, which will result in
 breaking nearly every analysis. To provide legacy support, we made the
 [ye olde
 lighthouse](https://github.com/robinweide/GENOVA/releases/tag/v0.95)

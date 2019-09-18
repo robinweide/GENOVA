@@ -29,7 +29,7 @@ The increase in interest for Hi-C methods in the chromatin community has led to 
 
 Here, we present **GEN**ome **O**rganisation **V**isual **A**nalytics (GENOVA): a software suite to perform in-depth analyses on various levels of genome organisation, using Hi-C data. GENOVA facilitates the comparison between multiple datasets and supports the majority of mapping-pipelines.
 
-GENOVA supports data from:
+GENOVA directly reads data from:
 
 - HiC-pro
 - cooler

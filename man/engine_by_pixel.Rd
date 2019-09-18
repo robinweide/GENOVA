@@ -4,16 +4,16 @@
 \alias{engine_by_pixel}
 \title{Engine for repeated matrix lookups}
 \usage{
-engine_by_pixel(ICE, anchors, rel_pos)
+engine_by_pixel(MAT, anchors, rel_pos)
 }
 \arguments{
-\item{ICE}{The Hi-C matrix slot of a GENOVA experiment object.}
-
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}
 
 \item{rel_pos}{An \code{integer} vector indicating relative positions in
 bins, indicating ranges around anchors to lookup.}
+
+\item{ICE}{The Hi-C matrix slot of a GENOVA experiment object.}
 }
 \value{
 A threedimensional \code{array} wherein the first dimension is

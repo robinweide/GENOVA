@@ -36,11 +36,7 @@ indices and uses these instead.}
 summary matrices be returned in the output?}
 }
 \value{
-<<<<<<< HEAD
 An \code{APA_discovery} object with the APA results.
-=======
-A \code{APA_discovery} object with the APA results.
->>>>>>> 0436eccc768debaa34e895498fa161438c476149
 }
 \description{
 Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of

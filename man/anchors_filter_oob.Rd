@@ -4,10 +4,10 @@
 \alias{anchors_filter_oob}
 \title{Filter anchors that become out of bounds.}
 \usage{
-anchors_filter_oob(ABS, anchors, rel_pos)
+anchors_filter_oob(IDX, anchors, rel_pos)
 }
 \arguments{
-\item{ABS}{The indices slot of a GENOVA \code{contacts} object.}
+\item{IDX}{The indices slot of a GENOVA \code{contacts} object.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}

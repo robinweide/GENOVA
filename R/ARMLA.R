@@ -55,7 +55,7 @@ APA <- function(explist, bedpe,
   explist <- check_compat_exp(explist)
 
   # Initialise parameters
-  res <- explist[[1]]$RES
+  res <- attr(explist[[1]], "res")
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
 
   if (is.null(dist_thres)) {
@@ -65,8 +65,8 @@ APA <- function(explist, bedpe,
   # Calculate anchors
   if (is.null(anchors)) {
     anchors <- anchors_APA(
-      explist[[1]]$ABS,
-      explist[[1]]$RES,
+      explist[[1]]$IDX,
+      res,
       bedpe,
       dist_thres
     )
@@ -134,14 +134,14 @@ PESCAn <- function(explist, bed, shift = 1e6L,
   explist <- check_compat_exp(explist)
 
   # Initialise parameters
-  res <- explist[[1]]$RES
+  res <- attr(explist[[1]], "res")
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
   shift <- round(shift / res)
 
   # Calculate anchors
   if (is.null(anchors)) {
     anchors <- anchors_PESCAn(
-      explist[[1]]$ABS, explist[[1]]$RES,
+      explist[[1]]$IDX, attr(explist[[1]], "res"),
       bed, dist_thres,
       min_compare = min_compare
     )
@@ -185,12 +185,12 @@ ATA <- function(explist, bed,
   explist <- check_compat_exp(explist)
 
   # Initialise parameters
-  res <- explist[[1]]$RES
+  res <- attr(explist[[1]], "res")
   rel_pos <- seq.int(size)
 
   if (is.null(anchors)) {
     anchors <- anchors_ATA(
-      explist[[1]]$ABS,
+      explist[[1]]$IDX,
       bed,
       dist_thres
     )
@@ -253,14 +253,14 @@ ARA <- function(explist, bed, shift = 1e6,
   explist <- check_compat_exp(explist)
 
   # Initialise parameters
-  res <- explist[[1]]$RES
+  res <- attr(explist[[1]], "res")
   rel_pos <- parse_rel_pos(res, size_bin, size_bp)
   shift <- round(shift / res)
 
   # Calculate anchors
   if (is.null(anchors)) {
     anchors <- anchors_ARA(
-      explist[[1]]$ABS,
+      explist[[1]]$IDX,
       bed
     )
   }
@@ -312,14 +312,14 @@ check_compat_exp <- function(explist) {
   }
 
   # Re-list of only one experiment was given
-  if (any(c("ICE", "ABS", "RES") %in% names(explist))) {
+  if (any(c("MAT", "IDX") %in% names(explist))) {
     explist <- list(explist)
   }
 
   # Test equality of experiments in list
   if (length(explist) > 1) {
     equal <- vapply(seq_along(explist)[-1], function(i) {
-      all.equal(explist[[1]]$ABS, explist[[i]]$ABS)
+      all.equal(explist[[1]]$IDX, explist[[i]]$IDX)
     }, logical(1))
 
     if (any(!equal)) {

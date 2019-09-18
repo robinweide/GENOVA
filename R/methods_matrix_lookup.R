@@ -22,11 +22,11 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
                            outlier_filter = c(0, 1), raw = FALSE) {
 
   # Finish off anchors
-  anchors <- anchors_finish(explist[[1]]$ABS, anchors, rel_pos, shift)
+  anchors <- anchors_finish(explist[[1]]$IDX, anchors, rel_pos, shift)
   anch_id <- eval(attr(anchors, "anch_id"))
   shft_id <- eval(attr(anchors, "shft_id"))
 
-  dnames <- format(rel_pos * explist[[1]]$RES, trim = TRUE)
+  dnames <- format(rel_pos * attr(explist[[1]], "res"), trim = TRUE)
 
   # Set data.table core usage
   dt.cores <- data.table::getDTthreads()
@@ -44,7 +44,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   results <- lapply(seq_along(explist), function(i) {
 
     # Lookup matrices
-    master <- run_engine(explist[[i]]$ICE, anchors, rel_pos)
+    master <- run_engine(explist[[i]]$MAT, anchors, rel_pos)
     arr <- master[anch_id,,]
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
@@ -103,7 +103,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   # Format experiment names
   names(results) <- if (is.null(names(explist))) {
     vapply(explist, function(exp) {
-      exp$NAME
+      attr(exp, "samplename")
     }, character(1L))
   } else {
     names(explist)
@@ -145,7 +145,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-engine_by_pixel <- function(ICE, anchors, rel_pos) {
+engine_by_pixel <- function(MAT, anchors, rel_pos) {
   class(anchors) <- "matrix"
 
   # Setup indices
@@ -155,24 +155,15 @@ engine_by_pixel <- function(ICE, anchors, rel_pos) {
               grid[idx$Var2, 2] + anchors[idx$Var1, 2])
 
   # Get data
-  mats <- ICE[idx, V3]
+  mats <- MAT[idx, V3]
   dim(mats) <- c(nrow(anchors), length(rel_pos)[c(1, 1)])
   mats
 }
 
 #' @keywords internal
-engine_by_dir_pixel <- function(ICE, anchors, rel_pos) {
-  class(anchors) <- "matrix"
+engine_by_dir_pixel <- function(MAT, anchors, rel_pos) {
 
-  # Setup indices
-  grid <- expand.grid(rel_pos, rel_pos)
-  idx <- expand.grid(seq_len(nrow(anchors)), seq_len(nrow(grid)))
-  idx <- list(grid[idx$Var2, 1] + anchors[idx$Var1, 1],
-              grid[idx$Var2, 2] + anchors[idx$Var1, 2])
-  # Get data
-  mats <- ICE[idx, V3]
-  dim(mats) <- c(nrow(anchors), length(rel_pos)[c(1, 1)])
-  mats
+  mats <- engine_by_pixel(MAT = MAT, anchors = anchors, rel_pos = rel_pos)
 
   # Split off reverse orientation
   dir <- inverse.rle(attr(anchors, "dir"))
@@ -183,7 +174,6 @@ engine_by_dir_pixel <- function(ICE, anchors, rel_pos) {
   attr(mats, "dir") <- attr(anchors, "dir")
   mats
 }
-
 
 #' Engine for repeated matrix lookup and resizing
 #'
@@ -206,7 +196,7 @@ engine_by_dir_pixel <- function(ICE, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-lookup_resizer <- function(ICE, anchors, rel_pos) {
+lookup_resizer <- function(MAT, anchors, rel_pos) {
   template <- matrix(0, tail(rel_pos, 1), tail(rel_pos, 1))
   coords <- as.matrix(expand.grid(rel_pos, rel_pos))
   max_pos <- max(rel_pos)
@@ -220,7 +210,7 @@ lookup_resizer <- function(ICE, anchors, rel_pos) {
     min <- i[1] - 1
 
     # Lookup matrix
-    mat <- ICE[CJ(V1 = i, V2 = i),
+    mat <- MAT[CJ(V1 = i, V2 = i),
                dt_matrix(V3, V1, V2, len, min),
                nomatch = NULL]
 

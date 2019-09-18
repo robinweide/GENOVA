@@ -4,10 +4,10 @@
 \alias{anchors_shift}
 \title{Shift anchors}
 \usage{
-anchors_shift(ABS, anchors, rel_pos, shift = 1)
+anchors_shift(IDX, anchors, rel_pos, shift = 1)
 }
 \arguments{
-\item{ABS}{The indices slot of a GENOVA \code{contacts} object.}
+\item{IDX}{The indices slot of a GENOVA \code{contacts} object.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}

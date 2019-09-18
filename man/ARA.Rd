@@ -39,11 +39,7 @@ indices and uses these instead.}
 summary matrices be returned in the output?}
 }
 \value{
-<<<<<<< HEAD
 An \code{ARA_discovery} object with the ARA results.
-=======
-A \code{ARA_discovery} object with the ARA results.
->>>>>>> 0436eccc768debaa34e895498fa161438c476149
 }
 \description{
 Extracts Hi-C matrices centered around regions and averages the results for
@@ -55,13 +51,8 @@ By default, \code{ARA} also calculates the results for shifted
 
   The '\code{bed}' argument can take in oriented entries, wherein entries
   with a start site larger than the end site are considered to be in the
-<<<<<<< HEAD
   reverse direction. The reverse sites are flipped during analysis, so the
   orientation is the same as in the forward sites.
-=======
-  reverse direction. The reverse sites are flipped so the orientation is the
-  same as in the forward sites.
->>>>>>> 0436eccc768debaa34e895498fa161438c476149
 }
 \examples{
 # Typical usage

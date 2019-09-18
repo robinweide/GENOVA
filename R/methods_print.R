@@ -3,7 +3,7 @@
 #' @export
 #' @keywords internal
 print.contacts <- function(x) {
-  res <- x$RES
+  res <- attr(x, "res")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
   } else if (res %% 1e3 == 0) {
@@ -12,21 +12,21 @@ print.contacts <- function(x) {
     paste0(res, " bp")
   }
   string <- paste0("A ", attr(x, "package"), " ", class(x), " object named '",
-                   x$NAME, "' with the following slots:\n")
+                   attr(x, "samplename"), "' with the following slots:\n")
   slots <- sapply(x, is.null)
   slots <- names(slots[!slots])
 
-  ice <- paste0("- ICE\t:\tTriplet format matrix containing ", dim(x$ICE)[1],
+  mat <- paste0("- MAT\t:\tTriplet format matrix containing ", dim(x$MAT)[1],
                 " informative bins.\n")
-  abs <- paste0("- ABS\t:\t", dim(x$ABS)[1], " genomic indices in BED format.\n")
-  cname <- paste0('- NAME\t:\t"', x$NAME, '"\n')
+  idx <- paste0("- IDX\t:\t", dim(x$IDX)[1], " genomic indices in BED format.\n")
+  cname <- paste0('- NAME\t:\t"', attr(x, "samplename"), '"\n')
   pres <- paste0("- RES\t:\tResolution at ", res, ".\n")
   chroms <- paste0("- CHRS\t:\tA vector of ", length(x$CHRS), " chromosome names.\n")
   col <- paste0("- COL\t:\tThe colour '", x$COL, "'\n")
   mask <- paste0("- MASK\t:\t", sum(x$MASK), " bins are masked.\n")
-  rmchrom <- paste0("- RMCHROM:\t", if(x$RMCHROM){"Some"} else {"No"},
+  rmchrom <- paste0("- RMCHROM:\t", if(attr(x, "rmChrom")){"Some"} else {"No"},
                     " chromosomes have been removed.\n")
-  zscore <- paste0("- ZSCORE:\tThe data have ", if (!x$ZSCORE) {"not"},
+  zscore <- paste0("- ZSCORE:\tThe data have ", if (!attr(x, "znorm")) {"not"},
                    " been Z-score normalised.\n")
   comment <- paste0("- COMM\t:\tThe following comment: ",
                     if (!is.null(x$COMM)) {x$COMM} else {"NULL"},
@@ -38,16 +38,16 @@ print.contacts <- function(x) {
   }
 
   cat(string)
-  cat(ice)
-  cat(abs)
+  cat(mat)
+  cat(idx)
+  cat(chroms)
+  cat(centros)
   cat(cname)
   cat(pres)
-  cat(chroms)
   cat(col)
   cat(mask)
   cat(rmchrom)
   cat(zscore)
-  cat(centros)
   cat(comment)
 }
 

@@ -7,6 +7,8 @@
 anchors_finish(IDX, anchors, rel_pos, shift = 0)
 }
 \arguments{
+\item{IDX}{The indices slot of a GENOVA \code{contacts} object.}
+
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}
 

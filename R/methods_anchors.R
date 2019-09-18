@@ -167,6 +167,8 @@ anchors_PESCAn <- function(ABS, RES, bed,
   idx
 }
 
+
+
 #' @rdname anchors
 #' @export
 anchors_APA <- function(ABS, RES, bedpe,
@@ -275,7 +277,7 @@ anchors_ARA <- function(ABS, bed) {
   idx <- unname(cbind(idx, idx))
 
   # Attach direction if necessary
-  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "forward", "reverse"))
+  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "+", "-"))
 
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "ARA"
@@ -284,6 +286,50 @@ anchors_ARA <- function(ABS, bed) {
 }
 
 # Utilities ---------------------------------------------------------------
+
+#' Finish anchors for repeated matrix lookup
+#'
+#' @inheritParams anchors_shift
+#'
+#' @return A \code{anchors} object of the same type.
+#' @examples
+#' anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
+#' anchors_finish(WT_20kb$ABS, anch, -10:10, 0)
+anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
+  anchors <- anchors_filter_oob(IDX, anchors, rel_pos)
+  anch_id <- parse(text = paste0("seq.int(", nrow(anchors), ")"),
+                   keep.source = FALSE)
+
+  # Quick workaround for no shift
+  if (shift == 0) {
+    shft_id <- expression(0)
+    attr(anchors, "anch_id") <- anch_id
+    attr(anchors, "shft_id") <- shft_id
+    return(anchors)
+  }
+
+  # Shift anchors as necessary
+  shift <- anchors_shift(IDX, anchors, rel_pos, shift)
+  shft_id <- parse(text = paste0("seq.int(", nrow(shift), ") + ",
+                                 nrow(anchors)), keep.source = FALSE)
+
+  # Take care of direction attribute
+  attris <- attributes(anchors)
+  if ("dir" %in% names(attris)) {
+    attris$dir$lengths <- c(attris$dir$lengths, attr(shift, "dir")$lengths)
+    attris$dir$values  <- c(attris$dir$values,  attr(shift, "dir")$values)
+  }
+
+  # Make final anchors
+  fin <- rbind(anchors, shift)
+
+  # Re-attach attributes
+  extra <- setdiff(names(attris), names(attributes(fin)))
+  attributes(fin) <- c(attributes(fin), attris[extra])
+  attr(fin, "anch_id") <- anch_id
+  attr(fin, "shft_id") <- shft_id
+  fin
+}
 
 #' Shift anchors
 #'
@@ -309,8 +355,9 @@ anchors_ARA <- function(ABS, bed) {
 #'
 #' @export
 anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
+
   # Translate indices to chromosomes
-  chrom <- ABS[match(anchors, ABS[, 4]), 1]
+  chrom   <- ABS[match(anchors, ABS[, 4]), 1]
   shifted <- ABS[match(anchors + shift + max(rel_pos), ABS[, 4]), 1]
 
   # Check chromosome is same after shift
@@ -451,5 +498,3 @@ is_anchors <- function(x) {
   attributes(y) <- c(attributes(y), x_attr)
   y
 }
-
-

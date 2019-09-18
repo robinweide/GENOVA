@@ -20,19 +20,11 @@
 #' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
 rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
                            outlier_filter = c(0, 1), raw = FALSE) {
-  anchors <- anchors_filter_oob(
-    explist[[1]]$ABS,
-    anchors, rel_pos
-  )
 
-  if (shift > 0) {
-    shift_anchors <- anchors_shift(
-      explist[[1]]$ABS,
-      anchors, rel_pos, shift
-    )
-    class(shift_anchors) <- "matrix"
-  }
-  class(anchors) <- "matrix"
+  # Finish off anchors
+  anchors <- anchors_finish(explist[[1]]$ABS, anchors, rel_pos, shift)
+  anch_id <- eval(attr(anchors, "anch_id"))
+  shft_id <- eval(attr(anchors, "shft_id"))
 
   dnames <- format(rel_pos * explist[[1]]$RES, trim = TRUE)
 
@@ -44,15 +36,16 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   # Decide on engine
   run_engine <- switch(attr(anchors, "type"),
                        "TADs" = "lookup_resizer",
-                       "ARA" = "directional_matrix_lookup",
-                       "matrix_lookup")
+                       "ARA" = "engine_by_dir_pixel",
+                       "engine_by_pixel")
   run_engine <- getFromNamespace(run_engine, "GENOVA")
 
   # Loop over experiments, perform matrix lookup
   results <- lapply(seq_along(explist), function(i) {
 
-    # Calculate true values
-    arr <- run_engine(explist[[i]]$ICE, anchors, rel_pos)
+    # Lookup matrices
+    master <- run_engine(explist[[i]]$ICE, anchors, rel_pos)
+    arr <- master[anch_id,,]
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
@@ -67,7 +60,8 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
     # Calculate shifted values
     if (shift > 0) {
-      shifted_arr <- run_engine(explist[[i]]$ICE, shift_anchors, rel_pos)
+      # shifted_arr <- run_engine(explist[[i]]$ICE, shift_anchors, rel_pos)
+      shifted_arr <- master[shft_id,,]
       shifted_mu <- summarise_lookup(shifted_arr,
                                      outlier_filter,
                                      keep = mat_mu$keep
@@ -151,64 +145,43 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-matrix_lookup <- function(ICE, anchors, rel_pos) {
-  # Setup a grid of relative positions
+engine_by_pixel <- function(ICE, anchors, rel_pos) {
+  class(anchors) <- "matrix"
+
+  # Setup indices
   grid <- expand.grid(rel_pos, rel_pos)
-  idx <- seq_len(nrow(grid))
+  idx <- expand.grid(seq_len(nrow(anchors)), seq_len(nrow(grid)))
+  idx <- list(grid[idx$Var2, 1] + anchors[idx$Var1, 1],
+              grid[idx$Var2, 2] + anchors[idx$Var1, 2])
 
-  # Loop over grid entries, get scores at all anchor positions
-  mats <- vapply(idx, function(i) {
-    ICE[list(
-      grid[i, 1] + anchors[, 1],
-      grid[i, 2] + anchors[, 2]
-    )]$V3
-  }, as.numeric(anchors[, 1]))
-
-  # Cast results in array
-  array(mats,
-    dim = c(
-      nrow(anchors),
-      length(rel_pos)[c(1, 1)]
-    )
-  )
+  # Get data
+  mats <- ICE[idx, V3]
+  dim(mats) <- c(nrow(anchors), length(rel_pos)[c(1, 1)])
+  mats
 }
 
-#' @export
-directional_matrix_lookup <- function(ICE, anchors, rel_pos) {
+#' @keywords internal
+engine_by_dir_pixel <- function(ICE, anchors, rel_pos) {
+  class(anchors) <- "matrix"
 
-  grid <- as.matrix(CJ(rel_pos, rel_pos))
-  idx <- seq_len(nrow(grid))
-
-  # Loop over grid entries, get scores at all anchor positions
-  mats <- vapply(idx, function(i) {
-    ICE[list(
-      grid[i, 1] + anchors[, 1],
-      grid[i, 2] + anchors[, 2]
-    )]$V3
-  }, as.numeric(anchors[, 1]))
-
-  # Cast results in array
-  arr <- array(mats,
-        dim = c(
-          nrow(anchors),
-          length(rel_pos)[c(1, 1)]
-        )
-  )
+  # Setup indices
+  grid <- expand.grid(rel_pos, rel_pos)
+  idx <- expand.grid(seq_len(nrow(anchors)), seq_len(nrow(grid)))
+  idx <- list(grid[idx$Var2, 1] + anchors[idx$Var1, 1],
+              grid[idx$Var2, 2] + anchors[idx$Var1, 2])
+  # Get data
+  mats <- ICE[idx, V3]
+  dim(mats) <- c(nrow(anchors), length(rel_pos)[c(1, 1)])
+  mats
 
   # Split off reverse orientation
   dir <- inverse.rle(attr(anchors, "dir"))
-  revidx <- which(dir == "reverse")
-  rev <- arr[revidx,,]
+  dir <- which(dir == "-")
 
-  # Flip reverse
-  dimseq <- seq_len(dim(rev)[2])
-  rev[, dimseq, dimseq] <- rev[, rev(dimseq), rev(dimseq)]
-  rev <- aperm(rev, c(1,3,2))
-
-  # Recombine
-  arr[revidx,,] <- rev
-  attr(arr, "dir") <- attr(anchors, "dir")
-  arr
+  seq <- seq_along(rel_pos)
+  mats[dir, seq, seq] <- aperm(mats[dir, rev(seq), rev(seq)], c(1,3,2))
+  attr(mats, "dir") <- attr(anchors, "dir")
+  mats
 }
 
 
@@ -297,12 +270,9 @@ lookup_resizer <- function(ICE, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-summarise_lookup <- function(
-                             array, outlier_filter = c(0, 1), keep = NULL) {
+summarise_lookup <- function(array, outlier_filter = c(0, 1), keep = NULL) {
   if (is.null(keep)) {
-    keep <- apply(array, 1, function(slice) {
-      !all(is.na(slice))
-    })
+    keep <- rowSums(array, na.rm = TRUE) != 0
   }
 
   # Remove all-NA slices, set other NAs to 0
@@ -322,6 +292,6 @@ summarise_lookup <- function(
   }
 
   # Summarise
-  mat <- apply(array, 2:3, function(x) .Internal(mean(x)))
+  mat <- colMeans(array)
   return(list(mat = mat, keep = keep))
 }

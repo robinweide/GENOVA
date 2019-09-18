@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 inst/doc
-
 *.RData
 *.rdx
 *.rdb
+tests/

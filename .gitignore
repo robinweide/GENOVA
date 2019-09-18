@@ -5,4 +5,8 @@ inst/doc
 *.RData
 *.rdx
 *.rdb
+<<<<<<< HEAD
 tests/
+=======
+*.Rpoj
+>>>>>>> 0436eccc768debaa34e895498fa161438c476149

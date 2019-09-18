@@ -2,6 +2,12 @@
 
 S3method("[",anchors)
 S3method(bundle,ARMLA_discovery)
+<<<<<<< HEAD
+=======
+S3method(print,APA_discovery)
+S3method(print,ATA_discovery)
+S3method(print,PESCAn_discovery)
+>>>>>>> 0436eccc768debaa34e895498fa161438c476149
 S3method(print,anchors)
 S3method(print,contacts)
 S3method(subset,ARMLA_discovery)

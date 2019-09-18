@@ -167,8 +167,11 @@ anchors_PESCAn <- function(ABS, RES, bed,
   idx
 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 0436eccc768debaa34e895498fa161438c476149
 #' @rdname anchors
 #' @export
 anchors_APA <- function(ABS, RES, bedpe,

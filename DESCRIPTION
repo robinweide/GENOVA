@@ -19,5 +19,6 @@ Imports:
 RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
-    bigwrig
+    bigwrig,
+    strawr
 VignetteBuilder: knitr

@@ -1,7 +1,6 @@
 # Documentation -----------------------------------------------------------
 
-#' @name anchor_docs
-#' @aliases anchors
+#' @name anchors
 #' @title Anchors for Hi-C
 #'
 #' @description Anchors are indices to the matrix in a \code{contacts} object.
@@ -11,8 +10,8 @@
 #'   parts of the matrix should be looked up. Anchors come in different types,
 #'   depending on the aggregate analysis functions they are used for.
 #'
-#' @param ABS The indices slot of a GENOVA \code{contacts} object.
-#' @param RES The resolution slot of a GENOVA \code{contacts} object.\emph{ Not
+#' @param IDX The indices slot of a GENOVA \code{contacts} object.
+#' @param res The resolution attribute of a GENOVA \code{contacts} object.\emph{ Not
 #'   for ATA}.
 #' @param bed A BED-formatted \code{data.frame} with the following 3 columns:
 #'   \enumerate{ \item A \code{character} giving the chromosome names. \item An
@@ -107,16 +106,16 @@ NULL
 
 # Types --------------------------------------------------------------
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
-anchors_PESCAn <- function(ABS, RES, bed,
+anchors_PESCAn <- function(IDX, res, bed,
                            dist_thres = c(5e6L, Inf),
                            min_compare = 10L,
                            mode = c("cis", "trans", "both")) {
   mode <- match.arg(mode)
 
   # Match and clean indices
-  newbed <- cbind(bed, idx = bed2idx(ABS, bed, mode = "centre"))
+  newbed <- cbind(bed, idx = bed2idx(IDX, bed, mode = "centre"))
   newbed <- newbed[!is.na(newbed$idx), ]
   newbed <- newbed[order(newbed$idx), ]
 
@@ -150,7 +149,7 @@ anchors_PESCAn <- function(ABS, RES, bed,
   # Filtering distances only makes sense in cis
   if (mode != "trans") {
     # Covert dists to resolution space
-    dist_thres <- dist_thres / RES
+    dist_thres <- dist_thres / res
     dist_thres <- sort(dist_thres)
 
     # Exclude cis combinations based on min/max_dist
@@ -168,17 +167,17 @@ anchors_PESCAn <- function(ABS, RES, bed,
   idx
 }
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
-anchors_APA <- function(ABS, RES, bedpe,
+anchors_APA <- function(IDX, res, bedpe,
                         dist_thres = c(0, Inf),
                         mode = c("both", "cis", "trans")) {
   mode <- match.arg(mode)
 
   # Convert bedpe to idx matrix
   newbed <- cbind(bedpe[, 1:6],
-    idx1 = bed2idx(ABS, bedpe[, 1:3], mode = "centre"),
-    idx2 = bed2idx(ABS, bedpe[, 4:6], mode = "centre")
+    idx1 = bed2idx(IDX, bedpe[, 1:3], mode = "centre"),
+    idx2 = bed2idx(IDX, bedpe[, 4:6], mode = "centre")
   )
   newbed <- na.exclude(newbed)
   newbed <- newbed[!duplicated(newbed[, 7:8]), ]
@@ -200,7 +199,7 @@ anchors_APA <- function(ABS, RES, bedpe,
     newbed <- newbed[!newbed$is_cis, ]
   } else {
     # Convert distances to bins
-    dist_thres <- dist_thres / RES
+    dist_thres <- dist_thres / res
     dist_thres <- sort(dist_thres)
 
     # Filter cis on distances
@@ -225,9 +224,9 @@ anchors_APA <- function(ABS, RES, bedpe,
   return(idx)
 }
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
-anchors_ATA <- function(ABS, bed,
+anchors_ATA <- function(IDX, bed,
                         dist_thres = c(225000, Inf),
                         padding = 1) {
   if (!inherits(bed, "data.frame")) {
@@ -246,8 +245,8 @@ anchors_ATA <- function(ABS, bed,
 
   # Translate to Hi-C indices
   idx <- cbind(
-    bed2idx(ABS, bed, mode = "start"),
-    bed2idx(ABS, bed, mode = "end")
+    bed2idx(IDX, bed, mode = "start"),
+    bed2idx(IDX, bed, mode = "end")
   )
   # Sort
   idx <- cbind(
@@ -263,20 +262,20 @@ anchors_ATA <- function(ABS, bed,
   return(idx)
 }
 
-#' @rdname anchor_docs
+#' @rdname anchors
 #' @export
-anchors_ARA <- function(ABS, bed) {
+anchors_ARA <- function(IDX, bed) {
   if (!inherits(bed, "data.frame")) {
     bed <- as.data.frame(bed)[, 1:3]
   }
   # Translate to indices
-  idx <- bed2idx(ABS, bed)
+  idx <- bed2idx(IDX, bed)
   is_dup <- duplicated(idx)
   idx <- idx[!is_dup]
   idx <- unname(cbind(idx, idx))
 
   # Attach direction if necessary
-  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "forward", "reverse"))
+  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "+", "-"))
 
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "ARA"
@@ -285,6 +284,50 @@ anchors_ARA <- function(ABS, bed) {
 }
 
 # Utilities ---------------------------------------------------------------
+
+#' Finish anchors for repeated matrix lookup
+#'
+#' @inheritParams anchors_shift
+#'
+#' @return A \code{anchors} object of the same type.
+#' @examples
+#' anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
+#' anchors_finish(WT_20kb$ABS, anch, -10:10, 0)
+anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
+  anchors <- anchors_filter_oob(IDX, anchors, rel_pos)
+  anch_id <- parse(text = paste0("seq.int(", nrow(anchors), ")"),
+                   keep.source = FALSE)
+
+  # Quick workaround for no shift
+  if (shift == 0) {
+    shft_id <- expression(0)
+    attr(anchors, "anch_id") <- anch_id
+    attr(anchors, "shft_id") <- shft_id
+    return(anchors)
+  }
+
+  # Shift anchors as necessary
+  shift <- anchors_shift(IDX, anchors, rel_pos, shift)
+  shft_id <- parse(text = paste0("seq.int(", nrow(shift), ") + ",
+                                 nrow(anchors)), keep.source = FALSE)
+
+  # Take care of direction attribute
+  attris <- attributes(anchors)
+  if ("dir" %in% names(attris)) {
+    attris$dir$lengths <- c(attris$dir$lengths, attr(shift, "dir")$lengths)
+    attris$dir$values  <- c(attris$dir$values,  attr(shift, "dir")$values)
+  }
+
+  # Make final anchors
+  fin <- rbind(anchors, shift)
+
+  # Re-attach attributes
+  extra <- setdiff(names(attris), names(attributes(fin)))
+  attributes(fin) <- c(attributes(fin), attris[extra])
+  attr(fin, "anch_id") <- anch_id
+  attr(fin, "shft_id") <- shft_id
+  fin
+}
 
 #' Shift anchors
 #'
@@ -309,10 +352,11 @@ anchors_ARA <- function(ABS, bed) {
 #'   general out of bounds filtering of anchors.
 #'
 #' @export
-anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
+anchors_shift <- function(IDX, anchors, rel_pos, shift = 1) {
+
   # Translate indices to chromosomes
-  chrom <- ABS[match(anchors, ABS[, 4]), 1]
-  shifted <- ABS[match(anchors + shift + max(rel_pos), ABS[, 4]), 1]
+  chrom   <- IDX[match(anchors, IDX[, V4]), V1]
+  shifted <- IDX[match(anchors + shift + max(rel_pos), IDX[, V4]), V1]
 
   # Check chromosome is same after shift
   inbounds <- matrix(chrom == shifted, ncol = 2)
@@ -343,13 +387,13 @@ anchors_shift <- function(ABS, anchors, rel_pos, shift = 1) {
 #' @seealso \code{\link[GENOVA]{anchors}}.
 #'
 #' @export
-anchors_filter_oob <- function(ABS, anchors, rel_pos) {
+anchors_filter_oob <- function(IDX, anchors, rel_pos) {
   type <- attr(anchors, "type")
 
   # ATA has slightly different oob rules
   if (type == "TADs") {
-    left  <- ABS[match(anchors[, 1], ABS[, 4]), 1]
-    right <- ABS[match(anchors[, 2], ABS[, 4]), 1]
+    left  <- IDX[match(anchors[, 1], IDX[, V4]), V1]
+    right <- IDX[match(anchors[, 2], IDX[, V4]), V1]
     keep <- left == right
     anchors <- anchors[keep, ]
     attr(anchors, "type") <- type
@@ -357,8 +401,8 @@ anchors_filter_oob <- function(ABS, anchors, rel_pos) {
   }
 
   # Match idx +/- relative position to chrom
-  plus  <- ABS[match(anchors + max(rel_pos), ABS[, 4]), 1]
-  minus <- ABS[match(anchors + min(rel_pos), ABS[, 4]), 1]
+  plus  <- IDX[match(anchors + max(rel_pos), IDX[, V4]), V1]
+  minus <- IDX[match(anchors + min(rel_pos), IDX[, V4]), V1]
 
   # Check wether chromosomes have changed
   inbounds <- matrix(plus == minus, ncol = 2)
@@ -452,5 +496,3 @@ is_anchors <- function(x) {
   attributes(y) <- c(attributes(y), x_attr)
   y
 }
-
-

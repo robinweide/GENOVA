@@ -33,10 +33,13 @@ indices and uses these instead.}
 summary matrices be returned in the output?}
 }
 \value{
-An \code{ATA_discovery} object containing arrays with the results of
-  the ATA for the experiments.
+An \code{ATA_discovery} object with the ATA results.
 }
 \description{
 Extracts Hi-C matrices around TADs, resizes these to a uniform size and
 averages the results for all TADs.
+}
+\seealso{
+The \code{\link[GENOVA]{discovery}} class.
+  \code{\link[GENOVA]{visualise}} for visualisation of the results.
 }

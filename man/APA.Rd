@@ -36,8 +36,7 @@ indices and uses these instead.}
 summary matrices be returned in the output?}
 }
 \value{
-A \code{list} of the same length as \code{explist} wherein list
-  elements contain the results of the APA per experiment.
+An \code{APA_discovery} object with the APA results.
 }
 \description{
 Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
@@ -54,9 +53,9 @@ anchors <- anchors_APA(WT_10kb$ABS, WT_10kb$RES,
 apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
 
 # Visualising results
-autoplot(apa)
+visualise(apa)
 }
 \seealso{
-\code{\link[GENOVA]{APA_visualisation}} for visualising
-  results.
+The \code{\link[GENOVA]{discovery}} class.
+  \code{\link[GENOVA]{visualise}} for visualisation of the results.
 }

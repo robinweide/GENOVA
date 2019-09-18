@@ -10,7 +10,7 @@
 #'
 #' @details Out of bounds values are matched to nearest bin.
 #' @export
-bed2idx <- function(ABS, bed, mode = c("centre", "start", "end")) {
+bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   if (!inherits(bed, "data.frame")) {
     bed <- as.data.frame(bed)
   }
@@ -30,18 +30,18 @@ bed2idx <- function(ABS, bed, mode = c("centre", "start", "end")) {
   )
 
   # Assign entries to shared chromosomes
-  chroms <- intersect(ABS[, 1], bed[, 1])
+  chroms <- intersect(IDX[, V1], bed[, 1])
   bed_group <- match(bed[, 1], chroms)
-  ABS_group <- match(ABS[, 1], chroms)
+  IDX_group <- match(IDX[, V1], chroms)
 
   # Split by chromosome
   bed_chrom <- split(bed[, 2], bed_group)
-  ABS_chrom <- split(ABS[, c(2, 4)], ABS_group)
+  IDX_chrom <- split(IDX[, c(2, 4)], IDX_group)
 
   # Match bed entry to idx
   out <- mapply(function(i, j) {
-    j[pmax(findInterval(i, j[, 1]), 1), 2]
-  }, i = bed_chrom, j = ABS_chrom)
+    j[pmax(findInterval(i, j[, V2]), 1), V4]
+  }, i = bed_chrom, j = IDX_chrom)
   unsplit(out, bed_group)
 }
 
@@ -104,14 +104,14 @@ select_subset <- function(exp, chrom, start, end) {
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
 
-  idx <- which(exp$ABS[, 1] == chrom & exp$ABS[, 2] >= start & exp$ABS[, 2] <= end)
-  pos <- rowMeans(exp$ABS[idx, 2:3])
-  i <- exp$ABS[idx, 4]
+  idx <- which(exp$IDX[, 1] == chrom & exp$IDX[, 2] >= start & exp$IDX[, 2] <= end)
+  pos <- rowMeans(exp$IDX[idx, 2:3])
+  i <- exp$IDX[idx, V4]
   min <- i[1] - 1
   len <- length(i)
-  list(x = locs,
-       y = locs,
-       z = exp$ICE[CJ(V1 = i, V2 = i),
+  list(x = pos,
+       y = pos,
+       z = exp$MAT[CJ(V1 = i, V2 = i),
                    dt_matrix(V3, V1, V2, len, min),
                    nomatch = NULL])
 }
@@ -122,10 +122,10 @@ try_require <- function(package, fun, source = NULL) {
     return(invisible())
   }
 
-  if(source == 'BIOC'){
+  if (source == 'BIOC') {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install from Bioconductor and try again.", call. = FALSE)
-  } else   if(source == 'github'){
+  } else   if (source == 'github') {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install from github and try again.", call. = FALSE)
   } else {

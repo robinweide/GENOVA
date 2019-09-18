@@ -5,7 +5,7 @@
 
 ![GitHub](https://img.shields.io/github/license/robinweide/GENOVA?color=succes?branch=dev)
 [![Build
-Status](https://travis-ci.org/robinweide/tagmeppr.svg?branch=master)](https://travis-ci.org/robinweide/GENOVA)
+Status](https://travis-ci.org/robinweide/tagmeppr.svg?branch=dev)](https://travis-ci.org/robinweide/GENOVA)
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)

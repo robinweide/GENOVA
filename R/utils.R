@@ -28,19 +28,21 @@ bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
       "end" = bed[, 3]
     )
   )
+  
+  class(IDX) <- "data.frame"
 
   # Assign entries to shared chromosomes
-  chroms <- intersect(IDX[, V1], bed[, 1])
+  chroms <- intersect(IDX[, 1], bed[, 1])
   bed_group <- match(bed[, 1], chroms)
-  IDX_group <- match(IDX[, V1], chroms)
-
+  IDX_group <- match(IDX[, 1], chroms)
+  
   # Split by chromosome
   bed_chrom <- split(bed[, 2], bed_group)
   IDX_chrom <- split(IDX[, c(2, 4)], IDX_group)
-
+  
   # Match bed entry to idx
   out <- mapply(function(i, j) {
-    j[pmax(findInterval(i, j[, V2]), 1), V4]
+    j[pmax(findInterval(i, j[, 1]), 1), 2]
   }, i = bed_chrom, j = IDX_chrom)
   unsplit(out, bed_group)
 }

@@ -168,7 +168,7 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
 #'
 #' create a domainogram for the insulation scores
 #'
-#' @param exp A Hi-C experiment object: produced by construct.experiment().
+#' @param exp A Hi-C experiment object: produced by loadContacts().
 #' @param chrom Chromosome of the region of interest
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
@@ -187,15 +187,15 @@ insulation.domainogram <- function(exp, chrom, start, end, axes = T, window.size
   if (step %% 2) {
     stop("Step size has to be even")
   }
-  if (!window.size1 %% 2) {
-    stop("Window sizes has to be odd")
-  }
+  # if (!window.size1 %% 2) {
+  #   stop("Window sizes has to be odd")
+  # }
   color.fun <- colorRampPalette(c("#f03b20", "#ffeda0", "white", "#31a354"))
   color.vec <- color.fun(1000)
   plot(c(start, end), c(window.size1, window.size2), type = "n", xaxs = "i", yaxs = "i", axes = F, ylab = "window size", xlab = "chromosomal position")
   window.vec <- seq(window.size1, window.size2, by = step)
   for (window.size in window.vec) {
-    extend <- exp$RES * window.size
+    extend <- attr(exp, "res") * window.size
     ins.score <- insulation.score(exp, window.size, chrom, start - extend, end + extend, local = local)
     # set the limits on the values of the insulation score
     ins.score[ins.score[, 2] < zlim[1], 2] <- zlim[1]
@@ -221,9 +221,9 @@ delta.insulation.domainogram <- function(exp1, exp2, chrom, start, end, window.s
   if (step %% 2) {
     stop("Step size has to be even")
   }
-  if (!window.size1 %% 2) {
-    stop("Window sizes has to be odd")
-  }
+  # if (!window.size1 %% 2) {
+  #   stop("Window sizes has to be odd")
+  # }
   # set the differential color palette
   color.fun <- colorRampPalette(c("blue", "white", "red"))
   color.res <- 1000
@@ -232,7 +232,7 @@ delta.insulation.domainogram <- function(exp1, exp2, chrom, start, end, window.s
   plot(c(start, end), c(window.size1, window.size2), type = "n", xaxs = "i", yaxs = "i", axes = F, ylab = "window size", xlab = "chromosomal position")
   window.vec <- seq(window.size1, window.size2, by = step)
   for (window.size in window.vec) {
-    extend <- exp1$RES * window.size
+    extend <- attr(exp1, "res") * window.size
     delta.score <- insulation.score(exp1, window.size, chrom, start - extend, end + extend, local = local)
     score2 <- insulation.score(exp2, window.size, chrom, start - extend, end + extend, local = local)
     delta.score[, 2] <- delta.score[, 2] - score2[, 2]

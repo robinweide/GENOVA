@@ -132,7 +132,9 @@ saddle.core <- function(exp, chip, chrom, start, end, CS, nBins) {
   }
 
   # return list of ev/cs and matrices in three-column form
-  MAT <- reshape2::melt(ave.matrix)
+  MAT <- data.frame(arrayInd(seq_along(ave.matrix), dim(ave.matrix)),
+                    value = as.vector(ave.matrix))
+  MAT <- setNames(MAT, c("Var1", "Var2", "value"))
   MAT$chrom <- chrom
 
   ev <- sort(ev)
@@ -162,9 +164,9 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins) {
     chromStructure <- data.frame(
       chrom = chrom,
       start = 0,
-      startC = min(cent) * exp$RES,
-      endC = max(cent) * exp$RES,
-      end = max(exp$ABS[exp$ABS$V1 == chrom, 3])
+      startC = min(cent) * attr(exp, "res"),
+      endC = max(cent) * attr(exp, "res"),
+      end = max(exp$IDX[V1 == chrom, V3])
     )
   } else if (!is.null(exp$CENTROMERES) & chrom %in% exp$CENTROMERES[, 1]) {
     centChrom <- exp$CENTROMERES[exp$CENTROMERES[, 1] == chrom, ]
@@ -173,7 +175,7 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins) {
       start = 0,
       startC = centChrom[, 2],
       endC = centChrom[, 3],
-      end = max(exp$ABS[exp$ABS$V1 == chrom, 3])
+      end = max(exp$IDX[V1 == chrom, 3])
     )
   } else {
     stop("Chromosome is not found in exp$CENTROMERES.\nQuitting...")
@@ -182,11 +184,11 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins) {
   # check if an arm is smaller than Nbins*10 (eg: at least 10 bins per bin)
   # 1
   doArm1 <- T
-  if (!(((chromStructure[, 3] - chromStructure[, 2]) / exp$RES) / nBins) > 10) {
+  if (!(((chromStructure[, 3] - chromStructure[, 2]) / attr(exp, "res")) / nBins) > 10) {
     doArm1 <- F
   }
   doArm2 <- T
-  if (!(((chromStructure[, 5] - chromStructure[, 4]) / exp$RES) / nBins) > 10) {
+  if (!(((chromStructure[, 5] - chromStructure[, 4]) / attr(exp, "res")) / nBins) > 10) {
     doArm2 <- F
   }
 
@@ -198,8 +200,7 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins) {
       CS_C <- CS[CS[, 1] == chrom, ]
       CS_CA <- CS_C[CS_C[, 3] <= chromStructure$startC, 4]
       # find out if the length of CS_CA is the same as the #bins in the arm-mat
-      len_abs <- length(exp$ABS[exp$ABS$V1 == chrom &
-        exp$ABS$V3 <= chromStructure$startC, 4])
+      len_abs <- length(exp$IDX[V1 == chrom & V3 <= chromStructure$startC, V4])
       len_CS <- length(CS_CA)
       if (len_abs == len_CS) {
         # cool. the lengths are the same. the same resolution is used.
@@ -212,8 +213,7 @@ saddle.chr <- function(exp, chip, chrom, CS, nBins) {
         CS_C <- CS[CS[, 1] == chrom, ]
         CS_CA <- CS_C[CS_C[, 3] <= altEnd, 4]
         # find out if the length of CS_CA is the same as the #bins in the arm-mat
-        len_abs <- length(exp$ABS[exp$ABS$V1 == chrom &
-          exp$ABS$V3 <= altEnd, 4])
+        len_abs <- length(exp$IDX[V1 == chrom & V3 <= altEnd, V4])
         len_CS <- length(CS_CA)
         if (len_abs == len_CS) {
           # cool. the lengths are now the same. the same resolution is used.
@@ -254,9 +254,7 @@ Continuing with NULL.")
       CS_CA <- CS_C[CS_C[, 2] >= chromStructure$endC &
         CS_C[, 3] <= chromStructure$end, 4]
       # find out if the length of CS_CA is the same as the #bins in the arm-mat
-      len_abs <- length(exp$ABS[exp$ABS$V1 == chrom &
-        exp$ABS$V2 >= chromStructure$endC &
-        exp$ABS$V3 <= chromStructure$end, 4])
+      len_abs <- length(exp$IDX[V1 == chrom & V2 >= chromStructure$endC & V3 <= chromStructure$end, V4])
       len_CS <- length(CS_CA)
       if (len_abs == len_CS) {
         # cool. the lengths are the same. the same resolution is used.
@@ -270,9 +268,7 @@ Continuing with NULL.")
         CS_CA <- CS_C[CS_C[, 2] >= altStart &
           CS_C[, 3] <= chromStructure$end, 4]
         # find out if the length of CS_CA is the same as the #bins in the arm-mat
-        len_abs <- length(exp$ABS[exp$ABS$V1 == chrom &
-          exp$ABS$V2 >= altStart &
-          exp$ABS$V3 <= chromStructure$end, 4])
+        len_abs <- length(exp$IDX[V1 == chrom & V2 >= altStart & V3 <= chromStructure$end, V4])
         len_CS <- length(CS_CA)
 
         if (len_abs == len_CS) {
@@ -377,10 +373,10 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
     out$EV <- rbind(out$EV, tmp$EV)
   }
 
-  out$MAT$sample <- exp$NAME
-  out$MAT$color <- exp$COL
-  out$EV$sample <- exp$NAME
-  out$EV$color <- exp$COL
+  out$MAT$sample <- attr(exp, "samplename")
+  out$MAT$color  <- attr(exp, "colour")
+  out$EV$sample  <- attr(exp, "samplename")
+  out$EV$color   <- attr(exp, "samplename")
   # return list of ev/cs and matrices in three-column form
   return(list(MAT = out$MAT, EV = out$EV))
 }

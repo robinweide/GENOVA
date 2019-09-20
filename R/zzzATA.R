@@ -19,7 +19,6 @@
 #' ## Not run:
 #' ATA_results_of_RAOetal <- ATA(experiment = Rao_20k, tad.bed = TADs)
 #' ## End(**Not run**)
-#' @export
 ATA_old <- function(experiment, tad.bed, smallTreshold = 225000, rmOutlier = F, verbose = F, outlierCutOff = .995) {
   OUTLIERCORRECTIONSWITCH <- ifelse(rmOutlier,
     yes = T,

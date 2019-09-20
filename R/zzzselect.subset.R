@@ -13,7 +13,6 @@
 #' # plot the region
 #' image(ss_out$z)
 #' @return A list with the X and Y locations and a matrix (Z) containing the contacts.
-#' @export
 select.subset <- function(exp, chrom, start, end) {
   sel <- exp$ABS[exp$ABS[, 1] == chrom & exp$ABS[, 2] >= start & exp$ABS[, 2] <= end, 4]
   start.i <- min(sel)

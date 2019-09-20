@@ -4,11 +4,11 @@
 \alias{insulation.score}
 \title{insulation.score}
 \usage{
-insulation.score(hic, window.size, chrom, start, end, diag.add = 0,
+insulation.score(exp, window.size, chrom, start, end, diag.add = 0,
   local = T)
 }
 \arguments{
-\item{hic}{A Hi-C experiment object: produced by construct.experiment().}
+\item{exp}{A Hi-C experiment object: produced by \code{loadContacts()}.}
 
 \item{window.size}{The sliding square size}
 

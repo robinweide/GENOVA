@@ -331,7 +331,11 @@ cis.ev <- function(data, chrom, arm = "p") {
   cent <- largest.stretch(cent)
 
 
-  centromere.pos <- data.frame(chrom = c(chrom, chrom), start = c(min(cent) * data$RES, min(cent) * data$RES), end = c(max(cent) * data$RES, min(cent) * data$RES))
+  centromere.pos <- data.frame(chrom = c(chrom, chrom), 
+                               start = c(min(cent) * attr(data, "res"), 
+                                         min(cent) * attr(data, "res")), 
+                               end = c(max(cent) * attr(data, "res"), 
+                                       min(cent) * attr(data, "res")))
   if (centromere.pos[1, 2] < 1e6 && arm == "p") {
     print("No p arm. Enter q as arm")
     return(NULL)
@@ -347,9 +351,9 @@ cis.ev <- function(data, chrom, arm = "p") {
 
 # function to determine whether chromosomes need to be switched
 switch.chromosomes <- function(data, chrom1, chrom2) {
-  bed <- data$ABS
-  X <- bed[bed[, 1] == chrom1, 4]
-  Y <- bed[bed[, 1] == chrom2, 4]
+  bed <- data$IDX
+  X <- bed[V1 == chrom1, V4]
+  Y <- bed[V1 == chrom2, V4]
   return(X[1] > Y[1])
 }
 
@@ -404,7 +408,7 @@ trans.compartment.plot <- function(exp, chrom1, arm1 = "p", chrom2, arm2 = "p", 
   # of the matrix and and the x and y positions
   # chroms <- switch.chromosomes(data, chrom1, chrom2 ) #determine the order of the chromsomes
   if (switch.chromosomes(data, chrom1, chrom2)) {
-    temp <- mat$x
+    temp  <- mat$x
     mat$x <- mat$y
     mat$y <- temp # alternative then the switching of chromosomes is not needed
     mat$z <- t(mat$z)
@@ -430,7 +434,7 @@ trans.compartment.plot <- function(exp, chrom1, arm1 = "p", chrom2, arm2 = "p", 
 
   if (is.null(cut.off)) {
     cut.off <- max(quantile(arm$z, .99))
-    warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+    message("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
   }
 
   arm$z[arm$z > cut.off] <- cut.off

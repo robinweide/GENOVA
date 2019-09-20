@@ -4,7 +4,7 @@
 \alias{shuffleHiC}
 \title{Shuffle a symmetric matrix}
 \usage{
-shuffleHiC(MAT, symmetric = T)
+shuffleHiC(MAT, symmetric = T, verbose = T)
 }
 \arguments{
 \item{MAT}{A Hi-C matrix: can be produced by `select_subset()`.}

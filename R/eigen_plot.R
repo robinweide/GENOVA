@@ -48,10 +48,10 @@ eigen.struct <- function(mat, outlier.correct = 0.995) {
 
 # select a matrix of interactions for between two chromosomes
 selectData <- function(exp, chrom1, chrom2) {
-  bed <- exp$ABS
-  data <- exp$ICE
-  X <- bed[bed[, 1] == chrom1, 4]
-  Y <- bed[bed[, 1] == chrom2, 4]
+  bed <- exp$IDX
+  data <- exp$MAT
+  X <- bed[V1 == chrom1, V4]
+  Y <- bed[V1 == chrom2, V4]
   # the order of the chromosomes matters for the analysis
   # make sure that X is smaller than Y, otherwise switch
   # them around
@@ -73,8 +73,8 @@ selectData <- function(exp, chrom1, chrom2) {
   # windows and as many columns as the 'Y' chromosome has windows
   mat <- matrix(0, ncol = tail(Y, n = 1) - Y[1] + 1, nrow = tail(X, n = 1) - X[1] + 1)
   mat[cbind(data.sub$V1 - min(X) + 1, data.sub$V2 - min(Y) + 1)] <- data.sub$V3
-  x.pos <- bed[bed[, 1] == chrom1, 2]
-  y.pos <- bed[bed[, 1] == chrom2, 2]
+  x.pos <- bed[V1 == chrom1, V2]
+  y.pos <- bed[V1 == chrom2, V2]
   # create a list that is compatible with the image function
   mat <- list(x = x.pos, y = y.pos, z = mat)
   mat
@@ -179,15 +179,13 @@ cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = 
   cent <- largest.stretch(cent)
 
 
-  centromere.pos <- data.frame(chrom = c(chrom, chrom), start = c(min(cent) * exp1$RES, min(cent) * exp1$RES), end = c(max(cent) * exp1$RES, min(cent) * exp1$RES))
+  centromere.pos <- data.frame(chrom = c(chrom, chrom), 
+                               start = c(min(cent), min(cent)) * attr(exp1, "res"), 
+                               end = c(max(cent), min(cent) * attr(exp1, "res")))
   if (centromere.pos[1, 2] < 1e6 && arm == "p") {
     print("No p arm. Enter q as arm")
     return(NULL)
   }
-
-
-
-
 
   # plot the p and q arms
 
@@ -238,7 +236,7 @@ cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = 
   par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
 
   if (smoothNA) {
-    require(fields)
+    try_require("fields", "cis.compartment.plot", "CRAN")
     oe1.5 <- oe1
     oe1.5$z[oe1.5$z == 0] <- NA
     oe1.5$z <- fields::image.smooth(oe1.5$z, theta = 0.25)$z
@@ -333,7 +331,11 @@ cis.ev <- function(data, chrom, arm = "p") {
   cent <- largest.stretch(cent)
 
 
-  centromere.pos <- data.frame(chrom = c(chrom, chrom), start = c(min(cent) * data$RES, min(cent) * data$RES), end = c(max(cent) * data$RES, min(cent) * data$RES))
+  centromere.pos <- data.frame(chrom = c(chrom, chrom), 
+                               start = c(min(cent) * attr(data, "res"), 
+                                         min(cent) * attr(data, "res")), 
+                               end = c(max(cent) * attr(data, "res"), 
+                                       min(cent) * attr(data, "res")))
   if (centromere.pos[1, 2] < 1e6 && arm == "p") {
     print("No p arm. Enter q as arm")
     return(NULL)
@@ -349,9 +351,9 @@ cis.ev <- function(data, chrom, arm = "p") {
 
 # function to determine whether chromosomes need to be switched
 switch.chromosomes <- function(data, chrom1, chrom2) {
-  bed <- data$ABS
-  X <- bed[bed[, 1] == chrom1, 4]
-  Y <- bed[bed[, 1] == chrom2, 4]
+  bed <- data$IDX
+  X <- bed[V1 == chrom1, V4]
+  Y <- bed[V1 == chrom2, V4]
   return(X[1] > Y[1])
 }
 
@@ -406,7 +408,7 @@ trans.compartment.plot <- function(exp, chrom1, arm1 = "p", chrom2, arm2 = "p", 
   # of the matrix and and the x and y positions
   # chroms <- switch.chromosomes(data, chrom1, chrom2 ) #determine the order of the chromsomes
   if (switch.chromosomes(data, chrom1, chrom2)) {
-    temp <- mat$x
+    temp  <- mat$x
     mat$x <- mat$y
     mat$y <- temp # alternative then the switching of chromosomes is not needed
     mat$z <- t(mat$z)
@@ -432,7 +434,7 @@ trans.compartment.plot <- function(exp, chrom1, arm1 = "p", chrom2, arm2 = "p", 
 
   if (is.null(cut.off)) {
     cut.off <- max(quantile(arm$z, .99))
-    warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
+    message("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
   }
 
   arm$z[arm$z > cut.off] <- cut.off

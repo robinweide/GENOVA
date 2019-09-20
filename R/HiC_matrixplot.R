@@ -611,7 +611,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            skipAnn = F, symmAnn = F,
                            check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F) {
   if (is.null(loops.radius)) {
-    loops.radius <- exp1$RES * 5
+    loops.radius <- attr(exp1, "res") * 5
   }
 
   if (length(chip) < 3) {
@@ -620,16 +620,16 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
 
   # some error handling
   if (!is.null(exp2)) {
-    if (any(exp2$RMCHROM, exp1$RMCHROM)) {
+    if (any(attr(exp1, "rmChrom"), attr(exp2, "rmChrom"))) {
       check.genome <- F
     }
     # make sure the resolutions are the same
-    if (exp1$RES != exp2$RES) {
+    if (attr(exp1, "res") != attr(exp2, "res")) {
       stop("The Hi-C matrices should have the same resolution")
     }
 
     if (check.genome) {
-      if (!all(exp1$ABS[, 4] == exp2$ABS[, 4])) {
+      if (!all(exp1$IDX[["V4"]] == exp2$IDX[["V4"]])) {
         msg <- paste0(
           "Not all ICE indexes are the same.\nAre you these ",
           "experiments were mapped to the same genome (-build)?"
@@ -684,13 +684,13 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   }
 
 
-  ZnormScale <- exp1$ZSCORE
+  ZnormScale <- attr(exp1, "znorm")
   if (!is.null(exp2)) {
-    if (exp1$ZSCORE != exp2$ZSCORE) {
+    if (attr(exp1, "znorm") != attr(exp2, "znorm")) {
       stop("One experiment is Z-normalised and the other is not.")
     }
 
-    ZnormScale <- exp1$ZSCORE | exp2$ZSCORE
+    ZnormScale <- attr(exp1, "znorm") | attr(exp2, "znorm")
   }
 
   ##############################################################################
@@ -717,7 +717,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     # set cutoffs
     if (is.null(cut.off)) {
       cut.off <- max(quantile(abs(mat1$z), .99))
-      warning(
+      message(
         "No cut.off was given: using 99% percentile: ",
         round(cut.off), "."
       )

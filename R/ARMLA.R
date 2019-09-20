@@ -179,7 +179,7 @@ PESCAn <- function(explist, bed, shift = 1e6L,
 ATA <- function(explist, bed,
                 dist_thres = c(225000, Inf),
                 size = 100L,
-                outlier_filter = c(0, 0.995),
+                outlier_filter = c(0, 1),
                 anchors = NULL, raw = TRUE) {
   # Verify experiment compatibility
   explist <- check_compat_exp(explist)

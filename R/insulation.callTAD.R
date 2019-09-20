@@ -6,52 +6,52 @@
 #' As a last step, we create TADs by combining the borders (which are sorted) two-by-two, creating non-overlapping fully-covering TAD-borders on the genome.
 #'
 #' @param experiment The Hi-C experiment object: produced by construct.experiment().
+#' @param gw_insulation The result of \code{genome.wide.insulation} with window.size = 25.
 #' @param BEDcolor Color of items in the resulting BEDPE-file
 #' @return A BEDPE-df
-#' @note Call insulation scores first and store these in exp$INSULATION
 #' @examples
 #' # Get the insulation score with window-size 25 and store in the INSULATION-slot.
-#' Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+#' insula <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
 #'
 #' # Call TAD from the insulation-score.
-#' TADcalls <- insulation.callTAD(Hap1_WT_10kb)
+#' TADcalls <- insulation.callTAD(Hap1_WT_10kb, insula)
 #'
 #' # Plot TADs
 #' hic.matrixplot(exp1 = Hap1_WT_10kb, chrom = "chr7", start = 25e6, end = 30e6, tads = WT_TADs, tads.type = "lower", cut.off = 25)
 #' @export
-insulation.callTAD <- function(experiment, BEDcolor = "127,201,127", verbose = F) {
-  if (is.null(experiment$INSULATION)) {
-    stop("Call insulation score first and store in experiment$INSULATION")
-  }
-  res <- experiment$RES
+insulation.callTAD <- function(exp, gw_insulation, BEDcolor = "127,201,127", verbose = F) {
+  # if (is.null(exp$INSULATION)) {
+  #   stop("Call insulation score first and store in experiment$INSULATION")
+  # }
+  res <- attr(exp, "res")
   scooch <- floor(100e3 / res)
   entries <- list()
   df <- NULL
-  CHROMS <- unique(experiment$INSULATION[, 1])
+  CHROMS <- unique(gw_insulation[, 1])
 
-  experiment$INSULATION$V2 <- experiment$INSULATION[, 2] + experiment$RES
+  gw_insulation$V2 <- gw_insulation[, 2] + attr(exp, "res")
 
   for (CCC in CHROMS) {
     if (verbose) {
       message("Starting chromosome", CCC, "\n")
     }
 
-    INSU <- experiment$INSULATION[experiment$INSULATION[, 1] == CCC, ]
+    INSU <- gw_insulation[gw_insulation[, 1] == CCC, ]
     insCol <- INSU[, 4]
 
     # determine minimum and maximum values
     min_value <- min(insCol[insCol != -Inf])
-    max_value <- max(insCol[insCol != Inf])
+    max_value <- max(insCol[insCol !=  Inf])
     # check for every insulatoin score that is -Inf or Inf if
     #    the value before or after it is the same
     # to prevent "sudden" peaks to be filtered out
     for (i in (2:length(insCol))) {
       insCol[i == -Inf & i - 1 != -Inf & i + 1 != -Inf] <- min_value * 2
-      insCol[i == Inf & i - 1 != Inf & i + 1 != Inf] <- max_value * 2
+      insCol[i ==  Inf & i - 1 !=  Inf & i + 1 !=  Inf] <- max_value * 2
     }
     # set values of Inf and -Inf that are left to the minimal and maximal value of the chromosome
     insCol[insCol == -Inf] <- min_value
-    insCol[insCol == Inf] <- max_value
+    insCol[insCol ==  Inf] <- max_value
 
     # set any remaining values that ar not finite (e.g. NA)
     # to NaN (only for chrY as this only has -Inf and Inf)
@@ -76,7 +76,7 @@ insulation.callTAD <- function(experiment, BEDcolor = "127,201,127", verbose = F
     deltaDF <- data.frame(INSU[i, 1:4], delta)
     colnames(deltaDF)[1:4] <- paste0("V", 1:4)
     colnames(deltaDF)[5] <- "delta"
-    deltaDF <- dplyr::arrange(deltaDF, V1, V2)
+    deltaDF <- deltaDF[order(deltaDF$V1, deltaDF$V2), ]
     deltaDF$ID <- 1:nrow(deltaDF)
 
     ####
@@ -110,15 +110,16 @@ insulation.callTAD <- function(experiment, BEDcolor = "127,201,127", verbose = F
       if (!all(zeroOrder == normalOrder)) {
         next
       }
-      UP <- max(deltaDF[(j - 1), 5], na.rm = T)
+      UP   <- max(deltaDF[(j - 1), 5], na.rm = T)
       DOWN <- min(deltaDF[(j + 1), 5], na.rm = T)
       if ((UP - DOWN) < 0.1) {
         next
       }
       if (is.null(boundaryCalls)) {
-        boundaryCalls <- rbind(boundaryCalls, dat[2, ])
+        boundaryCalls <- as.data.table(rbind(boundaryCalls, dat[2, ]))
       } else {
-        nearbyPoints <- dplyr::filter(boundaryCalls, V2 >= (dat[2, 2] - (res * scooch)), V2 <= (dat[2, 3] + (res * scooch))) # res*scooch
+        nearbyPoints <- boundaryCalls[V2 >= (dat[2, 2] - (res * scooch)) &
+                                        V2 <= (dat[2, 3] + (res * scooch)), ]
         if (nrow(nearbyPoints) == 0) {
           boundaryCalls <- rbind(boundaryCalls, dat[2, ])
         } else {
@@ -126,10 +127,11 @@ insulation.callTAD <- function(experiment, BEDcolor = "127,201,127", verbose = F
           winner <- rbind(nearbyPoints, dat[2, ])[which(abs(c(nearbyPoints$delta, dat[2, ]$delta)) == closeToZeroDelta), ]
           losers <- rbind(nearbyPoints, dat[2, ])[-which(abs(c(nearbyPoints$delta, dat[2, ]$delta)) == closeToZeroDelta), ]
           boundaryCalls <- rbind(boundaryCalls, dat[2, ])
-          boundaryCalls <- dplyr::anti_join(boundaryCalls, losers, by = c("V1", "V2", "V3", "V4", "delta"))
+          boundaryCalls <- boundaryCalls[!losers, on = c("V1", "V2", "V3", "V4", "delta")]
         }
       }
     }
+    boundaryCalls <- as.data.frame(boundaryCalls)
 
     for (i in 1:nrow(boundaryCalls)) {
       if (boundaryCalls[i, 3] < boundaryCalls[i, 2]) {

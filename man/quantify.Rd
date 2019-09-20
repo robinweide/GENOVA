@@ -2,11 +2,8 @@
 % Please edit documentation in R/methods_quantify.R
 \name{quantify}
 \alias{quantify}
-\alias{quantify.APA_discovery}
+\alias{quantify.default}
 \title{Quantification of results}
-\usage{
-\method{quantify}{APA_discovery}(discovery, widths = c(3, 3))
-}
 \description{
 Here be a placholder description
 }

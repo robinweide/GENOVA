@@ -527,7 +527,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, flipFacet = F){
   
-  metric <- match.arg(metric)
+ metric <- match.arg(metric)
   
  nregion = length(unique(discovery$smooth$region))
   
@@ -599,38 +599,38 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
     
     GG = NULL
     if(nregion == 1){
-      GG = ggplot(lfcDT, aes(x = log10(distance), y = P ,col = samplename)) +
-        labs(x = 'distance (Mb)', col = 'sample') +
-        scale_color_manual(values = smplCols)
+      GG = ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+        ggplot2::scale_color_manual(values = smplCols)
     } else if(flipFacet){
-      GG =   ggplot(lfcDT, aes(x = log10(distance), y = P ,col = region)) +
-        facet_grid(. ~ samplename)+
-        labs(x = 'distance (Mb)', col = 'region') +
-        scale_color_manual(values = regCols)
+      GG =   ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
+        ggplot2::facet_grid(. ~ samplename)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+        ggplot2::scale_color_manual(values = regCols)
     } else {
-      GG =ggplot(lfcDT, aes(x = log10(distance), y = P ,col = samplename)) +
-        facet_grid(. ~ region)+
-        labs(x = 'distance (Mb)', col = 'sample')+
-        scale_color_manual(values = smplCols)
+      GG =ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::facet_grid(. ~ region)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+        ggplot2::scale_color_manual(values = smplCols)
     }
     RAUW = GG +   
-      geom_line() 
+      ggplot2::geom_line() 
     
     # GG: misc
     breaks = unique(round(log10(unique(discovery$smooth$distance))))
     breaks = breaks[is.finite(breaks)]
     
-    GG = GG + theme_classic() +
-      scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
-      geom_line() +
-      coord_fixed(ylim = range(lfcDT$P))
+    GG = GG + ggplot2::theme_classic() +
+      ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
+      ggplot2::geom_line() +
+      ggplot2::coord_fixed(ylim = range(lfcDT$P))
     
     GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
                               aspect.ratio = 1,
                               strip.background = ggplot2::element_rect(fill = NA, colour = NA),
                               panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
                               text = ggplot2::element_text(color = 'black'),
-                              axis.line = element_blank(),
+                              axis.line = ggplot2::element_blank(),
                               axis.text = ggplot2::element_text(colour = 'black'),
                               strip.text = ggplot2::element_text(colour = 'black') )
     
@@ -645,46 +645,46 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
   # GG: in
   GG = NULL
   if(nregion == 1){
-    GG = ggplot(discovery$smooth, aes(x = log10(distance), y = P ,col = samplename)) +
-      labs(x = 'distance (Mb)', col = 'sample') +
-      scale_color_manual(values = smplCols)
+    GG = ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+      ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+      ggplot2::scale_color_manual(values = smplCols)
   } else if(flipFacet){
-    GG =   ggplot(discovery$smooth, aes(x = log10(distance), y = P ,col = region)) +
-      facet_grid(. ~ samplename)+
-      labs(x = 'distance (Mb)', col = 'region') +
-      scale_color_manual(values = regCols)
+    GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
+      ggplot2::facet_grid(. ~ samplename)+
+      ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+      ggplot2::scale_color_manual(values = regCols)
   } else {
-    GG =ggplot(discovery$smooth, aes(x = log10(distance), y = P ,col = samplename)) +
-      facet_grid(. ~ region)+
-      labs(x = 'distance (Mb)', col = 'sample')+
-      scale_color_manual(values = smplCols)
+    GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+      ggplot2::facet_grid(. ~ region)+
+      ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+      ggplot2::scale_color_manual(values = smplCols)
   }
   RAUW = GG +   
-    scale_y_log10() + 
-    geom_line() 
+    ggplot2::scale_y_log10() + 
+    ggplot2::geom_line() 
   
   # GG: cloud
   if(metric == 'both'){
-    GG = GG + geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
-    RAUW = RAUW + geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
+    GG = GG + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
+    RAUW = RAUW + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
   }
   
   # GG: misc
   breaks = unique(round(log10(unique(discovery$smooth$distance))))
   breaks = breaks[is.finite(breaks)]
   
-  GG = GG + theme_classic() +
-    scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
-    scale_y_log10() + 
-    geom_line() +
-    coord_fixed(ylim = range(discovery$smooth$P))
+  GG = GG + ggplot2::theme_classic() +
+    ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
+    ggplot2::scale_y_log10() + 
+    ggplot2::geom_line() +
+    ggplot2::coord_fixed(ylim = range(discovery$smooth$P))
   
   GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
                             aspect.ratio = 1,
                             strip.background = ggplot2::element_rect(fill = NA, colour = NA),
                             panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
                             text = ggplot2::element_text(color = 'black'),
-                            axis.line = element_blank(),
+                            axis.line = ggplot2::element_blank(),
                             axis.text = ggplot2::element_text(colour = 'black'),
                             strip.text = ggplot2::element_text(colour = 'black') )
   

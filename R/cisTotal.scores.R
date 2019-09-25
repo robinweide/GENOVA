@@ -5,9 +5,8 @@
 #'
 #' @author Elzo de Wit, \email{e.d.wit@nki.nl}
 #' @param exp The Hi-C experiment object of a sample:
-#' produced by construct.experiment().
+#' produced by \code{loadContacts}.
 #' @return The genome-wide cis/total ratio
-#' @import data.table
 #' @examples
 #' # calculate the ratios for a 1Mb-resolution experiment
 #' cis_out <- cisTotal.scores(WT_1MB)
@@ -16,16 +15,16 @@ cisTotal.scores <- function(exp) {
   # sort the TADs otherwise the findInterval function will not work
   cis <- 0
   # loop over chromosomes
-  d <- exp$ICE # select the ICE matrix from the HiC data structure
+  d <- exp$MAT # select the ICE matrix from the HiC data structure
   # select the chromosome names in a specific order
-  exp$ABS[, 1] <- as.character(exp$ABS[, 1])
+  exp$IDX[["V1"]] <- as.character(exp$IDX[["V1"]])
   chrom <- c(
-    exp$ABS[1, 1],
-    exp$ABS[which(head(exp$ABS[, 1], -1) != tail(exp$ABS[, 1], -1)) + 1, 1]
+    exp$IDX[1, V1],
+    exp$IDX[which(head(exp$IDX[["V1"]], -1) != tail(exp$IDX[["V1"]], -1)) + 1, V1]
   )
   for (chr in chrom) {
     # select the chromosome ids from the HiC data structure
-    chr.id <- exp$ABS[exp$ABS[, 1] == chr, ]
+    chr.id <- exp$IDX[V1 == chr, ]
     # select the chromosomal indexes for chr
     chrom.min <- min(chr.id[, 4])
     chrom.max <- max(chr.id[, 4])

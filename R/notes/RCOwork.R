@@ -42,3 +42,5 @@ visualise(RCP_out, metric = 'both', raw = T)
 visualise(RCP_out, metric = 'lfc', contrast = 'WT')
 visualise(RCP_out, metric = 'lfc', contrast = 'WT', flipFacet = T)
 visualise(RCP_out, metric = 'lfc', contrast = 'WT', raw = T)
+
+

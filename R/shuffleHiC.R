@@ -14,14 +14,14 @@
 #' @export
 #'
 #'
-shuffleHiC <- function(MAT, symmetric = T) {
+shuffleHiC <- function(MAT, symmetric = T, verbose = T) {
   # works only with symmetric matrices, where the diagonal starts at 1,1 and ends at n,n
 
   # check if input is from select_subset (list with c(x),c(y), mat(z)) or just a matrix
   SS <- F
   MAT_BK <- MAT
   if (is.list(MAT)) {
-    message("Input is considered as output of select_subset().")
+    if (verbose) message("Input is considered as output of select_subset().")
     SS <- T
     MAT <- MAT$z
   }

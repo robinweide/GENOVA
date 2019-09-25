@@ -51,8 +51,8 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
                                  "black"
                                )),
                                leftNorm = F, verbose = F) {
-  require(ggplot2)
-  require(reshape2)
+  # require(ggplot2)
+  # require(reshape2)
 
   # What are we plotting? ------------------------------------------------------
   if (!whatToPlot %in% c("profile", "heatmap", "both")) {
@@ -112,13 +112,15 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
 
   # Melting the data -----------------------------------------------------------
 
-  df <- dplyr::bind_rows(sampleList, .id = "sample")
+  df <- rbindlist(sampleList, idcol = "sample")
+
   outDF <- df
 
-  df <- reshape2::melt(df[, -c(2:3)], id.vars = c("sample", "rowIDX"))
+  df <- data.table::melt.data.table(df[, -c(2:3)], id.vars = c("sample", "rowIDX"))
   df$variable <- as.numeric(gsub(df$variable, pattern = "V", replacement = ""))
 
   df$sample <- factor(df$sample, levels = names(insulationList))
+  df <- as.data.frame(df)
 
   # Normalise to first bin -----------------------------------------------------
   if (leftNorm) {
@@ -126,11 +128,13 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
   }
 
   # Make the profile -----------------------------------------------------------
-  groupedDF <- dplyr::group_by(df, sample, variable)
-  groupedDF[is.na(groupedDF$value), "value"] <- 0
-  minVal <- min(groupedDF[groupedDF$value != -Inf, "value"])
-  groupedDF[groupedDF$value == -Inf, "value"] <- minVal
-  profDF <- dplyr::summarize(groupedDF, val = profileFunct(value))
+  groupedDF <- as.data.table(df)
+  groupedDF[is.na(value), "value"] <- 0
+  ValRange <- range(groupedDF[is.finite(value), value])
+  groupedDF[value == -Inf, "value"]  <- ValRange[1]
+  groupedDF[value == Inf,  "value"] <- ValRange[2]
+  profDF <- groupedDF[, value := profileFunct(value), by = c("sample",  "variable")]
+  profDF <- as.data.frame(profDF)
 
   # GGPlot features- -----------------------------------------------------------
   if (is.null(profileCols)) {
@@ -149,12 +153,12 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
   # Plot profile ---------------------------------------------------------------
   PRFLS <- NULL
 
-  if (whatToPlot == "profile" | whatToPlot == "both") {
+  if (whatToPlot %in% c("both", "profile")) {
     if (is.null(profileZlim)) {
       profileZlim <- zlim
     }
 
-    PRFLS <- ggplot2::ggplot(profDF, ggplot2::aes(x = variable, y = val, col = sample)) +
+    PRFLS <- ggplot2::ggplot(profDF, ggplot2::aes(x = variable, y = value, col = sample)) +
       ggplot2::geom_line() +
       ggplot2::scale_x_continuous(
         expand = c(0, 0),
@@ -217,7 +221,7 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
         breaks = tickPoss,
         labels = tickLabs
       ) +
-      ggplot2::geom_line(data = profDF, mapping = ggplot2::aes(x = variable, y = val, col = sample), inherit.aes = F) +
+      ggplot2::geom_line(data = profDF, mapping = ggplot2::aes(x = variable, y = value, col = sample), inherit.aes = F) +
       ggplot2::geom_blank(
         data = data.frame(dummy = "profile", x = 1, y = profileZlim),
         mapping = ggplot2::aes(x = x, y = y),
@@ -275,7 +279,7 @@ normHM2left <- function(HM, profileFunct = mean) {
 
     x
   })
-  return(dplyr::bind_rows(tmp))
+  return(as.data.frame(rbindlist(tmp)))
 }
 
 

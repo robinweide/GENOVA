@@ -4,12 +4,15 @@
 \alias{insulation.callTAD}
 \title{insulation.callTAD}
 \usage{
-insulation.callTAD(experiment, BEDcolor = "127,201,127", verbose = F)
+insulation.callTAD(exp, gw_insulation, BEDcolor = "127,201,127",
+  verbose = F)
 }
 \arguments{
-\item{experiment}{The Hi-C experiment object: produced by construct.experiment().}
+\item{gw_insulation}{The result of \code{genome.wide.insulation} with window.size = 25.}
 
 \item{BEDcolor}{Color of items in the resulting BEDPE-file}
+
+\item{experiment}{The Hi-C experiment object: produced by construct.experiment().}
 }
 \value{
 A BEDPE-df
@@ -20,15 +23,12 @@ Briefly, we take the result of genome.wide.insulation that is stored in experime
 Next, we compute the local minima of the delta-vector: these are (after some filtering) the TAD-borders
 As a last step, we create TADs by combining the borders (which are sorted) two-by-two, creating non-overlapping fully-covering TAD-borders on the genome.
 }
-\note{
-Call insulation scores first and store these in exp$INSULATION
-}
 \examples{
 # Get the insulation score with window-size 25 and store in the INSULATION-slot.
-Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+insula <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
 
 # Call TAD from the insulation-score.
-TADcalls <- insulation.callTAD(Hap1_WT_10kb)
+TADcalls <- insulation.callTAD(Hap1_WT_10kb, insula)
 
 # Plot TADs
 hic.matrixplot(exp1 = Hap1_WT_10kb, chrom = "chr7", start = 25e6, end = 30e6, tads = WT_TADs, tads.type = "lower", cut.off = 25)

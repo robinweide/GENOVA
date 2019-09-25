@@ -4,11 +4,11 @@
 \alias{insulation.plot.single}
 \title{plot.insulation.single}
 \usage{
-insulation.plot.single(exp1, chrom, start, end, cut.off = NULL,
+insulation.plot.single(exp, chrom, start, end, cut.off = NULL,
   window.size = 21, local = T)
 }
 \arguments{
-\item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
+\item{exp}{The Hi-C experiment object: produced by construct.experiment().}
 
 \item{chrom}{Chromosome}
 

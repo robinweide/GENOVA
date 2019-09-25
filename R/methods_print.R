@@ -12,43 +12,42 @@ print.contacts <- function(x) {
     paste0(res, " bp")
   }
   string <- paste0("A ", attr(x, "package"), " ", class(x), " object named '",
-                   attr(x, "samplename"), "' with the following slots:\n")
+                   attr(x, "samplename"), "' at a resolution of ", res, 
+                   ".\nContains the following slots:\n")
   slots <- sapply(x, is.null)
   slots <- names(slots[!slots])
 
   mat <- paste0("- MAT\t:\tTriplet format matrix containing ", dim(x$MAT)[1],
                 " informative bins.\n")
   idx <- paste0("- IDX\t:\t", dim(x$IDX)[1], " genomic indices in BED format.\n")
-  cname <- paste0('- NAME\t:\t"', attr(x, "samplename"), '"\n')
-  pres <- paste0("- RES\t:\tResolution at ", res, ".\n")
   chroms <- paste0("- CHRS\t:\tA vector of ", length(x$CHRS), " chromosome names.\n")
-  col <- paste0("- COL\t:\tThe colour '", x$COL, "'\n")
-  mask <- paste0("- MASK\t:\t", sum(x$MASK), " bins are masked.\n")
-  rmchrom <- paste0("- RMCHROM:\t", if(attr(x, "rmChrom")){"Some"} else {"No"},
+  
+  
+  col <- paste0("This object is assigned the colour '", attr(x, "col"), "'\n")
+  mask <- paste0(sum(x$MASK), " bins are masked.\n")
+  rmchrom <- paste0(if(attr(x, "rmChrom")){"Some"} else {"No"},
                     " chromosomes have been removed.\n")
-  zscore <- paste0("- ZSCORE:\tThe data have ", if (!attr(x, "znorm")) {"not"},
+  zscore <- paste0("The data have ", if (!attr(x, "znorm")) {"not"},
                    " been Z-score normalised.\n")
-  comment <- paste0("- COMM\t:\tThe following comment: ",
-                    if (!is.null(x$COMM)) {x$COMM} else {"NULL"},
-                    "\n")
   centros <- if (is.null(x$CENTROMERES)) {
     paste0("- CENTROMERES:\tNo centromere information.\n")
   } else {
     paste0("- CENTROMERES:\tLocations of ", nrow(x$CENTROMERES), " centromeres.\n")
   }
+  bal <- paste0("The orgininal data were loaded in as ", if (attr(x, "balanced")) {
+    "balanced"
+  } else { "raw" }, " data.")
 
   cat(string)
   cat(mat)
   cat(idx)
   cat(chroms)
   cat(centros)
-  cat(cname)
-  cat(pres)
   cat(col)
   cat(mask)
   cat(rmchrom)
   cat(zscore)
-  cat(comment)
+  cat(bal)
 }
 
 
@@ -66,14 +65,9 @@ print.ARMLA_discovery <- function(x) {
 
   myclass <- class(x)[[1]]
   miniclass <- strsplit(myclass, "_")[[1]][[1]]
-  aan <- if(startsWith(myclass, "A")) {
-    "An"
-  } else {
-    "A"
-  }
 
   opening <- paste0(
-    aan, " ", attr(x, "package"), " '", myclass, "' object involving the ",
+    "A ", attr(x, "package"), " '", myclass, "' object involving the ",
     "following ", dim(x$signal)[3],' experiments:\n"',
     paste0(dimnames(x$signal)[[3]], collapse = '", "'),
     '" at a resolution of ', res, '.\n\n'

@@ -389,11 +389,12 @@ anchors_shift <- function(IDX, anchors, rel_pos, shift = 1) {
 #' @export
 anchors_filter_oob <- function(IDX, anchors, rel_pos) {
   type <- attr(anchors, "type")
+  class(IDX) <- "data.frame"
 
   # ATA has slightly different oob rules
   if (type == "TADs") {
-    left  <- IDX[match(anchors[, 1], IDX[, V4]), V1]
-    right <- IDX[match(anchors[, 2], IDX[, V4]), V1]
+    left  <- IDX[match(anchors[, 1], IDX[, 4]), 1]
+    right <- IDX[match(anchors[, 2], IDX[, 4]), 1]
     keep <- left == right
     anchors <- anchors[keep, ]
     attr(anchors, "type") <- type
@@ -401,8 +402,8 @@ anchors_filter_oob <- function(IDX, anchors, rel_pos) {
   }
 
   # Match idx +/- relative position to chrom
-  plus  <- IDX[match(anchors + max(rel_pos), IDX[, V4]), V1]
-  minus <- IDX[match(anchors + min(rel_pos), IDX[, V4]), V1]
+  plus  <- IDX[match(anchors + max(rel_pos), IDX[, 4]), 1]
+  minus <- IDX[match(anchors + min(rel_pos), IDX[, 4]), 1]
 
   # Check wether chromosomes have changed
   inbounds <- matrix(plus == minus, ncol = 2)

@@ -4,11 +4,11 @@
 \alias{genome.wide.insulation}
 \title{genome.wide.insulation}
 \usage{
-genome.wide.insulation(hic, window.size, normalize.genome = F,
+genome.wide.insulation(exp, window.size, normalize.genome = F,
   verbose = F)
 }
 \arguments{
-\item{hic}{A GENOVA-experiment}
+\item{exp}{A GENOVA-experiment}
 
 \item{window.size}{The sliding square size}
 

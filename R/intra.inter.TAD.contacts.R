@@ -9,7 +9,7 @@
 #' (i.e. the 3' border of TAD1 is the 5' border of TAD2).
 #' This means that using TAD-calls from Arrowhead is only possible after some
 #' these internal sub-TADs.
-#' @param max.neighbor How many surrounding TADs should be taken into account?
+#' @param max_neighbour How many surrounding TADs should be taken into account?
 #' @return A list:
 #' @return \item{hic}{dataframe with indexes of two TADs and interaction-score}
 #' @return \item{tad}{dataframe with TADs and the index used in the hic-df}
@@ -41,7 +41,7 @@
 #'   allData = T
 #' )
 #' @export
-intra.inter.TAD.contacts <- function(exp, TAD, max.neighbor = 10, verbose = F) {
+intra.inter.TAD.contacts <- function(exp, TAD, max_neighbour = 10, verbose = F) {
   # error handling
   if (any(TAD[, 3] < TAD[, 2])) {
     stop("Incorrectly structured TAD data: end column smaller than start")
@@ -49,7 +49,7 @@ intra.inter.TAD.contacts <- function(exp, TAD, max.neighbor = 10, verbose = F) {
   if (verbose) {
     msg <- paste0(
       "Calculating the intra- and inter-TAD contact frequency with ",
-      max.neighbor,
+      max_neighbour,
       " neighboring TADs. This can take several minutes depending",
       " on the size of the dataset\n"
     )
@@ -69,25 +69,25 @@ intra.inter.TAD.contacts <- function(exp, TAD, max.neighbor = 10, verbose = F) {
       message("Now analyzing ", chr, " \r")
     }
     # select the chromosome ids from the HiC data structure
-    chr.id <- exp$ABS[exp$ABS[, 1] == chr, ]
+    chr.id <- exp$IDX[V1 == chr, ]
     # determine which ids overlap with which TAD/domain
-    chr.id[, 5] <- findInterval(chr.id[, 2], TAD[TAD[, 1] == chr, 2])
+    chr.id[["V5"]] <- findInterval(chr.id[["V2"]], TAD[TAD[, 1] == chr, 2])
     # determine which ids overlap with which TAD/domain
-    chr.id[, 6] <- findInterval(chr.id[, 2], TAD[TAD[, 1] == chr, 3])
+    chr.id[["V6"]] <- findInterval(chr.id[["V2"]], TAD[TAD[, 1] == chr, 3])
     # select only those sites that are within a TAD that is given by the user
-    chr.id <- chr.id[chr.id[, 5] != chr.id[, 6], ]
-    d <- exp$ICE # select the ICE matrix from the HiC data structure
+    chr.id <- chr.id[chr.id[["V5"]] != chr.id[["V6"]], ]
+    d <- exp$MAT # select the ICE matrix from the HiC data structure
     # select the intrachromosomal contact sites for chr
-    chrom.min <- min(chr.id[, 4])
-    chrom.max <- max(chr.id[, 4])
+    chrom.min <- min(chr.id[["V4"]])
+    chrom.max <- max(chr.id[["V4"]])
     d.chrom <- d[J(chrom.min:chrom.max), ]
     d.chrom <- d.chrom[d.chrom$V2 >= chrom.min & d.chrom$V2 <= chrom.max, ]
 
     # associate hic-pro indices with TAD positions
-    tad.x <- chr.id[match(d.chrom$V1, chr.id[, 4]), 5]
-    tad.y <- chr.id[match(d.chrom$V2, chr.id[, 4]), 5]
+    tad.x <- chr.id[match(d.chrom$V1, chr.id[["V4"]]), V5]
+    tad.y <- chr.id[match(d.chrom$V2, chr.id[["V4"]]), V5]
     # select tad(combination)s that are not more than max.neighbor apart
-    sel <- tad.y - tad.x <= max.neighbor & tad.x > 0 & tad.y > 0 & !is.na(tad.x) & !is.na(tad.y)
+    sel <- tad.y - tad.x <= max_neighbour & tad.x > 0 & tad.y > 0 & !is.na(tad.x) & !is.na(tad.y)
     tad.x <- tad.x[sel]
     tad.y <- tad.y[sel]
     d.chrom <- d.chrom$V3[sel]
@@ -112,5 +112,5 @@ intra.inter.TAD.contacts <- function(exp, TAD, max.neighbor = 10, verbose = F) {
     # give every TAD an ID corresponding to the IDs used in intra.inter
   }
   # combine the TAD positions and
-  list(hic = intra.inter, tad = TAD, sampleName = exp$NAME)
+  list(hic = intra.inter, tad = TAD, sampleName = attr(exp, "samplename"))
 }

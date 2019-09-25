@@ -8,7 +8,7 @@ cisTotal.scores(exp)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample:
-produced by construct.experiment().}
+produced by \code{loadContacts}.}
 }
 \value{
 The genome-wide cis/total ratio

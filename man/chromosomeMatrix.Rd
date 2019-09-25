@@ -5,7 +5,7 @@
 \title{chromosomeMatrix}
 \usage{
 chromosomeMatrix(exp, color.fun = NULL, cut.off = NULL,
-  chromsToUse = NULL, remove = NULL)
+  chromsToUse = NULL, remove = NULL, plot = TRUE)
 }
 \arguments{
 \item{color.fun}{Optional color-function}
@@ -16,6 +16,8 @@ chromosomeMatrix(exp, color.fun = NULL, cut.off = NULL,
 Genome-wide score will not we given!}
 
 \item{remove}{A vector of (partial) names of chromosomes to leave out.}
+
+\item{plot}{A \code{logical}: plot the resulting matrix?}
 
 \item{experiment}{The Hi-C experiment object of a sample: produced by
 construct.experiment().}

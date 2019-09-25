@@ -4,10 +4,10 @@
 \alias{chromosome.wide.insulation}
 \title{chromosome.wide.insulation}
 \usage{
-chromosome.wide.insulation(hic, window.size, chrom)
+chromosome.wide.insulation(exp, window.size, chrom)
 }
 \arguments{
-\item{hic}{A GENOVA-experiment}
+\item{exp}{A GENOVA-experiment}
 
 \item{window.size}{The sliding square size}
 

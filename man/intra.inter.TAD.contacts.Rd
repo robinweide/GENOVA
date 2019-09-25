@@ -4,7 +4,7 @@
 \alias{intra.inter.TAD.contacts}
 \title{intra.inter.TAD.contacts}
 \usage{
-intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10, verbose = F)
+intra.inter.TAD.contacts(exp, TAD, max_neighbour = 10, verbose = F)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample from construct.experiment()}
@@ -14,7 +14,7 @@ intra.inter.TAD.contacts(exp, TAD, max.neighbor = 10, verbose = F)
 This means that using TAD-calls from Arrowhead is only possible after some
 these internal sub-TADs.}
 
-\item{max.neighbor}{How many surrounding TADs should be taken into account?}
+\item{max_neighbour}{How many surrounding TADs should be taken into account?}
 }
 \value{
 A list:

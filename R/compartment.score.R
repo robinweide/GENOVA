@@ -149,8 +149,8 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     cent <- largest.stretch(cent)
     centChrom <- data.frame(
       chrom = chrom,
-      startC = min(cent) * exp$RES,
-      endC = max(cent) * exp$RES
+      startC = min(cent) * attr(exp, "res"),
+      endC = max(cent) * attr(exp, "res")
     )
   } else if (!is.null(exp$CENTROMERES) & chrom %in% exp$CENTROMERES[, 1]) {
     centChrom <- exp$CENTROMERES[exp$CENTROMERES[, 1] == chrom, ]
@@ -158,7 +158,7 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     stop("User doesn't want empericalCentromeres,\nbut chromosome is not found in exp$CENTROMERES.\nQuitting...")
   }
 
-  chromSize <- max(exp$ABS[exp$ABS$V1 == chrom, 3])
+  chromSize <- max(exp$IDX[V1 == chrom, V3])
   first_startLocVector <- NULL
   second_startLocVector <- NULL
 
@@ -169,9 +169,9 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
   S <- 0
   E <- centChrom[centChrom[, 1] == chrom, 2]
 
-  if (centChrom[1, 2] > (exp$RES * 10)) { # otherwise too small to do
+  if (centChrom[1, 2] > (attr(exp, "res") * 10)) { # otherwise too small to do
     # get all bins of this region
-    first_startLocVector <- exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 <= E, 3] - exp$RES
+    first_startLocVector <- exp$IDX[V1 == C & V2 <= E, V3] - attr(exp, "res")
 
     ss <- select_subset(exp, C, S, E)
     if (shuffle) {
@@ -208,7 +208,7 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     }
 
     if (!is.null(comparableTrack)) {
-      tmpTrack <- cbind(ss$x - (exp$RES / 2), compScore)
+      tmpTrack <- cbind(ss$x - (attr(exp, "res") / 2), compScore)
 
       compArm <- comparableTrack[comparableTrack[, 1] == chrom &
         comparableTrack[, 2] <= max(tmpTrack[, 1]), ]
@@ -234,11 +234,11 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
   ###
   C <- chrom
   S <- centChrom[centChrom[, 1] == chrom, 3]
-  E <- max(exp$ABS[exp$ABS$V1 == C, 3])
+  E <- max(exp$IDX[V1 == C, V3])
 
-  if ((chromSize - centChrom[1, 3]) > (exp$RES * 10)) { # otherwise too small to do
+  if ((chromSize - centChrom[1, 3]) > (attr(exp, "res") * 10)) { # otherwise too small to do
     # get all bins of this region
-    second_startLocVector <- exp$ABS[exp$ABS$V1 == C & exp$ABS$V2 >= S, 3] - exp$RES
+    second_startLocVector <- exp$IDX[V1 == C & V2 >= S, V3] - attr(exp, "res")
     ss <- select_subset(exp, C, S, E)
     if (shuffle) {
       ss <- suppressMessages(shuffleHiC(ss))
@@ -274,7 +274,7 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
     }
 
     if (!is.null(comparableTrack)) {
-      tmpTrack <- cbind(ss$x - (exp$RES / 2), compScore)
+      tmpTrack <- cbind(ss$x - (attr(exp, "res") / 2), compScore)
 
       compArm <- comparableTrack[comparableTrack[, 1] == chrom &
         comparableTrack[, 2] >= min(tmpTrack[, 1]), ]
@@ -299,9 +299,9 @@ compartment.score.chr <- function(exp, chrom = "chr2", empericalCentromeres = T,
   outDF <- data.frame(
     seqnames = C,
     start = c(first_startLocVector, second_startLocVector),
-    end = c(first_startLocVector, second_startLocVector) + exp$RES,
+    end = c(first_startLocVector, second_startLocVector) + attr(exp, "res"),
     compartmentScore = c(firstArm, secondArm),
-    name = exp$NAME
+    name = attr(exp, "samplename")
   )
 
   return(outDF)

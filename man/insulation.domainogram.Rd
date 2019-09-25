@@ -9,7 +9,7 @@ insulation.domainogram(exp, chrom, start, end, axes = T,
   zlim = c(-1, 0.5))
 }
 \arguments{
-\item{exp}{A Hi-C experiment object: produced by construct.experiment().}
+\item{exp}{A Hi-C experiment object: produced by loadContacts().}
 
 \item{chrom}{Chromosome of the region of interest}
 

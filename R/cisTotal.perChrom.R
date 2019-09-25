@@ -32,20 +32,20 @@ cisTotal.perChrom <- function(exp, chromsToUse = NULL, plot = TRUE, ...) {
   cisSum <- 0
   # d <- exp$ICE #select the ICE matrix from the HiC data structure
   # select the chromosome names in a specific order
-  exp$ABS[, 1] <- as.character(exp$ABS[, 1])
+  exp$IDX[["V1"]] <- as.character(exp$IDX[["V1"]])
 
   # loop over all chromosomes.
   # store cis and trans in df with chromname
 
   for (chr in exp$CHRS) {
     # select the chromosome ids from the HiC data structure
-    chr.id <- exp$ABS[exp$ABS[, 1] == chr, ]
+    chr.id <- exp$IDX[V1 == chr, ]
     # select the minimal and maximal chromosomal indexes for chr
-    chrom.min <- min(chr.id[, 4])
-    chrom.max <- max(chr.id[, 4])
+    chrom.min <- min(chr.id[, V4])
+    chrom.max <- max(chr.id[, V4])
 
     # get singnal-rows with indexes
-    allRows <- exp$ICE[V1 %in% chrom.min:chrom.max | V2 %in% chrom.min:chrom.max]
+    allRows <- exp$MAT[V1 %in% chrom.min:chrom.max | V2 %in% chrom.min:chrom.max]
 
     # get cis
     tmp <- allRows[V1 %in% chrom.min:chrom.max & V2 %in% chrom.min:chrom.max, 3]
@@ -73,7 +73,7 @@ cisTotal.perChrom <- function(exp, chromsToUse = NULL, plot = TRUE, ...) {
   cis <- cis[names(cis) %in% chromsToUse]
 
   # genomewide
-  total <- sum(exp$ICE$V3)
+  total <- sum(exp$MAT[["V3"]])
   GW <- 100 * (cisSum / total)
 
 

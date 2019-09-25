@@ -35,9 +35,9 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
   # Decide on engine
   run_engine <- switch(attr(anchors, "type"),
-                       "TADs" = "lookup_resizer",
-                       "ARA" = "engine_by_dir_pixel",
-                       "engine_by_pixel")
+                       "TADs" = "engine_resizing",
+                       "ARA"  = "engine_flipping",
+                       "engine_default")
   run_engine <- getFromNamespace(run_engine, "GENOVA")
 
   # Loop over experiments, perform matrix lookup
@@ -50,7 +50,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
       dimnames(arr) <- list(
-        paste0(anchors[, 1], ",", anchors[, 2]),
+        paste0(anchors[anch_id, 1], ",", anchors[anch_id, 2]),
         rev(dnames), dnames
       )
       arr <- arr[mat_mu$keep, , ]
@@ -145,7 +145,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-engine_by_pixel <- function(MAT, anchors, rel_pos) {
+engine_default <- function(MAT, anchors, rel_pos) {
   class(anchors) <- "matrix"
 
   # Setup indices
@@ -161,9 +161,9 @@ engine_by_pixel <- function(MAT, anchors, rel_pos) {
 }
 
 #' @keywords internal
-engine_by_dir_pixel <- function(MAT, anchors, rel_pos) {
+engine_flipping <- function(MAT, anchors, rel_pos) {
 
-  mats <- engine_by_pixel(MAT = MAT, anchors = anchors, rel_pos = rel_pos)
+  mats <- engine_default(MAT = MAT, anchors = anchors, rel_pos = rel_pos)
 
   # Split off reverse orientation
   dir <- inverse.rle(attr(anchors, "dir"))
@@ -196,7 +196,7 @@ engine_by_dir_pixel <- function(MAT, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-lookup_resizer <- function(MAT, anchors, rel_pos) {
+engine_resizing <- function(MAT, anchors, rel_pos) {
   template <- matrix(0, tail(rel_pos, 1), tail(rel_pos, 1))
   coords <- as.matrix(expand.grid(rel_pos, rel_pos))
   max_pos <- max(rel_pos)

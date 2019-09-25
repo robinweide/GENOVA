@@ -5,8 +5,9 @@
 \title{Construct a contacts-object.}
 \usage{
 loadContacts(signalPath, indicesPath = NULL, juicerResolution = 10000,
-  sampleName, centromeres = NULL, color = NULL, Znorm = F,
-  bpscaling = 1e+09, balancing = T, legacy = F, verbose = T)
+  sampleName, centromeres = NULL, colour = NULL, Znorm = F,
+  bpscaling = 1e+09, cisscaling = F, balancing = T, legacy = F,
+  verbose = T)
 }
 \arguments{
 \item{signalPath}{Full path to an Hi-C file. This could be \*.matrix (for HiCpro), \*.cooler or \*.hic (for juicer).}
@@ -19,7 +20,7 @@ loadContacts(signalPath, indicesPath = NULL, juicerResolution = 10000,
 
 \item{centromeres}{A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.}
 
-\item{color}{Color associated with sample.}
+\item{colour}{colour associated with sample.}
 
 \item{Znorm}{Normalise the matrices per-chromosome with a Z-score.}
 
@@ -46,7 +47,7 @@ help other GENOVA-functions to deal better with this problem. There is a
 slight performance-cost during the construction of the object, however.
 }
 \examples{
-WT_10kb_hicpro <- loadContacts(signalPath = "WT_10kb_iced.matrix", indicesPath = "WT_10kb_abs.bed", sampleName = "WT", color = "black")
-WT_10kb_cooler <- loadContacts("WT_10kb.cooler", balancing =T, sampleName = "WT", color = "black")
-WT_10kb_juicer <- loadContacts("WT_10kb_iced.hic", juicerResolution = 10e3, balancing =T, sampleName = "WT", color = "black")
+WT_10kb_hicpro <- loadContacts(signalPath = "WT_10kb_iced.matrix", indicesPath = "WT_10kb_abs.bed", sampleName = "WT", colour = "black")
+WT_10kb_cooler <- loadContacts("WT_10kb.cooler", balancing =T, sampleName = "WT", colour = "black")
+WT_10kb_juicer <- loadContacts("WT_10kb_iced.hic", juicerResolution = 10e3, balancing =T, sampleName = "WT", colour = "black")
 }

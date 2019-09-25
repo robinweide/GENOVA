@@ -110,6 +110,29 @@ print.ARMLA_discovery <- function(x) {
   cat(slots5)
 }
 
+#' @export
+#' @keywords internal
+print.RCP_discovery = function(discovery){
+  
+  string <- paste0("A ", attr(discovery, "package"), " ", 'RCP_discovery',  " object with the following details:\n")
+  
+  smpls = unique(discovery$raw$samplename)
+  smpls = paste(paste0(smpls[-length(smpls)], collapse = ', '), smpls[length(smpls)], sep = ' & ')
+  print_samples = paste0("- samples: ", smpls,"\n")
+  
+  regs = unique(discovery$raw$region)
+  regs = paste(paste0(regs[-length(regs)], collapse = ', '), regs[length(regs)], sep = ' & ')
+  print_regions = paste0("- regions: ",regs,"\n")
+  
+  print_norm = paste0("- normalisation: ", attr(discovery, 'norm'),"\n")
+  
+  cat(string)
+  cat(print_samples)
+  cat(print_regions)
+  cat(print_norm)
+  
+}
+
 # Other classes -----------------------------------------------------------
 
 #' @export

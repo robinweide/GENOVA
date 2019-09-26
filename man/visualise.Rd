@@ -7,6 +7,7 @@
 \alias{visualise.PESCAn_discovery}
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
+\alias{visualise.RCP_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -24,6 +25,9 @@ visualise(discovery, ...)
 \method{visualise}{ARA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
   raw = FALSE)
+
+\method{visualise}{RCP_discovery}(discovery, contrast = 1,
+  metric = c("smooth", "both", "lfc"), raw = F, flipFacet = F)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -34,9 +38,15 @@ functions.}
 contrast with all other samples. Alternatively, set to \code{NULL} to not
 plot contrast panels.}
 
-\item{metric}{A \code{character} of length 1: what contrast metric should be
-used? \code{"diff"} for difference by subtraction or \code{"lfc"} for
-\ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
+\item{metric}{A \code{character} of length 1:
+
+\describe{
+  \item{A*A}{\code{"diff"} for difference by subtraction or \code{"lfc"} for
+  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
+  \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both} for 
+  adding the raw distance-bins as points and \code{lfc} for 
+  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
+}}
 
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
@@ -44,6 +54,9 @@ returned?}
 \item{mode}{(PESCAn_discovery and ARA_discovery only) What result slot should
 be used for visualisation? \code{"obsexp"} for the observed over expected
 metric or \code{"signal"} for mean contacts at unshifted anchors.}
+
+\item{flipFacet}{(RCP_discovery only) Do you want to have RCP's of different 
+regions in one plot, instead of facets? (default : \code{FALSE})}
 }
 \description{
 Plot the results of \code{discovery} objects. By default

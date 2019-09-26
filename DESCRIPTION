@@ -11,12 +11,12 @@ Depends:
 License: MIT
 Encoding: UTF-8
 LazyData: true
-Imports:
-    ggplot2
+Imports: ggplot2
 RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown,
-    bigwrig,
-    strawr,
-    rhdf5
+    HiCseg
 VignetteBuilder: knitr
+Remotes: rnabioco/RcppLibBigWig,
+   aidenlab/straw/R,
+   bioc::release/rhdf5

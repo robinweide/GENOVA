@@ -7,7 +7,7 @@
 #' @param juicerResolution Set the desired resolution of the matrix when using juicer-data.
 #' @param sampleName The name of the sample.
 #' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
-#' @param color Color associated with sample.
+#' @param colour colour associated with sample.
 #' @param Znorm Normalise the matrices per-chromosome with a Z-score.
 #' @param balancing TRUE (default) will perform matrix balancing for .cooler and KR for.hic.
 #' @param BPscaling Scale contacts to have agenome-wide sum of `BPscaling` reads (default: 1e9). Set to NULL to skip this.
@@ -21,9 +21,9 @@
 #' help other GENOVA-functions to deal better with this problem. There is a
 #' slight performance-cost during the construction of the object, however.
 #' @examples
-#' WT_10kb_hicpro <- loadContacts(signalPath = "WT_10kb_iced.matrix", indicesPath = "WT_10kb_abs.bed", sampleName = "WT", color = "black")
-#' WT_10kb_cooler <- loadContacts("WT_10kb.cooler", balancing =T, sampleName = "WT", color = "black")
-#' WT_10kb_juicer <- loadContacts("WT_10kb_iced.hic", juicerResolution = 10e3, balancing =T, sampleName = "WT", color = "black")
+#' WT_10kb_hicpro <- loadContacts(signalPath = "WT_10kb_iced.matrix", indicesPath = "WT_10kb_abs.bed", sampleName = "WT", colour = "black")
+#' WT_10kb_cooler <- loadContacts("WT_10kb.cooler", balancing =T, sampleName = "WT", colour = "black")
+#' WT_10kb_juicer <- loadContacts("WT_10kb_iced.hic", juicerResolution = 10e3, balancing =T, sampleName = "WT", colour = "black")
 #' @return An contacts-object, which is a named list of contacts, indices and attributes for a Hi-C matrix of a given sample at a given resolution.
 #' @export
 loadContacts = function(signalPath, 
@@ -31,17 +31,22 @@ loadContacts = function(signalPath,
                         juicerResolution = 10e3,
                         sampleName,
                         centromeres = NULL,
-                        color = NULL,
+                        colour = NULL,
                         Znorm = F,
                         bpscaling = 1e9,
+                        cisscaling = F,
                         balancing = T,
                         legacy = F,
                         verbose = T){
+  
+  data.table::setDTthreads(threads = 1)
   
   doJuicer = F
   doCooler = F
   doHiCpro = F
   balanced = F
+  juicerPath = NULL
+  coolerPath = NULL
   ##############################################################################
   #################################################### what are we dealing with?
   ##############################################################################
@@ -184,9 +189,16 @@ loadContacts = function(signalPath,
   }
   
   ##############################################################################
+  ############################################################# set to upper tri
+  ##############################################################################
+  if(!all(signal$V1 <= signal$V2)){
+    signal[signal$V1 > signal$V2, ] <- signal[signal$V1 > signal$V2, c(1,3,2)]
+  }
+  
+  ##############################################################################
   ###############################################################  Contruct list
   ##############################################################################
-  color = if(is.null(color)){color = 'black'}
+  colour = if(is.null(colour)){colour = 'black'}
   out = structure(list(
     # Iced HiC-matrix in three-column format (i.e. from HiC-pro)
     MAT = signal,
@@ -204,7 +216,7 @@ loadContacts = function(signalPath,
   # classes
   class = "contacts",
   # attrs
-  znorm = Znorm, samplename = sampleName, color = color,
+  znorm = Znorm, samplename = sampleName, colour = colour,
   resolution = res, rmChrom = RMCHROM, balanced = balanced,
   # packgs
   package = "GENOVA")
@@ -224,7 +236,7 @@ loadContacts = function(signalPath,
 loadHiCpro = function(signalPath, indicesPath, norm){
   
   SIG <- read.hicpro.matrix(signalPath, norm = norm)
-  ABS <- data.table::fread(indicesPath, header = F, data.table = F)
+  ABS <- data.table::fread(indicesPath, header = F, data.table = T)
   
   return(list(SIG, ABS))
 }
@@ -309,8 +321,8 @@ legacy_out = function(out){
     # Available chromosomes
     CHRS = out$CHRS,
     
-    # color of sample (optional, but recommended for running RCP)
-    COL = attr(out, 'color'),
+    # colour of sample (optional, but recommended for running RCP)
+    COL = attr(out, 'colour'),
     
     # comments
     COMM = "",

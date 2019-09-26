@@ -12,15 +12,25 @@
 #'   (name) of length 1, specifying which sample should be used to make a
 #'   contrast with all other samples. Alternatively, set to \code{NULL} to not
 #'   plot contrast panels.
-#' @param metric A \code{character} of length 1: what contrast metric should be
-#'   used? \code{"diff"} for difference by subtraction or \code{"lfc"} for
-#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.
+#' @param metric A \code{character} of length 1:
+#' 
+#' \describe{
+#'   \item{A*A}{\code{"diff"} for difference by subtraction or \code{"lfc"} for
+#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
+#'   \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both} for 
+#'   adding the raw distance-bins as points and \code{lfc} for 
+#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
+#' }
+#' 
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
 #' @param mode (PESCAn_discovery and ARA_discovery only) What result slot should
 #'   be used for visualisation? \code{"obsexp"} for the observed over expected
 #'   metric or \code{"signal"} for mean contacts at unshifted anchors.
-#'
+#'   
+#' @param flipFacet (RCP_discovery only) Do you want to have RCP's of different 
+#' regions in one plot, instead of facets? (default : \code{FALSE})
+#'   
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
 #'   subtracting the values of each sample by the values of the sample indicated
 #'   by the '\code{contrast}' argument. The \code{"lfc"} \code{metric} value
@@ -511,6 +521,180 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
     )
 
   g
+}
+
+#' @rdname visualise
+#' @export
+visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, flipFacet = F){
+  
+ metric <- match.arg(metric)
+  
+ nregion = length(unique(discovery$smooth$region))
+  
+  # colours
+  smplCols = unique(discovery$smooth[,c('samplename', 'colour')])
+
+  smplCols = lapply(split(smplCols,smplCols$colour), function(x){
+    NL = nrow(x)
+    if(NL > 1){
+      
+      cols = (col2rgb(unique(x$colour))+1)/255
+      cols = sapply(1:NL, function(i){
+        
+        factor = ((1/(NL+2))*i)
+        CF = cols+factor
+        
+        if(any(CF > 1)){
+          factor = ((1/(NL+2))*i)
+          CF = cols-factor
+        }
+        
+        rgb(t(CF), maxColorValue = 1)
+        
+      })
+      x$colour =  cols
+    } else {
+      x$colour =  rgb(t(col2rgb(unique(x$colour))/255))
+    }
+    x
+  })
+  
+  smplCols = data.table::rbindlist(smplCols)
+  smplCols = setNames(smplCols$colour,smplCols$samplename)
+  
+  D3cols <-c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", 
+             "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF", "#AEC7E8", "#FFBB78", 
+             "#98DF8A", "#FF9896", "#C5B0D5", "#C49C94", "#F7B6D2", "#C7C7C7", 
+             "#DBDB8D", "#9EDAE5")
+  regCols = D3cols[1:nregion]
+  
+  
+  ####################################################################### LFC
+
+  if(metric == 'lfc'){
+    smplevels = levels(discovery$smooth$samplename)
+    if(is.numeric(contrast)){
+      contrast = smplevels[contrast]
+    } else if(!contrast %in% smplevels){
+      stop('The contrast given is not found as samplename.')
+    }
+    
+    # breaks
+    logRange = round(log10(unique(discovery$smooth$distance)))
+    logRange = range(logRange[is.finite(logRange)])
+    logRange[2] = logRange[2] +1
+    
+    breaks <- 10**seq(from = logRange[1],
+                      to =  logRange[2], length.out = 101)
+    breaks = c(0,breaks)
+    
+    
+    lfcDT = lapply(unique(discovery$smooth$region), function(REGION){
+      
+      tmp = RCPlfc(discovery$raw[discovery$raw$region == REGION,], contrast, breaks )
+      tmp$region = REGION
+      tmp
+    })
+    lfcDT = rbindlist(lfcDT)
+    
+    GG = NULL
+    if(nregion == 1){
+      GG = ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+        ggplot2::scale_color_manual(values = smplCols)
+    } else if(flipFacet){
+      GG =   ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
+        ggplot2::facet_grid(. ~ samplename)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+        ggplot2::scale_color_manual(values = regCols)
+    } else {
+      GG =ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::facet_grid(. ~ region)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+        ggplot2::scale_color_manual(values = smplCols)
+    }
+    RAUW = GG +   
+      ggplot2::geom_line() 
+    
+    # GG: misc
+    breaks = unique(round(log10(unique(discovery$smooth$distance))))
+    breaks = breaks[is.finite(breaks)]
+    
+    GG = GG + ggplot2::theme_classic() +
+      ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
+      ggplot2::geom_line() +
+      ggplot2::coord_fixed(ylim = range(lfcDT$P))
+    
+    GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
+                              aspect.ratio = 1,
+                              strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                              panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                              text = ggplot2::element_text(color = 'black'),
+                              axis.line = ggplot2::element_blank(),
+                              axis.text = ggplot2::element_text(colour = 'black'),
+                              strip.text = ggplot2::element_text(colour = 'black') )
+    
+    if(raw){
+      suppressWarnings(RAUW)
+    } else {
+      suppressWarnings(GG)
+    }
+  } else {
+
+  ####################################################################### \ LFC
+  # GG: in
+  GG = NULL
+  if(nregion == 1){
+    GG = ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+      ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+      ggplot2::scale_color_manual(values = smplCols)
+  } else if(flipFacet){
+    GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
+      ggplot2::facet_grid(. ~ samplename)+
+      ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+      ggplot2::scale_color_manual(values = regCols)
+  } else {
+    GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+      ggplot2::facet_grid(. ~ region)+
+      ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+      ggplot2::scale_color_manual(values = smplCols)
+  }
+  RAUW = GG +   
+    ggplot2::scale_y_log10() + 
+    ggplot2::geom_line() 
+  
+  # GG: cloud
+  if(metric == 'both'){
+    GG = GG + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
+    RAUW = RAUW + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
+  }
+  
+  # GG: misc
+  breaks = unique(round(log10(unique(discovery$smooth$distance))))
+  breaks = breaks[is.finite(breaks)]
+  
+  GG = GG + ggplot2::theme_classic() +
+    ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
+    ggplot2::scale_y_log10() + 
+    ggplot2::geom_line() +
+    ggplot2::coord_fixed(ylim = range(discovery$smooth$P))
+  
+  GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
+                            aspect.ratio = 1,
+                            strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                            panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                            text = ggplot2::element_text(color = 'black'),
+                            axis.line = ggplot2::element_blank(),
+                            axis.text = ggplot2::element_text(colour = 'black'),
+                            strip.text = ggplot2::element_text(colour = 'black') )
+  
+  if(raw){
+    suppressMessages(RAUW)
+  } else {
+    suppressWarnings(GG)
+  }
+
+  }
 }
 
 # Utilities ---------------------------------------------------------------

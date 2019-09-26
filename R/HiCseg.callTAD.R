@@ -32,9 +32,10 @@ select.subset.hicseg <- function(EXP, chrom, start, end) {
 #' @param verbose Bioinformatics can be a bit lonely: set this to true to get a more chatty function.
 #' @return A BEDPE-df
 #' @export
-#' @import HiCseg
 HiCseg.callTAD <- function(experiment, chromsToUse = NULL, binPerBorder = 3, chunk = NULL, BEDcolor = "255,255,0", verbose = F) {
-  require(HiCseg)
+ 
+  try_require('HiCseg', 'HiCseg.callTAD')
+  
   # check if chunks are given and provide a warning
   if (!is.null(chunk)) {
     message("You chose a chunked approach.

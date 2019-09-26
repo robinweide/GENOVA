@@ -73,7 +73,7 @@ bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
 #' @keywords internal
 dt_matrix <- function(x, i, j, dim, offset) {
   m <- matrix(0, dim, dim)
-  m[matrix(c(i, j, j, i) - offset, 2, 2 * length(i))] <- c(x, x)
+  m[matrix(c(i, j, j, i) - offset, 2 * length(i), 2)] <- c(x, x)
   m
 }
 

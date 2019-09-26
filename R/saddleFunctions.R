@@ -374,9 +374,9 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
   }
 
   out$MAT$sample <- attr(exp, "samplename")
-  out$MAT$color  <- attr(exp, "colour")
+  out$MAT$colour  <- attr(exp, "colour")
   out$EV$sample  <- attr(exp, "samplename")
-  out$EV$color   <- attr(exp, "samplename")
+  out$EV$colour   <- attr(exp, "colour")
   # return list of ev/cs and matrices in three-column form
   return(list(MAT = out$MAT, EV = out$EV))
 }
@@ -417,7 +417,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
 
     tmp <- dplyr::summarise(dplyr::group_by(
       dat$MAT,
-      color,
+      colour,
       sample,
       chrom,
       arm,
@@ -433,7 +433,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
         for (A in unique(unname(unlist(meta[meta$chrom == C, "arm"])))) {
           tmpi <- tmp[tmp$sample == S & tmp$chrom == C & tmp$arm == A, ]
           strength <- log(tmpi[tmpi$CC == "AA", "score"] * tmpi[tmpi$CC == "BB", "score"] / tmpi[tmpi$CC == "AB", "score"]**2)
-          strengthDF <- rbind(strengthDF, data.frame(S, C, A, strength, unique(tmp[tmp$sample == S, "color"])))
+          strengthDF <- rbind(strengthDF, data.frame(S, C, A, strength, unique(tmp[tmp$sample == S, "colour"])))
         }
       }
     }
@@ -446,7 +446,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
 
 
   if (showInteractions != TRUE) {
-    coltmp <- col2rgb(levels(as.factor(strengthDF$color)), alpha = T) / 255
+    coltmp <- col2rgb(levels(as.factor(strengthDF$colour)), alpha = T) / 255
     coltmp[4, ] <- coltmp[4, ] * 0.85
     cols <- rgb(red = coltmp[1, ], green = coltmp[2, ], blue = coltmp[3, ], alpha = coltmp[4, ])
 
@@ -462,7 +462,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
     P <- ggplot2::ggplot(interactionDF, ggplot2::aes(
       x = sample,
       y = score,
-      fill = color
+      fill = colour
     )) +
       ggplot2::facet_wrap("CC") +
       ggplot2::geom_hline(yintercept = 1, lty = 3) +

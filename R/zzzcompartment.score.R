@@ -106,7 +106,8 @@ largest.stretch <- function(x) {
 #'   t = "h", axes = F
 #' )
 #' axis(2)
-#' @export
+#' @noMd
+#' @noRd
 compartment.score <- function(exp, chromsToUse = NULL, empericalCentromeres = T,
                               pEV = 1, qEV = 1, comparableBed = NULL,
                               comparableTrack = NULL, shuffle = F, verbose = T) {

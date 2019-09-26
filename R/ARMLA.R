@@ -342,6 +342,9 @@ check_compat_exp <- function(explist) {
 #' @return A \code{integer} vector of relative positions.
 #' @keywords internal
 parse_rel_pos <- function(res, size_bin, size_bp) {
+  if (!is.null(size_bin) & !is.null(size_bp)) {
+    message("Both 'size_bin' and 'size_bp' are set. Continuing with 'size_bin'.")
+  }
   if (is.null(size_bin) & !(is.null(size_bp))) {
     # Translate size to relative positions
     rel_pos <- seq_len(((size_bp / res) * 2 + 1))

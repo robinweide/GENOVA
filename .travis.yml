@@ -1,12 +1,3 @@
 # Use R language
 language: r
 
-before_install:
-  - R -q -e 'if (!requireNamespace("dplyr")) install.packages("dplyr")'
-
-# Set one of you dependencies from github
-r_github_packages: 
-  - rnabioco/RcppLibBigWig
-  - aidenlab/straw/R
-
-bioc_packages: strawr

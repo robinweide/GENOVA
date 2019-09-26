@@ -29,8 +29,7 @@
 #'
 #' # Plot the RCP
 #' visualise.RCP.ggplot(RCP_out)
-#' @export
-RCP <- function(experimentList, chromsToUse = NULL, bedList = NULL, colors = NULL, maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1, verbose = F) {
+zzzzRCP <- function(experimentList, chromsToUse = NULL, bedList = NULL, colors = NULL, maxDistance = NULL, ignoreLengthWarning = F, outlierCutoff = 1, verbose = F) {
   BEDCOL <- NULL
   if (is.null(colors)) {
     colors <- c()
@@ -110,7 +109,8 @@ RCP <- function(experimentList, chromsToUse = NULL, bedList = NULL, colors = NUL
     }
     for (i in 1:amountOfSamples) {
       if (verbose) {
-        cat(paste0("Chromosome ", Ci, " of ", length(chromsToUse), " chromosomes"))
+        cat(paste0("Chromosome ", Ci, " of ", length(chromsToUse), " chromosomes
+"))
       }
       dat <- NULL
       resolu <- experimentList[[i]]$RES

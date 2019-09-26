@@ -2,6 +2,7 @@
 
 S3method("[",anchors)
 S3method(bundle,ARMLA_discovery)
+S3method(print,CS_discovery)
 S3method(print,RCP_discovery)
 S3method(print,anchors)
 S3method(print,contacts)

@@ -12,10 +12,12 @@ sign_compartmentscore(CS_discovery, bed = NULL, bedgraph = NULL,
 \code{\link[GENOVA]{comparment_score}} function.}
 
 \item{bed}{A \code{data.frame} with 3 columns in BED format, containing peaks
-of active chromatin marks.}
+of active chromatin marks. Mutually exclusive with the '\code{bedgraph}'
+argument.}
 
 \item{bedgraph}{A \code{data.frame} with 4 columns in bedGraph format,
-containing scores correlated with active chromatin.}
+containing scores correlated with active chromatin. Mutually exclusive with
+the '\code{bed}' argument.}
 
 \item{verbose}{A \code{logical} of length 1. If \code{TRUE}, reports when
 '\code{bedgraph}' correlations are weak or uncomputable.}

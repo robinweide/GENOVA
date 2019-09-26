@@ -15,10 +15,12 @@ retrieve. Useful in case the first eigenvector does not resemble the
 compartmentalisation.}
 
 \item{bed}{A \code{data.frame} with 3 columns in BED format, containing peaks
-of active chromatin marks.}
+of active chromatin marks. Mutually exclusive with the '\code{bedgraph}'
+argument.}
 
 \item{bedgraph}{A \code{data.frame} with 4 columns in bedGraph format,
-containing scores correlated with active chromatin.}
+containing scores correlated with active chromatin. Mutually exclusive with
+the '\code{bed}' argument.}
 }
 \value{
 A \code{CS_discovery} object.

@@ -126,9 +126,10 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   out <- merge(idx, evs, by.x = "V4", by.y = "bins", all = TRUE)
   setcolorder(out, neworder = c(2,3,4,1,5:ncol(out)))
   names(out)[1:4] <- c("chrom", "start", "end", "bin")
-  out <- structure(list(compart_scores = out), 
+  out <- structure(list(compart_scores = out),
+                   package = "GENOVA",
                    class = c("CS_discovery"),
-                   res = attr(explist[[1]], "res"),
+                   resolution = attr(explist[[1]], "resolution"),
                    partitioning = partitioning,
                    signed = FALSE)
   
@@ -149,9 +150,11 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
 #' @param CS_discovery A \code{CS_discovery} object as produced by the
 #'   \code{\link[GENOVA]{comparment_score}} function.
 #' @param bed A \code{data.frame} with 3 columns in BED format, containing peaks
-#'   of active chromatin marks.
+#'   of active chromatin marks. Mutually exclusive with the '\code{bedgraph}'
+#'   argument.
 #' @param bedgraph A \code{data.frame} with 4 columns in bedGraph format,
-#'   containing scores correlated with active chromatin.
+#'   containing scores correlated with active chromatin. Mutually exclusive with
+#'   the '\code{bed}' argument.
 #' @param verbose A \code{logical} of length 1. If \code{TRUE}, reports when
 #'   '\code{bedgraph}' correlations are weak or uncomputable.
 #'
@@ -284,7 +287,8 @@ sign_compartmentscore <- function(CS_discovery,
   
   structure(list(compart_scores = out),
             class = "CS_discovery",
-            res = attr(CS_discovery, "res"),
+            package = "GENOVA",
+            resolution = attr(CS_discovery, "resolution"),
             partitioning = attr(CS_discovery, "partitioning"),
             signed = TRUE)
 }

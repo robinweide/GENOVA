@@ -24,8 +24,9 @@ anchors = makeGRangesFromDataFrame(anchors,start.field = 'X1',end.field = 'X2', 
 anchors_shuffle = regioneR::circularRandomizeRegions(anchors)
 loopList = lapply(list(anchors = anchors, shuffled = anchors_shuffle), as.data.frame)
 
-RCP_out = RCP(explist = list('WT' = WT, 'MED12' = MED12, 'DKO' = DKO), bedlist = loopList)
-
+tic('3 samples 50kb load')
+RCP_out = RCP(explist = list('WT' = WT, 'MED12' = MED12, 'DKO' = DKO))
+toc()
 
 
 RCP_out
@@ -44,3 +45,15 @@ visualise(RCP_out, metric = 'lfc', contrast = 'WT', flipFacet = T)
 visualise(RCP_out, metric = 'lfc', contrast = 'WT', raw = T)
 
 
+
+
+library(patchwork)
+A = visualise(RCP_out, metric = 'both')
+B = visualise(RCP_out, metric = 'lfc', contrast = 'WT')
+A+B+plot_layout(ncol = 1)
+
+C = visualise(RCP_out, metric = 'both', flipFacet = T)
+D = visualise(RCP_out, metric = 'lfc', contrast = 'WT', flipFacet = T)
+C+D+plot_layout(ncol = 1)
+
+avg extr loop size

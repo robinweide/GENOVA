@@ -8,6 +8,7 @@
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
 \alias{visualise.RCP_discovery}
+\alias{visualise.CS_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -28,6 +29,9 @@ visualise(discovery, ...)
 
 \method{visualise}{RCP_discovery}(discovery, contrast = 1,
   metric = c("smooth", "both", "lfc"), raw = F, flipFacet = F)
+
+\method{visualise}{CS_discovery}(discovery, contrast = NULL,
+  chr = "chr1", start = NULL, end = NULL, raw = FALSE)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -40,13 +44,11 @@ plot contrast panels.}
 
 \item{metric}{A \code{character} of length 1:
 
-\describe{
-  \item{A*A}{\code{"diff"} for difference by subtraction or \code{"lfc"} for
-  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
-  \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both} for 
-  adding the raw distance-bins as points and \code{lfc} for 
-  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
-}}
+  \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
+  \code{"lfc"} for \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold
+  changes.} \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both}
+  for adding the raw distance-bins as points and \code{lfc} for
+  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }}
 
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
@@ -55,8 +57,15 @@ returned?}
 be used for visualisation? \code{"obsexp"} for the observed over expected
 metric or \code{"signal"} for mean contacts at unshifted anchors.}
 
-\item{flipFacet}{(RCP_discovery only) Do you want to have RCP's of different 
+\item{flipFacet}{(RCP_discovery only) Do you want to have RCP's of different
 regions in one plot, instead of facets? (default : \code{FALSE})}
+
+\item{chr}{(CP_discovery only) A \code{character} of length 1 indicating a
+chromosome name.}
+
+\item{start, end}{(CP_discovery only) A \code{numeric} of length 1 with start-
+and end-positions for the region to plot. If \code{NULL}, is set to
+\code{-Inf} and \code{Inf} respectively.}
 }
 \description{
 Plot the results of \code{discovery} objects. By default

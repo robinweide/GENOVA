@@ -126,8 +126,12 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   out <- merge(idx, evs, by.x = "V4", by.y = "bins", all = TRUE)
   setcolorder(out, neworder = c(2,3,4,1,5:ncol(out)))
   names(out)[1:4] <- c("chrom", "start", "end", "bin")
+  
+  cols <- vapply(explist, attr, character(1L), "colour")
+  
   out <- structure(list(compart_scores = out),
                    package = "GENOVA",
+                   colours = cols,
                    class = c("CS_discovery"),
                    resolution = attr(explist[[1]], "resolution"),
                    partitioning = partitioning,
@@ -229,7 +233,7 @@ sign_compartmentscore <- function(CS_discovery,
                                count[down])
           # Is the orientation wrong?
           test2 <- median(count[up]) < median(count[down])
-          flip <- test1$p.value < 1e-5 & test2
+          flip <- test1$p.value < 1e-2 & test2
           if (flip) {
             # Flip score
             return(- score)
@@ -287,6 +291,7 @@ sign_compartmentscore <- function(CS_discovery,
   
   structure(list(compart_scores = out),
             class = "CS_discovery",
+            colours = attr(CS_discovery, "colours"),
             package = "GENOVA",
             resolution = attr(CS_discovery, "resolution"),
             partitioning = attr(CS_discovery, "partitioning"),

@@ -1,4 +1,4 @@
-loadJuicer = function(juicerPath, resolution, norm = 1e9, balancing = T){
+loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, balancing = T){
 
   require(strawr)
 
@@ -15,10 +15,13 @@ loadJuicer = function(juicerPath, resolution, norm = 1e9, balancing = T){
   expandedChromosomes = as.data.frame(t(combn(juicer_metadata[[1]]$chrom, m = 2)), stringsAsFactors = F)
   expandedChromosomes = rbind(as.data.frame(cbind(juicer_metadata[[1]]$chrom,juicer_metadata[[1]]$chrom)),
                               expandedChromosomes)
-
+  expandedChromosomes = apply(expandedChromosomes, 2, as.character)
   strawNorm = ifelse(balancing, 'KR', "NONE")
-  juicerList = apply(expandedChromosomes, 1, function(ec){
-
+  
+  juicerList = lapply(seq_len(nrow(expandedChromosomes)), function(eci){
+    
+    ec = expandedChromosomes[eci,]
+    
     juicer_in <- tryCatch(
       {strawr::straw(norm = strawNorm,
                      fname =juicerPath,
@@ -27,10 +30,10 @@ loadJuicer = function(juicerPath, resolution, norm = 1e9, balancing = T){
                      unit = 'BP',
                      binsize = resolution)
       },error=function(cond) {
-
+        
         return(NULL)
       })
-
+    
     # remove NaN
     if(!is.null(juicer_in)){
       juicer_in = juicer_in[!is.nan(juicer_in[,3]),]
@@ -38,18 +41,19 @@ loadJuicer = function(juicerPath, resolution, norm = 1e9, balancing = T){
         juicer_in = NULL
       }
     }
-
+    
     # decorate
     if(!is.null(juicer_in)){
-
+      
       juicer_in$chrom_x = ec[1]
       juicer_in$chrom_y = ec[2]
-
+      
       juicer_in = juicer_in[, c(4,1,5,2,3)]
     }
     juicer_in
-
+    
   })
+
 
   juicer_data = data.table::rbindlist(juicerList)
 
@@ -59,9 +63,26 @@ loadJuicer = function(juicerPath, resolution, norm = 1e9, balancing = T){
   SIG = SA[[1]]
   ABS = SA[[2]]
 
-  if (!is.null(norm)) {
-    SIG$V3 <- norm * SIG$V3 / sum(SIG$V3)
+  
+  
+  if (!is.null(scale_bp)) {
+    
+    if(scale_cis){
+      
+      chromRange = ABS[ , .(first = min(V4)), by = V1]
+      chromRange = chromRange[order(chromRange$first),]
+      
+      F1 = findInterval(SIG$V1, chromRange$first)
+      F2 = findInterval(SIG$V2, chromRange$first)
+      
+      SIG$V3 <- scale_bp * SIG$V3 / sum(SIG[ifelse(F1 == F2, T, F), 3])
+      
+    } else {
+      SIG$V3 <- scale_bp * SIG$V3 / sum(SIG$V3)
+    }
+    
   }
+  
 
   return(list(SIG, ABS))
 

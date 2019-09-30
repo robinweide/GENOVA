@@ -1,8 +1,8 @@
-loadCooler = function(cooler, balancing = T, norm = NULL){
+loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F){
 
   require(rhdf5)
 
-  ABS = as.data.frame(rhdf5::h5read(file = cooler,
+  ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
                              name = "bins"))
   ABS$bin = 1:nrow(ABS)
 
@@ -17,7 +17,7 @@ loadCooler = function(cooler, balancing = T, norm = NULL){
   h5closeAll()
 
   SIG[,1] = SIG[,1] + 1
-  SIG[,2] = SIG[,2] + 2
+  SIG[,2] = SIG[,2] + 1
 
   if(balancing){
     SIG = balance_cooler(ABS, SIG)
@@ -25,11 +25,24 @@ loadCooler = function(cooler, balancing = T, norm = NULL){
 
   ABS$weight = NULL
   colnames(ABS) = paste0('V', 1:4)
-
   colnames(SIG) = paste0('V', 1:3)
 
-  if (!is.null(norm)) {
-    SIG$V3 <- norm * SIG$V3 / sum(SIG$V3)
+  if (!is.null(scale_bp)) {
+    
+    if(scale_cis){
+      
+      chromRange = ABS[ , .(first = min(V4)), by = V1]
+      chromRange = chromRange[order(chromRange$first),]
+      
+      F1 = findInterval(SIG$V1, chromRange$first)
+      F2 = findInterval(SIG$V2, chromRange$first)
+      
+      SIG$V3 <- scale_bp * SIG$V3 / sum(SIG[ifelse(F1 == F2, T, F), 3])
+      
+    } else {
+      SIG$V3 <- scale_bp * SIG$V3 / sum(SIG$V3)
+    }
+
   }
 
   return(list(SIG, ABS))

@@ -2,39 +2,40 @@
 #'
 #' Make an object which holds the most needed information of a HiC-experiment at a given resolution.
 #'
-#' @param signalPath Full path to an Hi-C file. This could be \*.matrix (for HiCpro), \*.cooler or \*.hic (for juicer).
-#' @param indicesPath Full path the HiC-pro-like index-file. Required when `signalPath` is \*.matrix.
-#' @param juicerResolution Set the desired resolution of the matrix when using juicer-data.
-#' @param sampleName The name of the sample.
+#' @param signal_path Full path to an Hi-C file. This could be \*.matrix (for HiCpro), \*.cooler or \*.hic (for juicer).
+#' @param indices_path Full path the HiC-pro-like index-file. Required when `signal_path` is \*.matrix.
+#' @param resolution Set the desired resolution of the matrix when using juicer-data.
+#' @param sample_name The name of the sample.
 #' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
 #' @param colour colour associated with sample.
-#' @param Znorm Normalise the matrices per-chromosome with a Z-score.
+#' @param z_norm Normalise the matrices per-chromosome with a Z-score.
 #' @param balancing TRUE (default) will perform matrix balancing for .cooler and KR for.hic.
-#' @param BPscaling Scale contacts to have agenome-wide sum of `BPscaling` reads (default: 1e9). Set to NULL to skip this.
+#' @param scale_bp Scale contacts to have agenome-wide sum of `scale_bp` reads (default: 1e9). Set to NULL to skip this.
+#' @param scale_cis Only scale with cis-contacts.
 #' @param legacy Get a pre-v1 object (mimics the output of construct.experiment.)
 #' @param verbose Do you want updates during the construction?
 #' @note
 #' Some reference genomes have very small "random" or "patch" chromosomes,
 #' which can have zero contacts mapped to it (at certain resolutions).
-#' `loadContacts` checks this and omits these chromosomes in the resulting
+#' `load_contacts` checks this and omits these chromosomes in the resulting
 #' experiment-object. The RMCHROM-flag will also be set to TRUE: this will
 #' help other GENOVA-functions to deal better with this problem. There is a
 #' slight performance-cost during the construction of the object, however.
 #' @examples
-#' WT_10kb_hicpro <- loadContacts(signalPath = "WT_10kb_iced.matrix", indicesPath = "WT_10kb_abs.bed", sampleName = "WT", colour = "black")
-#' WT_10kb_cooler <- loadContacts("WT_10kb.cooler", balancing =T, sampleName = "WT", colour = "black")
-#' WT_10kb_juicer <- loadContacts("WT_10kb_iced.hic", juicerResolution = 10e3, balancing =T, sampleName = "WT", colour = "black")
+#' WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", indices_path = "WT_10kb_abs.bed", sample_name = "WT", colour = "black")
+#' WT_10kb_cooler <- load_contacts("WT_10kb.cooler", balancing =T, sample_name = "WT", colour = "black")
+#' WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", resolution = 10e3, balancing =T, sample_name = "WT", colour = "black")
 #' @return An contacts-object, which is a named list of contacts, indices and attributes for a Hi-C matrix of a given sample at a given resolution.
 #' @export
-loadContacts = function(signalPath, 
-                        indicesPath = NULL,
-                        juicerResolution = 10e3,
-                        sampleName,
+load_contacts = function(signal_path, 
+                        indices_path = NULL,
+                        resolution = 10e3,
+                        sample_name,
                         centromeres = NULL,
                         colour = NULL,
-                        Znorm = F,
-                        bpscaling = 1e9,
-                        cisscaling = F,
+                        z_norm = F,
+                        scale_bp = 1e9,
+                        scale_cis = F,
                         balancing = T,
                         legacy = F,
                         verbose = T){
@@ -50,13 +51,13 @@ loadContacts = function(signalPath,
   ##############################################################################
   #################################################### what are we dealing with?
   ##############################################################################
-  inputType = switch(tools::file_ext(tolower(signalPath)), 
+  inputType = switch(tools::file_ext(tolower(signal_path)), 
                      'matrix' = 'hicpro',
                      'cooler' = 'cooler',
                      'hic'    = 'juicer')
   
-  if(inputType == 'juicer'){juicerPath = signalPath}
-  if(inputType == 'cooler'){coolerPath = signalPath}
+  if(inputType == 'juicer'){juicerPath = signal_path}
+  if(inputType == 'cooler'){coolerPath = signal_path}
   
   if(!is.null(juicerPath)){
     ##################################################################### juicer
@@ -64,10 +65,10 @@ loadContacts = function(signalPath,
 
     
     if(grepl(juicerPath ,pattern = '^http')){
-      stop('signalPath starts with http, but the current version does not support it.')
-      # signalPath points to an URL!
-     if(unname(RCurl::url.exists(signalPath, .header = T)[7] == "404")){
-       stop('signalPath starts with http, but url is not found (404).')
+      stop('signal_path starts with http, but the current version does not support it.')
+      # signal_path points to an URL!
+     if(unname(RCurl::url.exists(signal_path, .header = T)[7] == "404")){
+       stop('signal_path starts with http, but url is not found (404).')
      }
       
     } else if(!file.exists(juicerPath)){
@@ -75,7 +76,7 @@ loadContacts = function(signalPath,
     }
     
     # is strawr installed?
-    try_require('strawr', "loadContacts", source = 'github')
+    try_require('strawr', "load_contacts", source = 'github')
     
     doJuicer = T
 
@@ -92,22 +93,22 @@ loadContacts = function(signalPath,
     
     doCooler = T
     
-  } else if(!is.null(signalPath)){
+  } else if(!is.null(signal_path)){
     ##################################################################### hicpro
     
-    # a signalPath is given. Does it exist?
-    if(!file.exists(signalPath)){
-      stop("signalPath doesn't point to an existing file.")
+    # a signal_path is given. Does it exist?
+    if(!file.exists(signal_path)){
+      stop("signal_path doesn't point to an existing file.")
     }
     
-    if(!file.exists(indicesPath)){
-      stop("indicesPath doesn't point to an existing file.")
+    if(!file.exists(indices_path)){
+      stop("indices_path doesn't point to an existing file.")
     }
     
     doHiCpro = T
 
   } else {
-    stop('please provide either .matrix/indicesPath, a .cooler or a .hic.')
+    stop('please provide either .matrix/indices_path, a .cooler or a .hic.')
   }
   
   ##############################################################################
@@ -115,17 +116,17 @@ loadContacts = function(signalPath,
   ##############################################################################
   if(verbose){message('Reading data...')}
   if(doJuicer){
-    sig_ind = loadJuicer(juicerPath, juicerResolution, norm = bpscaling, balancing = balancing)
+    sig_ind = loadJuicer(juicerPath, resolution, scale_bp = scale_bp, scale_cis = scale_cis, balancing = balancing)
     balanced = balancing
   }
   
   if(doHiCpro){
-    sig_ind = loadHiCpro(signalPath, indicesPath, norm = bpscaling)
-    balanced = any(data.table::fread(signalPath, nrows = 1000)[,3] %% 1 != 0)
+    sig_ind = loadHiCpro(signal_path, indices_path, scale_bp = scale_bp, scale_cis = scale_cis )
+    balanced = any(data.table::fread(signal_path, nrows = 1000)[,3] %% 1 != 0)
   }
   
   if(doCooler){
-    sig_ind = loadCooler(coolerPath, norm = bpscaling,balancing = balancing)
+    sig_ind = loadCooler(coolerPath, scale_bp = scale_bp,balancing = balancing, scale_cis = scale_cis)
     balanced = balancing
   }
   
@@ -183,7 +184,7 @@ loadContacts = function(signalPath,
   ##############################################################################
   ###################################################################### Z-score
   ##############################################################################
-  if(Znorm){
+  if(z_norm){
     if(verbose){message('Running Z-score normalisation...')}
     signal = zscore_hic(signal, index)
   }
@@ -216,8 +217,8 @@ loadContacts = function(signalPath,
   # classes
   class = "contacts",
   # attrs
-  znorm = Znorm, samplename = sampleName, colour = colour,
-  resolution = res, rmChrom = RMCHROM, balanced = balanced,
+  znorm = z_norm, samplename = sample_name, colour = colour,
+  resolution = res, rmChrom = RMCHROM, balanced = balanced, scale_cis = scale_cis,
   # packgs
   package = "GENOVA")
   
@@ -233,11 +234,26 @@ loadContacts = function(signalPath,
 
 
 
-loadHiCpro = function(signalPath, indicesPath, norm){
+loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
   
-  SIG <- read.hicpro.matrix(signalPath, norm = norm)
-  ABS <- data.table::fread(indicesPath, header = F, data.table = T)
+  ABS <- data.table::fread(indices_path, header = F, data.table = T)
   
+  SIG = NULL
+  if(scale_cis){
+    SIG <- read.hicpro.matrix(signal_path, scale_bp = NULL)
+    
+    chromRange = ABS[ , .(first = min(V4)), by = V1]
+    chromRange = chromRange[order(chromRange$first),]
+    
+    F1 = findInterval(SIG$V1, chromRange$first)
+    F2 = findInterval(SIG$V2, chromRange$first)
+
+    SIG$V3 <- scale_bp * SIG$V3 / sum(SIG[ifelse(F1 == F2, T, F), 3])
+    
+  } else {
+    SIG <- read.hicpro.matrix(signal_path, scale_bp = scale_bp)
+  }
+
   return(list(SIG, ABS))
 }
 

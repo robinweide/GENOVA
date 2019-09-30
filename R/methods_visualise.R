@@ -224,7 +224,7 @@ visualise.ARMLA <- function(discovery, contrast = 1,
 #' @export
 visualise.APA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
-                                    raw = FALSE) {
+                                    raw = FALSE, title = NULL) {
   metric <- match.arg(metric)
 
   altfillscale <- ggplot2::scale_fill_gradientn(
@@ -275,6 +275,9 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
       }
     )
 
+  if(!is.null(title)){
+    g = g + ggplot2::ggtitle(title)
+  }
   g
 }
 
@@ -283,7 +286,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
 visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        metric = c("diff", "lfc"),
                                        mode = c("obsexp", "signal"),
-                                       raw = FALSE) {
+                                       raw = FALSE, title = NULL) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -364,6 +367,10 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
       }
     )
 
+  if(!is.null(title)){
+    g = g + ggplot2::ggtitle(title)
+  }
+  
   g
 }
 
@@ -371,7 +378,7 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.ATA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
-                                    raw = FALSE) {
+                                    raw = FALSE, title = NULL) {
   metric <- match.arg(metric)
 
   altfillscale <- ggplot2::scale_fill_gradientn(
@@ -430,6 +437,10 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
       labels = c("5' border", "3' border")
     )
 
+  if(!is.null(title)){
+    g = g + ggplot2::ggtitle(title)
+  }
+  
   g
 }
 
@@ -438,7 +449,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
 visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     mode = c("obsexp", "signal"),
-                                    raw = FALSE) {
+                                    raw = FALSE, title = NULL) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -523,12 +534,16 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
       }
     )
 
+  if(!is.null(title)){
+    g = g + ggplot2::ggtitle(title)
+  }
+  
   g
 }
 
 #' @rdname visualise
 #' @export
-visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, flipFacet = F){
+visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F){
   
  metric <- match.arg(metric)
   
@@ -637,6 +652,10 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
                               axis.text = ggplot2::element_text(colour = 'black'),
                               strip.text = ggplot2::element_text(colour = 'black') )
     
+    if(!is.null(title)){
+      GG = GG + ggplot2::ggtitle(title)
+    }
+    
     if(raw){
       suppressWarnings(RAUW)
     } else {
@@ -690,6 +709,10 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
                             axis.line = ggplot2::element_blank(),
                             axis.text = ggplot2::element_text(colour = 'black'),
                             strip.text = ggplot2::element_text(colour = 'black') )
+  
+  if(!is.null(title)){
+    GG = GG + ggplot2::ggtitle(title)
+  }
   
   if(raw){
     suppressMessages(RAUW)

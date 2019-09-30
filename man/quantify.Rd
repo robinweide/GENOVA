@@ -4,6 +4,12 @@
 \alias{quantify}
 \alias{quantify.default}
 \title{Quantification of results}
+\arguments{
+\item{discovery}{A \code{discovery} object as returned by GENOVA analysis functions.}
+
+\item{signal_size}{The width/height of the signal (e.g. a value of 3 will 
+take the middle 3x3 matrix of the APA).}
+}
 \description{
 Here be a placholder description
 }

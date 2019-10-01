@@ -612,20 +612,23 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
     })
     lfcDT = rbindlist(lfcDT)
     
+
+    
+    
     GG = NULL
     if(nregion == 1){
       GG = ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
-        ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
         ggplot2::scale_color_manual(values = smplCols)
     } else if(flipFacet){
       GG =   ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
         ggplot2::facet_grid(. ~ samplename)+
-        ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+        ggplot2::labs(x = 'distance (Mb)', col = 'region', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
         ggplot2::scale_color_manual(values = regCols)
     } else {
       GG =ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
         ggplot2::facet_grid(. ~ region)+
-        ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")"))+
         ggplot2::scale_color_manual(values = smplCols)
     }
     RAUW = GG +   

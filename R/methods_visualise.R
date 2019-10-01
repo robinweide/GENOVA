@@ -612,20 +612,23 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
     })
     lfcDT = rbindlist(lfcDT)
     
+
+    
+    
     GG = NULL
     if(nregion == 1){
       GG = ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
-        ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
         ggplot2::scale_color_manual(values = smplCols)
     } else if(flipFacet){
       GG =   ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
         ggplot2::facet_grid(. ~ samplename)+
-        ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+        ggplot2::labs(x = 'distance (Mb)', col = 'region', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
         ggplot2::scale_color_manual(values = regCols)
     } else {
       GG =ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
         ggplot2::facet_grid(. ~ region)+
-        ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")"))+
         ggplot2::scale_color_manual(values = smplCols)
     }
     RAUW = GG +   
@@ -718,6 +721,70 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
   }
 
   }
+}
+
+
+#' @rdname visualise
+#' @export
+visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, bp_blackout = NULL){
+  # ! someday: allow mulitple samples
+  
+  data <- discovery$data
+  VP   <- attr(discovery,"viewpoint")
+  
+  if( is.null(bins) ) {
+    bins = nrow(data)
+  }
+  
+  draw_blackout = F
+  if( is.null(bp_blackout) ) {
+    bp_blackout <- attr(discovery, 'resolution') * 25
+    draw_blackout = T
+  } else if (bp_blackout == F){
+    bp_blackout <- 0
+  } 
+  
+  blackout_up   <- attr(discovery, 'viewpoint')[1,2] - (bp_blackout/2)
+  blackout_down <- attr(discovery, 'viewpoint')[1,3] + (bp_blackout/2)
+  
+  if( !is.null(bed)) {
+    bed = bed[bed[,1] == attr(discovery, 'viewpoint')[1,1],2:3]
+  }
+  
+  data <- data[!(data$mid > blackout_up & data$mid < blackout_down)]
+  
+  breaks <- seq(min(data$mid), max(data$mid), length.out = bins)
+  smooth <- data[, mean(signal),by = findInterval(data$mid, breaks)]
+  smooth$mid = breaks[unlist(smooth[,1])] + unique(diff(breaks)/2)
+  smooth[,1] = NULL
+  colnames(smooth) = c("signal","mid")
+  
+  p = ggplot2::ggplot(data, ggplot2::aes(x= mid/1e6, y = signal)) +
+    ggplot2::geom_col(data = smooth, fill = 'black') +
+    ggplot2::coord_cartesian(expand = F) +
+    ggplot2::theme_classic() +
+    ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1])
+  
+  if( draw_blackout ){
+    p = p + ggplot2::annotate('rect',
+                              fill =  "#D8D8D8",
+                              xmin = blackout_up/1e6,
+                              xmax = blackout_down/1e6,
+                              ymin = 0,
+                              ymax = ceiling(max(smooth$signal))) 
+  }
+  
+  if( !is.null(bed)){
+    p = p + ggplot2::annotate('rect', 
+                              fill = "black",
+                              xmin = bed[,1]/1e6, 
+                              xmax = bed[,2]/1e6,
+                              ymin = -ceiling(max(smooth$signal))/100,
+                              ymax = 0)  
+  }
+  p
+  
+  
 }
 
 # Utilities ---------------------------------------------------------------

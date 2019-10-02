@@ -1,13 +1,15 @@
-VP = HICCUPS[2498,1:3]
-xlim      <- VP[,2:3]
-xlim[1]   <- xlim[1]-5e6
-xlim[2]   <- xlim[2]+5e6
-
-virtual_4C(exp = WT_new, viewpoint = VP, xlim = xlim)
-
-
+#' Get an average virtual 4C of 2D-regions (e.g. loops).
+#'
+#' Extract matrices around a defined region a.k.a. the viewpoint
+#'
+#' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
+#' @param viewpoint The viewpoint
+#' @param xlim A vector of two with the flanking basepairs up- and downstream 
+#' of the viewpoint, resp. 
+#' @return A virtual4C_discovery object.
+#' @export
 virtual_4C <- function(exp, viewpoint, xlim = NULL){
-  
+  # ! someday: allow mulitple samples
   vp_idx <- median(bed2idx(exp$IDX, viewpoint))
   
   signal <- NULL
@@ -46,77 +48,17 @@ virtual_4C <- function(exp, viewpoint, xlim = NULL){
   # output ---------------------------------------------------------------------
   signal <- signal[,c(3,6,2)]
   colnames(signal) <- c('chromosome','mid','signal')
+  signal <- list(data = signal)
   
   signal <- structure(signal, 
+                      class = "virtual4C_discovery",
                       'viewpoint' = viewpoint, 
                       'xlim' = xlim,
                       'sample' = attr(exp, 'sample'),
-                      class = "virtual4C_discovery",
+                      'resolution' = attr(exp, 'resolution'),
                       package = "GENOVA")
   
   signal
 }
-
-
-
-visualise.virtual4C_discovery(){
-  
-  
-}
-
-
-library(ggplot2)
-bed = HICCUPS[,1:3]
-bins = 200
-blackout_region <- 2.5e5
-data <- signal
-draw_blackout <- T
-
-if( is.null(bins) ) {
-  bins = nrow(data)
-}
-
-if( !is.null(bed)) {
-  bed = bed[bed[,1] == attr(data, 'viewpoint_chromosome'),2:3]
-}
-  
-blackout_up   <- attr(data, 'viewpoint_start') - (blackout_region/2)
-blackout_down <- attr(data, 'viewpoint_end') + (blackout_region/2)
-
-data <- data[!(data$mid > blackout_up & data$mid < blackout_down)]
-
-breaks <- seq(min(data$mid), max(data$mid), length.out = bins)
-smooth <- data[, mean(signal),by = findInterval(data$mid, breaks)]
-smooth$mid = breaks[unlist(smooth[,1])] + unique(diff(breaks)/2)
-smooth[,1] = NULL
-colnames(smooth) = c("signal","mid")
-
-p = ggplot(data, aes(x= mid/1e6, y = signal)) +
-  annotate('rect', 
-           fill = "black",
-           xmin = bed[,1]/1e6, 
-           xmax = bed[,2]/1e6,
-           ymin = -ceiling(max(smooth$signal))/100,
-           ymax = 0)  +
-  geom_col(data = smooth, fill = 'black') +
-  coord_cartesian(xlim = unlist(attr(signal, 'xlim'))/1e6 ,expand = F) +
-  theme_classic() 
-
-if( draw_blackout ){
-  p = p + annotate('rect',
-                   fill =  "#D8D8D8",
-                   xmin = blackout_up/1e6,
-                   xmax = blackout_down/1e6,
-                   ymin = 0,
-                   ymax = ceiling(max(smooth$signal))) 
-}
- 
-p
-
-
-
-
-
-
 
 

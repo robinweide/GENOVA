@@ -32,15 +32,11 @@ visualise(discovery, ...)
   raw = FALSE, title = NULL)
 
 \method{visualise}{RCP_discovery}(discovery, contrast = 1,
-<<<<<<< HEAD
-  metric = c("smooth", "both", "lfc"), raw = F, flipFacet = F)
+  metric = c("smooth", "both", "lfc"), raw = F, title = NULL,
+  flipFacet = F)
 
 \method{visualise}{CS_discovery}(discovery, contrast = NULL,
   chr = "chr1", start = NULL, end = NULL, raw = FALSE)
-=======
-  metric = c("smooth", "both", "lfc"), raw = F, title = NULL,
-  flipFacet = F)
->>>>>>> 3748225d5a6e213f603033d0c56a180b41f7955a
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

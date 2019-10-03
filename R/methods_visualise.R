@@ -1,4 +1,5 @@
 # Documentation -----------------------------------------------------------
+
 #' @name visualise
 #' @title Visualise discoveries
 #'
@@ -15,40 +16,42 @@
 #'
 #'   \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
 #'   \code{"lfc"} for \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold
-#'   changes.} \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both}
+#'   changes.} \item{RCP}{\code{"smooth"} for a \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line, \code{both}
 #'   for adding the raw distance-bins as points and \code{lfc} for
 #'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }
 #'
+#' @param colour_lim,colour_lim_contrast One of: \itemize{
+#'   \item \code{NULL} to have the middle colour fall on a sensible mid-point.
+#'   \item A \code{numeric} vector of length two providing the limits of the scale. Use \code{NA} to refer to existing minima or maxima.
+#'   \item A \code{function} that accepts the existing (automatic) limits and returns new limits.
+#' }
+#'
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
-#'   
-#' @param bins \code{[virtual4C]} Set the number of histogram-bins 
-#' 
-#' @param bed \code{[virtual4C]} A data.frame of bed-entries to plot 
-#' underneath.
-#' 
-#' @param extend_viewpoint \code{[virtual4C]} Add a set bp to both sides 
-#' of the viewpoint. Will make the viewpoint-box broader.
-#' 
-#' @param mode \code{[PESCAn & ARA]} What result slot should
-#'   be used for visualisation? \code{"obsexp"} for the observed over expected
-#'   metric or \code{"signal"} for mean contacts at unshifted anchors.
-<<<<<<< HEAD
 #'
-#' @param flipFacet (RCP_discovery only) Do you want to have RCP's of different
+#' @param bins \code{[virtual4C]} Set the number of histogram-bins
+#'
+#' @param bed \code{[virtual4C]} A data.frame of bed-entries to plot underneath.
+#'
+#' @param extend_viewpoint \code{[virtual4C]} Add a set bp to both sides of the
+#'   viewpoint. Makes the viewpoint-box broader.
+#'
+#' @param mode \code{[PESCAn & ARA]} What result slot should be used for
+#'   visualisation? \code{"obsexp"} for the observed over expected metric or
+#'   \code{"signal"} for mean contacts at unshifted anchors.
+#'
+#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different
 #'   regions in one plot, instead of facets? (default : \code{FALSE})
-#' @param chr (CP_discovery only) A \code{character} of length 1 indicating a
+#' @param chr \code{[CS]} A \code{character} of length 1 indicating a
 #'   chromosome name.
-#' @param start,end (CP_discovery only) A \code{numeric} of length 1 with start-
+#' @param start,end \code{[CS]} A \code{numeric} of length 1 with start-
 #'   and end-positions for the region to plot. If \code{NULL}, is set to
 #'   \code{-Inf} and \code{Inf} respectively.
 #'
-=======
-#'   
-#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different 
-#' regions in one plot, instead of facets? (default : \code{FALSE})
-#'   
->>>>>>> b0cd6094a9d427138c57d7399271a9089159c1b3
+#'
+#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different regions
+#'   in one plot, instead of facets? (default : \code{FALSE})
+#'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
 #'   subtracting the values of each sample by the values of the sample indicated
 #'   by the '\code{contrast}' argument. The \code{"lfc"} \code{metric} value
@@ -87,6 +90,14 @@
 #' # ARA
 #' ara <- ARA(list(WT = WT_20kb, KO = KO_20kb), ctcf_sites)
 #' visualise(ara)
+#' 
+#' # Compartment score
+#' cs <- compartment_score(list(WT = WT_100kb, KO = KO_100kb), H3K4me1_peaks)
+#' visualise(cs, chr = "chr1")
+#' 
+#' # Saddle function
+#' sadl <- saddle(list(WT = WT_100kb, KO = KO_100kb), cs) # see example above
+#' visualise(sadl)
 #'
 #' # Handling 'raw' plots
 #' visualise(pescan, raw = TRUE) +
@@ -889,8 +900,6 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
                       y =  ymax*0.9,
                       label = '\u2693')
 
-  
-<<<<<<< HEAD
   if( !is.null(bed)){
     p = p + ggplot2::annotate('rect', 
                               fill = "black",
@@ -900,7 +909,6 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
                               ymax = 0)  
   }
   p
-=======
   bed_track_size <- ceiling(max(smooth$signal))/50
   bed_track_padding <- ceiling(max(smooth$signal))/200
   
@@ -926,8 +934,142 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   p <- p + ggplot2::theme(axis.line = ggplot2::element_line(colour = 'black'),
                           axis.text = ggplot2::element_text(colour = 'black'))
   suppressWarnings(p)
+}
+
+#' @rdname visualise
+#' @export
+visualise.saddle_discovery <- function(discovery, contrast = 1,
+                                       raw = FALSE, title = NULL,
+                                       colour_lim = NULL,
+                                       colour_lim_contrast = NULL) {
+  df <- discovery$saddle
+  df <- df[!is.na(mean) & !is.na(q1),]
   
->>>>>>> b0cd6094a9d427138c57d7399271a9089159c1b3
+  expnames <- df[, unique(exp)]
+  
+  # Aggregate across chromosomes
+  df <- df[, mean(mean), by = list(exp, q1, q2)]
+  setnames(df, 4, "obsexp")
+  
+  # Mirror along diagonal
+  comp <- df[q1 != q2, ]
+  setnames(comp, 2:3, names(comp)[3:2])
+  df <- rbindlist(list(df, comp), use.names = TRUE)
+  
+  if (is.null(colour_lim)) {
+    colour_lim <- function(x) {c(-1, 1) * max(abs(x - 1)) + 1}
+  }
+  if (is.null(colour_lim_contrast)) {
+    colour_lim_contrast <- function(x){c(-1, 1) * max(abs(x))}
+  }
+
+  if (!is.null(contrast)) {
+    contrast <- df[exp == expnames[contrast],]
+    m <- matrix(NA_real_, max(contrast$q1), max(contrast$q2))
+    i <- as.matrix(contrast[,list(q1, q2)])
+    m[i] <- contrast[["obsexp"]]
+    
+    contrast <- lapply(expnames, function(j) {
+      xx <- df[exp == j]
+      mm <- m
+      mm[as.matrix(xx[,list(q1, q2)])] <- xx[["obsexp"]]
+      mm <- mm - m
+      data.table(exp = j, q1 = row(mm)[TRUE], q2 = col(mm)[TRUE], 
+                 diff = mm[TRUE])
+    })
+    contrast <- rbindlist(contrast)
+    contrast <- as.data.frame(contrast)
+    contrast$panel <- factor("Difference", 
+                             levels = c("Individual", "Difference"))
+    contrast$q1 <- contrast$q1 / max(contrast$q1)
+    contrast$q2 <- contrast$q2 / max(contrast$q2)
+  }
+  
+  df$panel <- factor("Individual",
+                     levels = c("Individual", "Difference"))
+  df <- as.data.frame(df)
+  df$q1 <- df$q1 / max(df$q1)
+  df$q2 <- df$q2 / max(df$q2)
+
+  g <- ggplot2::ggplot(df, ggplot2::aes(q1, q2)) +
+    ggplot2::geom_raster(hjust = 0, vjust = 0, ggplot2::aes(fill = obsexp))
+  
+  if (!is.null(title)) {
+    g <- g + ggplot2::ggtitle(title)
+  }
+  
+  if (!is.null(contrast)) {
+    
+    suppressWarnings(
+      g <- g + ggplot2::geom_raster(data = contrast, 
+                                    ggplot2::aes(q1, q2, altfill = diff),
+                                    inherit.aes = FALSE,
+                                    hjust = 0, vjust = 0) +
+        ggplot2::facet_grid(panel ~ exp, switch = "y")
+    )
+    
+    if (!raw) {
+      g <- g + ggplot2::scale_fill_gradientn(
+        colours = c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC"),
+        aesthetics = "altfill",
+        oob = scales::squish,
+        name = "Difference",
+        limits = colour_lim_contrast
+      )
+      g$scales$scales[[1]]$guide <- ggplot2::guide_colourbar()
+      g$scales$scales[[1]]$guide$available_aes[[3]] <- "altfill"
+      g$scales$scales[[1]]$guide$order <- 2
+    } else {
+      g <- g + ggplot2::guides(
+        "altfill" = ggplot2::guide_colourbar(available_aes = "altfill")
+      )
+    }
+    
+    # ggnomics style hack
+    old_geom <- g$layers[[2]]$geom
+    old_nahandle <- old_geom$handle_na
+    new_nahandle <- function(self, data, params) {
+      colnames(data)[colnames(data) %in% "altfill"] <- "fill"
+      old_nahandle(data, params)
+    }
+    new_geom <- ggplot2::ggproto(paste0(sample(1e6, 1), class(old_geom)),
+                                 old_geom,
+                                 handle_na = new_nahandle)
+    names(new_geom$default_aes)[1] <- "altfill"
+    new_geom$non_missing_aes <- "altfill"
+    g$layers[[2]]$geom <- new_geom
+  } else if (length(unique(df$exp)) > 1) {
+    g <- g + ggplot2::facet_grid(~ exp)
+  }
+  
+  if (raw) {
+    return(g)
+  } else {
+    g <- g + ggplot2::theme(
+      aspect.ratio = 1,
+      strip.placement = "outside",
+      strip.background = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(fill = NA, colour = "black",
+                                           size = 0.25),
+      axis.text = ggplot2::element_text(colour = "black"),
+      axis.ticks = ggplot2::element_line(colour = "black", size = 0.25),
+      strip.text = ggplot2::element_text(colour = "black"),
+      panel.spacing.x = grid::unit(0.8 * 0.5, "strwidth", data = c("1.00.0")),
+      panel.spacing.y = grid::unit(0.8 * 1.5, "strheight", data = c("1.00.0"))
+    ) +
+    ggplot2::scale_x_continuous(name = "Quantile", expand = c(0,0),
+                                breaks = c(0, 0.5, 1)) +
+      ggplot2::scale_y_continuous(name = "Quantile", expand = c(0,0),
+                                  breaks = c(0, 0.5, 1)) +
+      ggplot2::scale_fill_gradientn(
+        colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+        limits = colour_lim,
+        oob = scales::squish,
+        name = expression(frac("Observed", "Expected")),
+        guide = ggplot2::guide_colourbar(order = 1)) +
+      ggplot2::coord_cartesian(clip = "off")
+  }
+  return(g)
 }
 
 # Utilities ---------------------------------------------------------------

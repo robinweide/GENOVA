@@ -12,6 +12,7 @@
 \alias{visualise.RCP_discovery}
 \alias{visualise.CS_discovery}
 \alias{visualise.virtual4C_discovery}
+\alias{visualise.saddle_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -41,6 +42,10 @@ visualise(discovery, ...)
 
 \method{visualise}{virtual4C_discovery}(discovery, bins = NULL,
   bed = NULL, extend_viewpoint = NULL)
+
+\method{visualise}{saddle_discovery}(discovery, contrast = 1,
+  raw = FALSE, title = NULL, colour_lim = NULL,
+  colour_lim_contrast = NULL)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -62,11 +67,10 @@ plot contrast panels.}
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
 
-\item{mode}{\code{[PESCAn & ARA]} What result slot should
-be used for visualisation? \code{"obsexp"} for the observed over expected
-metric or \code{"signal"} for mean contacts at unshifted anchors.}
+\item{mode}{\code{[PESCAn & ARA]} What result slot should be used for
+visualisation? \code{"obsexp"} for the observed over expected metric or
+\code{"signal"} for mean contacts at unshifted anchors.}
 
-<<<<<<< HEAD
 \item{flipFacet}{(RCP_discovery only) Do you want to have RCP's of different
 regions in one plot, instead of facets? (default : \code{FALSE})}
 
@@ -76,18 +80,22 @@ chromosome name.}
 \item{start, end}{(CP_discovery only) A \code{numeric} of length 1 with start-
 and end-positions for the region to plot. If \code{NULL}, is set to
 \code{-Inf} and \code{Inf} respectively.}
-=======
-\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different 
-regions in one plot, instead of facets? (default : \code{FALSE})}
 
 \item{bins}{\code{[virtual4C]} Set the number of histogram-bins}
 
-\item{bed}{\code{[virtual4C]} A data.frame of bed-entries to plot 
-underneath.}
+\item{bed}{\code{[virtual4C]} A data.frame of bed-entries to plot underneath.}
 
-\item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides 
-of the viewpoint. Will make the viewpoint-box broader.}
->>>>>>> b0cd6094a9d427138c57d7399271a9089159c1b3
+\item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides of the
+viewpoint. Will make the viewpoint-box broader.}
+
+\item{colour_lim, colour_lim_contrast}{One of: \itemize{
+  \item \code{NULL} to have the middle colour fall on a sensible mid-point.
+  \item A \code{numeric} vector of length two providing the limits of the scale. Use \code{NA} to refer to existing minima or maxima.
+  \item A \code{function} that accepts the existing (automatic) limits and returns new limits.
+}}
+
+\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different regions
+in one plot, instead of facets? (default : \code{FALSE})}
 }
 \description{
 Plot the results of \code{discovery} objects. By default

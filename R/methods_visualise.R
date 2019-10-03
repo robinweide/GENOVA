@@ -21,7 +21,7 @@
 #'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }
 #'
 #' @param colour_lim,colour_lim_contrast One of: \itemize{
-#'   \item \code{NULL} to have the middle colour fall on a sensible mid-point.
+#'   \item \code{NULL} to have an educated quess for the scale.
 #'   \item A \code{numeric} vector of length two providing the limits of the scale. Use \code{NA} to refer to existing minima or maxima.
 #'   \item A \code{function} that accepts the existing (automatic) limits and returns new limits.
 #' }
@@ -252,8 +252,18 @@ visualise.ARMLA <- function(discovery, contrast = 1,
 #' @export
 visualise.APA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
-                                    raw = FALSE, title = NULL) {
+                                    raw = FALSE, title = NULL,
+                                    colour_lim = NULL,
+                                    colour_lim_contrast = NULL) {
   metric <- match.arg(metric)
+  
+  # Decide on limits
+  if (is.null(colour_lim)) {
+    colour_lim <- c(NA, NA)
+  }
+  if (is.null(colour_lim_contrast)) {
+    colour_lim_contrast <- centered_limits()
+  }
 
   altfillscale <- ggplot2::scale_fill_gradientn(
     colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
@@ -262,7 +272,8 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
       "diff" = "Difference",
       "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
-    limits = function(x){c(-1, 1) * max(abs(x))}
+    oob = scales::squish,
+    limits = colour_lim_contrast
   )
 
   # Get a default plot
@@ -284,7 +295,9 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
   g <- g + ggplot2::scale_fill_gradientn(
     colours = c('white', '#f5a623', '#d0021b', 'black'),
     guide = ggplot2::guide_colourbar(order = 1),
-    name = expression(mu*" Contacts")
+    name = expression(mu*" Contacts"),
+    limits = colour_lim,
+    oob = scales::squish
   ) +
   ggplot2::scale_x_continuous(
     name = "",
@@ -314,7 +327,9 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
 visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        metric = c("diff", "lfc"),
                                        mode = c("obsexp", "signal"),
-                                       raw = FALSE, title = NULL) {
+                                       raw = FALSE, title = NULL,
+                                       colour_lim = NULL,
+                                       colour_lim_contrast = NULL) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -327,6 +342,18 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
     setNames(discovery[names(discovery) %in% "obsexp"], "signal")
   } else {
     discovery
+  }
+  
+  # Decide on limits
+  if (is.null(colour_lim)) {
+    if (hasobsexp) {
+      colour_lim <- centered_limits(1)
+    } else {
+      colour_lim <- c(NA, NA)
+    }
+  }
+  if (is.null(colour_lim_contrast)) {
+    colour_lim_contrast <- centered_limits()
   }
 
   altcols <- if (hasobsexp) {
@@ -341,7 +368,8 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                    "diff" = "Difference",
                    "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
-    limits = function(x){c(-1, 1) * max(abs(x))}
+    limits = colour_lim_contrast,
+    oob = scales::squish
   )
 
   # Get a default plot
@@ -360,15 +388,16 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
       colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(frac("Observed", "Expected")),
-      limits = function(x) {
-        c(-1, 1) * max(abs(x - 1)) + 1
-      }
+      oob = scales::squish,
+      limits = colour_lim
     )
   } else {
     ggplot2::scale_fill_gradientn(
       colours = c('white', '#f5a623', '#d0021b', 'black'),
       guide = ggplot2::guide_colourbar(order = 1),
-      name = expression(mu*" Contacts")
+      name = expression(mu*" Contacts"),
+      oob = scales::squish,
+      limits = colour_lim
     )
   }
 
@@ -406,8 +435,15 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.ATA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
-                                    raw = FALSE, title = NULL) {
+                                    raw = FALSE, title = NULL,
+                                    colour_lim = NULL,
+                                    colour_lim_contrast = NULL) {
   metric <- match.arg(metric)
+  
+  # Decide on limits
+  if (is.null(colour_lim_contrast)) {
+    colour_lim_contrast <- centered_limits()
+  }
 
   altfillscale <- ggplot2::scale_fill_gradientn(
     colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
@@ -416,7 +452,8 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
                    "diff" = "Difference",
                    "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
-    limits = function(x){c(-1, 1) * max(abs(x))}
+    oob = scales::squish,
+    limits = colour_lim_contrast
   )
 
   # Get a default plot
@@ -441,15 +478,17 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
       seq(x[1], x[2], length.out = 5)[c(2,4)]
     }
   }
-
-  upperq <- quantile(discovery$signal, 0.95)
+  
+  if (is.null(colour_lim)) {
+    colour_lim <- c(NA, quantile(discovery$signal, 0.95))
+  }
 
   g <- g +
     ggplot2::scale_fill_gradientn(
       colours = c('white', '#f5a623', '#d0021b', 'black'),
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(mu*" Contacts"),
-      limits = c(NA, upperq),
+      limits = colour_lim,
       oob = scales::squish
     ) +
     ggplot2::scale_x_continuous(
@@ -477,7 +516,9 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
 visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     mode = c("obsexp", "signal"),
-                                    raw = FALSE, title = NULL) {
+                                    raw = FALSE, title = NULL,
+                                    colour_lim = NULL,
+                                    colour_lim_contrast = NULL) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -490,6 +531,11 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
     setNames(discovery[names(discovery) %in% "obsexp"], "signal")
   } else {
     discovery
+  }
+  
+  # Decide on limits
+  if (is.null(colour_lim_contrast)) {
+    colour_lim_contrast <- centered_limits()
   }
 
   altcols <- if (hasobsexp) {
@@ -504,7 +550,8 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
                    "diff" = "Difference",
                    "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
-    limits = function(x){c(-1, 1) * max(abs(x))}
+    limits = colour_lim_contrast,
+    oob = scales::squish
   )
 
   # Get a default plot
@@ -522,24 +569,30 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
     x <- scales::extended_breaks()(x)
     if (length(x) > 3) head(tail(x, -1), -1) else x
   }
-
-  upperq <- quantile(discovery$signal, 0.95)
+  
+  # Decide on limits
+  if (is.null(colour_lim)) {
+    if (hasobsexp) {
+      colour_lim <- centered_limits(1)
+    } else {
+      colour_lim <- c(NA, quantile(discovery$signal, 0.95))
+    }
+  }
 
   fillscale <- if (hasobsexp) {
     ggplot2::scale_fill_gradientn(
       colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(frac("Observed", "Expected")),
-      limits = function(x) {
-        c(-1, 1) * max(abs(x - 1)) + 1
-      }
+      oob = scales::squish,
+      limits = colour_lim
     )
   } else {
     ggplot2::scale_fill_gradientn(
       colours = c('white', '#f5a623', '#d0021b', 'black'),
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(mu*" Contacts"),
-      limits = c(NA, upperq),
+      limits = colour_lim,
       oob = scales::squish
     )
   }
@@ -563,201 +616,13 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
     )
 
   if(!is.null(title)){
-    g = g + ggplot2::ggtitle(title)
+    g <- g + ggplot2::ggtitle(title)
   }
   
   g
 }
 
-#' @rdname visualise
-#' @export
-visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F){
-  
- metric <- match.arg(metric)
-  
- nregion = length(unique(discovery$smooth$region))
-  
-  # colours
-  smplCols = unique(discovery$smooth[,c('samplename', 'colour')])
-
-  smplCols = lapply(split(smplCols,smplCols$colour), function(x){
-    NL = nrow(x)
-    if(NL > 1){
-      
-      cols = (col2rgb(unique(x$colour))+1)/255
-      cols = sapply(1:NL, function(i){
-        
-        factor = ((1/(NL+2))*i)
-        CF = cols+factor
-        
-        if(any(CF > 1)){
-          factor = ((1/(NL+2))*i)
-          CF = cols-factor
-        }
-        
-        rgb(t(CF), maxColorValue = 1)
-        
-      })
-      x$colour =  cols
-    } else {
-      x$colour =  rgb(t(col2rgb(unique(x$colour))/255))
-    }
-    x
-  })
-  
-  smplCols = data.table::rbindlist(smplCols)
-  smplCols = setNames(smplCols$colour,smplCols$samplename)
-  
-  D3cols <-c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", 
-             "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF", "#AEC7E8", "#FFBB78", 
-             "#98DF8A", "#FF9896", "#C5B0D5", "#C49C94", "#F7B6D2", "#C7C7C7", 
-             "#DBDB8D", "#9EDAE5")
-  regCols = D3cols[1:nregion]
-  
-  
-  ####################################################################### LFC
-
-  if(metric == 'lfc'){
-    smplevels = levels(discovery$smooth$samplename)
-    if(is.numeric(contrast)){
-      contrast = smplevels[contrast]
-    } else if(!contrast %in% smplevels){
-      stop('The contrast given is not found as samplename.')
-    }
-    
-    # breaks
-    logRange = round(log10(unique(discovery$smooth$distance)))
-    logRange = range(logRange[is.finite(logRange)])
-    logRange[2] = logRange[2] +1
-    
-    breaks <- 10**seq(from = logRange[1],
-                      to =  logRange[2], length.out = 101)
-    breaks = c(0,breaks)
-    
-    
-    lfcDT = lapply(unique(discovery$smooth$region), function(REGION){
-      
-      tmp = RCPlfc(discovery$raw[discovery$raw$region == REGION,], contrast, breaks )
-      tmp$region = REGION
-      tmp
-    })
-    lfcDT = rbindlist(lfcDT)
-    
-
-    
-    
-    GG = NULL
-    if(nregion == 1){
-      GG = ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
-        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
-        ggplot2::scale_color_manual(values = smplCols)
-    } else if(flipFacet){
-      GG =   ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
-        ggplot2::facet_grid(. ~ samplename)+
-        ggplot2::labs(x = 'distance (Mb)', col = 'region', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
-        ggplot2::scale_color_manual(values = regCols)
-    } else {
-      GG =ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
-        ggplot2::facet_grid(. ~ region)+
-        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")"))+
-        ggplot2::scale_color_manual(values = smplCols)
-    }
-    RAUW = GG +   
-      ggplot2::geom_line() 
-    
-    # GG: misc
-    breaks = unique(round(log10(unique(discovery$smooth$distance))))
-    breaks = breaks[is.finite(breaks)]
-    
-    GG = GG + ggplot2::theme_classic() +
-      ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
-      ggplot2::geom_line() +
-      ggplot2::coord_fixed(ylim = range(lfcDT$P))
-    
-    GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
-                              aspect.ratio = 1,
-                              strip.background = ggplot2::element_rect(fill = NA, colour = NA),
-                              panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
-                              text = ggplot2::element_text(color = 'black'),
-                              axis.line = ggplot2::element_blank(),
-                              axis.text = ggplot2::element_text(colour = 'black'),
-                              strip.text = ggplot2::element_text(colour = 'black') )
-    
-    if(!is.null(title)){
-      GG = GG + ggplot2::ggtitle(title)
-    }
-    
-    if(raw){
-      suppressWarnings(RAUW)
-    } else {
-      suppressWarnings(GG)
-    }
-  } else {
-
-  ####################################################################### \ LFC
-  # GG: in
-  GG = NULL
-  if(nregion == 1){
-    GG = ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
-      ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
-      ggplot2::scale_color_manual(values = smplCols)
-  } else if(flipFacet){
-    GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
-      ggplot2::facet_grid(. ~ samplename)+
-      ggplot2::labs(x = 'distance (Mb)', col = 'region') +
-      ggplot2::scale_color_manual(values = regCols)
-  } else {
-    GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
-      ggplot2::facet_grid(. ~ region)+
-      ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
-      ggplot2::scale_color_manual(values = smplCols)
-  }
-  RAUW = GG +   
-    ggplot2::scale_y_log10() + 
-    ggplot2::geom_line() 
-  
-  # GG: cloud
-  if(metric == 'both'){
-    GG = GG + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
-    RAUW = RAUW + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
-  }
-  
-  # GG: misc
-  breaks = unique(round(log10(unique(discovery$smooth$distance))))
-  breaks = breaks[is.finite(breaks)]
-  
-  GG = GG + ggplot2::theme_classic() +
-    ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
-    ggplot2::scale_y_log10() + 
-    ggplot2::geom_line() +
-    ggplot2::coord_fixed(ylim = range(discovery$smooth$P))
-  
-  GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
-                            aspect.ratio = 1,
-                            strip.background = ggplot2::element_rect(fill = NA, colour = NA),
-                            panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
-                            text = ggplot2::element_text(color = 'black'),
-                            axis.line = ggplot2::element_blank(),
-                            axis.text = ggplot2::element_text(colour = 'black'),
-                            strip.text = ggplot2::element_text(colour = 'black') )
-  
-  if(!is.null(title)){
-    GG = GG + ggplot2::ggtitle(title)
-  }
-  
-  if(raw){
-    suppressMessages(RAUW)
-  } else {
-    suppressWarnings(GG)
-  }
-
-  }
-}
-
-
 # Genome wide scores ------------------------------------------------------
-
-
 
 #' @rdname visualise
 #' @export
@@ -851,6 +716,191 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
 }
 
 # Miscellaneous discoveries ----------------------------------------------------
+
+#' @rdname visualise
+#' @export
+visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F){
+  
+  metric <- match.arg(metric)
+  
+  nregion = length(unique(discovery$smooth$region))
+  
+  # colours
+  smplCols = unique(discovery$smooth[,c('samplename', 'colour')])
+  
+  smplCols = lapply(split(smplCols,smplCols$colour), function(x){
+    NL = nrow(x)
+    if(NL > 1){
+      
+      cols = (col2rgb(unique(x$colour))+1)/255
+      cols = sapply(1:NL, function(i){
+        
+        factor = ((1/(NL+2))*i)
+        CF = cols+factor
+        
+        if(any(CF > 1)){
+          factor = ((1/(NL+2))*i)
+          CF = cols-factor
+        }
+        
+        rgb(t(CF), maxColorValue = 1)
+        
+      })
+      x$colour =  cols
+    } else {
+      x$colour =  rgb(t(col2rgb(unique(x$colour))/255))
+    }
+    x
+  })
+  
+  smplCols = data.table::rbindlist(smplCols)
+  smplCols = setNames(smplCols$colour,smplCols$samplename)
+  
+  D3cols <-c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", 
+             "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF", "#AEC7E8", "#FFBB78", 
+             "#98DF8A", "#FF9896", "#C5B0D5", "#C49C94", "#F7B6D2", "#C7C7C7", 
+             "#DBDB8D", "#9EDAE5")
+  regCols = D3cols[1:nregion]
+  
+  
+  ####################################################################### LFC
+  
+  if(metric == 'lfc'){
+    smplevels = levels(discovery$smooth$samplename)
+    if(is.numeric(contrast)){
+      contrast = smplevels[contrast]
+    } else if(!contrast %in% smplevels){
+      stop('The contrast given is not found as samplename.')
+    }
+    
+    # breaks
+    logRange = round(log10(unique(discovery$smooth$distance)))
+    logRange = range(logRange[is.finite(logRange)])
+    logRange[2] = logRange[2] +1
+    
+    breaks <- 10**seq(from = logRange[1],
+                      to =  logRange[2], length.out = 101)
+    breaks = c(0,breaks)
+    
+    
+    lfcDT = lapply(unique(discovery$smooth$region), function(REGION){
+      
+      tmp = RCPlfc(discovery$raw[discovery$raw$region == REGION,], contrast, breaks )
+      tmp$region = REGION
+      tmp
+    })
+    lfcDT = rbindlist(lfcDT)
+    
+    
+    
+    
+    GG = NULL
+    if(nregion == 1){
+      GG = ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
+        ggplot2::scale_color_manual(values = smplCols)
+    } else if(flipFacet){
+      GG =   ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
+        ggplot2::facet_grid(. ~ samplename)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'region', y = expression("log2(P"[sample]*"/P"[contrast]*")")) +
+        ggplot2::scale_color_manual(values = regCols)
+    } else {
+      GG =ggplot2::ggplot(lfcDT, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::facet_grid(. ~ region)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample', y = expression("log2(P"[sample]*"/P"[contrast]*")"))+
+        ggplot2::scale_color_manual(values = smplCols)
+    }
+    RAUW = GG +   
+      ggplot2::geom_line() 
+    
+    # GG: misc
+    breaks = unique(round(log10(unique(discovery$smooth$distance))))
+    breaks = breaks[is.finite(breaks)]
+    
+    GG = GG + ggplot2::theme_classic() +
+      ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
+      ggplot2::geom_line() +
+      ggplot2::coord_fixed(ylim = range(lfcDT$P))
+    
+    GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
+                              aspect.ratio = 1,
+                              strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                              panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                              text = ggplot2::element_text(color = 'black'),
+                              axis.line = ggplot2::element_blank(),
+                              axis.text = ggplot2::element_text(colour = 'black'),
+                              strip.text = ggplot2::element_text(colour = 'black') )
+    
+    if(!is.null(title)){
+      GG = GG + ggplot2::ggtitle(title)
+    }
+    
+    if(raw){
+      suppressWarnings(RAUW)
+    } else {
+      suppressWarnings(GG)
+    }
+  } else {
+    
+    ####################################################################### \ LFC
+    # GG: in
+    GG = NULL
+    if(nregion == 1){
+      GG = ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample') +
+        ggplot2::scale_color_manual(values = smplCols)
+    } else if(flipFacet){
+      GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = region)) +
+        ggplot2::facet_grid(. ~ samplename)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'region') +
+        ggplot2::scale_color_manual(values = regCols)
+    } else {
+      GG =ggplot2::ggplot(discovery$smooth, ggplot2::aes(x = log10(distance), y = P ,col = samplename)) +
+        ggplot2::facet_grid(. ~ region)+
+        ggplot2::labs(x = 'distance (Mb)', col = 'sample')+
+        ggplot2::scale_color_manual(values = smplCols)
+    }
+    RAUW = GG +   
+      ggplot2::scale_y_log10() + 
+      ggplot2::geom_line() 
+    
+    # GG: cloud
+    if(metric == 'both'){
+      GG = GG + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
+      RAUW = RAUW + ggplot2::geom_point(data = discovery$raw, pch = '.', cex = 1, alpha = 0.01) 
+    }
+    
+    # GG: misc
+    breaks = unique(round(log10(unique(discovery$smooth$distance))))
+    breaks = breaks[is.finite(breaks)]
+    
+    GG = GG + ggplot2::theme_classic() +
+      ggplot2::scale_x_continuous(breaks = breaks, labels = paste0((10**breaks)/1e6)) + 
+      ggplot2::scale_y_log10() + 
+      ggplot2::geom_line() +
+      ggplot2::coord_fixed(ylim = range(discovery$smooth$P))
+    
+    GG = GG +  ggplot2::theme(panel.background = ggplot2::element_blank(),
+                              aspect.ratio = 1,
+                              strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                              panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                              text = ggplot2::element_text(color = 'black'),
+                              axis.line = ggplot2::element_blank(),
+                              axis.text = ggplot2::element_text(colour = 'black'),
+                              strip.text = ggplot2::element_text(colour = 'black') )
+    
+    if(!is.null(title)){
+      GG = GG + ggplot2::ggtitle(title)
+    }
+    
+    if(raw){
+      suppressMessages(RAUW)
+    } else {
+      suppressWarnings(GG)
+    }
+    
+  }
+}
 
 #' @rdname visualise
 #' @export
@@ -1109,12 +1159,4 @@ centered_limits <- function(around = 0) {
   function(input) {
     c(-1, 1) * max(abs(input - around)) + around
   }
-}
-
-megabase_format <- function(x, suffix = " Mb") {
-  paste0(x / 1e6, suffix)
-}
-
-kilobase_format <- function(x, suffix = " kb") {
-  paste0(x / 1e3, suffix)
 }

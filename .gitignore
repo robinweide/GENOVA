@@ -1,11 +1,11 @@
 .Rproj.user
 .Rproj.user/
 .Rhistory
-.RData
 inst/doc
-*.RData
 *.rdx
 *.rdb
 tests/
 *.Rpoj
 *.Rpoj/
+vignettes/GENOVA_vignette_cache
+vignettes/GENOVA_vignette_files

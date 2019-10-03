@@ -39,7 +39,7 @@
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
 compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   
   znormed <- vapply(explist, attr, logical(1L), "znorm")
   if (any(znormed)) {
@@ -86,7 +86,7 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
     
     # Diversify chromosome names if not centromere
     rle <- rle(keep)
-    rle$values <- with(rle, ifelse(values, LETTERS[cumsum(values)], "centro"))
+    rle$values <- with(rle, ifelse(values, letters[cumsum(values) + 15], "centro"))
     x[, V1 := paste0(V1, rep.int(rle$values, rle$lengths))]
     x
   })

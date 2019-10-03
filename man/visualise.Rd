@@ -60,7 +60,7 @@ plot contrast panels.}
 
   \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
   \code{"lfc"} for \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold
-  changes.} \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both}
+  changes.} \item{RCP}{\code{"smooth"} for a \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line, \code{both}
   for adding the raw distance-bins as points and \code{lfc} for
   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }}
 
@@ -71,13 +71,13 @@ returned?}
 visualisation? \code{"obsexp"} for the observed over expected metric or
 \code{"signal"} for mean contacts at unshifted anchors.}
 
-\item{flipFacet}{(RCP_discovery only) Do you want to have RCP's of different
+\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different
 regions in one plot, instead of facets? (default : \code{FALSE})}
 
-\item{chr}{(CP_discovery only) A \code{character} of length 1 indicating a
+\item{chr}{\code{[CS]} A \code{character} of length 1 indicating a
 chromosome name.}
 
-\item{start, end}{(CP_discovery only) A \code{numeric} of length 1 with start-
+\item{start, end}{\code{[CS]} A \code{numeric} of length 1 with start-
 and end-positions for the region to plot. If \code{NULL}, is set to
 \code{-Inf} and \code{Inf} respectively.}
 
@@ -86,7 +86,7 @@ and end-positions for the region to plot. If \code{NULL}, is set to
 \item{bed}{\code{[virtual4C]} A data.frame of bed-entries to plot underneath.}
 
 \item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides of the
-viewpoint. Will make the viewpoint-box broader.}
+viewpoint. Makes the viewpoint-box broader.}
 
 \item{colour_lim, colour_lim_contrast}{One of: \itemize{
   \item \code{NULL} to have the middle colour fall on a sensible mid-point.
@@ -141,6 +141,14 @@ visualise(ata)
 # ARA
 ara <- ARA(list(WT = WT_20kb, KO = KO_20kb), ctcf_sites)
 visualise(ara)
+
+# Compartment score
+cs <- compartment_score(list(WT = WT_100kb, KO = KO_100kb), H3K4me1_peaks)
+visualise(cs, chr = "chr1")
+
+# Saddle function
+sadl <- saddle(list(WT = WT_100kb, KO = KO_100kb), cs) # see example above
+visualise(sadl)
 
 # Handling 'raw' plots
 visualise(pescan, raw = TRUE) +

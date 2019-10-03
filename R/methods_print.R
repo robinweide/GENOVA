@@ -182,6 +182,38 @@ print.CS_discovery <- function(discovery) {
   }
 }
 
+#' @export
+#' @keywords internal
+print.saddle_discovery <- function(x) {
+  myclass <- class(x)
+  n_bins <- max(c(x$saddle$q1, x$saddle$q2), na.rm = TRUE)
+  expnames <- unique(x$saddle$exp)
+  
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  
+  n_arms <- length(unique(x$saddle$chr))
+  
+  string <- paste0("A ", attr(x, "package"), " '", myclass, 
+                   "' object involving the following ", 
+                   length(expnames), " experiments:\n'", 
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n")
+  slot0 <- "Contains the following slots:\n\n"
+  slot1 <- paste0("- saddle:\tA data.frame containing quantile-quantile ",
+                  "scores for ", n_arms, " chromosome arms.")
+  
+  cat(string)
+  cat(slot0)
+  cat(slot1)
+}
+
 # Other classes -----------------------------------------------------------
 
 #' @export

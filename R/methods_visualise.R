@@ -815,6 +815,7 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
     )
   }
   g
+}
 
   
 #' @rdname visualise
@@ -876,9 +877,6 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, bp
                               ymax = 0)  
   }
   p
-  
-  
->>>>>>> 7670fddf441bb9ca8e1ec3759e1dab0722ed3593
 }
 
 # Utilities ---------------------------------------------------------------

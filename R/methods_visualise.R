@@ -42,7 +42,7 @@
 #'
 #' @param flipFacet \code{[RCP]} Do you want to have RCP's of different
 #'   regions in one plot, instead of facets? (default : \code{FALSE})
-#' @param chr \code{[CS]} A \code{character} of length 1 indicating a
+#' @param chr \code{[CS & saddle]} A \code{character} of length 1 indicating a
 #'   chromosome name.
 #' @param start,end \code{[CS]} A \code{numeric} of length 1 with start-
 #'   and end-positions for the region to plot. If \code{NULL}, is set to
@@ -245,6 +245,8 @@ visualise.ARMLA <- function(discovery, contrast = 1,
 }
 
 # Discovery objects -------------------------------------------------------
+
+# Aggregate matrices ------------------------------------------------------
 
 #' @rdname visualise
 #' @export
@@ -752,6 +754,11 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
   }
 }
 
+
+# Genome wide scores ------------------------------------------------------
+
+
+
 #' @rdname visualise
 #' @export
 visualise.CS_discovery <- function(discovery, contrast = NULL,
@@ -843,7 +850,8 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
   g
 }
 
-  
+# Miscellaneous discoveries ----------------------------------------------------
+
 #' @rdname visualise
 #' @export
 visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, extend_viewpoint = NULL){
@@ -939,11 +947,24 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
 #' @rdname visualise
 #' @export
 visualise.saddle_discovery <- function(discovery, contrast = 1,
+                                       chr = "all",
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
                                        colour_lim_contrast = NULL) {
   df <- discovery$saddle
   df <- df[!is.na(mean) & !is.na(q1),]
+  
+  if (chr != "all") {
+    if (endsWith(chr, "p") || endsWith(chr, "q")) {
+      chromo <- chr
+      df <- df[chr == chromo,]
+    } else {
+      chromo <- df[["chr"]]
+      chromo <- substr(chromo, 1, nchar(chromo) - 1)
+      keep <- chromo == chr
+      df <- df[keep,]
+    }
+  }
   
   expnames <- df[, unique(exp)]
   
@@ -956,11 +977,12 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
   setnames(comp, 2:3, names(comp)[3:2])
   df <- rbindlist(list(df, comp), use.names = TRUE)
   
+  # Decide on limits
   if (is.null(colour_lim)) {
-    colour_lim <- function(x) {c(-1, 1) * max(abs(x - 1)) + 1}
+    colour_lim <- centered_limits(1)
   }
   if (is.null(colour_lim_contrast)) {
-    colour_lim_contrast <- function(x){c(-1, 1) * max(abs(x))}
+    colour_lim_contrast <- centered_limits()
   }
 
   if (!is.null(contrast)) {
@@ -1080,4 +1102,19 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
 #' @keywords internal
 scale_altfill_continuous <- function(...) {
   ggplot2::scale_fill_gradient2(..., aesthetics = "altfill")
+}
+
+# Function factory for centering limits around a value
+centered_limits <- function(around = 0) {
+  function(input) {
+    c(-1, 1) * max(abs(input - around)) + around
+  }
+}
+
+megabase_format <- function(x, suffix = " Mb") {
+  paste0(x / 1e6, suffix)
+}
+
+kilobase_format <- function(x, suffix = " kb") {
+  paste0(x / 1e3, suffix)
 }

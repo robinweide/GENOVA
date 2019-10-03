@@ -44,7 +44,7 @@ visualise(discovery, ...)
   bed = NULL, extend_viewpoint = NULL)
 
 \method{visualise}{saddle_discovery}(discovery, contrast = 1,
-  raw = FALSE, title = NULL, colour_lim = NULL,
+  chr = "all", raw = FALSE, title = NULL, colour_lim = NULL,
   colour_lim_contrast = NULL)
 }
 \arguments{
@@ -74,7 +74,7 @@ visualisation? \code{"obsexp"} for the observed over expected metric or
 \item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different
 regions in one plot, instead of facets? (default : \code{FALSE})}
 
-\item{chr}{\code{[CS]} A \code{character} of length 1 indicating a
+\item{chr}{\code{[CS & saddle]} A \code{character} of length 1 indicating a
 chromosome name.}
 
 \item{start, end}{\code{[CS]} A \code{numeric} of length 1 with start-

@@ -1,4 +1,5 @@
 .Rproj.user
+.Rproj.user/
 .Rhistory
 .RData
 inst/doc
@@ -7,3 +8,4 @@ inst/doc
 *.rdb
 tests/
 *.Rpoj
+*.Rpoj/

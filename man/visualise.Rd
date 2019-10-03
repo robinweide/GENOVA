@@ -10,11 +10,8 @@
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
 \alias{visualise.RCP_discovery}
-<<<<<<< HEAD
 \alias{visualise.CS_discovery}
-=======
 \alias{visualise.virtual4C_discovery}
->>>>>>> 7670fddf441bb9ca8e1ec3759e1dab0722ed3593
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -39,13 +36,11 @@ visualise(discovery, ...)
   metric = c("smooth", "both", "lfc"), raw = F, title = NULL,
   flipFacet = F)
 
-<<<<<<< HEAD
 \method{visualise}{CS_discovery}(discovery, contrast = NULL,
   chr = "chr1", start = NULL, end = NULL, raw = FALSE)
-=======
+
 \method{visualise}{virtual4C_discovery}(discovery, bins = NULL,
   bed = NULL, bp_blackout = NULL)
->>>>>>> 7670fddf441bb9ca8e1ec3759e1dab0722ed3593
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

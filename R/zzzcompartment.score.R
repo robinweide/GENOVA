@@ -1,9 +1,9 @@
 # select a matrix of interactions for between two chromosomes
 selectData_saddle <- function(exp, chrom1, chrom2) {
-  bed <- exp$ABS
-  data <- exp$ICE
-  X <- bed[bed[, 1] == chrom1, 4]
-  Y <- bed[bed[, 1] == chrom2, 4]
+  bed <- exp$IDX
+  data <- exp$MAT
+  X <- bed[V1 == chrom1, V4]
+  Y <- bed[V1 == chrom2, V4]
   # the order of the chromosomes matters for the analysis
   # make sure that X is smaller than Y, otherwise switch
   # them around
@@ -25,8 +25,8 @@ selectData_saddle <- function(exp, chrom1, chrom2) {
   # windows and as many columns as the 'Y' chromosome has windows
   mat <- matrix(0, ncol = tail(Y, n = 1) - Y[1] + 1, nrow = tail(X, n = 1) - X[1] + 1)
   mat[cbind(data.sub$V1 - min(X) + 1, data.sub$V2 - min(Y) + 1)] <- data.sub$V3
-  x.pos <- bed[bed[, 1] == chrom1, 2]
-  y.pos <- bed[bed[, 1] == chrom2, 2]
+  x.pos <- bed[V1 == chrom1, V2]
+  y.pos <- bed[V1 == chrom2, V2]
   # create a list that is compatible with the image function
   mat <- list(x = x.pos, y = y.pos, z = mat)
   mat

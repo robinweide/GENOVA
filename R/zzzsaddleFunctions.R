@@ -343,8 +343,7 @@ Continuing with NULL.")
 #' visualise.compartmentStrength(list(saddle_WT))
 #' @return A log2(O/E) matrix and a DF of compartment-scores.
 #' @import data.table
-#' @export
-saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) {
+saddle_old <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) {
   if (!is.null(CS)) { # CS
     if (!is.null(chip)) { # CS chip
       stop("Either CS or chip must be used!")
@@ -358,6 +357,11 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
       # no CS, so CS will just be made
     }
   }
+  
+  # Control data.table threads
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
 
   if (!is.null(CS)) {
     CS <- as.data.frame(CS)
@@ -395,7 +399,6 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
 #'
 #' # plot compartment-strengths
 #' CS_out <- visualise.compartmentStrength(list(saddle_WT))
-#' @export
 visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
   require(ggplot2)
   strengthDF <- data.frame()
@@ -498,7 +501,6 @@ rotate <- function(x) t(apply(x, 2, rev))
 #'
 #' # plot saddle-plot
 #' visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
-#' @export
 visualise_saddle <- function(SBoutList, addText = T,
                              zlim = c(0.5, 2), EVlim = c(-1.5, 1.5),
                              square = T, crossLines = NULL) {

@@ -9,7 +9,7 @@ virtual_4C(exp, viewpoint, xlim = NULL)
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 
-\item{viewpoint}{The viewpoint}
+\item{viewpoint}{The viewpoint: will take the middle Hi-C bin if it spans mulitple bins.}
 
 \item{xlim}{A vector of two with the flanking basepairs up- and downstream 
 of the viewpoint, resp.}

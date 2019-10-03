@@ -26,7 +26,6 @@ outlier3Darray <- function(ARRAY, Q = .995) {
 #' @param rmOutlier Try to perform outlier-correction
 #' @param verbose Verbose?
 #' @return A list containing a score-matrix and a count-variable of the amount of used bed-entries.
-#' @import data.table
 cov2d <- function(experiment, bed, minDist = 5e6, maxDist = Inf, size = 500e3, add = 0,
                   outlierCutOff = 40, rmOutlier = F, verbose = T) {
   # read data from experiment list

@@ -343,8 +343,7 @@ Continuing with NULL.")
 #' visualise.compartmentStrength(list(saddle_WT))
 #' @return A log2(O/E) matrix and a DF of compartment-scores.
 #' @import data.table
-#' @export
-saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) {
+saddle_old <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) {
   if (!is.null(CS)) { # CS
     if (!is.null(chip)) { # CS chip
       stop("Either CS or chip must be used!")
@@ -358,6 +357,11 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
       # no CS, so CS will just be made
     }
   }
+  
+  # Control data.table threads
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
 
   if (!is.null(CS)) {
     CS <- as.data.frame(CS)
@@ -374,9 +378,9 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
   }
 
   out$MAT$sample <- attr(exp, "samplename")
-  out$MAT$color  <- attr(exp, "colour")
+  out$MAT$colour  <- attr(exp, "colour")
   out$EV$sample  <- attr(exp, "samplename")
-  out$EV$color   <- attr(exp, "samplename")
+  out$EV$colour   <- attr(exp, "colour")
   # return list of ev/cs and matrices in three-column form
   return(list(MAT = out$MAT, EV = out$EV))
 }
@@ -395,7 +399,6 @@ saddle <- function(exp, chip = NULL, CS = NULL, chromsToUse = NULL, nBins = 10) 
 #'
 #' # plot compartment-strengths
 #' CS_out <- visualise.compartmentStrength(list(saddle_WT))
-#' @export
 visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
   require(ggplot2)
   strengthDF <- data.frame()
@@ -417,7 +420,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
 
     tmp <- dplyr::summarise(dplyr::group_by(
       dat$MAT,
-      color,
+      colour,
       sample,
       chrom,
       arm,
@@ -433,7 +436,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
         for (A in unique(unname(unlist(meta[meta$chrom == C, "arm"])))) {
           tmpi <- tmp[tmp$sample == S & tmp$chrom == C & tmp$arm == A, ]
           strength <- log(tmpi[tmpi$CC == "AA", "score"] * tmpi[tmpi$CC == "BB", "score"] / tmpi[tmpi$CC == "AB", "score"]**2)
-          strengthDF <- rbind(strengthDF, data.frame(S, C, A, strength, unique(tmp[tmp$sample == S, "color"])))
+          strengthDF <- rbind(strengthDF, data.frame(S, C, A, strength, unique(tmp[tmp$sample == S, "colour"])))
         }
       }
     }
@@ -446,7 +449,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
 
 
   if (showInteractions != TRUE) {
-    coltmp <- col2rgb(levels(as.factor(strengthDF$color)), alpha = T) / 255
+    coltmp <- col2rgb(levels(as.factor(strengthDF$colour)), alpha = T) / 255
     coltmp[4, ] <- coltmp[4, ] * 0.85
     cols <- rgb(red = coltmp[1, ], green = coltmp[2, ], blue = coltmp[3, ], alpha = coltmp[4, ])
 
@@ -462,7 +465,7 @@ visualise_compartmentStrength <- function(SBoutList, showInteractions = F) {
     P <- ggplot2::ggplot(interactionDF, ggplot2::aes(
       x = sample,
       y = score,
-      fill = color
+      fill = colour
     )) +
       ggplot2::facet_wrap("CC") +
       ggplot2::geom_hline(yintercept = 1, lty = 3) +
@@ -498,7 +501,6 @@ rotate <- function(x) t(apply(x, 2, rev))
 #'
 #' # plot saddle-plot
 #' visualise.saddle(list(saddle_WT), crossLines = T, addText = T)
-#' @export
 visualise_saddle <- function(SBoutList, addText = T,
                              zlim = c(0.5, 2), EVlim = c(-1.5, 1.5),
                              square = T, crossLines = NULL) {

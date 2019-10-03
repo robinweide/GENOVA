@@ -9,8 +9,10 @@
 \alias{visualise.PESCAn_discovery}
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
+\alias{visualise.CS_discovery}
 \alias{visualise.RCP_discovery}
 \alias{visualise.virtual4C_discovery}
+\alias{visualise.saddle_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -18,18 +20,25 @@ visualise(discovery, ...)
 \method{quantify}{APA_discovery}(discovery, signal_size = 3)
 
 \method{visualise}{APA_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), raw = FALSE, title = NULL)
+  metric = c("diff", "lfc"), raw = FALSE, title = NULL,
+  colour_lim = NULL, colour_lim_contrast = NULL)
 
 \method{visualise}{PESCAn_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
-  raw = FALSE, title = NULL)
+  raw = FALSE, title = NULL, colour_lim = NULL,
+  colour_lim_contrast = NULL)
 
 \method{visualise}{ATA_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), raw = FALSE, title = NULL)
+  metric = c("diff", "lfc"), raw = FALSE, title = NULL,
+  colour_lim = NULL, colour_lim_contrast = NULL)
 
 \method{visualise}{ARA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
-  raw = FALSE, title = NULL)
+  raw = FALSE, title = NULL, colour_lim = NULL,
+  colour_lim_contrast = NULL)
+
+\method{visualise}{CS_discovery}(discovery, contrast = NULL,
+  chr = "chr1", start = NULL, end = NULL, raw = FALSE)
 
 \method{visualise}{RCP_discovery}(discovery, contrast = 1,
   metric = c("smooth", "both", "lfc"), raw = F, title = NULL,
@@ -37,6 +46,10 @@ visualise(discovery, ...)
 
 \method{visualise}{virtual4C_discovery}(discovery, bins = NULL,
   bed = NULL, extend_viewpoint = NULL)
+
+\method{visualise}{saddle_discovery}(discovery, contrast = 1,
+  chr = "all", raw = FALSE, title = NULL, colour_lim = NULL,
+  colour_lim_contrast = NULL)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -49,31 +62,44 @@ plot contrast panels.}
 
 \item{metric}{A \code{character} of length 1:
 
-\describe{
-  \item{A*A}{\code{"diff"} for difference by subtraction or \code{"lfc"} for
-  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
-  \item{RCP}{\code{"smooth"} for a log10-smoothed line, \code{both} for 
-  adding the raw distance-bins as points and \code{lfc} for 
-  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
-}}
+  \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
+  \code{"lfc"} for \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold
+  changes.} \item{RCP}{\code{"smooth"} for a \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line, \code{both}
+  for adding the raw distance-bins as points and \code{lfc} for
+  \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }}
 
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
 
-\item{mode}{\code{[PESCAn & ARA]} What result slot should
-be used for visualisation? \code{"obsexp"} for the observed over expected
-metric or \code{"signal"} for mean contacts at unshifted anchors.}
+\item{colour_lim, colour_lim_contrast}{One of: \itemize{
+  \item \code{NULL} to have an educated quess for the scale.
+  \item A \code{numeric} vector of length two providing the limits of the scale. Use \code{NA} to refer to existing minima or maxima.
+  \item A \code{function} that accepts the existing (automatic) limits and returns new limits.
+}}
 
-\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different 
+\item{mode}{\code{[PESCAn & ARA]} What result slot should be used for
+visualisation? \code{"obsexp"} for the observed over expected metric or
+\code{"signal"} for mean contacts at unshifted anchors.}
+
+\item{chr}{\code{[CS & saddle]} A \code{character} of length 1 indicating a
+chromosome name.}
+
+\item{start, end}{\code{[CS]} A \code{numeric} of length 1 with start-
+and end-positions for the region to plot. If \code{NULL}, is set to
+\code{-Inf} and \code{Inf} respectively.}
+
+\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different
 regions in one plot, instead of facets? (default : \code{FALSE})}
 
 \item{bins}{\code{[virtual4C]} Set the number of histogram-bins}
 
-\item{bed}{\code{[virtual4C]} A data.frame of bed-entries to plot 
-underneath.}
+\item{bed}{\code{[virtual4C]} A data.frame of bed-entries to plot underneath.}
 
-\item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides 
-of the viewpoint. Will make the viewpoint-box broader.}
+\item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides of the
+viewpoint. Makes the viewpoint-box broader.}
+
+\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different regions
+in one plot, instead of facets? (default : \code{FALSE})}
 }
 \description{
 Plot the results of \code{discovery} objects. By default
@@ -119,6 +145,14 @@ visualise(ata)
 # ARA
 ara <- ARA(list(WT = WT_20kb, KO = KO_20kb), ctcf_sites)
 visualise(ara)
+
+# Compartment score
+cs <- compartment_score(list(WT = WT_100kb, KO = KO_100kb), H3K4me1_peaks)
+visualise(cs, chr = "chr1")
+
+# Saddle function
+sadl <- saddle(list(WT = WT_100kb, KO = KO_100kb), cs) # see example above
+visualise(sadl)
 
 # Handling 'raw' plots
 visualise(pescan, raw = TRUE) +

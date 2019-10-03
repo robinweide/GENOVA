@@ -12,7 +12,6 @@
 #' @param add Add constant value to bed-start and -end.
 #' @param size The amount of Hi-C bins to take into account (i.e. a score of 21 yield an output with 10 Hi-C bins up- and downstream of the anchor).
 #' @return A score-matrix.
-#' @import data.table
 #' @examples
 #' # Run PE-SCAn on a bed of super-enhancers, using WT Hi-C data.
 #' WT_PE_OUT = PESCAn(exp = WT_40kb, bed = superEnhancers)
@@ -100,7 +99,6 @@ PESCAn_covert <- function( experiment, bed, minComparables = 10, rmOutlier = F,
 #' persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
 #'            y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
 #'            z = WT_PE_OUT)
-#' @export
 PESCAn_old = function(exp, bed, shift = 1e6, minComparables = 10, mindist = 5e+06, maxDist = Inf,
                   size = 4e+05, rmOutlier = F, outlierCutOff = 0.995,
                   verbose = T){
@@ -160,7 +158,6 @@ PESCAn_old = function(exp, bed, shift = 1e6, minComparables = 10, mindist = 5e+0
 #' visualise.PESCAn.ggplot(PESCAnlist = list(WT = WT_PE_OUT),
 #'                         resolution = 40e3,
 #'                         smooth = F)
-#' @export
 visualise_PESCAn_ggplot = function (PESCAnlist, resolution, title = "PE-SCAn", zTop = NULL, zBottom = NULL, focus = 1, smooth = F, ...) {
   require(ggplot2)
 

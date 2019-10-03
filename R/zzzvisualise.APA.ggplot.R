@@ -15,7 +15,6 @@
 #' \code{focus}-sample, we generate the differentials. A positive value in the
 #' differential plots thus means an enrichment in that sample versus the
 #' \code{focus}-sample.
-#' @export
 visualise_APA_ggplot <- function(APAlist, title = "APA", zTop = NULL, zBottom = NULL, focus = 1, ...) {
   OL <- c()
   for (i in 1:length(APAlist)) {

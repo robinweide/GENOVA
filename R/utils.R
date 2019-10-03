@@ -72,13 +72,10 @@ bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
 #'
 #' @keywords internal
 dt_matrix <- function(x, i, j, dim, offset) {
-  m <- .Internal(matrix(0, dim, dim, FALSE, NULL, FALSE, FALSE))
-  i <- .Internal(matrix(c(i, j, j, i) - offset,
-                        2 * length(i), 2, FALSE, NULL, FALSE, FALSE))
-  m[i] <- c(x, x)
+  m <- matrix(0, dim, dim)
+  m[matrix(c(i, j, j, i) - offset, 2 * length(i), 2)] <- c(x, x)
   m
 }
-
 
 #' Get a matrix from a BED-like entry
 #'

@@ -106,16 +106,19 @@ print.ARMLA_discovery <- function(x) {
 
 #' @export
 #' @keywords internal
-print.RCP_discovery = function(discovery){
+print.RCP_discovery <- function(discovery) {
   
-  string <- paste0("A ", attr(discovery, "package"), " ", 'RCP_discovery',  " object with the following details:\n")
+  string <- paste0("A ", attr(discovery, "package"), " ", 
+                   'RCP_discovery',  " object with the following details:\n")
   
   smpls = unique(discovery$raw$samplename)
-  smpls = paste(paste0(smpls[-length(smpls)], collapse = ', '), smpls[length(smpls)], sep = ' & ')
+  smpls = paste(paste0(smpls[-length(smpls)], collapse = ', '), 
+                smpls[length(smpls)], sep = ' & ')
   print_samples = paste0("- samples: ", smpls,"\n")
   
   regs = unique(discovery$raw$region)
-  regs = paste(paste0(regs[-length(regs)], collapse = ', '), regs[length(regs)], sep = ' & ')
+  regs = paste(paste0(regs[-length(regs)], collapse = ', '), 
+               regs[length(regs)], sep = ' & ')
   print_regions = paste0("- regions: ",regs,"\n")
   
   print_norm = paste0("- normalisation: ", attr(discovery, 'norm'),"\n")
@@ -125,6 +128,90 @@ print.RCP_discovery = function(discovery){
   cat(print_regions)
   cat(print_norm)
   
+}
+
+#' @export
+#' @keywords internal
+print.CS_discovery <- function(discovery) {
+  
+  myclass <- class(discovery)[1]
+  cols <- colnames(discovery$compart_scores)
+  res <- attr(discovery, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  part <- attr(discovery, "partitioning")
+  
+  string <- paste0("A ", attr(discovery, "PACKAGE"), " '", myclass, 
+                   "' object involving the following ", 
+                   length(cols) - 4, " experiments:\n'", 
+                   paste0(cols[5:length(cols)], collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n")
+  slot0 <- "Contains the following slots:\n\n"
+  
+  slot1 <- if (attr(discovery, "signed")) {
+    paste0("- compart_scores:\tA data.frame containing ",
+           sum(!is.na(discovery$compart_scores[[5]])),
+           " compartment scores.\n\n")
+  } else {
+    paste0("- compart_scores:\tA data.frame containing ",
+           sum(!is.na(discovery$compart_scores[[5]])),
+           " scores.\n\n")
+  }
+
+  ncentro <- sum(grepl("centro$", part$values))
+  centrobins <- sum(part$lengths[grepl("centro$", part$values)])
+  
+  details1 <- paste0(ncentro, " centromeres spanning a total of ", centrobins, 
+                     " bins have been ignored.\n")
+  signed <- paste0("The scores are signed.")
+  unsigned <- paste0("The scores are unsigned.")
+  
+  cat(string)
+  cat(slot0)
+  cat(slot1)
+  cat(details1)
+  if (attr(discovery, "signed")) {
+    cat(signed)
+  } else {
+    cat(unsigned)
+  }
+}
+
+#' @export
+#' @keywords internal
+print.saddle_discovery <- function(x) {
+  myclass <- class(x)
+  n_bins <- max(c(x$saddle$q1, x$saddle$q2), na.rm = TRUE)
+  expnames <- unique(x$saddle$exp)
+  
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  
+  n_arms <- length(unique(x$saddle$chr))
+  
+  string <- paste0("A ", attr(x, "package"), " '", myclass, 
+                   "' object involving the following ", 
+                   length(expnames), " experiments:\n'", 
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n")
+  slot0 <- "Contains the following slots:\n\n"
+  slot1 <- paste0("- saddle:\tA data.frame containing quantile-quantile ",
+                  "scores for ", n_arms, " chromosome arms.")
+  
+  cat(string)
+  cat(slot0)
+  cat(slot1)
 }
 
 # Other classes -----------------------------------------------------------

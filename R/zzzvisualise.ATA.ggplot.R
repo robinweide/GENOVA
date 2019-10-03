@@ -23,7 +23,6 @@
 #'
 #' # plot the results
 #' visualise.ATA.ggplot(ATAlist, focus = 1, title = "Rao vs Sanborn.")
-#' @export
 visualise_ATA_ggplot <- function(stackedlist, title = "ATA", focus = 1, zlim1 = NULL, zlim2 = NULL) {
 
   # ! check OUTLIERCORRECTIONSWITCH

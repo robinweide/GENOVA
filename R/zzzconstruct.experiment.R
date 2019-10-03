@@ -16,7 +16,6 @@
 #' @examples
 #' WT_10kb <- construct.experiment(ignore.checks = T, signalPath = "WT_10kb_iced.matrix", indicesPath = "WT_10kb_abs.bed", name = "WT", color = "black")
 #' @return An experiment-object, which is a named list of contacts, indices and metadata for a Hi-C matrix of a given sample at a given resolution.
-#' @export
 construct.experiment <- function(signalPath, indicesPath, name, Znorm = F, ignore.checks = F, centromeres = NULL, color = 1, comments = NULL, BPscaling = 1e9) {
   # Check if files exist
   if (!file.exists(signalPath)) {

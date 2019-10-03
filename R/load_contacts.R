@@ -40,7 +40,10 @@ load_contacts = function(signal_path,
                         legacy = F,
                         verbose = T){
   
-  data.table::setDTthreads(threads = 1)
+  # Control data.table threads
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
   
   doJuicer = F
   doCooler = F

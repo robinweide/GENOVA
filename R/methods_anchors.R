@@ -254,6 +254,7 @@ anchors_ATA <- function(IDX, bed,
     pmax(idx[, 1], idx[, 2])
   )
   idx <- idx[order(idx[, 1]), ]
+  idx <- idx[idx[, 1] < idx[, 2], ]
 
   # Attribute to let matrix lookup methods know it is performing ATA
   class(idx) <- c("anchors", "matrix")

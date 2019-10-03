@@ -40,7 +40,7 @@ visualise(discovery, ...)
   chr = "chr1", start = NULL, end = NULL, raw = FALSE)
 
 \method{visualise}{virtual4C_discovery}(discovery, bins = NULL,
-  bed = NULL, bp_blackout = NULL)
+  bed = NULL, extend_viewpoint = NULL)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -62,10 +62,11 @@ plot contrast panels.}
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
 
-\item{mode}{(PESCAn_discovery and ARA_discovery only) What result slot should
+\item{mode}{\code{[PESCAn & ARA]} What result slot should
 be used for visualisation? \code{"obsexp"} for the observed over expected
 metric or \code{"signal"} for mean contacts at unshifted anchors.}
 
+<<<<<<< HEAD
 \item{flipFacet}{(RCP_discovery only) Do you want to have RCP's of different
 regions in one plot, instead of facets? (default : \code{FALSE})}
 
@@ -75,6 +76,18 @@ chromosome name.}
 \item{start, end}{(CP_discovery only) A \code{numeric} of length 1 with start-
 and end-positions for the region to plot. If \code{NULL}, is set to
 \code{-Inf} and \code{Inf} respectively.}
+=======
+\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different 
+regions in one plot, instead of facets? (default : \code{FALSE})}
+
+\item{bins}{\code{[virtual4C]} Set the number of histogram-bins}
+
+\item{bed}{\code{[virtual4C]} A data.frame of bed-entries to plot 
+underneath.}
+
+\item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides 
+of the viewpoint. Will make the viewpoint-box broader.}
+>>>>>>> b0cd6094a9d427138c57d7399271a9089159c1b3
 }
 \description{
 Plot the results of \code{discovery} objects. By default

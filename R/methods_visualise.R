@@ -1,5 +1,4 @@
 # Documentation -----------------------------------------------------------
-
 #' @name visualise
 #' @title Visualise discoveries
 #'
@@ -22,9 +21,19 @@
 #'
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
-#' @param mode (PESCAn_discovery and ARA_discovery only) What result slot should
+#'   
+#' @param bins \code{[virtual4C]} Set the number of histogram-bins 
+#' 
+#' @param bed \code{[virtual4C]} A data.frame of bed-entries to plot 
+#' underneath.
+#' 
+#' @param extend_viewpoint \code{[virtual4C]} Add a set bp to both sides 
+#' of the viewpoint. Will make the viewpoint-box broader.
+#' 
+#' @param mode \code{[PESCAn & ARA]} What result slot should
 #'   be used for visualisation? \code{"obsexp"} for the observed over expected
 #'   metric or \code{"signal"} for mean contacts at unshifted anchors.
+<<<<<<< HEAD
 #'
 #' @param flipFacet (RCP_discovery only) Do you want to have RCP's of different
 #'   regions in one plot, instead of facets? (default : \code{FALSE})
@@ -34,6 +43,12 @@
 #'   and end-positions for the region to plot. If \code{NULL}, is set to
 #'   \code{-Inf} and \code{Inf} respectively.
 #'
+=======
+#'   
+#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different 
+#' regions in one plot, instead of facets? (default : \code{FALSE})
+#'   
+>>>>>>> b0cd6094a9d427138c57d7399271a9089159c1b3
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
 #'   subtracting the values of each sample by the values of the sample indicated
 #'   by the '\code{contrast}' argument. The \code{"lfc"} \code{metric} value
@@ -820,54 +835,62 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
   
 #' @rdname visualise
 #' @export
-visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, bp_blackout = NULL){
+visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, extend_viewpoint = NULL){
   # ! someday: allow mulitple samples
-  
   data <- discovery$data
   VP   <- attr(discovery,"viewpoint")
+  
+  if(!is.null(extend_viewpoint)){
+    VP[1,2] <- VP[1,2] - extend_viewpoint
+    VP[1,3] <- VP[1,3] + extend_viewpoint
+  }
   
   if( is.null(bins) ) {
     bins = nrow(data)
   }
   
-  draw_blackout = F
-  if( is.null(bp_blackout) ) {
-    bp_blackout <- attr(discovery, 'resolution') * 25
-    draw_blackout = T
-  } else if (bp_blackout == F){
-    bp_blackout <- 0
-  } 
+  VP_mid <- rowMeans(attr(discovery, 'viewpoint')[1,2:3])
   
-  blackout_up   <- attr(discovery, 'viewpoint')[1,2] - (bp_blackout/2)
-  blackout_down <- attr(discovery, 'viewpoint')[1,3] + (bp_blackout/2)
+  blackout_up   <- VP[1,2]
+  blackout_down <- VP[1,3]
+  data_blackout <- data[(data$mid >= blackout_up & data$mid <= blackout_down)]
   
   if( !is.null(bed)) {
     bed = bed[bed[,1] == attr(discovery, 'viewpoint')[1,1],2:3]
   }
   
-  data <- data[!(data$mid > blackout_up & data$mid < blackout_down)]
+  data <- data[!(data$mid >= blackout_up & data$mid <= blackout_down)]
   
-  breaks <- seq(min(data$mid), max(data$mid), length.out = bins)
-  smooth <- data[, mean(signal),by = findInterval(data$mid, breaks)]
-  smooth$mid = breaks[unlist(smooth[,1])] + unique(diff(breaks)/2)
+  breaks   <- seq(min(data$mid), max(data$mid), length.out = bins)
+  bin_size <- median(diff(breaks))
+  smooth   <- data[, mean(signal),by = findInterval(data$mid, breaks)]
+  smooth$mid = breaks[unlist(smooth[,1])] +(bin_size/2)
   smooth[,1] = NULL
   colnames(smooth) = c("signal","mid")
   
   p = ggplot2::ggplot(data, ggplot2::aes(x= mid/1e6, y = signal)) +
-    ggplot2::geom_col(data = smooth, fill = 'black') +
-    ggplot2::coord_cartesian(expand = F) +
+    ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size/1e6) +
     ggplot2::theme_classic() +
     ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1])
   
-  if( draw_blackout ){
-    p = p + ggplot2::annotate('rect',
-                              fill =  "#D8D8D8",
-                              xmin = blackout_up/1e6,
-                              xmax = blackout_down/1e6,
-                              ymin = 0,
-                              ymax = ceiling(max(smooth$signal))) 
-  }
+  # draw_blackout ===+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ymax <- ceiling(max(smooth$signal))
+  data_blackout$signal <- ymax
+
+  p = p + ggplot2::annotate('rect', 
+                            fill = "#D8D8D8", 
+                            xmin = (min(data_blackout$mid)/1e6)-(bin_size/1e6), 
+                            xmax = (max(data_blackout$mid)/1e6)+(bin_size/1e6), 
+                            ymin = 0, 
+                            ymax = max(data_blackout$signal) )+
+    ggplot2::annotate(geom = 'text',
+                      vjust = 1,
+                      x = rowMeans(VP[,2:3])/1e6,
+                      y =  ymax*0.9,
+                      label = '\u2693')
+
   
+<<<<<<< HEAD
   if( !is.null(bed)){
     p = p + ggplot2::annotate('rect', 
                               fill = "black",
@@ -877,6 +900,34 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, bp
                               ymax = 0)  
   }
   p
+=======
+  bed_track_size <- ceiling(max(smooth$signal))/50
+  bed_track_padding <- ceiling(max(smooth$signal))/200
+  
+  if( !is.null(bed) ){
+    bed <- bed/1e6
+    
+    p = p+ ggplot2::annotate(geom = 'rect', 
+                             xmin = bed[,1], 
+                             xmax = bed[,2], 
+                             ymin = -bed_track_size, 
+                             ymax = -bed_track_padding, 
+                             fill = 'black') +
+      ggplot2::coord_cartesian(expand = F, 
+                               ylim = c(-1*(bed_track_size+
+                                              bed_track_padding+
+                                              bed_track_padding), 
+                                        ymax))
+  } else {
+    p = p + ggplot2::coord_cartesian(expand = F, 
+                                     ylim = c(0, ymax))
+  }
+
+  p <- p + ggplot2::theme(axis.line = ggplot2::element_line(colour = 'black'),
+                          axis.text = ggplot2::element_text(colour = 'black'))
+  suppressWarnings(p)
+  
+>>>>>>> b0cd6094a9d427138c57d7399271a9089159c1b3
 }
 
 # Utilities ---------------------------------------------------------------

@@ -3,7 +3,7 @@
 #' Extract matrices around a defined region a.k.a. the viewpoint
 #'
 #' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
-#' @param viewpoint The viewpoint
+#' @param viewpoint The viewpoint: will take the middle Hi-C bin if it spans mulitple bins.
 #' @param xlim A vector of two with the flanking basepairs up- and downstream 
 #' of the viewpoint, resp. 
 #' @return A virtual4C_discovery object.
@@ -21,10 +21,9 @@ virtual_4C <- function(exp, viewpoint, xlim = NULL){
     downstream_signal <- signal[V1 %in% vp_idx][,2:3]
   } else {
     # run for a region =========================================================
-    flank_downstream <- floor((viewpoint[,2] - xlim[1])/attr(exp, 'resolution'))
-    flank_upstream <- floor((xlim[2] - viewpoint[,3])/attr(exp, 'resolution'))
-    
-    range_idx <- unlist(vp_idx - flank_upstream):unlist(vp_idx + flank_upstream)
+    flank <- floor(xlim/attr(exp, 'resolution'))
+
+    range_idx <- unlist(vp_idx - flank[1]):unlist(vp_idx + flank[2])
     
     upstream_signal <- exp$MAT[list(range_idx,vp_idx), nomatch = 0][,c(1,3)]
     downstream_signal <- exp$MAT[list(vp_idx, range_idx), nomatch = 0][,2:3]
@@ -46,7 +45,7 @@ virtual_4C <- function(exp, viewpoint, xlim = NULL){
  
   
   # output ---------------------------------------------------------------------
-  signal <- signal[,c(3,6,2)]
+  signal <- unique(signal[,c(3,6,2)])
   colnames(signal) <- c('chromosome','mid','signal')
   signal <- list(data = signal)
   

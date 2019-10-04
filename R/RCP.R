@@ -17,10 +17,12 @@
 #' @return \item{smooth}{a log10-mean smoothed probability}
 #' @examples
 #' # Calculate the RCP of chromosome 1
+#' \dontrun{
 #' RCP_out = RCP(experimentList = list('WT' = WT_1MB), chromsToUse = 'chr1')
 #'
 #' # Plot the RCP
 #' visualise(RCP_out)
+#' }
 #' @export
 RCP = function(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL, genomeWide = NULL){
   

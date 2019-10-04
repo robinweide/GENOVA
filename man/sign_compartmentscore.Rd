@@ -9,7 +9,7 @@ sign_compartmentscore(CS_discovery, bed = NULL, bedgraph = NULL,
 }
 \arguments{
 \item{CS_discovery}{A \code{CS_discovery} object as produced by the
-\code{\link[GENOVA]{comparment_score}} function.}
+\code{\link[GENOVA]{compartment_score}} function.}
 
 \item{bed}{A \code{data.frame} with 3 columns in BED format, containing peaks
 of active chromatin marks. Mutually exclusive with the '\code{bedgraph}'

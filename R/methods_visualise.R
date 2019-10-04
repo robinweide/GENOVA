@@ -72,6 +72,7 @@
 #'   \code{ARA_discovery}, when '\code{mode = "signal"}'.
 #'
 #' @examples
+#' \dontrun{
 #' # APA
 #' apa <- APA(list(WT = WT_40kb, KO = KO_40kb), loops)
 #' visualise(apa)
@@ -102,7 +103,7 @@
 #' # Handling 'raw' plots
 #' visualise(pescan, raw = TRUE) +
 #'   ggplot2::scale_fill_gradient(aesthetics = "altfill")
-NULL
+#' }
 
 # Default -----------------------------------------------------------------
 

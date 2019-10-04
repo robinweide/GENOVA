@@ -330,6 +330,3 @@ uptrimat2eig <- function(x, y, value, ev = 1) {
   data.table(bin = seq_along(eig) + mini - 1,
              ev = eig)
 }
-
-bed <- "/DATA/projects/Hap1/ChIP-seq/completeSet_WTWaplMed12DKO/MACS2/WT_K4me1_peaks.narrowPeak"
-bed <- read.table(bed)

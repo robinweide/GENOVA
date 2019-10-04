@@ -9,7 +9,7 @@
 read_bedpe <- function(loop.bed, header = T) {
   # Load bedpe of loops of interest
   # Chromosome-columns are factors
-  LOI <- read.delim(loop.bed, stringsAsFactors = F, h = header)
+  LOI <- read.delim(loop.bed, stringsAsFactors = F, header = header)
   # Store extra columns
   LOI.extra <- NA
   if (ncol(LOI) > 6) {

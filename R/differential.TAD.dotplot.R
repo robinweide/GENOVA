@@ -76,7 +76,7 @@ differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL
     )
     axis(1,
       at = 1:(max.neighbor + 1),
-      lab = paste0("n + ", 0:max.neighbor), las = 2
+      labels = paste0("n + ", 0:max.neighbor), las = 2
     )
   } else {
     plot(tad.dist + runif(nrow(comb.exp), -0.4, 0.4),
@@ -90,7 +90,7 @@ differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL
       ylim = yRange,
       main = title, ...
     )
-    axis(1, at = 1:(max.neighbor + 1), lab = paste0("n + ", 0:max.neighbor), las = 2)
+    axis(1, at = 1:(max.neighbor + 1), labels = paste0("n + ", 0:max.neighbor), las = 2)
   }
 
   invisible(comb.exp)

@@ -57,6 +57,11 @@ fields.interp.surface <- function(obj, loc) {
 
 # select a matrix of interactions for between two chromosomes
 selectTransData <- function(exp, chrom1, chrom2) {
+  # init
+  V1         <- NULL
+  V2         <- NULL
+  V4         <- NULL
+  
   bed <- exp$IDX
   data <- exp$MAT
   X <- bed[V1 == chrom1, V4]
@@ -74,13 +79,13 @@ selectTransData <- function(exp, chrom1, chrom2) {
   }
   # create x and y vectors that contain the positions of the
   # entries in the matrix that we are creating
-  x <- rep(X[1]:X[length(X)], tail(Y, n = 1) - Y[1] + 1)
-  y <- rep(Y[1]:Y[length(Y)], each = tail(X, n = 1) - X[1] + 1)
+  x <- rep(X[1]:X[length(X)], utils::tail(Y, n = 1) - Y[1] + 1)
+  y <- rep(Y[1]:Y[length(Y)], each = utils::tail(X, n = 1) - X[1] + 1)
   data.sub <- data[base::list(x, y)]
   data.sub <- data.sub[!is.na(data.sub$V3)]
   # create an empty matrix, that has as many rows as the 'X' chromosome has
   # windows and as many columns as the 'Y' chromosome has windows
-  mat <- matrix(0, ncol = tail(Y, n = 1) - Y[1] + 1, nrow = tail(X, n = 1) - X[1] + 1)
+  mat <- matrix(0, ncol = utils::tail(Y, n = 1) - Y[1] + 1, nrow = utils::tail(X, n = 1) - X[1] + 1)
   mat[cbind(data.sub$V1 - min(X) + 1, data.sub$V2 - min(Y) + 1)] <- data.sub$V3
   x.pos <- bed[V1 == chrom1, V2]
   y.pos <- bed[V1 == chrom2, V2]

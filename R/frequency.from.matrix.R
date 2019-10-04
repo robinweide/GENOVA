@@ -35,7 +35,7 @@ frequency.from.matrix <- function(experiment, chrom, start, end, window = 10e3, 
   if (shinyAxis) {
     plot(mat.start + window * (pos[, 1] + pos[, 2]) / 2, pos[, 2] - pos[, 1], pch = 18, col = rgb(1, 1 - cnt, 1 - cnt), xlab = "", ylab = "", ylim = ylim, cex = cex, xlim = c(start, end), axes = F, ...)
     box(lwd = 1)
-    axis(1, at = seq(0, 3e9, by = 5e5), lab = NA, lwd = 1)
+    axis(1, at = seq(0, 3e9, by = 5e5), labels = NA, lwd = 1)
   } else {
     plot(mat.start + window * (pos[, 1] + pos[, 2]) / 2, pos[, 2] - pos[, 1], pch = 18, col = rgb(1, 1 - cnt, 1 - cnt), xlab = "", ylab = "", ylim = ylim, cex = cex, xlim = c(start, end), ...)
   }

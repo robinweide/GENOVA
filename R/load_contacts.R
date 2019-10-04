@@ -164,7 +164,7 @@ load_contacts = function(signal_path,
   if(is.null(data.table::key(index))){
     data.table::setkey(index, "V1", "V2")
   }
-  res <- as.numeric(median(index$V3 - index$V2))
+  res <- as.numeric(stats::median(index$V3 - index$V2))
   ##############################################################################
   ################################################################### check bins
   ##############################################################################
@@ -254,6 +254,11 @@ load_contacts = function(signal_path,
 
 loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
   
+  # init
+  .          <- NULL
+  V1         <- NULL
+  V4         <- NULL
+  
   ABS <- data.table::fread(indices_path, header = F, data.table = T)
   
   SIG = NULL
@@ -278,6 +283,12 @@ loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
 
 zscore_hic = function(SIG, ABS){
   
+  # init
+  D          <- NULL
+  V3         <- NULL
+  C1         <- NULL
+  C2         <- NULL
+
   chromRLE = rle(ABS$V1)
   
   CS = cumsum(c(1,chromRLE$lengths))

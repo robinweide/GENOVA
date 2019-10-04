@@ -46,13 +46,13 @@ insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, windo
   box(lwd = 2)
   size.region <- diff(range(mat1$x))
   if (size.region > 2e6) {
-    axis(2, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
   } else {
     lab <- seq(0, 3e9, by = 500e3) / 1e6
     lab <- sprintf("%.1f", lab)
-    axis(2, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
   }
 
   extend <- attr(exp, "res") * window.size
@@ -134,13 +134,13 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
   box(lwd = 2)
   size.region <- diff(range(mat1$x))
   if (size.region > 2e6) {
-    axis(2, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
   } else {
     lab <- seq(0, 3e9, by = 500e3) / 1e6
     lab <- sprintf("%.1f", lab)
-    axis(2, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
   }
 
   # plot the insulation score for the matrix
@@ -231,7 +231,7 @@ insulation.domainogram <- function(exp, chrom, start, end, axes = T, window.size
   }
   at <- seq(1e6 * floor(start / 1e6), 1e6 * floor(end / 1e6), by = 1e6)
   if (axes) {
-    axis(1, at = at, lab = at / 1e6, lwd = 2)
+    axis(1, at = at, labels = at / 1e6, lwd = 2)
   }
   axis(2, lwd = 2)
   box(lwd = 2)
@@ -269,7 +269,7 @@ delta.insulation.domainogram <- function(exp1, exp2, chrom, start, end, window.s
     rect(x1, y1, x2, y2, col = color.vec[color.index], border = NA)
   }
   at <- seq(1e6 * floor(start / 1e6), 1e6 * floor(end / 1e6), by = 1e6)
-  axis(1, at = at, lab = at / 1e6, lwd = 2)
+  axis(1, at = at, labels = at / 1e6, lwd = 2)
   axis(2, lwd = 2)
   box(lwd = 2)
 }

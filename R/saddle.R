@@ -39,11 +39,12 @@
 #' }
 saddle <- function(explist, CS_discovery, bins = 10L) {
   
+
   # Check argument compatability
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   expnames <- vapply(explist, attr, character(1L), "samplename")
   scores <- copy(CS_discovery$compart_scores)[order(chrom, start)]
-  discnames <- tail(colnames(scores), length(expnames))
+  discnames <- utils::tail(colnames(scores), length(expnames))
   
   
   if (!identical(expnames, discnames)) {
@@ -84,7 +85,7 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
   for (i in expnames) {
     i <- as.symbol(i)
     quants[, as.character(i) := pmin(
-      findInterval(eval(i), quantile(eval(i), qbins, na.rm = TRUE),
+      findInterval(eval(i), stats::quantile(eval(i), qbins, na.rm = TRUE),
                    left.open = TRUE, rightmost.closed = TRUE), bins
     ), by = "part"]
   }

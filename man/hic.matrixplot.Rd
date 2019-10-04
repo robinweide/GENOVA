@@ -36,6 +36,8 @@ inner-left.}
 
 \item{cexTicks}{Change size of numbers on the axis}
 
+\item{chip.colour}{A vector of four, parallel to [chip], of the to use colour.}
+
 \item{chip.yMax}{A vector of four, parallel to [chip], of the maximum 
 height of the biwigs. If only one value is given, all be set on this value.}
 
@@ -61,6 +63,8 @@ will only be combined with bed structure}
 
 \item{loops.type}{How to show loops: upper, lower and or both}
 
+\item{tads.colour}{Which colour do you want the TADs to have?}
+
 \item{loops.radius}{Set the size of the loop-circle to X bp. Can help 
 visibility.}
 
@@ -81,8 +85,6 @@ effect on the compartment-scores.}
 fillNA.}
 
 \item{antoni}{Logical: plot an explorer of the microscopic world}
-
-\item{chip.col}{A vector of four, parallel to [chip], of the to use colour.}
 }
 \value{
 A matrix-plot

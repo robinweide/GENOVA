@@ -49,6 +49,8 @@
 #'   \code{-Inf} and \code{Inf} respectively.
 #'   
 #' @param title add a title
+#' @param signal_size The width/height of the signal (e.g. a value of 3 will 
+#' take the middle 3x3 matrix of the APA).
 #' @param ... further arguments passed to or from other methods.
 #'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
@@ -122,7 +124,7 @@ visualise.default <- function(discovery, ...) {
 # Common ancestor for aggregate repeated matrix lookup analysis plots
 visualise.ARMLA <- function(discovery, contrast = 1,
                             metric = c("diff", "lfc"),
-                            raw = FALSE, altfillscale) {
+                            raw = FALSE, altfillscale, ...) {
   metric <- match.arg(metric)
   mats <- discovery$signal
 
@@ -171,7 +173,6 @@ visualise.ARMLA <- function(discovery, contrast = 1,
                        value = as.vector(contrast[,,i]))
     })
     contrast <- do.call(rbind, contrast)
-    outcontrast <<- contrast
     df <- rbind(df, contrast)
   }
 
@@ -254,7 +255,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL) {
+                                    colour_lim_contrast = NULL, ...) {
   metric <- match.arg(metric)
   
   # Decide on limits
@@ -329,7 +330,7 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        mode = c("obsexp", "signal"),
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
-                                       colour_lim_contrast = NULL) {
+                                       colour_lim_contrast = NULL, ...) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -437,7 +438,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL) {
+                                    colour_lim_contrast = NULL, ...) {
   metric <- match.arg(metric)
   
   # Decide on limits
@@ -518,7 +519,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     mode = c("obsexp", "signal"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL) {
+                                    colour_lim_contrast = NULL, ...) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -555,7 +556,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
   )
 
   # Get a default plot
-  g <- GENOVA:::visualise.ARMLA(
+  g <- visualise.ARMLA(
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
@@ -628,7 +629,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.CS_discovery <- function(discovery, contrast = NULL,
                                    chr = "chr1", start = NULL, end = NULL,
-                                   raw = FALSE) {
+                                   raw = FALSE, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- discovery$compart_scores
@@ -719,7 +720,7 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
 
 #' @rdname visualise
 #' @export
-visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F){
+visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F, ...){
   
   metric <- match.arg(metric)
   
@@ -904,7 +905,7 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
 
 #' @rdname visualise
 #' @export
-visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, extend_viewpoint = NULL){
+visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, extend_viewpoint = NULL, ...){
   # ! someday: allow mulitple samples
   data <- discovery$data
   VP   <- attr(discovery,"viewpoint")
@@ -1000,7 +1001,7 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
                                        chr = "all",
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
-                                       colour_lim_contrast = NULL) {
+                                       colour_lim_contrast = NULL, ...) {
   df <- discovery$saddle
   df <- df[!is.na(mean) & !is.na(q1),]
   
@@ -1146,12 +1147,15 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
 
 # Utilities ---------------------------------------------------------------
 
-# Makes sure no errors are returned when visualise(..., raw = TRUE)
-# Unfortunately has to be exported, but is better than throwing errors
-#' @usage NULL
-#' @noRd
+
+#' scale_altfill_continuous
+#' Makes sure no errors are returned when visualise(..., raw = TRUE)
+#' Unfortunately has to be exported, but is better than throwing errors
+#'
+#' @param ... whatever. 
+#'
+#' @return a thing
 #' @export
-#' @keywords internal
 scale_altfill_continuous <- function(...) {
   ggplot2::scale_fill_gradient2(..., aesthetics = "altfill")
 }

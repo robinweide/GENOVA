@@ -129,13 +129,13 @@ anchors_PESCAn <- function(IDX, res, bed,
     if (length(idx) == 0) {
       stop("Too few comparable positions per chromosome.", call. = FALSE)
     }
-    idx <- lapply(idx, function(x) t(combn(x, 2)))
+    idx <- lapply(idx, function(x) t(utils::combn(x, 2)))
     idx <- do.call(rbind, idx)
     is_cis <- TRUE
   } else {
 
     # Generate all combinations
-    idx <- t(combn(newbed$idx, 2))
+    idx <- t(utils::combn(newbed$idx, 2))
     is_cis <- newbed[match(idx, newbed$idx), 1]
     is_cis <- matrix(is_cis, ncol = 2)
     is_cis <- is_cis[, 1] == is_cis[, 2]
@@ -176,12 +176,13 @@ anchors_APA <- function(IDX, res, bedpe,
                         mode = c("both", "cis", "trans")) {
   mode <- match.arg(mode)
 
+  
   # Convert bedpe to idx matrix
   newbed <- cbind(bedpe[, 1:6],
     idx1 = bed2idx(IDX, bedpe[, 1:3], mode = "centre"),
     idx2 = bed2idx(IDX, bedpe[, 4:6], mode = "centre")
   )
-  newbed <- na.exclude(newbed)
+  newbed <- stats::na.exclude(newbed)
   newbed <- newbed[!duplicated(newbed[, 7:8]), ]
 
   # Shortcut when no additional filtering is needed
@@ -359,6 +360,10 @@ anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
 #' @export
 anchors_shift <- function(IDX, anchors, rel_pos, shift = 1) {
 
+  # init
+  V4         <- NULL
+  V1         <- NULL
+  
   # Translate indices to chromosomes
   chrom   <- IDX[match(anchors, IDX[, V4]), V1]
   shifted <- IDX[match(anchors + shift + max(rel_pos), IDX[, V4]), V1]

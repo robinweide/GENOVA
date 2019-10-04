@@ -17,45 +17,48 @@
 \usage{
 visualise(discovery, ...)
 
-\method{quantify}{APA_discovery}(discovery, signal_size = 3)
+\method{quantify}{APA_discovery}(discovery, signal_size = 3, ...)
 
 \method{visualise}{APA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), raw = FALSE, title = NULL,
-  colour_lim = NULL, colour_lim_contrast = NULL)
+  colour_lim = NULL, colour_lim_contrast = NULL, ...)
 
 \method{visualise}{PESCAn_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
   raw = FALSE, title = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL)
+  colour_lim_contrast = NULL, ...)
 
 \method{visualise}{ATA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), raw = FALSE, title = NULL,
-  colour_lim = NULL, colour_lim_contrast = NULL)
+  colour_lim = NULL, colour_lim_contrast = NULL, ...)
 
 \method{visualise}{ARA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
   raw = FALSE, title = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL)
+  colour_lim_contrast = NULL, ...)
 
 \method{visualise}{CS_discovery}(discovery, contrast = NULL,
-  chr = "chr1", start = NULL, end = NULL, raw = FALSE)
+  chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
 
 \method{visualise}{RCP_discovery}(discovery, contrast = 1,
   metric = c("smooth", "both", "lfc"), raw = F, title = NULL,
-  flipFacet = F)
+  flipFacet = F, ...)
 
 \method{visualise}{virtual4C_discovery}(discovery, bins = NULL,
-  bed = NULL, extend_viewpoint = NULL)
+  bed = NULL, extend_viewpoint = NULL, ...)
 
 \method{visualise}{saddle_discovery}(discovery, contrast = 1,
   chr = "all", raw = FALSE, title = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL)
+  colour_lim_contrast = NULL, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
 functions.}
 
 \item{...}{further arguments passed to or from other methods.}
+
+\item{signal_size}{The width/height of the signal (e.g. a value of 3 will 
+take the middle 3x3 matrix of the APA).}
 
 \item{contrast}{An \code{integer} or \code{character} matching an experiment
 (name) of length 1, specifying which sample should be used to make a

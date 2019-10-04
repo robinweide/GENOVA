@@ -7,7 +7,7 @@
 \usage{
 unbundle(discovery, ...)
 
-\method{unbundle}{ARMLA_discovery}(discovery)
+\method{unbundle}{ARMLA_discovery}(discovery, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object with more than 1 sample.}

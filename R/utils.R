@@ -104,6 +104,12 @@ dt_matrix <- function(x, i, j, dim, offset) {
 #' image(mat)
 #' }
 select_subset <- function(exp, chrom, start, end) {
+  # init
+  V1         <- NULL
+  V2         <- NULL
+  V3         <- NULL
+  V4         <- NULL
+  
   dt.cores <- data.table::getDTthreads()
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
@@ -140,10 +146,16 @@ try_require <- function(package, fun, source = NULL) {
 }
 
 
-# RAW RCP in, lfc out
+#' @title RCP log2 foldchange
+#' 
+#'  RAW RCP in, lfc out
+#'
+#' @param dt a data.table of rcp
+#' @param contrast the name of the contrast-sample
+#' @param breaks a set of numbers to use as intervals
+#'
+#' @return a data.table with the log2 fold changes compared to the `contrast`.
 #' @export
-#' @keywords internal
-#' @noRd
 RCPlfc = function(dt, contrast, breaks){
   
   intervalMid = (diff(breaks)/2)+breaks[-length(breaks)]
@@ -170,4 +182,16 @@ RCPlfc = function(dt, contrast, breaks){
   out = melt(out, id.vars = 'distance')
   colnames(out)[2:3] = c('samplename','P')
   out
+}
+
+
+GENOVA_THEME = function(){
+  p = ggplot2::theme(panel.background = ggplot2::element_blank(),
+                     legend.key =  ggplot2::element_rect(fill = 'white'),
+                     strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                     panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                     text = ggplot2::element_text(color = 'black'),
+                     axis.text = ggplot2::element_text(colour = 'black'),
+                     strip.text = ggplot2::element_text(colour = 'black') )
+  return(p)
 }

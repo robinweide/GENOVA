@@ -1,7 +1,5 @@
 loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F){
 
-  require(rhdf5)
-
   ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
                              name = "bins"))
   ABS$bin = 1:nrow(ABS)
@@ -14,7 +12,7 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F){
   SIG = data.table::as.data.table(rhdf5::h5read(file = cooler,
                              name = "pixels"))
 
-  h5closeAll()
+  rhdf5::h5closeAll()
 
   SIG[,1] = SIG[,1] + 1
   SIG[,2] = SIG[,2] + 1

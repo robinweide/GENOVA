@@ -289,7 +289,7 @@ ARA <- function(explist, bed, shift = 1e6,
     i <- cols - rows
     i <- i - min(i) + 1
     nexp <- apply(exp, 3, function(x) {
-      mu <- vapply(split(x, i), function(x){.Internal(mean(x))}, numeric(1))
+      mu <- vapply(split(x, i), function(x){mean(x)}, numeric(1))
       mu[i]
     })
     dim(nexp) <- dim(obs)

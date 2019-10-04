@@ -378,9 +378,6 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
 
 plot.bw <- function(file, chrom, start, end, y1, y2, col,
                     yMax = NULL, rotate = F) {
-  if (require("bigwrig") == F) {
-    stop("Please install github.com/jayhesselberth/bigwrig\n")
-  }
 
   # leave here in case something changes
   # official call but don't need it
@@ -550,7 +547,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' inner-left.
 #' @param inferno White/Red/black or White/Red coloscale?
 #' @param cexTicks Change size of numbers on the axis
-#' @param chip.col A vector of four, parallel to [chip], of the to use colour.
+#' @param chip.colour A vector of four, parallel to [chip], of the to use colour.
 #' @param chip.yMax A vector of four, parallel to [chip], of the maximum 
 #' height of the biwigs. If only one value is given, all be set on this value.
 #' @param type Should a rectangle or a triangle be drawn?
@@ -565,6 +562,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' will only be combined with bed structure
 #' @param tads BED-like dataframe or a list of these data.frames
 #' @param tads.type How to show TADS: upper, lower and or both
+#' @param tads.colour Which colour do you want the TADs to have?
 #' @param loops BED-like dataframe or a list of these data.frames
 #' @param loops.type How to show loops: upper, lower and or both
 #' @param loops.radius Set the size of the loop-circle to X bp. Can help 
@@ -804,27 +802,27 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   size.region <- diff(range(mat1$x))
   if (size.region > 40e6) {
     axis(2,
-      at = seq(0, 3e9, by = 10e6), lab = seq(0, 3e9, by = 10e6) / 1e6,
+      at = seq(0, 3e9, by = 10e6), labels = seq(0, 3e9, by = 10e6) / 1e6,
       lwd = 2, cex.axis = cexTicks
     )
     axis(3,
-      at = seq(0, 3e9, by = 10e6), lab = seq(0, 3e9, by = 10e6) / 1e6,
+      at = seq(0, 3e9, by = 10e6), labels = seq(0, 3e9, by = 10e6) / 1e6,
       lwd = 2, cex.axis = cexTicks
     )
   } else if (size.region > 2e6) {
     axis(2,
-      at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6,
+      at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6,
       lwd = 2, cex.axis = cexTicks
     )
     axis(3,
-      at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6,
+      at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6,
       lwd = 2, cex.axis = cexTicks
     )
   } else {
     lab <- seq(0, 3e9, by = 500e3) / 1e6
     lab <- sprintf("%.1f", lab)
-    axis(2, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = cexTicks)
-    axis(3, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = cexTicks)
+    axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = cexTicks)
+    axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = cexTicks)
   }
 
   # draw tads on the image plot

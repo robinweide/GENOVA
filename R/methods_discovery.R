@@ -200,7 +200,7 @@ NULL
 
 #' @rdname unbundle
 #' @export
-unbundle.ARMLA_discovery <- function(discovery) {
+unbundle.ARMLA_discovery <- function(discovery, ...) {
   slotnames <- names(discovery)
 
   # Find experiment names
@@ -228,19 +228,20 @@ unbundle.ARMLA_discovery <- function(discovery) {
 # Utilities ---------------------------------------------------------------
 
 #' @export
-subset.ARMLA_discovery <- function(discovery, i) {
-  oldclass <- class(discovery)[[1]]
-  if (!("signal" %in% names(discovery))) {
+subset.ARMLA_discovery <- function(x, i, ...) {
+  
+  oldclass <- class(x)[[1]]
+  if (!("signal" %in% names(x))) {
     warning(paste0("Invalid ", oldclass, "object: no 'signal' array found.\n",
                    "Returning 'NULL'"),
             call. = FALSE)
     return(NULL)
   }
 
-  attris <- attributes(discovery)
-  class(discovery) <- "list"
+  attris <- attributes(x)
+  class(x) <- "list"
 
-  out <- lapply(discovery, function(slot) {
+  out <- lapply(x, function(slot) {
     thisclass <- class(slot)
     if (thisclass == "array") {
       return(slot[,,i, drop = FALSE])

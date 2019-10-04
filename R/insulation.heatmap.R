@@ -172,7 +172,7 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
       ggplot2::scale_colour_manual(values = profileCols) +
       ggplot2::theme(aspect.ratio = 1) +
       ggplot2::facet_grid(. ~ sample) +
-      GENOVA:::GENOVA_THEME() +
+      GENOVA_THEME() +
       ggplot2::theme(plot.margin = ggplot2::unit(c(0, 0, 0, 0), "cm")) +
       ggplot2::theme(
         panel.grid.minor = ggplot2::element_blank(),
@@ -196,7 +196,7 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
       ) +
       ggplot2::scale_y_continuous(expand = c(0, 0), breaks = NULL) +
       ggplot2::labs(x = "", y = "") +
-      GENOVA:::GENOVA_THEME() +
+      GENOVA_THEME() +
       ggplot2::guides(fill = F) + ggplot2::theme_linedraw() +
       ggplot2::scale_fill_gradientn(colours = heatmapCols) +
       ggplot2::theme(
@@ -235,7 +235,7 @@ insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus
         inherit.aes = F
       ) +
       ggplot2::coord_cartesian(expand = F) +
-      GENOVA:::GENOVA_THEME() +
+      GENOVA_THEME() +
       ggplot2::labs(x = "", y = "") +
       ggplot2::guides(col = F, fill = F) +
       ggplot2::scale_colour_manual(values = profileCols) +

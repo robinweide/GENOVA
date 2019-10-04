@@ -28,6 +28,7 @@ Calculate a scaled matrix of the interchromosomal interactions aligned from
 centromere to telomere
 }
 \examples{
+\dontrun{
 # Get a scaled matric of the interchomosomal interactions between 15 and 19
 out1519 <- centromere.telomere.analysis(WT_40kb,
   chrom.vec = c("chr15", "chr19")
@@ -35,6 +36,7 @@ out1519 <- centromere.telomere.analysis(WT_40kb,
 
 # Plot the results
 draw.centromere.telomere(out1519)
+}
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

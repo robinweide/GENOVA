@@ -417,7 +417,7 @@ plot.bw <- function(file, chrom, start, end, y1, y2, col,
 }
 
 # overlay TAD positions with the hi-c data
-draw.tads <- function(tads, chrom, tads.type = "lower", tads.color = "#006837",
+draw.tads <- function(tads, chrom, tads.type = "lower", tads.colour = "#006837",
                       lwd = 2) {
 
   # check if tads is a list of dataframes or a data.frame
@@ -437,13 +437,13 @@ draw.tads <- function(tads, chrom, tads.type = "lower", tads.color = "#006837",
   }
   # if you survived this, you will now have a list of dfs!
 
-  # get the tads color, resize and type
+  # get the tads colour, resize and type
   if (length(tads) != length(tads.type)) {
     tads.type <- rep(tads.type[1], length(tads))
   }
 
-  if (length(tads) != length(tads.color)) {
-    tads.color <- rep(tads.color[1], length(tads))
+  if (length(tads) != length(tads.colour)) {
+    tads.colour <- rep(tads.colour[1], length(tads))
   }
 
 
@@ -456,25 +456,25 @@ draw.tads <- function(tads, chrom, tads.type = "lower", tads.color = "#006837",
 
     if (tads.type[listIDX] == "both") {
       rect(tad[, 2], tad[, 2], tad[, 3], tad[, 3],
-        border = tads.color[listIDX],
+        border = tads.colour[listIDX],
         lwd = lwd
       )
     } else if (tads.type[listIDX] == "lower") {
       segments(tad[, 2], tad[, 2], tad[, 2], tad[, 3],
-        col = tads.color[listIDX],
+        col = tads.colour[listIDX],
         lwd = lwd
       )
       segments(tad[, 2], tad[, 3], tad[, 3], tad[, 3],
-        col = tads.color[listIDX],
+        col = tads.colour[listIDX],
         lwd = lwd
       )
     } else if (tads.type[listIDX] == "upper") {
       segments(tad[, 2], tad[, 2], tad[, 3], tad[, 2],
-        col = tads.color[listIDX],
+        col = tads.colour[listIDX],
         lwd = lwd
       )
       segments(tad[, 3], tad[, 2], tad[, 3], tad[, 3],
-        col = tads.color[listIDX],
+        col = tads.colour[listIDX],
         lwd = lwd
       )
     } else {
@@ -550,8 +550,9 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' inner-left.
 #' @param inferno White/Red/black or White/Red coloscale?
 #' @param cexTicks Change size of numbers on the axis
-#' @param chip.col A vector of four, parallel to [chip], of the to use color.
-#' @param chip.yMax A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.
+#' @param chip.col A vector of four, parallel to [chip], of the to use colour.
+#' @param chip.yMax A vector of four, parallel to [chip], of the maximum 
+#' height of the biwigs. If only one value is given, all be set on this value.
 #' @param type Should a rectangle or a triangle be drawn?
 #' Note that for a triangle a 6th strand column should be included
 #' @param guessType If an element in the chip is a dataframe,
@@ -566,14 +567,18 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param tads.type How to show TADS: upper, lower and or both
 #' @param loops BED-like dataframe or a list of these data.frames
 #' @param loops.type How to show loops: upper, lower and or both
-#' @param loops.radius Set the size of the loop-circle to X bp. Can help visibility.
-#' @param loops.color Which color do you want the loops to have?
+#' @param loops.radius Set the size of the loop-circle to X bp. Can help 
+#' visibility.
+#' @param loops.colour Which colour do you want the loops to have?
 #' @param skipAnn Do not plot outside-annotation. Can be used to plot other
 #' things next to the matrix.
 #' @param symmAnn Put features 1&2 also on verical (ignore chip-entries 3&4)
 #' @param check.genome Check if reference genomes in exp1 and exp2 are the same
-#' @param smoothNA Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.
-#' @param fillNAtreshold Set the amount strength of out-lier correction for fillNA.
+#' @param smoothNA Set to TRUE to perform a Nadaraya/Watson normalization. 
+#' This will try to eliminate white stripes: this is only cosmetic and has no 
+#' effect on the compartment-scores.
+#' @param fillNAtreshold Set the amount strength of out-lier correction for 
+#' fillNA.
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @note
 #' To plot genes, a gene-model data.frame must be made. This can be done via a
@@ -585,6 +590,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' directly use this table (with exons combined per row), by renaming
 #' exonStarts and exonEnds to exonStart and exonEnd.
 #' @examples
+#' \dontrun{
 #' # plot two matrices of Hap-1 cells, including their respective loop-calls
 #' hic.matrixplot(
 #'   exp1 = Hap1_Haarhuis2017_10kb,
@@ -593,21 +599,22 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #'   start = 25e6,
 #'   end = 30e6,
 #'   loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
-#'   loops.color = c("blue", "green"),
+#'   loops.colour = c("blue", "green"),
 #'   loops.type = c("upper", "lower"),
 #'   loops.resize = c(20e3, 20e3), # expand for visibility
 #'   cut.off = 25
 #' ) # upper limit of contacts
+#' }
 #' @return A matrix-plot
 #' @export
 hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            chip = list(NULL, NULL, NULL, NULL), inferno = T,
-                           cexTicks = 1, chip.color = "black", chip.yMax = NULL,
+                           cexTicks = 1, chip.colour = "black", chip.yMax = NULL,
                            type = rep("triangle", 4), guessType = T,
                            coplot = "dual", genes = NULL,
                            tads = NULL, tads.type = "lower", loops = NULL,
-                           loops.type = "lower", tads.color = "#1faee3", # direct complementary color of mid-orange inferno
-                           loops.radius = NULL, loops.color = "#1faee3",
+                           loops.type = "lower", tads.colour = "#1faee3", # direct complementary colour of mid-orange inferno
+                           loops.radius = NULL, loops.colour = "#1faee3",
                            skipAnn = F, symmAnn = F,
                            check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F) {
   if (is.null(loops.radius)) {
@@ -639,9 +646,9 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     }
   }
 
-  # if only one color is given use it for all feature tracks
-  if (length(chip.color) == 1) {
-    chip.color <- rep(chip.color, 4)
+  # if only one colour is given use it for all feature tracks
+  if (length(chip.colour) == 1) {
+    chip.colour <- rep(chip.colour, 4)
   }
 
   # fill up empty yMax-elements
@@ -651,7 +658,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     }
   }
 
-  # if only one color is given use it for all feature tracks
+  # if only one colour is given use it for all feature tracks
   if (length(type) == 1) {
     type <- rep(type, 4)
   }
@@ -822,12 +829,12 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
 
   # draw tads on the image plot
   if (!is.null(tads)) {
-    draw.tads(tads, chrom, tads.type = tads.type, tads.color = tads.color)
+    draw.tads(tads, chrom, tads.type = tads.type, tads.colour = tads.colour)
   }
 
   # draw loops on the image plot
   if (!is.null(loops)) {
-    draw.loops(loops, chrom = chrom, start = start, end = end, type = loops.type, radius = loops.radius, col = loops.color, lwd = 2)
+    draw.loops(loops, chrom = chrom, start = start, end = end, type = loops.type, radius = loops.radius, col = loops.colour, lwd = 2)
   }
 
   # fill up empty elements
@@ -841,7 +848,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     # plot the features horizontal
     features(mat1, chrom, genes,
       chip1 = chip[[1]], chip2 = chip[[2]],
-      autoCHIP = guessType, yMax = chip.yMax[1:2], col = chip.color[1:2], type = type[1:2]
+      autoCHIP = guessType, yMax = chip.yMax[1:2], col = chip.colour[1:2], type = type[1:2]
     )
 
     # clone 1 and two to feature entries 3 and 4
@@ -854,11 +861,11 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       }
 
       chip.yMax[3:4] <- chip.yMax[1:2]
-      chip.color[3:4] <- chip.color[1:2]
+      chip.colour[3:4] <- chip.colour[1:2]
     }
 
     features(mat1, chrom, genes, chip[[3]], chip[[4]],
-      autoCHIP = guessType, yMax = chip.yMax[3:4], col = chip.color[3:4],
+      autoCHIP = guessType, yMax = chip.yMax[3:4], col = chip.colour[3:4],
       type = type[3:4], rotate = T
     )
   }

@@ -43,6 +43,7 @@ Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
 regions, for example loops.
 }
 \examples{
+\dontrun{
 # Typical usage: APA for loops
 apa <- APA(list(WT = WT_10kb, KO = KO_10kb), bedpe = WT_loops)
 
@@ -54,6 +55,7 @@ apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
 
 # Visualising results
 visualise(apa)
+}
 }
 \seealso{
 The \code{\link[GENOVA]{discovery}} class.

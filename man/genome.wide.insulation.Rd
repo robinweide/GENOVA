@@ -23,6 +23,9 @@ DF with insulation score
 Get the genome-wide insulation.
 }
 \examples{
-# Get the insulation score with window-size 25 and store in the INSULATION-slot.
-Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+# Get the insulation score with window-size 25
+\dontrun{
+Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, 
+                                                  window.size = 25)
+}
 }

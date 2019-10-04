@@ -9,3 +9,4 @@ tests/
 *.Rpoj/
 vignettes/GENOVA_vignette_cache
 vignettes/GENOVA_vignette_files
+.RData

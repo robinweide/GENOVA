@@ -4,8 +4,9 @@
 #' If only a BED-file is present, duplicate BED-columns 1,2,3 as: 1,2,2,1,3,3.
 #'
 #' @param loop.bed Path to bedpe file.
+#' @param header Does the file come with a header?
 #' @return A data.frame with the bedpe-values.
-read.bedpe <- function(loop.bed, header = T) {
+read_bedpe <- function(loop.bed, header = T) {
   # Load bedpe of loops of interest
   # Chromosome-columns are factors
   LOI <- read.delim(loop.bed, stringsAsFactors = F, h = header)

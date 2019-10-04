@@ -1,10 +1,13 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
 #' @inheritParams PESCAn
+#' 
+#' @param IDX The IDX-slot of a `contacts`-object
+#' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the
 #'   \code{bed} argument to match with the indices. Possible values:
 #'   \code{"center"}, \code{"start"} or \code{"end"}.
-#'
+#'   
 #' @return An \code{integer} vector of length \code{nrow(bed)} and parallel to
 #'   \code{bed} with indices to the Hi-C matrix.
 #'
@@ -93,11 +96,13 @@ dt_matrix <- function(x, i, j, dim, offset) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Get the TP53-locus in an experiment mapped to hg19
 #' mat <- select_subset(WT, "chr17", 75e5, 76e5)
 #'
 #' # Plot the region
 #' image(mat)
+#' }
 select_subset <- function(exp, chrom, start, end) {
   dt.cores <- data.table::getDTthreads()
   on.exit(data.table::setDTthreads(dt.cores))
@@ -138,6 +143,7 @@ try_require <- function(package, fun, source = NULL) {
 # RAW RCP in, lfc out
 #' @export
 #' @keywords internal
+#' @noRd
 RCPlfc = function(dt, contrast, breaks){
   
   intervalMid = (diff(breaks)/2)+breaks[-length(breaks)]

@@ -4,7 +4,7 @@
 #'
 #' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
 #' @author Elzo de Wit, \email{e.d.wit@nki.nl}
-#' @param experiment The Hi-C experiment object of a sample: produced by
+#' @param exp The Hi-C experiment object of a sample: produced by
 #' construct.experiment().
 #' @param color.fun Optional color-function
 #' @param cut.off Adjust the maximum value of the color-scale
@@ -17,8 +17,10 @@
 #' @return \item{rawCounts}{the observed chromosome-chromosome matrix}
 #' @return \item{normMat}{the expected chromosome-chromosome matrix}
 #' @examples
+#' \dontrun{
 #' # use chromosomeMatrix without chromosome M and Y.
 #' chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM", "chrY"), cut.off = 2)
+#' }
 #' @export
 chromosomeMatrix <- function(exp, color.fun = NULL, cut.off = NULL,
                              chromsToUse = NULL, remove = NULL, plot = TRUE) {

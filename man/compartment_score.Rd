@@ -41,6 +41,7 @@ When the '\code{bed}' or '\code{bedgraph}' arguments are both
   compartments and negative values to more inactive B compartments.
 }
 \examples{
+\dontrun{
 # Proper compartment scores
 cs <- compartment_score(list(WT_100kb, KO_100kb), bed = H3K4me1_peaks)
 
@@ -49,6 +50,7 @@ cs <- compartment_score(list(WT_100kb, KO_100kb))
 
 # Signing the scores
 cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
+}
 }
 \seealso{
 \code{\link[GENOVA]{sign_compartmentscore}} for getting signed

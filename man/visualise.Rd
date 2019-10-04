@@ -55,6 +55,8 @@ visualise(discovery, ...)
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
 functions.}
 
+\item{...}{further arguments passed to or from other methods.}
+
 \item{contrast}{An \code{integer} or \code{character} matching an experiment
 (name) of length 1, specifying which sample should be used to make a
 contrast with all other samples. Alternatively, set to \code{NULL} to not
@@ -70,6 +72,8 @@ plot contrast panels.}
 
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned?}
+
+\item{title}{add a title}
 
 \item{colour_lim, colour_lim_contrast}{One of: \itemize{
   \item \code{NULL} to have an educated quess for the scale.
@@ -97,9 +101,6 @@ regions in one plot, instead of facets? (default : \code{FALSE})}
 
 \item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides of the
 viewpoint. Makes the viewpoint-box broader.}
-
-\item{flipFacet}{\code{[RCP]} Do you want to have RCP's of different regions
-in one plot, instead of facets? (default : \code{FALSE})}
 }
 \description{
 Plot the results of \code{discovery} objects. By default
@@ -127,6 +128,7 @@ For \code{ATA_discovery} objects which include the matrix's diagonal,
   \code{ARA_discovery}, when '\code{mode = "signal"}'.
 }
 \examples{
+\dontrun{
 # APA
 apa <- APA(list(WT = WT_40kb, KO = KO_40kb), loops)
 visualise(apa)
@@ -157,4 +159,5 @@ visualise(sadl)
 # Handling 'raw' plots
 visualise(pescan, raw = TRUE) +
   ggplot2::scale_fill_gradient(aesthetics = "altfill")
+}
 }

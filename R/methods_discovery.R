@@ -62,6 +62,7 @@ NULL
 #' @return A \code{discovery}-class object of the same type.
 #'
 #' @examples
+#' \dontrun{
 #' # Running multiple analysis
 #' ata1 <- ATA(WT_10kb, tads_wt)
 #' ata2 <- ATA(KO_10kb, tads_ko)
@@ -71,6 +72,7 @@ NULL
 #'
 #' # Visualising the combined results
 #' visualise(cata)
+#' }
 NULL
 
 # Bundle functions --------------------------------------------------------
@@ -170,6 +172,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 #'   out to individual experiments.
 #'
 #' @param discovery A \code{discovery} object with more than 1 sample.
+#' @param ... 	further arguments passed to or from other methods.
 #'
 #' @return A \code{list} wherein each element is a \code{discovery} object for a
 #'   single sample.
@@ -181,6 +184,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 #'   The \code{\link[GENOVA]{discovery}} class.
 #'
 #' @examples
+#' \dontrun{
 #' # Getting a discovery object
 #' apa <- APA(list(WT_20kb, KO_20kb), loops)
 #'
@@ -189,6 +193,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 #'
 #' # Plotting the first result only
 #' visualise(split[[1]])
+#' }
 NULL
 
 # Unbundle functions ------------------------------------------------------

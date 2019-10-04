@@ -10,6 +10,7 @@
 #' @param color.fun A color-function like rainbow().
 #' @param xlab The x-axis label.
 #' @param ylab The y-axis label.
+#' @param ... further arguments passed to or from other methods.
 #' @return A scatterplot.
 #' @import data.table
 #' @examples

@@ -7,8 +7,9 @@
 bed2idx(IDX, bed, mode = c("centre", "start", "end"))
 }
 \arguments{
-\item{bed}{A \code{data.frame} with 3 columns in BED format, containing the
-regions to anchor in pairwise manner.}
+\item{IDX}{The IDX-slot of a `contacts`-object}
+
+\item{bed}{A 3-column data.frame}
 
 \item{mode}{A \code{character} of length 1 indicating what position of the
 \code{bed} argument to match with the indices. Possible values:

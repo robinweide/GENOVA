@@ -47,10 +47,9 @@
 #' @param start,end \code{[CS]} A \code{numeric} of length 1 with start-
 #'   and end-positions for the region to plot. If \code{NULL}, is set to
 #'   \code{-Inf} and \code{Inf} respectively.
-#'
-#'
-#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different regions
-#'   in one plot, instead of facets? (default : \code{FALSE})
+#'   
+#' @param title add a title
+#' @param ... further arguments passed to or from other methods.
 #'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
 #'   subtracting the values of each sample by the values of the sample indicated
@@ -1149,6 +1148,8 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
 
 # Makes sure no errors are returned when visualise(..., raw = TRUE)
 # Unfortunately has to be exported, but is better than throwing errors
+#' @usage NULL
+#' @noRd
 #' @export
 #' @keywords internal
 scale_altfill_continuous <- function(...) {

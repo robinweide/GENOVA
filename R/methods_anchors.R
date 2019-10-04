@@ -87,6 +87,7 @@
 #'   Hi-C index conversion.
 #'
 #' @examples
+#' \dontrun{
 #' # PE-SCAn
 #' anch <- anchors_PESCAn(WT_20kb$ABS, WT_20kb$RES, super_enhancers)
 #' PESCAn(list(WT_20kb, KO_20kb), anchors = anch)
@@ -102,6 +103,7 @@
 #' # ARA
 #' anch <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
 #' ARA(list(WT_20kb, KO_20kb), anchors = anch)
+#' }
 NULL
 
 # Types --------------------------------------------------------------
@@ -292,8 +294,10 @@ anchors_ARA <- function(IDX, bed) {
 #'
 #' @return A \code{anchors} object of the same type.
 #' @examples
+#' \dontrun{
 #' anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
 #' anchors_finish(WT_20kb$ABS, anch, -10:10, 0)
+#' }
 anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
   anchors <- anchors_filter_oob(IDX, anchors, rel_pos)
   anch_id <- parse(text = paste0("seq.int(", nrow(anchors), ")"),
@@ -431,7 +435,9 @@ anchors_filter_oob <- function(IDX, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{anchors}}
 #'
 #' @examples
+#' \dontrun{
 #' as_anchors(matrix(1:20, 2))
+#' }
 as_anchors <- function(x) {
   if (is.null(dim(x)) || length(dim(x)) > 2) {
     stop(paste0("An object of class ", class(x),
@@ -467,11 +473,13 @@ as_anchors <- function(x) {
 #' @seealso \code{\link[GENOVA]{anchors}}
 #'
 #' @examples
+#' \dontrun{
 #' m <- matrix(1:20, 10)
 #' is_anchors(m) # FALSE
 #'
 #' m <- as_anchors(m)
 #' is_anchors(m) # TRUE
+#' }
 is_anchors <- function(x) {
   inherits(x, "anchors")
 }

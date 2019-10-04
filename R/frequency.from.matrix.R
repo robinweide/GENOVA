@@ -10,7 +10,9 @@
 #' @param q.val Quantile cutoff
 #' @param cut.off Score cutoff
 #' @param extraPadding Extra room needed for the ends of the piramid.
-#' @param ylim The y-start and -stop: zero is at the diagonal,
+#' @param ylim The y-start and -stop: zero is at the diagonal
+#' @param shinyAxis Plot a nice axis?
+#' @param ... further arguments passed to or from other methods.
 #' @return A plot.
 #' @import data.table
 frequency.from.matrix <- function(experiment, chrom, start, end, window = 10e3, q.val = 0.95, cut.off = NULL, extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ...) {
@@ -38,3 +40,5 @@ frequency.from.matrix <- function(experiment, chrom, start, end, window = 10e3, 
     plot(mat.start + window * (pos[, 1] + pos[, 2]) / 2, pos[, 2] - pos[, 1], pch = 18, col = rgb(1, 1 - cnt, 1 - cnt), xlab = "", ylab = "", ylim = ylim, cex = cex, xlim = c(start, end), ...)
   }
 }
+
+

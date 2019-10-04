@@ -12,9 +12,11 @@
 #' @param pch Which plot-characters?
 #' @param title Add a title to the plot.
 #' @param cex How big do you want the points?
+#' @param ... further arguments passed to or from other methods.
 #' @return A dotplot
 #' @import data.table
 #' @examples
+#' \dontrun{
 #' # get scores for WT and WAPL data
 #' TAD_N_WT <- intra.inter.TAD.contacts(
 #'   TAD = WT_TADs,
@@ -32,6 +34,7 @@
 #'   exp1 = TAD_N_WT, # denominator
 #'   exp2 = TAD_N_WAPL
 #' ) # numerator
+#' }
 #' @export
 differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL,
                                      pch = ".", title = NULL, cex = 1, ...) {

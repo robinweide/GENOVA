@@ -166,6 +166,7 @@ draw.chromosome <- function() {
 #' @param m matrix result from centromere-telomere
 #' @param cut.off log2-ratio cut.off
 #' @examples
+#' \dontrun{
 #' # Get a scaled matric of the interchomosomal interactions between 15 and 19
 #' out1519 <- centromere.telomere.analysis(WT_40kb,
 #'   chrom.vec = c("chr15", "chr19")
@@ -173,6 +174,7 @@ draw.chromosome <- function() {
 #'
 #' # Plot the results
 #' draw.centromere.telomere(out1519)
+#' }
 #' @export
 draw.centromere.telomere <- function(m, cut.off = 2) {
   bwr <- colorRampPalette(c("blue", "white", "red"))
@@ -212,6 +214,7 @@ draw.centromere.telomere <- function(m, cut.off = 2) {
 #' (because they are outliers)
 #' @param verbose Produces a progress-indication.
 #' @examples
+#' \dontrun{
 #' # Get a scaled matric of the interchomosomal interactions between 15 and 19
 #' out1519 <- centromere.telomere.analysis(WT_40kb,
 #'   chrom.vec = c("chr15", "chr19")
@@ -219,6 +222,7 @@ draw.centromere.telomere <- function(m, cut.off = 2) {
 #'
 #' # Plot the results
 #' draw.centromere.telomere(out1519)
+#' }
 #' @export
 centromere.telomere.analysis <- function(exp, chrom.vec, nrow = 100,
                                          leave.out = NULL, q.top = 1e-5,

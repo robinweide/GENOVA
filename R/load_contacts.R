@@ -23,11 +23,22 @@
 #' slight performance-cost during the construction of the object, however.
 #' @examples
 #' \dontrun{
-#' WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", indices_path = "WT_10kb_abs.bed", sample_name = "WT", colour = "black")
-#' WT_10kb_cooler <- load_contacts("WT_10kb.cooler", balancing =T, sample_name = "WT", colour = "black")
-#' WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", resolution = 10e3, balancing =T, sample_name = "WT", colour = "black")
+#' WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", 
+#'                                 indices_path = "WT_10kb_abs.bed", 
+#'                                 sample_name = "WT", 
+#'                                 colour = "black")
+#' WT_10kb_cooler <- load_contacts("WT_10kb.cooler", 
+#'                                 balancing =T, 
+#'                                 sample_name = "WT", 
+#'                                 colour = "black")
+#' WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", 
+#'                                 resolution = 10e3, 
+#'                                 balancing =T, 
+#'                                 sample_name = "WT", 
+#'                                 colour = "black")
 #' }
-#' @return An contacts-object, which is a named list of contacts, indices and attributes for a Hi-C matrix of a given sample at a given resolution.
+#' @return An contacts-object, which is a named list of contacts, indices and 
+#' attributes for a Hi-C matrix of a given sample at a given resolution.
 #' @export
 load_contacts = function(signal_path, 
                         indices_path = NULL,

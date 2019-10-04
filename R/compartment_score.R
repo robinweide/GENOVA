@@ -29,6 +29,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Proper compartment scores
 #' cs <- compartment_score(list(WT_100kb, KO_100kb), bed = H3K4me1_peaks)
 #' 
@@ -37,6 +38,7 @@
 #' 
 #' # Signing the scores
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
+#' }
 compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
   explist <- check_compat_exp(explist)
@@ -152,7 +154,7 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
 #' on metrics of active chromatin.
 #'
 #' @param CS_discovery A \code{CS_discovery} object as produced by the
-#'   \code{\link[GENOVA]{comparment_score}} function.
+#'   \code{\link[GENOVA]{compartment_score}} function.
 #' @param bed A \code{data.frame} with 3 columns in BED format, containing peaks
 #'   of active chromatin marks. Mutually exclusive with the '\code{bedgraph}'
 #'   argument.
@@ -177,11 +179,13 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Doing the eigenvector decomposition only yields unsigned scores
 #' cs <- compartment_score(list(WT_100kb, KO_100kb))
 #'
 #' # Signing the scores
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
+#' }
 sign_compartmentscore <- function(CS_discovery,
                                   bed = NULL,
                                   bedgraph = NULL,

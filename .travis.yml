@@ -6,3 +6,4 @@ before_install:
 # Use R language
 language: r
 
+warnings_are_errors: false

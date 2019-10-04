@@ -3,3 +3,8 @@ misc
 misc/*
 ^.*\.Rproj$
 ^\.Rproj\.user$
+.travis.yml
+.github
+CODE_OF_CONDUCT.md
+README.rmd
+changelog.md

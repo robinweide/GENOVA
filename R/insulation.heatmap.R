@@ -27,6 +27,7 @@
 #' @param verbose Should this function be chatty?
 #' @return A plot plus an (invisible) dataframe of the underlying matrix.
 #' @examples
+#' \dontrun{
 #' # Get the insulation score with window-size 25 of two experiments.
 #' WT_10kb_ins <- genome.wide.insulation(hic = WT_10kb, window.size = 25)
 #' SCC4_10kb_ins <- genome.wide.insulation(hic = SCC4_10kb, window.size = 25)
@@ -39,6 +40,7 @@
 #'   bed = WT_TADs,
 #'   zlim = c(-.5, 0.25), profileZlim = c(-.75, -.1)
 #' )
+#' }
 #' @export
 insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus = 1, sortWidth = 10,
                                whatToPlot = "both", profileFunct = mean, title = NULL,

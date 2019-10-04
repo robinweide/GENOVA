@@ -25,6 +25,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' exps <- list(WT_100kb, KO_100kb)
 #' 
 #' # Computing signed compartment scores
@@ -35,6 +36,7 @@
 #' 
 #' # Visualising results
 #' visualise(sadl)
+#' }
 saddle <- function(explist, CS_discovery, bins = 10L) {
   
   # Check argument compatability

@@ -35,6 +35,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Typical usage: APA for loops
 #' apa <- APA(list(WT = WT_10kb, KO = KO_10kb), bedpe = WT_loops)
 #'
@@ -46,6 +47,7 @@
 #'
 #' # Visualising results
 #' visualise(apa)
+#' }
 APA <- function(explist, bedpe,
                 dist_thres = NULL,
                 size_bin = 21, size_bp = NULL,
@@ -104,6 +106,7 @@ APA <- function(explist, bedpe,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Typical usage: PESCAn for super enhancers using a 1 MB
 #' # circular permutation on a pair of experiments.
 #' pescan <- PESCAn(
@@ -125,6 +128,7 @@ APA <- function(explist, bedpe,
 #'
 #' # Visualising PE-SCAns
 #' autoplot(pescan)
+#' }
 PESCAn <- function(explist, bed, shift = 1e6L,
                    dist_thres = c(5e6L, Inf),
                    size_bin = NULL, size_bp = 4e5,
@@ -236,6 +240,7 @@ ATA <- function(explist, bed,
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Typical usage
 #' ara <- ARA(list(WT_20kb, KO_20kb), ctcf_sites)
 #'
@@ -245,6 +250,7 @@ ATA <- function(explist, bed,
 #'
 #' # Visualisation
 #' visualise(ara)
+#' }
 ARA <- function(explist, bed, shift = 1e6,
                 size_bin = 21, size_bp = NULL,
                 outlier_filter = c(0, 1),

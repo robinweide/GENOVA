@@ -276,6 +276,38 @@ RCPbed = function(explist, bedlist, chromsToUse){
   out[,c(1:2,5,4,3)]
 }
 
+# Utils -------------------------------------------------------------------
+
+# RAW RCP in, lfc out
+#' @export
+#' @keywords internal
+RCPlfc = function(dt, contrast, breaks){
+  
+  intervalMid = (diff(breaks)/2)+breaks[-length(breaks)]
+  intervalMid[1] = 0
+  
+  # intersect with cuts
+  CT = cut(dt$distance, breaks, labels = F, include.lowest = T)
+  
+  dt$cut = intervalMid[CT]
+  
+  SPREAD = dcast(dt, cut ~ samplename, value.var = "P", fun.aggregate = mean)
+  
+  i = which(colnames(SPREAD) == contrast)
+  j = 2:ncol(SPREAD); j = j[j != i]
+  
+  out = lapply(j, function(J){
+    log2(as.matrix(SPREAD[,J, with = F]) / as.matrix(SPREAD[,i, with = F]))
+  })
+  
+  out = as.data.frame(do.call('cbind',out))
+  
+  out$distance <- SPREAD$cut
+  
+  out = melt(out, id.vars = 'distance')
+  colnames(out)[2:3] = c('samplename','P')
+  out
+}
 
 
 

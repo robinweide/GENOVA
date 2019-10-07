@@ -18,10 +18,7 @@ Suggests: knitr,
     rmarkdown,
     HiCseg,
     RhpcBLASctl,
-    strawr,
-    RCurl,
-    bigwrig,
-    rhdf5
+    RCurl
 VignetteBuilder: knitr
 Remotes: rnabioco/RcppLibBigWig,
    aidenlab/straw/R,

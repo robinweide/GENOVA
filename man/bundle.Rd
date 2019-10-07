@@ -36,6 +36,7 @@ This function can be convenient when a the same analysis has been
   same resolutions.
 }
 \examples{
+\dontrun{
 # Running multiple analysis
 ata1 <- ATA(WT_10kb, tads_wt)
 ata2 <- ATA(KO_10kb, tads_ko)
@@ -45,6 +46,7 @@ cata <- bundle(WT = ata1, KO = ata2)
 
 # Visualising the combined results
 visualise(cata)
+}
 }
 \seealso{
 The \code{\link[GENOVA]{discovery}} class.

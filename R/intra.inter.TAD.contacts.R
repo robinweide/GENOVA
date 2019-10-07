@@ -16,6 +16,7 @@
 #' @return \item{sampleName}{the sample name of the experiment-object}
 #' @import data.table
 #' @examples
+#' \dontrun{
 #' # get scores for WT and WAPL data
 #' TAD_N_WT <- intra.inter.TAD.contacts(
 #'   TAD = WT_TADs,
@@ -40,20 +41,12 @@
 #'   exp2 = TAD_N_WAPL, # y
 #'   allData = T
 #' )
+#' }
 #' @export
-intra.inter.TAD.contacts <- function(exp, TAD, max_neighbour = 10, verbose = F) {
+intra.inter.TAD.contacts <- function(exp, TAD, max_neighbour = 10) {
   # error handling
   if (any(TAD[, 3] < TAD[, 2])) {
     stop("Incorrectly structured TAD data: end column smaller than start")
-  }
-  if (verbose) {
-    msg <- paste0(
-      "Calculating the intra- and inter-TAD contact frequency with ",
-      max_neighbour,
-      " neighboring TADs. This can take several minutes depending",
-      " on the size of the dataset\n"
-    )
-    message(msg)
   }
   # sort the TADs otherwise the findInterval function will not work
   TAD <- TAD[order(TAD[, 1], TAD[, 2]), 1:3]
@@ -65,9 +58,7 @@ intra.inter.TAD.contacts <- function(exp, TAD, max_neighbour = 10, verbose = F) 
   }
   # loop over chromosomes
   for (chr in chrom) {
-    if (verbose) {
-      message("Now analyzing ", chr, " \r")
-    }
+
     # select the chromosome ids from the HiC data structure
     chr.id <- exp$IDX[V1 == chr, ]
     # determine which ids overlap with which TAD/domain

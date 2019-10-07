@@ -8,6 +8,12 @@
 #' @export
 cis_trans = function(exp, bed = NULL){
   
+  # init
+  .          <- NULL
+  V1         <- NULL
+  V3         <- NULL
+  V4         <- NULL
+  
   if (any(c("MAT", "IDX") %in% names(exp))) {
     exp <- list(exp)
   }

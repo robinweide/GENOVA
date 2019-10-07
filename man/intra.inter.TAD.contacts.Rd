@@ -4,7 +4,7 @@
 \alias{intra.inter.TAD.contacts}
 \title{intra.inter.TAD.contacts}
 \usage{
-intra.inter.TAD.contacts(exp, TAD, max_neighbour = 10, verbose = F)
+intra.inter.TAD.contacts(exp, TAD, max_neighbour = 10)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample from construct.experiment()}
@@ -30,6 +30,7 @@ Combine a bed file with TAD positions and the Hi-C matrix file to calculate
 the average coverage over a TAD and between two TADs.
 }
 \examples{
+\dontrun{
 # get scores for WT and WAPL data
 TAD_N_WT <- intra.inter.TAD.contacts(
   TAD = WT_TADs,
@@ -54,6 +55,7 @@ differential.TAD.scatterplot(
   exp2 = TAD_N_WAPL, # y
   allData = T
 )
+}
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

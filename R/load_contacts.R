@@ -22,10 +22,23 @@
 #' help other GENOVA-functions to deal better with this problem. There is a
 #' slight performance-cost during the construction of the object, however.
 #' @examples
-#' WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", indices_path = "WT_10kb_abs.bed", sample_name = "WT", colour = "black")
-#' WT_10kb_cooler <- load_contacts("WT_10kb.cooler", balancing =T, sample_name = "WT", colour = "black")
-#' WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", resolution = 10e3, balancing =T, sample_name = "WT", colour = "black")
-#' @return An contacts-object, which is a named list of contacts, indices and attributes for a Hi-C matrix of a given sample at a given resolution.
+#' \dontrun{
+#' WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", 
+#'                                 indices_path = "WT_10kb_abs.bed", 
+#'                                 sample_name = "WT", 
+#'                                 colour = "black")
+#' WT_10kb_cooler <- load_contacts("WT_10kb.cooler", 
+#'                                 balancing =T, 
+#'                                 sample_name = "WT", 
+#'                                 colour = "black")
+#' WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", 
+#'                                 resolution = 10e3, 
+#'                                 balancing =T, 
+#'                                 sample_name = "WT", 
+#'                                 colour = "black")
+#' }
+#' @return An contacts-object, which is a named list of contacts, indices and 
+#' attributes for a Hi-C matrix of a given sample at a given resolution.
 #' @export
 load_contacts = function(signal_path, 
                         indices_path = NULL,
@@ -151,7 +164,7 @@ load_contacts = function(signal_path,
   if(is.null(data.table::key(index))){
     data.table::setkey(index, "V1", "V2")
   }
-  res <- as.numeric(median(index$V3 - index$V2))
+  res <- as.numeric(stats::median(index$V3 - index$V2))
   ##############################################################################
   ################################################################### check bins
   ##############################################################################
@@ -241,6 +254,11 @@ load_contacts = function(signal_path,
 
 loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
   
+  # init
+  .          <- NULL
+  V1         <- NULL
+  V4         <- NULL
+  
   ABS <- data.table::fread(indices_path, header = F, data.table = T)
   
   SIG = NULL
@@ -265,6 +283,12 @@ loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
 
 zscore_hic = function(SIG, ABS){
   
+  # init
+  D          <- NULL
+  V3         <- NULL
+  C1         <- NULL
+  C2         <- NULL
+
   chromRLE = rle(ABS$V1)
   
   CS = cumsum(c(1,chromRLE$lengths))

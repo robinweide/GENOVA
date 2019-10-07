@@ -1,7 +1,5 @@
 loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, balancing = T){
 
-  require(strawr)
-
   # get metadata of juicer-file
   juicer_metadata = get_juicer_metadata(juicerPath)
 
@@ -12,7 +10,7 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
   }
   juicer_metadata[[1]] = juicer_metadata[[1]][juicer_metadata[[1]]$chrom != 'All',]
 
-  expandedChromosomes = as.data.frame(t(combn(juicer_metadata[[1]]$chrom, m = 2)), stringsAsFactors = F)
+  expandedChromosomes = as.data.frame(t(utils::combn(juicer_metadata[[1]]$chrom, m = 2)), stringsAsFactors = F)
   expandedChromosomes = rbind(as.data.frame(cbind(juicer_metadata[[1]]$chrom,juicer_metadata[[1]]$chrom)),
                               expandedChromosomes)
   expandedChromosomes = apply(expandedChromosomes, 2, as.character)

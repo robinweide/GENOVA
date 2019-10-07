@@ -10,7 +10,7 @@ Status](https://travis-ci.org/robinweide/GENOVA.svg?branch=dev)](https://travis-
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![minimal R
-version](https://img.shields.io/badge/R%3E%3D-3.4.4-succes.svg)](https://cran.r-project.org/)
+version](https://img.shields.io/badge/R%3E%3D-3.5.0-succes.svg)](https://cran.r-project.org/)
 ![GitHub tag (latest by
 date)](https://img.shields.io/github/v/tag/robinweide/GENOVA?color=succes)
 
@@ -60,7 +60,7 @@ please use the
 ## Code of conduct
 
 Please note that this project is released with a [Contributor Code of
-Conduct](.github/CODE_OF_CONDUCT.md). By participating in this project
+Conduct](CODE_OF_CONDUCT.md). By participating in this project
 you agree to abide by its terms.
 
 -----

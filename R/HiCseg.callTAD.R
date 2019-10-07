@@ -1,3 +1,11 @@
+select.sub <- function( data, start, end ){
+  x <- rep(start:end, end-start+1)
+  y <- rep(start:end, each=end-start+1)
+  data.sub <- data[list(x,y)]
+  data.sub <- data.sub[!is.na(data.sub$V3)]
+  return(data.sub)
+}
+
 select.subset.hicseg <- function(EXP, chrom, start, end) {
   sel <- EXP$ABS[EXP$ABS[, 1] == chrom & EXP$ABS[, 2] >= start & EXP$ABS[, 2] <= end, 4]
   start.i <- min(sel)
@@ -102,8 +110,8 @@ Skipping this chromosome.")
     if (length(m) < 2) {
       warning(chrom, "'s P-arm has no borders")
     } else {
-      DF <- data.frame(chrom, head(unique(m), -1), tail(unique(m), -1), chrom, head(unique(m), -1), tail(unique(m), -1), BEDcolor)
-      DFlist[[paste0(chrom, "_P")]] <- setNames(DF, c("chr1", "x1", "x2", "chr2", "y1", "y2", "color"))
+      DF <- data.frame(chrom, utils::head(unique(m), -1), utils::tail(unique(m), -1), chrom, utils::head(unique(m), -1), utils::tail(unique(m), -1), BEDcolor)
+      DFlist[[paste0(chrom, "_P")]] <- stats::setNames(DF, c("chr1", "x1", "x2", "chr2", "y1", "y2", "color"))
     }
 
     ###
@@ -141,8 +149,8 @@ Skipping this chromosome.")
     if (length(m) < 2) {
       warning(chrom, "'s Q-arm has no borders")
     } else {
-      DF <- data.frame(chrom, head(unique(m), -1), tail(unique(m), -1), chrom, head(unique(m), -1), tail(unique(m), -1), BEDcolor)
-      DFlist[[paste0(chrom, "_Q")]] <- setNames(DF, c("chr1", "x1", "x2", "chr2", "y1", "y2", "color"))
+      DF <- data.frame(chrom, utils::head(unique(m), -1), utils::tail(unique(m), -1), chrom, utils::head(unique(m), -1), utils::tail(unique(m), -1), BEDcolor)
+      DFlist[[paste0(chrom, "_Q")]] <- stats::setNames(DF, c("chr1", "x1", "x2", "chr2", "y1", "y2", "color"))
     }
   }
   DFlist <- do.call("rbind", DFlist)

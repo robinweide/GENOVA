@@ -7,8 +7,10 @@
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis functions.}
 
-\item{signal_size}{The width/height of the signal (e.g. a value of 3 will 
+\item{...}{further arguments passed to or from other methods.
 take the middle 3x3 matrix of the APA).}
+
+\item{signal_size}{The width/height of the signal (e.g. a value of 3 will}
 }
 \description{
 Here be a placholder description

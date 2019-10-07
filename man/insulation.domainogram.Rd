@@ -17,6 +17,8 @@ insulation.domainogram(exp, chrom, start, end, axes = T,
 
 \item{end}{End position of the region of interest}
 
+\item{axes}{Plot axes}
+
 \item{window.size1}{The minimal sliding square size}
 
 \item{window.size2}{The maximal sliding square size}
@@ -26,8 +28,6 @@ insulation.domainogram(exp, chrom, start, end, axes = T,
 \item{local}{Local or per-chromosome normalisation?}
 
 \item{zlim}{Zlims of the plot}
-
-\item{cut.off}{The cut.off for Hi-C scores}
 }
 \value{
 A plot
@@ -37,5 +37,13 @@ create a domainogram for the insulation scores
 }
 \examples{
 # Make an domainogram of a locus on chromosome 7 with windowsizes from 1 to 101.
-#  insulation.domainogram(Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size1 = 1, window.size2 = 101, step = 2)
+\dontrun{
+insulation.domainogram(Hap1_WT_10kb, 
+                       chrom = 'chr7', 
+                       start = 25.5e6, 
+                       end = 30e6, 
+                       window.size1 = 1, 
+                       window.size2 = 101, 
+                       step = 2)
+}
 }

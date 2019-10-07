@@ -54,6 +54,7 @@ Takes a list of insulation-scores and plots a sorted heatmap and/or
 average profile.
 }
 \examples{
+\dontrun{
 # Get the insulation score with window-size 25 of two experiments.
 WT_10kb_ins <- genome.wide.insulation(hic = WT_10kb, window.size = 25)
 SCC4_10kb_ins <- genome.wide.insulation(hic = SCC4_10kb, window.size = 25)
@@ -66,6 +67,7 @@ df.out <- insulation.heatmap(inList,
   bed = WT_TADs,
   zlim = c(-.5, 0.25), profileZlim = c(-.75, -.1)
 )
+}
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

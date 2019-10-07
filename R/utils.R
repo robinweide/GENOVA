@@ -1,10 +1,13 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
 #' @inheritParams PESCAn
+#' 
+#' @param IDX The IDX-slot of a `contacts`-object
+#' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the
 #'   \code{bed} argument to match with the indices. Possible values:
 #'   \code{"center"}, \code{"start"} or \code{"end"}.
-#'
+#'   
 #' @return An \code{integer} vector of length \code{nrow(bed)} and parallel to
 #'   \code{bed} with indices to the Hi-C matrix.
 #'
@@ -93,12 +96,20 @@ dt_matrix <- function(x, i, j, dim, offset) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Get the TP53-locus in an experiment mapped to hg19
 #' mat <- select_subset(WT, "chr17", 75e5, 76e5)
 #'
 #' # Plot the region
 #' image(mat)
+#' }
 select_subset <- function(exp, chrom, start, end) {
+  # init
+  V1         <- NULL
+  V2         <- NULL
+  V3         <- NULL
+  V4         <- NULL
+  
   dt.cores <- data.table::getDTthreads()
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
@@ -135,9 +146,16 @@ try_require <- function(package, fun, source = NULL) {
 }
 
 
-# RAW RCP in, lfc out
+#' @title RCP log2 foldchange
+#' 
+#'  RAW RCP in, lfc out
+#'
+#' @param dt a data.table of rcp
+#' @param contrast the name of the contrast-sample
+#' @param breaks a set of numbers to use as intervals
+#'
+#' @return a data.table with the log2 fold changes compared to the `contrast`.
 #' @export
-#' @keywords internal
 RCPlfc = function(dt, contrast, breaks){
   
   intervalMid = (diff(breaks)/2)+breaks[-length(breaks)]
@@ -164,4 +182,16 @@ RCPlfc = function(dt, contrast, breaks){
   out = melt(out, id.vars = 'distance')
   colnames(out)[2:3] = c('samplename','P')
   out
+}
+
+
+GENOVA_THEME = function(){
+  p = ggplot2::theme(panel.background = ggplot2::element_blank(),
+                     legend.key =  ggplot2::element_rect(fill = 'white'),
+                     strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                     panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                     text = ggplot2::element_text(color = 'black'),
+                     axis.text = ggplot2::element_text(colour = 'black'),
+                     strip.text = ggplot2::element_text(colour = 'black') )
+  return(p)
 }

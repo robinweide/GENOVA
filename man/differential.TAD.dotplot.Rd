@@ -22,6 +22,8 @@ otherwise use a quantile-based approach to find yRange}
 \item{title}{Add a title to the plot.}
 
 \item{cex}{How big do you want the points?}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 A dotplot
@@ -31,6 +33,7 @@ Create a dot plot showing the log-ratio of the intra and
 inter TAD contact frequencies for different TAD distances.
 }
 \examples{
+\dontrun{
 # get scores for WT and WAPL data
 TAD_N_WT <- intra.inter.TAD.contacts(
   TAD = WT_TADs,
@@ -48,6 +51,7 @@ differential.TAD.dotplot(
   exp1 = TAD_N_WT, # denominator
   exp2 = TAD_N_WAPL
 ) # numerator
+}
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

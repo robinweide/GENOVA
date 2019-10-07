@@ -21,6 +21,8 @@ differential.TAD.scatterplot(exp1, exp2, line = T, allData = T,
 \item{xlab}{The x-axis label.}
 
 \item{ylab}{The y-axis label.}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 A scatterplot.
@@ -29,6 +31,7 @@ A scatterplot.
 Create a scatter plot of the inter and intra TAD contact frequencies.
 }
 \examples{
+\dontrun{
 # get scores for WT and WAPL data
 TAD_N_WT <- intra.inter.TAD.contacts(
   TAD = WT_TADs,
@@ -47,6 +50,7 @@ differential.TAD.scatterplot(
   exp2 = TAD_N_WAPL, # y
   allData = T
 )
+}
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

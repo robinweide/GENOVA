@@ -25,9 +25,11 @@ Extracts a square symmetric matrix around the diagonal from a \code{contacts}
 object.
 }
 \examples{
+\dontrun{
 # Get the TP53-locus in an experiment mapped to hg19
 mat <- select_subset(WT, "chr17", 75e5, 76e5)
 
 # Plot the region
 image(mat)
+}
 }

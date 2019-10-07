@@ -4,7 +4,7 @@ get.eigen <- function(mat, with.eigen.value = T, outlier.correct = 0.995) {
   # set non-finite values to 1
   oe$z[!is.finite(oe$z)] <- 1
   # remove outliers
-  th <- quantile(oe$z, outlier.correct)
+  th <- stats::quantile(oe$z, outlier.correct)
   oe$z[oe$z > th] <- th
 
   ev <- eigen(oe$z - 1)
@@ -16,7 +16,7 @@ eigen.sort <- function(mat, outlier.correct = 0.995) {
   # set non-finite values to 1
   oe$z[!is.finite(oe$z)] <- 1
   # remove outliers
-  th <- quantile(oe$z, outlier.correct)
+  th <- stats::quantile(oe$z, outlier.correct)
   oe$z[oe$z > th] <- th
 
   ev <- eigen(oe$z - 1)
@@ -35,7 +35,7 @@ eigen.struct <- function(mat, outlier.correct = 0.995) {
   # set non-finite values to 1
   oe$z[!is.finite(oe$z)] <- 1
   # remove outliers
-  th <- quantile(oe$z, outlier.correct)
+  th <- stats::quantile(oe$z, outlier.correct)
   oe$z[oe$z > th] <- th
 
   ev <- eigen(oe$z - 1)
@@ -48,6 +48,11 @@ eigen.struct <- function(mat, outlier.correct = 0.995) {
 
 # select a matrix of interactions for between two chromosomes
 selectData <- function(exp, chrom1, chrom2) {
+  # init
+  V1         <- NULL
+  V2         <- NULL
+  V4         <- NULL
+  
   bed <- exp$IDX
   data <- exp$MAT
   X <- bed[V1 == chrom1, V4]
@@ -65,13 +70,13 @@ selectData <- function(exp, chrom1, chrom2) {
   }
   # create x and y vectors that contain the positions of the
   # entries in the matrix that we are creating
-  x <- rep(X[1]:X[length(X)], tail(Y, n = 1) - Y[1] + 1)
-  y <- rep(Y[1]:Y[length(Y)], each = tail(X, n = 1) - X[1] + 1)
+  x <- rep(X[1]:X[length(X)], utils::tail(Y, n = 1) - Y[1] + 1)
+  y <- rep(Y[1]:Y[length(Y)], each = utils::tail(X, n = 1) - X[1] + 1)
   data.sub <- data[base::list(x, y)]
   data.sub <- data.sub[!is.na(data.sub$V3)]
   # create an empty matrix, that has as many rows as the 'X' chromosome has
   # windows and as many columns as the 'Y' chromosome has windows
-  mat <- matrix(0, ncol = tail(Y, n = 1) - Y[1] + 1, nrow = tail(X, n = 1) - X[1] + 1)
+  mat <- matrix(0, ncol = utils::tail(Y, n = 1) - Y[1] + 1, nrow = utils::tail(X, n = 1) - X[1] + 1)
   mat[cbind(data.sub$V1 - min(X) + 1, data.sub$V2 - min(Y) + 1)] <- data.sub$V3
   x.pos <- bed[V1 == chrom1, V2]
   y.pos <- bed[V1 == chrom2, V2]
@@ -110,7 +115,7 @@ largest.stretch <- function(x) {
 # divided by some value
 remove.outliers <- function(arm, q = 0.05, th.mult = 1) {
   row.scores <- apply(arm$z, 1, mean)
-  cut.off <- quantile(row.scores, 0.05)
+  cut.off <- stats::quantile(row.scores, 0.05)
   th <- cut.off / th.mult
   print(th)
 
@@ -158,8 +163,6 @@ switch.EV <- function(ev.data, chip, chrom) {
 #' @param color.scheme color scheme that should be used, defaults to fall, other values result in white-red gradient
 #' @param cs.lim y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value
 #' @param chip A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments
-#' @param smoothNA Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.
-#' Requires fields and is only needed if large white stripes are bothering you.
 #' @note
 #' # Plot a cis-compartment plot of the q-arm of chromosome 14.
 #' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks)
@@ -167,7 +170,7 @@ switch.EV <- function(ev.data, chip, chrom) {
 #' # Plot a observed/expected cis-compartment plot of the q-arm of chromosome 14.
 #' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks, obs.exp = T)
 #' @export
-cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = NULL, obs.exp = F, invert = F, color.scheme = "fall", cs.lim = NULL, chip = NULL, smoothNA = F) {
+cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = NULL, obs.exp = F, invert = F, color.scheme = "fall", cs.lim = NULL, chip = NULL) {
   # exp1 = exp
 
   mat1 <- selectData(exp1, chrom, chrom)
@@ -232,58 +235,58 @@ cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = 
   lay[1, ] <- 2
   lay[, 1] <- 3
   lay[1, 1] <- 4
-  layout(lay)
-  par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
+  graphics::layout(lay)
+  graphics::par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
 
-  if (smoothNA) {
-    try_require("fields", "cis.compartment.plot", "CRAN")
-    oe1.5 <- oe1
-    oe1.5$z[oe1.5$z == 0] <- NA
-    oe1.5$z <- fields::image.smooth(oe1.5$z, theta = 0.25)$z
-    oe1 <- oe1.5
-
-    arm1.5 <- arm1
-    arm1.5$z[arm1.5$z == 0] <- NA
-    arm1.5$z <- fields::image.smooth(arm1.5$z, theta = 0.25)$z
-    arm1 <- arm1.5
-  }
+  # if (smoothNA) {
+  #   try_require("fields", "cis.compartment.plot", "CRAN")
+  #   oe1.5 <- oe1
+  #   oe1.5$z[oe1.5$z == 0] <- NA
+  #   oe1.5$z <- fields::image.smooth(oe1.5$z, theta = 0.25)$z
+  #   oe1 <- oe1.5
+  # 
+  #   arm1.5 <- arm1
+  #   arm1.5$z[arm1.5$z == 0] <- NA
+  #   arm1.5$z <- fields::image.smooth(arm1.5$z, theta = 0.25)$z
+  #   arm1 <- arm1.5
+  # }
 
   if (obs.exp) {
     # color scale used: blue, white, red
-    bwr <- colorRampPalette(c("blue", "white", "red"))
+    bwr <- grDevices::colorRampPalette(c("blue", "white", "red"))
 
     log.mat <- log2(oe1$z)
 
     if (is.null(cut.off)) {
-      cut.off <- max(quantile(log.mat, .99))
+      cut.off <- max(stats::quantile(log.mat, .99))
       warning("No cut.off was given: using 99 percentile: ", round(cut.off), ".")
     }
 
     log.mat[log.mat > cut.off] <- cut.off
     log.mat[log.mat < -cut.off] <- -cut.off
     oe1$z <- log.mat
-    image(oe1, col = bwr(300), zlim = c(-cut.off, cut.off), axes = F, ylim = rev(range(oe1$y)))
+    graphics::image(oe1, col = bwr(300), zlim = c(-cut.off, cut.off), axes = F, ylim = rev(range(oe1$y)))
   } else {
     if (color.scheme == "fall") {
-      col.fun <- colorRampPalette(c("white", "orange", "darkred", "black"))
+      col.fun <- grDevices::colorRampPalette(c("white", "orange", "darkred", "black"))
     } else {
-      col.fun <- colorRampPalette(c("white", "red"))
+      col.fun <- grDevices::colorRampPalette(c("white", "red"))
     }
 
     if (is.null(cut.off)) {
-      cut.off <- max(quantile(arm1$z, .99))
+      cut.off <- max(stats::quantile(arm1$z, .99))
       warning("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
     }
 
     arm1$z[arm1$z > cut.off] <- cut.off
-    image(arm1, col = col.fun(300), zlim = c(0, cut.off), axes = F, ylim = rev(range(oe1$y)))
+    graphics::image(arm1, col = col.fun(300), zlim = c(0, cut.off), axes = F, ylim = rev(range(oe1$y)))
   }
-  box(lwd = 2)
+  graphics::box(lwd = 2)
 
   label <- seq(10 * floor(min(arm1$x) / 10e6), 10 * floor(max(arm1$x) / 10e6), by = 10)
   at <- label * 1e6
-  axis(3, at, label)
-  axis(2, at, label)
+  graphics::axis(3, at, label)
+  graphics::axis(2, at, label)
 
   # plot the first compartment
   compartment.score.plot(oe1, invert = invert, cs.lim = cs.lim)
@@ -423,30 +426,30 @@ trans.compartment.plot <- function(exp, chrom1, arm1 = "p", chrom2, arm2 = "p", 
   lay[1, ] <- 2
   lay[, 1] <- 3
   lay[1, 1] <- 4
-  layout(lay)
-  par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
+  graphics::layout(lay)
+  graphics::par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
 
   if (color.scheme == "fall") {
-    col.fun <- colorRampPalette(c("white", "orange", "darkred", "black"))
+    col.fun <- grDevices::colorRampPalette(c("white", "orange", "darkred", "black"))
   } else {
-    col.fun <- colorRampPalette(c("white", "red"))
+    col.fun <- grDevices::colorRampPalette(c("white", "red"))
   }
 
   if (is.null(cut.off)) {
-    cut.off <- max(quantile(arm$z, .99))
+    cut.off <- max(stats::quantile(arm$z, .99))
     message("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
   }
 
   arm$z[arm$z > cut.off] <- cut.off
-  image(arm, col = col.fun(300), zlim = c(0, cut.off), axes = F, ylim = rev(range(arm$y)))
-  box(lwd = 2)
+  graphics::image(arm, col = col.fun(300), zlim = c(0, cut.off), axes = F, ylim = rev(range(arm$y)))
+  graphics::box(lwd = 2)
 
   label <- seq(10 * floor(min(arm$x) / 10e6), 10 * floor(max(arm$x) / 10e6), by = 10)
   at <- label * 1e6
-  axis(3, at, label)
+  graphics::axis(3, at, label)
   label <- seq(10 * floor(min(arm$y) / 10e6), 10 * floor(max(arm$y) / 10e6), by = 10)
   at <- label * 1e6
-  axis(2, at, label)
+  graphics::axis(2, at, label)
 
   # plot the first compartment
   compartment.score.plot(oe1, invert = invert[1], cs.lim = cs.lim)
@@ -467,28 +470,28 @@ compartment.score.plot <- function(oe, invert = F, cs.lim = NULL, rotate = F) {
     cs.lim <- max(abs(y.pos))
   }
   if (!rotate) {
-    plot(x.pos, y.pos, type = "n", xaxt = "n", axes = F, ylim = c(-cs.lim, cs.lim))
+    graphics::plot(x.pos, y.pos, type = "n", xaxt = "n", axes = F, ylim = c(-cs.lim, cs.lim))
     ab.polygon(x.pos, y.pos)
-    axis(2)
+    graphics::axis(2)
   } else {
-    plot(y.pos, x.pos, type = "n", axes = F, xlim = c(cs.lim, -cs.lim), ylim = rev(range(x.pos)))
+    graphics::plot(y.pos, x.pos, type = "n", axes = F, xlim = c(cs.lim, -cs.lim), ylim = rev(range(x.pos)))
     ab.polygon(x.pos, y.pos, rotate = T)
-    axis(3)
+    graphics::axis(3)
   }
 }
 
 # draw a polygon for the compartment scores
 # up is a red polygon, down is a blue polygon
 ab.polygon <- function(x.pos, y.pos, rotate = F) {
-  x <- c(x.pos[1], x.pos, tail(x.pos, 1))
+  x <- c(x.pos[1], x.pos, utils::tail(x.pos, 1))
   y.up <- c(0, ifelse(y.pos < 0, 0, y.pos), 0)
   y.down <- c(0, ifelse(y.pos > 0, 0, y.pos), 0)
 
   if (rotate) {
-    polygon(y.up, x, col = rgb(1, 0, 0, 0.8), border = NA)
-    polygon(y.down, x, col = rgb(0, 0, 1, 0.8), border = NA)
+    graphics::polygon(y.up, x, col = grDevices::rgb(1, 0, 0, 0.8), border = NA)
+    graphics::polygon(y.down, x, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
   } else {
-    polygon(x, y.up, col = rgb(1, 0, 0, 0.8), border = NA)
-    polygon(x, y.down, col = rgb(0, 0, 1, 0.8), border = NA)
+    graphics::polygon(x, y.up, col = grDevices::rgb(1, 0, 0, 0.8), border = NA)
+    graphics::polygon(x, y.down, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
   }
 }

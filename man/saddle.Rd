@@ -36,6 +36,7 @@ Per chromosome arm, compartment scores are divided in quantile bins.
   will produce results similar to Bonev \emph{et al}. (2017)
 }
 \examples{
+\dontrun{
 exps <- list(WT_100kb, KO_100kb)
 
 # Computing signed compartment scores
@@ -46,4 +47,5 @@ sadl <- saddle(exps, cs)
 
 # Visualising results
 visualise(sadl)
+}
 }

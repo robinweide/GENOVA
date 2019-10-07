@@ -55,6 +55,7 @@ By default, \code{ARA} also calculates the results for shifted
   orientation is the same as in the forward sites.
 }
 \examples{
+\dontrun{
 # Typical usage
 ara <- ARA(list(WT_20kb, KO_20kb), ctcf_sites)
 
@@ -64,6 +65,7 @@ ara <- ARA(list(WT_20kb, KO_20kb))
 
 # Visualisation
 visualise(ara)
+}
 }
 \seealso{
 The \code{\link[GENOVA]{discovery}} class.

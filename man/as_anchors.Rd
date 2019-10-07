@@ -20,7 +20,9 @@ The resulting \code{anchors} has the default '\code{type}' attribute
   \code{"custom"}.
 }
 \examples{
+\dontrun{
 as_anchors(matrix(1:20, 2))
+}
 }
 \seealso{
 \code{\link[GENOVA]{anchors}}

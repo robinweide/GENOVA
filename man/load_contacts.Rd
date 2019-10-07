@@ -35,7 +35,8 @@ load_contacts(signal_path, indices_path = NULL, resolution = 10000,
 \item{verbose}{Do you want updates during the construction?}
 }
 \value{
-An contacts-object, which is a named list of contacts, indices and attributes for a Hi-C matrix of a given sample at a given resolution.
+An contacts-object, which is a named list of contacts, indices and 
+attributes for a Hi-C matrix of a given sample at a given resolution.
 }
 \description{
 Make an object which holds the most needed information of a HiC-experiment at a given resolution.
@@ -49,7 +50,19 @@ help other GENOVA-functions to deal better with this problem. There is a
 slight performance-cost during the construction of the object, however.
 }
 \examples{
-WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", indices_path = "WT_10kb_abs.bed", sample_name = "WT", colour = "black")
-WT_10kb_cooler <- load_contacts("WT_10kb.cooler", balancing =T, sample_name = "WT", colour = "black")
-WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", resolution = 10e3, balancing =T, sample_name = "WT", colour = "black")
+\dontrun{
+WT_10kb_hicpro <- load_contacts(signal_path = "WT_10kb_iced.matrix", 
+                                indices_path = "WT_10kb_abs.bed", 
+                                sample_name = "WT", 
+                                colour = "black")
+WT_10kb_cooler <- load_contacts("WT_10kb.cooler", 
+                                balancing =T, 
+                                sample_name = "WT", 
+                                colour = "black")
+WT_10kb_juicer <- load_contacts("WT_10kb_iced.hic", 
+                                resolution = 10e3, 
+                                balancing =T, 
+                                sample_name = "WT", 
+                                colour = "black")
+}
 }

@@ -25,7 +25,11 @@
 
 \item{extraPadding}{Extra room needed for the ends of the piramid.}
 
-\item{ylim}{The y-start and -stop: zero is at the diagonal,}
+\item{ylim}{The y-start and -stop: zero is at the diagonal}
+
+\item{shinyAxis}{Plot a nice axis?}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 A plot.

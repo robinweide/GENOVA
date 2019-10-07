@@ -32,13 +32,13 @@ chrom.comparison.plot <- function(mat, color.fun = NULL, z.max = NULL) {
   )
   axis(1,
     at = seq(0, 1, len = nrow(mat$rawCounts)),
-    lab = rownames(mat$normMat),
+    labels = rownames(mat$normMat),
     las = 2,
     lwd = 2
   )
   axis(2,
     at = seq(0, 1, len = nrow(mat$rawCounts)),
-    lab = rownames(mat$normMat),
+    labels = rownames(mat$normMat),
     las = 2,
     lwd = 2
   )

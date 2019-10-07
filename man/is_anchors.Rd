@@ -16,11 +16,13 @@ A \code{logical} vector of length 1.
 Function to check if an object is \code{anchors}.
 }
 \examples{
+\dontrun{
 m <- matrix(1:20, 10)
 is_anchors(m) # FALSE
 
 m <- as_anchors(m)
 is_anchors(m) # TRUE
+}
 }
 \seealso{
 \code{\link[GENOVA]{anchors}}

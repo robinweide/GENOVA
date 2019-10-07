@@ -12,9 +12,11 @@
 #' @param pch Which plot-characters?
 #' @param title Add a title to the plot.
 #' @param cex How big do you want the points?
+#' @param ... further arguments passed to or from other methods.
 #' @return A dotplot
 #' @import data.table
 #' @examples
+#' \dontrun{
 #' # get scores for WT and WAPL data
 #' TAD_N_WT <- intra.inter.TAD.contacts(
 #'   TAD = WT_TADs,
@@ -32,6 +34,7 @@
 #'   exp1 = TAD_N_WT, # denominator
 #'   exp2 = TAD_N_WAPL
 #' ) # numerator
+#' }
 #' @export
 differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL,
                                      pch = ".", title = NULL, cex = 1, ...) {
@@ -73,7 +76,7 @@ differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL
     )
     axis(1,
       at = 1:(max.neighbor + 1),
-      lab = paste0("n + ", 0:max.neighbor), las = 2
+      labels = paste0("n + ", 0:max.neighbor), las = 2
     )
   } else {
     plot(tad.dist + runif(nrow(comb.exp), -0.4, 0.4),
@@ -87,7 +90,7 @@ differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL
       ylim = yRange,
       main = title, ...
     )
-    axis(1, at = 1:(max.neighbor + 1), lab = paste0("n + ", 0:max.neighbor), las = 2)
+    axis(1, at = 1:(max.neighbor + 1), labels = paste0("n + ", 0:max.neighbor), las = 2)
   }
 
   invisible(comb.exp)

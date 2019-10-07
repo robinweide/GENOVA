@@ -12,6 +12,8 @@ badBin.plot(hicMat, res, bin, RCP_base = RCP_base)
 \item{res}{The resolution}
 
 \item{bin}{The bin to plot}
+
+\item{RCP_base}{The output of RCP}
 }
 \value{
 A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can output a bed-file (`bed`).

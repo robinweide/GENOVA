@@ -62,6 +62,7 @@ NULL
 #' @return A \code{discovery}-class object of the same type.
 #'
 #' @examples
+#' \dontrun{
 #' # Running multiple analysis
 #' ata1 <- ATA(WT_10kb, tads_wt)
 #' ata2 <- ATA(KO_10kb, tads_ko)
@@ -71,6 +72,7 @@ NULL
 #'
 #' # Visualising the combined results
 #' visualise(cata)
+#' }
 NULL
 
 # Bundle functions --------------------------------------------------------
@@ -170,6 +172,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 #'   out to individual experiments.
 #'
 #' @param discovery A \code{discovery} object with more than 1 sample.
+#' @param ... 	further arguments passed to or from other methods.
 #'
 #' @return A \code{list} wherein each element is a \code{discovery} object for a
 #'   single sample.
@@ -181,6 +184,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 #'   The \code{\link[GENOVA]{discovery}} class.
 #'
 #' @examples
+#' \dontrun{
 #' # Getting a discovery object
 #' apa <- APA(list(WT_20kb, KO_20kb), loops)
 #'
@@ -189,13 +193,14 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
 #'
 #' # Plotting the first result only
 #' visualise(split[[1]])
+#' }
 NULL
 
 # Unbundle functions ------------------------------------------------------
 
 #' @rdname unbundle
 #' @export
-unbundle.ARMLA_discovery <- function(discovery) {
+unbundle.ARMLA_discovery <- function(discovery, ...) {
   slotnames <- names(discovery)
 
   # Find experiment names
@@ -223,19 +228,20 @@ unbundle.ARMLA_discovery <- function(discovery) {
 # Utilities ---------------------------------------------------------------
 
 #' @export
-subset.ARMLA_discovery <- function(discovery, i) {
-  oldclass <- class(discovery)[[1]]
-  if (!("signal" %in% names(discovery))) {
+subset.ARMLA_discovery <- function(x, i, ...) {
+  
+  oldclass <- class(x)[[1]]
+  if (!("signal" %in% names(x))) {
     warning(paste0("Invalid ", oldclass, "object: no 'signal' array found.\n",
                    "Returning 'NULL'"),
             call. = FALSE)
     return(NULL)
   }
 
-  attris <- attributes(discovery)
-  class(discovery) <- "list"
+  attris <- attributes(x)
+  class(x) <- "list"
 
-  out <- lapply(discovery, function(slot) {
+  out <- lapply(x, function(slot) {
     thisclass <- class(slot)
     if (thisclass == "array") {
       return(slot[,,i, drop = FALSE])

@@ -87,6 +87,7 @@
 #'   Hi-C index conversion.
 #'
 #' @examples
+#' \dontrun{
 #' # PE-SCAn
 #' anch <- anchors_PESCAn(WT_20kb$ABS, WT_20kb$RES, super_enhancers)
 #' PESCAn(list(WT_20kb, KO_20kb), anchors = anch)
@@ -102,6 +103,7 @@
 #' # ARA
 #' anch <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
 #' ARA(list(WT_20kb, KO_20kb), anchors = anch)
+#' }
 NULL
 
 # Types --------------------------------------------------------------
@@ -127,13 +129,13 @@ anchors_PESCAn <- function(IDX, res, bed,
     if (length(idx) == 0) {
       stop("Too few comparable positions per chromosome.", call. = FALSE)
     }
-    idx <- lapply(idx, function(x) t(combn(x, 2)))
+    idx <- lapply(idx, function(x) t(utils::combn(x, 2)))
     idx <- do.call(rbind, idx)
     is_cis <- TRUE
   } else {
 
     # Generate all combinations
-    idx <- t(combn(newbed$idx, 2))
+    idx <- t(utils::combn(newbed$idx, 2))
     is_cis <- newbed[match(idx, newbed$idx), 1]
     is_cis <- matrix(is_cis, ncol = 2)
     is_cis <- is_cis[, 1] == is_cis[, 2]
@@ -174,12 +176,13 @@ anchors_APA <- function(IDX, res, bedpe,
                         mode = c("both", "cis", "trans")) {
   mode <- match.arg(mode)
 
+  
   # Convert bedpe to idx matrix
   newbed <- cbind(bedpe[, 1:6],
     idx1 = bed2idx(IDX, bedpe[, 1:3], mode = "centre"),
     idx2 = bed2idx(IDX, bedpe[, 4:6], mode = "centre")
   )
-  newbed <- na.exclude(newbed)
+  newbed <- stats::na.exclude(newbed)
   newbed <- newbed[!duplicated(newbed[, 7:8]), ]
 
   # Shortcut when no additional filtering is needed
@@ -292,8 +295,10 @@ anchors_ARA <- function(IDX, bed) {
 #'
 #' @return A \code{anchors} object of the same type.
 #' @examples
+#' \dontrun{
 #' anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
 #' anchors_finish(WT_20kb$ABS, anch, -10:10, 0)
+#' }
 anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
   anchors <- anchors_filter_oob(IDX, anchors, rel_pos)
   anch_id <- parse(text = paste0("seq.int(", nrow(anchors), ")"),
@@ -355,6 +360,10 @@ anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
 #' @export
 anchors_shift <- function(IDX, anchors, rel_pos, shift = 1) {
 
+  # init
+  V4         <- NULL
+  V1         <- NULL
+  
   # Translate indices to chromosomes
   chrom   <- IDX[match(anchors, IDX[, V4]), V1]
   shifted <- IDX[match(anchors + shift + max(rel_pos), IDX[, V4]), V1]
@@ -431,7 +440,9 @@ anchors_filter_oob <- function(IDX, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{anchors}}
 #'
 #' @examples
+#' \dontrun{
 #' as_anchors(matrix(1:20, 2))
+#' }
 as_anchors <- function(x) {
   if (is.null(dim(x)) || length(dim(x)) > 2) {
     stop(paste0("An object of class ", class(x),
@@ -467,11 +478,13 @@ as_anchors <- function(x) {
 #' @seealso \code{\link[GENOVA]{anchors}}
 #'
 #' @examples
+#' \dontrun{
 #' m <- matrix(1:20, 10)
 #' is_anchors(m) # FALSE
 #'
 #' m <- as_anchors(m)
 #' is_anchors(m) # TRUE
+#' }
 is_anchors <- function(x) {
   inherits(x, "anchors")
 }

@@ -51,6 +51,7 @@ A \code{PESCAn_discovery} object with the PE-SCAn results.
 Performs an all-to-all Hi-C contact analysis for specified regions.
 }
 \examples{
+\dontrun{
 # Typical usage: PESCAn for super enhancers using a 1 MB
 # circular permutation on a pair of experiments.
 pescan <- PESCAn(
@@ -72,6 +73,7 @@ pescan <- PESCAn(
 
 # Visualising PE-SCAns
 autoplot(pescan)
+}
 }
 \seealso{
 The \code{\link[GENOVA]{discovery}} class.

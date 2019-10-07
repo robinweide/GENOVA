@@ -25,6 +25,8 @@ A \code{anchors} object of the same type.
 Finish anchors for repeated matrix lookup
 }
 \examples{
+\dontrun{
 anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
 anchors_finish(WT_20kb$ABS, anch, -10:10, 0)
+}
 }

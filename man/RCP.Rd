@@ -31,10 +31,12 @@ Bins are created on a log scale, which leads to equal amounts of datapoints per 
 }
 \examples{
 # Calculate the RCP of chromosome 1
+\dontrun{
 RCP_out = RCP(experimentList = list('WT' = WT_1MB), chromsToUse = 'chr1')
 
 # Plot the RCP
 visualise(RCP_out)
+}
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

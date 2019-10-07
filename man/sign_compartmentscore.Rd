@@ -39,11 +39,13 @@ Signing compartment scores is necessary to have the compartment
   or early replication timing metrics.
 }
 \examples{
+\dontrun{
 # Doing the eigenvector decomposition only yields unsigned scores
 cs <- compartment_score(list(WT_100kb, KO_100kb))
 
 # Signing the scores
 cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
+}
 }
 \seealso{
 \code{\link[GENOVA]{compartment_score}} for computing the

@@ -29,6 +29,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Proper compartment scores
 #' cs <- compartment_score(list(WT_100kb, KO_100kb), bed = H3K4me1_peaks)
 #' 
@@ -37,6 +38,7 @@
 #' 
 #' # Signing the scores
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
+#' }
 compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
   explist <- check_compat_exp(explist)
@@ -170,11 +172,13 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Doing the eigenvector decomposition only yields unsigned scores
 #' cs <- compartment_score(list(WT_100kb, KO_100kb))
 #'
 #' # Signing the scores
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
+#' }
 sign_compartmentscore <- function(CS_discovery,
                                   bed = NULL,
                                   bedgraph = NULL,
@@ -323,6 +327,3 @@ uptrimat2eig <- function(x, y, value, ev = 1) {
   data.table(bin = seq_along(eig) + mini - 1,
              ev = eig)
 }
-
-bed <- "/DATA/projects/Hap1/ChIP-seq/completeSet_WTWaplMed12DKO/MACS2/WT_K4me1_peaks.narrowPeak"
-bed <- read.table(bed)

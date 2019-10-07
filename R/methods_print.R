@@ -2,7 +2,7 @@
 
 #' @export
 #' @keywords internal
-print.contacts <- function(x) {
+print.contacts <- function(x, ...) {
   res <- attr(x, "res")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
@@ -53,7 +53,7 @@ print.contacts <- function(x) {
 
 # Discovery classes -------------------------------------------------------
 
-print.ARMLA_discovery <- function(x) {
+print.ARMLA_discovery <- function(x, ...) {
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
@@ -106,22 +106,22 @@ print.ARMLA_discovery <- function(x) {
 
 #' @export
 #' @keywords internal
-print.RCP_discovery <- function(discovery) {
+print.RCP_discovery <- function(x, ...) {
   
-  string <- paste0("A ", attr(discovery, "package"), " ", 
+  string <- paste0("A ", attr(x, "package"), " ", 
                    'RCP_discovery',  " object with the following details:\n")
   
-  smpls = unique(discovery$raw$samplename)
+  smpls = unique(x$raw$samplename)
   smpls = paste(paste0(smpls[-length(smpls)], collapse = ', '), 
                 smpls[length(smpls)], sep = ' & ')
   print_samples = paste0("- samples: ", smpls,"\n")
   
-  regs = unique(discovery$raw$region)
+  regs = unique(x$raw$region)
   regs = paste(paste0(regs[-length(regs)], collapse = ', '), 
                regs[length(regs)], sep = ' & ')
   print_regions = paste0("- regions: ",regs,"\n")
   
-  print_norm = paste0("- normalisation: ", attr(discovery, 'norm'),"\n")
+  print_norm = paste0("- normalisation: ", attr(x, 'norm'),"\n")
   
   cat(string)
   cat(print_samples)
@@ -132,11 +132,11 @@ print.RCP_discovery <- function(discovery) {
 
 #' @export
 #' @keywords internal
-print.CS_discovery <- function(discovery) {
+print.CS_discovery <- function(x, ...) {
   
-  myclass <- class(discovery)[1]
-  cols <- colnames(discovery$compart_scores)
-  res <- attr(discovery, "resolution")
+  myclass <- class(x)[1]
+  cols <- colnames(x$compart_scores)
+  res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
   } else if (res %% 1e3 == 0) {
@@ -144,22 +144,22 @@ print.CS_discovery <- function(discovery) {
   } else {
     paste0(res, " bp")
   }
-  part <- attr(discovery, "partitioning")
+  part <- attr(x, "partitioning")
   
-  string <- paste0("A ", attr(discovery, "PACKAGE"), " '", myclass, 
+  string <- paste0("A ", attr(x, "PACKAGE"), " '", myclass, 
                    "' object involving the following ", 
                    length(cols) - 4, " experiments:\n'", 
                    paste0(cols[5:length(cols)], collapse = "', '"), "' at a ",
                    "resolution of ", res, ".\n")
   slot0 <- "Contains the following slots:\n\n"
   
-  slot1 <- if (attr(discovery, "signed")) {
+  slot1 <- if (attr(x, "signed")) {
     paste0("- compart_scores:\tA data.frame containing ",
-           sum(!is.na(discovery$compart_scores[[5]])),
+           sum(!is.na(x$compart_scores[[5]])),
            " compartment scores.\n\n")
   } else {
     paste0("- compart_scores:\tA data.frame containing ",
-           sum(!is.na(discovery$compart_scores[[5]])),
+           sum(!is.na(x$compart_scores[[5]])),
            " scores.\n\n")
   }
 
@@ -175,7 +175,7 @@ print.CS_discovery <- function(discovery) {
   cat(slot0)
   cat(slot1)
   cat(details1)
-  if (attr(discovery, "signed")) {
+  if (attr(x, "signed")) {
     cat(signed)
   } else {
     cat(unsigned)
@@ -184,7 +184,7 @@ print.CS_discovery <- function(discovery) {
 
 #' @export
 #' @keywords internal
-print.saddle_discovery <- function(x) {
+print.saddle_discovery <- function(x, ...) {
   myclass <- class(x)
   n_bins <- max(c(x$saddle$q1, x$saddle$q2), na.rm = TRUE)
   expnames <- unique(x$saddle$exp)
@@ -218,14 +218,13 @@ print.saddle_discovery <- function(x) {
 
 #' @export
 #' @keywords internal
-print.anchors <- function(x) {
+print.anchors <- function(x, ...) {
   str1 <- paste0("An 'anchors' object of type '", attr(x, "type"),
                  "' of length ", nrow(x),":\n")
   class(x) <- "matrix"
   x <- x[T,]
   cat(str1)
   p <- print(head(x))
-  outp <<- p
   n <- max(nchar(p))
   if (is.null(dimnames(p))) {
     if (nrow(x) > nrow(p)) {

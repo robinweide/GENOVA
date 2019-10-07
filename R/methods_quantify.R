@@ -6,6 +6,7 @@
 #' @description Here be a placholder description
 #' @param discovery A \code{discovery} object as returned by GENOVA analysis functions.
 #' @param signal_size The width/height of the signal (e.g. a value of 3 will 
+#' @param ... further arguments passed to or from other methods.
 #' take the middle 3x3 matrix of the APA).
 
 # Functions ---------------------------------------------------------------
@@ -23,7 +24,7 @@ quantify.default <- function(discovery, ...) {
 
 #' @rdname visualise
 #' @export
-quantify.APA_discovery <- function(discovery, signal_size = 3) {
+quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
 
   mid = unique(floor(dim(discovery$signal[,,1])/2)+1)
   mid_range = (mid - ((signal_size - 1)/2)):(mid + ((signal_size - 1)/2))

@@ -8,6 +8,8 @@ insulation.polygon(ins.score, rotate = F)
 }
 \arguments{
 \item{ins.score}{Scores.}
+
+\item{rotate}{Rotate the polygon}
 }
 \value{
 happiness

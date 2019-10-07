@@ -17,10 +17,12 @@
 #' @return \item{smooth}{a log10-mean smoothed probability}
 #' @examples
 #' # Calculate the RCP of chromosome 1
+#' \dontrun{
 #' RCP_out = RCP(experimentList = list('WT' = WT_1MB), chromsToUse = 'chr1')
 #'
 #' # Plot the RCP
 #' visualise(RCP_out)
+#' }
 #' @export
 RCP = function(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL, genomeWide = NULL){
   
@@ -128,6 +130,14 @@ RCP = function(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL, 
 
 RCPchrom = function(explist, chromsToUse, genomeWide){
   
+  # init
+  .        <- NULL
+  V1       <- NULL
+  V3       <- NULL
+  V4       <- NULL
+  C        <- NULL
+  distance <- NULL
+  
   RCP_out = lapply(explist, function(x){
     
     SIG = x$MAT
@@ -188,6 +198,19 @@ RCPchrom = function(explist, chromsToUse, genomeWide){
 
 
 RCPbed = function(explist, bedlist, chromsToUse){
+  
+  # init
+  .          <- NULL
+  V1         <- NULL
+  V3         <- NULL
+  V4         <- NULL
+  C          <- NULL
+  distance   <- NULL
+  D          <- NULL
+  colour     <- NULL  
+  samplename <- NULL
+  SUM        <- NULL
+  
   
   ############################################################################## for bed...
   out = lapply(bedlist, function(bed){

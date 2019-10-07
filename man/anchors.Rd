@@ -112,6 +112,7 @@ Anchors are calculated within aggregate repeated matrix lookup
 }
 
 \examples{
+\dontrun{
 # PE-SCAn
 anch <- anchors_PESCAn(WT_20kb$ABS, WT_20kb$RES, super_enhancers)
 PESCAn(list(WT_20kb, KO_20kb), anchors = anch)
@@ -127,6 +128,7 @@ ATA(list(WT_10kb, KO_10kb), anchors = anch)
 # ARA
 anch <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
 ARA(list(WT_20kb, KO_20kb), anchors = anch)
+}
 }
 \seealso{
 \code{\link[GENOVA]{bed2idx}} for general genomic coordinates to

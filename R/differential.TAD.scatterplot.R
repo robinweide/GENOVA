@@ -10,9 +10,11 @@
 #' @param color.fun A color-function like rainbow().
 #' @param xlab The x-axis label.
 #' @param ylab The y-axis label.
+#' @param ... further arguments passed to or from other methods.
 #' @return A scatterplot.
 #' @import data.table
 #' @examples
+#' \dontrun{
 #' # get scores for WT and WAPL data
 #' TAD_N_WT <- intra.inter.TAD.contacts(
 #'   TAD = WT_TADs,
@@ -31,6 +33,7 @@
 #'   exp2 = TAD_N_WAPL, # y
 #'   allData = T
 #' )
+#' }
 #' @export
 #'
 differential.TAD.scatterplot <- function(exp1, exp2, line = T, allData = T,

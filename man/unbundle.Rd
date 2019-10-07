@@ -7,10 +7,12 @@
 \usage{
 unbundle(discovery, ...)
 
-\method{unbundle}{ARMLA_discovery}(discovery)
+\method{unbundle}{ARMLA_discovery}(discovery, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object with more than 1 sample.}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 A \code{list} wherein each element is a \code{discovery} object for a
@@ -25,6 +27,7 @@ In case the \code{discovery} contains incomplete samples with
   missing slots, \code{NULL} is returned.
 }
 \examples{
+\dontrun{
 # Getting a discovery object
 apa <- APA(list(WT_20kb, KO_20kb), loops)
 
@@ -33,6 +36,7 @@ split <- unbundle(apa)
 
 # Plotting the first result only
 visualise(split[[1]])
+}
 }
 \seealso{
 \code{\link[GENOVA]{bundle}} for the opposite of \code{unbundle}.

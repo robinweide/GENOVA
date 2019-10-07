@@ -8,11 +8,20 @@
 #' @param plotBad Plot some of the bad bins for visual inspection.
 #' @return A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can output a bed-file (`bed`).
 #' @examples
+#' \dontrun{
 #' # Identify and plot the bad bins
-#' bb_out <- badBin.find(experiment = WT_100kb, p.treshold = 0.1, getBed = T, plotBad = T)
+#' bb_out <- badBin.find(experiment = WT_100kb, 
+#'                       p.treshold = 0.1, 
+#'                       getBed = T, 
+#'                       plotBad = T)
 #'
 #' # plot the region from within hic.matrixplot
-#' hic.matrixplot(exp1 = WT_100kb, chrom = "chr7", start = 26.75e6, end = 28.5e6, chip = list(bb_out$bed))
+#' hic.matrixplot(exp1 = WT_100kb, 
+#'                chrom = "chr7", 
+#'                start = 26.75e6, 
+#'                end = 28.5e6, 
+#'                chip = list(bb_out$bed))
+#' }
 badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T) {
   ## INIT-phase
   cat("Initiation...\n")

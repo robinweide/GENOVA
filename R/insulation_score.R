@@ -8,10 +8,16 @@
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for Hi-C scores
 #' @param window.size The sliding square size
-#' @param Local or per-chromosome normalisation?
+#' @param local or per-chromosome normalisation?
 #' @examples
 #' # Make a matrix-plot of an experiment and the insulation-score for a region of interest.
-#' #  insulation.plot.dual(exp1 = Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size = 21)
+#' \dontrun{
+#' insulation.plot.dual(exp1 = Hap1_WT_10kb, 
+#'                      chrom = 'chr7', 
+#'                      start = 25.5e6, 
+#'                      end = 30e6, 
+#'                      window.size = 21)
+#' }
 #' @return A plot
 #' @export
 insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, window.size = 21, local = T) {
@@ -40,13 +46,13 @@ insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, windo
   box(lwd = 2)
   size.region <- diff(range(mat1$x))
   if (size.region > 2e6) {
-    axis(2, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
   } else {
     lab <- seq(0, 3e9, by = 500e3) / 1e6
     lab <- sprintf("%.1f", lab)
-    axis(2, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
   }
 
   extend <- attr(exp, "res") * window.size
@@ -66,7 +72,8 @@ insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, windo
 
 #' plot.insulation.dual
 #'
-#' Plot insulation-scores of two experiments, complete with Hi-C matrices, for a region of interest.
+#' Plot insulation-scores of two experiments, complete with Hi-C matrices, for 
+#' a region of interest.
 #'
 #' @param exp1 A Hi-C experiment object: produced by construct.experiment().
 #' @param exp2 A Hi-C experiment object: produced by construct.experiment().
@@ -78,8 +85,15 @@ insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, windo
 #' @param local Local or per-chromosome normalisation?
 #' @param delta Plot the differential insulation scores (exp1 - exp2)
 #' @examples
-#' # Make a matrix-plot, with two experiments and their respective insulation-scores, for a region of interest.
-#' #  insulation.plot.dual(exp1 = Hap1_WT_10kb, exp2 = Hap1_WAPL_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size = 21)
+#' # Make a matrix-plot, with two experiments for a region of interest.
+#' \dontrun{
+#' insulation.plot.dual(exp1 = Hap1_WT_10kb, 
+#'                      exp2 = Hap1_WAPL_10kb, 
+#'                      chrom = 'chr7', 
+#'                      start = 25.5e6, 
+#'                      end = 30e6, 
+#'                      window.size = 21)
+#' }
 #' @return A plot
 #' @export
 insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, window.size = 21, local = T, delta = F) {
@@ -120,13 +134,13 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
   box(lwd = 2)
   size.region <- diff(range(mat1$x))
   if (size.region > 2e6) {
-    axis(2, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 1e6), lab = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6, lwd = 2, cex.axis = 1.6)
   } else {
     lab <- seq(0, 3e9, by = 500e3) / 1e6
     lab <- sprintf("%.1f", lab)
-    axis(2, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
-    axis(3, at = seq(0, 3e9, by = 500e3), lab = lab, lwd = 2, cex.axis = 1.6)
+    axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
+    axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
   }
 
   # plot the insulation score for the matrix
@@ -172,7 +186,7 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
 #' @param chrom Chromosome of the region of interest
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
-#' @param cut.off The cut.off for Hi-C scores
+#' @param axes Plot axes
 #' @param window.size1 The minimal sliding square size
 #' @param window.size2 The maximal sliding square size
 #' @param step Thesliding square step-size
@@ -181,7 +195,15 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
 #' @return A plot
 #' @examples
 #' # Make an domainogram of a locus on chromosome 7 with windowsizes from 1 to 101.
-#' #  insulation.domainogram(Hap1_WT_10kb, chrom = 'chr7', start = 25.5e6, end = 30e6, window.size1 = 1, window.size2 = 101, step = 2)
+#' \dontrun{
+#' insulation.domainogram(Hap1_WT_10kb, 
+#'                        chrom = 'chr7', 
+#'                        start = 25.5e6, 
+#'                        end = 30e6, 
+#'                        window.size1 = 1, 
+#'                        window.size2 = 101, 
+#'                        step = 2)
+#' }
 #' @export
 insulation.domainogram <- function(exp, chrom, start, end, axes = T, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim = c(-1, 0.5)) {
   if (step %% 2) {
@@ -209,7 +231,7 @@ insulation.domainogram <- function(exp, chrom, start, end, axes = T, window.size
   }
   at <- seq(1e6 * floor(start / 1e6), 1e6 * floor(end / 1e6), by = 1e6)
   if (axes) {
-    axis(1, at = at, lab = at / 1e6, lwd = 2)
+    axis(1, at = at, labels = at / 1e6, lwd = 2)
   }
   axis(2, lwd = 2)
   box(lwd = 2)
@@ -247,7 +269,7 @@ delta.insulation.domainogram <- function(exp1, exp2, chrom, start, end, window.s
     rect(x1, y1, x2, y2, col = color.vec[color.index], border = NA)
   }
   at <- seq(1e6 * floor(start / 1e6), 1e6 * floor(end / 1e6), by = 1e6)
-  axis(1, at = at, lab = at / 1e6, lwd = 2)
+  axis(1, at = at, labels = at / 1e6, lwd = 2)
   axis(2, lwd = 2)
   box(lwd = 2)
 }
@@ -258,6 +280,7 @@ delta.insulation.domainogram <- function(exp1, exp2, chrom, start, end, window.s
 #' create a domainogram for the insulation scores
 #'
 #' @param ins.score Scores.
+#' @param rotate Rotate the polygon
 #' @return happiness
 insulation.polygon <- function(ins.score, rotate = F) {
   x <- c(ins.score[1, 1], ins.score[, 1], tail(ins.score[, 1], 1))
@@ -282,13 +305,19 @@ insulation.polygon <- function(ins.score, rotate = F) {
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
 #' @param window.size The sliding square size
-#' @param step Thesliding square step-size
 #' @param local Local or per-chromosome normalisation?
 #' @param diag.add Add values to diaginal
 #' @return A plot
 #' @examples
 #' # Get the insulation score with window-size 20 of a locus on chromosome 7.
-#' localInsulationScores <- insulation.score(hic = Hap1_WT_10kb, window.size = 20, chrom = "chr7", start = 25e6, end = 30e6, local = T)
+#' \dontrun{
+#' localInsulationScores <- insulation.score(hic = Hap1_WT_10kb, 
+#'                                           window.size = 20, 
+#'                                           chrom = "chr7", 
+#'                                           start = 25e6, 
+#'                                           end = 30e6, 
+#'                                           local = T)
+#' }
 #' @export
 insulation.score <- function(exp, window.size, chrom, start, end, diag.add = 0, local = T) {
   if ((end - start) / attr(exp, "res") > 1000 + 2 * window.size) {
@@ -376,8 +405,11 @@ chromosome.wide.insulation <- function(exp, window.size, chrom) {
 #' @param normalize.genome Perform the log2(O/E) normalisation
 #' @return DF with insulation score
 #' @examples
-#' # Get the insulation score with window-size 25 and store in the INSULATION-slot.
-#' Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, window.size = 25)
+#' # Get the insulation score with window-size 25
+#' \dontrun{
+#' Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, 
+#'                                                   window.size = 25)
+#' }
 #' @export
 genome.wide.insulation <- function(exp, window.size, normalize.genome = F, verbose = F) {
   chrom.vec <- c(exp$IDX[1, V1], exp$IDX[which(head(exp$IDX[, V1], -1) != tail(exp$IDX[, V1], -1)) + 1, V1])

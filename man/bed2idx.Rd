@@ -7,7 +7,7 @@
 bed2idx(IDX, bed, mode = c("centre", "start", "end"))
 }
 \arguments{
-\item{IDX}{The IDX-slot of a `contacts`-object}
+\item{IDX}{The IDX-slot of a \code{contacts} object}
 
 \item{bed}{A 3-column data.frame}
 

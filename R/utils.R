@@ -104,12 +104,7 @@ dt_matrix <- function(x, i, j, dim, offset) {
 #' image(mat)
 #' }
 select_subset <- function(exp, chrom, start, end) {
-  # init
-  V1         <- NULL
-  V2         <- NULL
-  V3         <- NULL
-  V4         <- NULL
-  
+
   dt.cores <- data.table::getDTthreads()
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)

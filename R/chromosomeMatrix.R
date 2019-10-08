@@ -24,6 +24,11 @@
 #' @export
 chromosomeMatrix <- function(exp, color.fun = NULL, cut.off = NULL,
                              chromsToUse = NULL, remove = NULL, plot = TRUE) {
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
+  
   exp$IDX[["V1"]] <- as.character(exp$IDX[["V1"]])
   chrom <- c(
     exp$IDX[1, V1],

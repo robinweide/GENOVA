@@ -1,4 +1,9 @@
 select.sub <- function( data, start, end ){
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
+  
   x <- rep(start:end, end-start+1)
   y <- rep(start:end, each=end-start+1)
   data.sub <- data[list(x,y)]

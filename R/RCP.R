@@ -45,6 +45,11 @@ RCP = function(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL, 
       
     }
   }
+  
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
 
   ##############################################################################
   ######################################################################## setup

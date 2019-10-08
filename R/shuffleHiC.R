@@ -17,6 +17,10 @@
 #'
 #'
 shuffleHiC <- function(MAT, symmetric = T) {
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
   # works only with symmetric matrices, where the diagonal starts at 1,1 and ends at n,n
 
   # check if input is from select_subset (list with c(x),c(y), mat(z)) or just a matrix

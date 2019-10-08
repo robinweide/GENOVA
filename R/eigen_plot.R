@@ -48,10 +48,10 @@ eigen.struct <- function(mat, outlier.correct = 0.995) {
 
 # select a matrix of interactions for between two chromosomes
 selectData <- function(exp, chrom1, chrom2) {
-  # init
-  V1         <- NULL
-  V2         <- NULL
-  V4         <- NULL
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
   
   bed <- exp$IDX
   data <- exp$MAT

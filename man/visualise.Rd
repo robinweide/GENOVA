@@ -10,6 +10,7 @@
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
 \alias{visualise.CS_discovery}
+\alias{visualise.IS_discovery}
 \alias{visualise.RCP_discovery}
 \alias{visualise.virtual4C_discovery}
 \alias{visualise.saddle_discovery}
@@ -38,6 +39,9 @@ visualise(discovery, ...)
   colour_lim_contrast = NULL, ...)
 
 \method{visualise}{CS_discovery}(discovery, contrast = NULL,
+  chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
+
+\method{visualise}{IS_discovery}(discovery, contrast = NULL,
   chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
 
 \method{visualise}{RCP_discovery}(discovery, contrast = 1,
@@ -88,10 +92,10 @@ returned?}
 visualisation? \code{"obsexp"} for the observed over expected metric or
 \code{"signal"} for mean contacts at unshifted anchors.}
 
-\item{chr}{\code{[CS & saddle]} A \code{character} of length 1 indicating a
+\item{chr}{\code{[CS, saddle & IS]} A \code{character} of length 1 indicating a
 chromosome name.}
 
-\item{start, end}{\code{[CS]} A \code{numeric} of length 1 with start-
+\item{start, end}{\code{[CS & IS]} A \code{numeric} of length 1 with start-
 and end-positions for the region to plot. If \code{NULL}, is set to
 \code{-Inf} and \code{Inf} respectively.}
 

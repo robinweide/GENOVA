@@ -191,13 +191,6 @@ load_contacts = function(signal_path,
   RMCHROM = length(foundChroms) != length(chromRLE$values)
   
   ##############################################################################
-  ############################################################ check centromeres
-  ##############################################################################
-  if (!is.null(centromeres)) {
-    centromeres <- clean_centromeres(centromeres, res)
-  }
-  
-  ##############################################################################
   ###################################################################### Z-score
   ##############################################################################
   if(z_norm){
@@ -210,6 +203,16 @@ load_contacts = function(signal_path,
   ##############################################################################
   if(!all(signal$V1 <= signal$V2)){
     signal[signal$V1 > signal$V2, ] <- signal[signal$V1 > signal$V2, c(1,3,2)]
+  }
+  
+  ##############################################################################
+  ############################################################ check centromeres
+  ##############################################################################
+  
+  if (!is.null(centromeres)) {
+    centromeres <- clean_centromeres(centromeres, index)
+  } else {
+    centromeres <- find_centromeres(signal, index)
   }
   
   ##############################################################################
@@ -306,48 +309,6 @@ zscore_hic = function(SIG, ABS){
   
   return(Z)
 }
-
-clean_centromeres <- function(centros, resolution) {
-  # Essentially does the same as `reduce(a_granges_object, min.gapwidth = resolution)
-  
-  centros <- as.data.frame(centros)
-  
-  # Drop unused factor levels
-  if (is.factor(centros[, 1])) {
-    centros[, 1] <- droplevels(centros[, 1])
-  }
-  
-  # Set column names and order on chromosome and start
-  centros <- setNames(centros, paste0("V", 1:3))
-  centros <- centros[order(centros[, 1], centros[, 2]), ]
-  
-  # Test wether adjacent entries should be merged
-  centros$merge <- c(FALSE, vapply(seq_len(nrow(centros) - 1), function(i) {
-    
-    # Is the difference between end and next start sub-resolution?
-    test <- abs(centros[i, 3] - centros[i + 1, 2]) < resolution
-    
-    # Are the entries on the same chromosome?
-    test && centros[i, 1] == centros[i + 1, 1]
-  }, logical(1)))
-  
-  # Merge the TRUE entries
-  while (any(centros$merge)) {
-    # What is the next entry to be merged?
-    i <- which(centros$merge)[1]
-    
-    # Replace end of previous entry with end of current entry
-    centros[i - 1, 3] <- centros[i, 3]
-    
-    # Remove current entry
-    centros <- centros[-i, ]
-  }
-  
-  # Return centromeres
-  centros[, 1:3]
-}
-
-
 
 legacy_out = function(out){
   newOut = list(

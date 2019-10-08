@@ -184,6 +184,43 @@ print.CS_discovery <- function(x, ...) {
 
 #' @export
 #' @keywords internal
+print.IS_discovery <- function(x, ...) {
+  
+  myclass <- class(x)[1]
+  cols <- colnames(x$insula_score)
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  part <- attr(x, "partitioning")
+  
+  string <- paste0("A ", attr(x, "PACKAGE"), " '", myclass, 
+                   "' object involving the following ", 
+                   length(cols) - 4, " experiments:\n'", 
+                   paste0(cols[5:length(cols)], collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n")
+  slot0 <- "Contains the following slots:\n\n"
+  
+  slot1 <- paste0("- insula_score:\tA data.frame containing ",
+                  sum(!is.na(x$insula_score[[5]])),
+                  " insulation scores.\n\n")
+  
+  details1 <- paste0("The scores have been called using a ", attr(x, "window"),
+                     " x ", attr(x, "window"), " sliding square.")
+
+  
+  cat(string)
+  cat(slot0)
+  cat(slot1)
+  cat(details1)
+}
+
+#' @export
+#' @keywords internal
 print.saddle_discovery <- function(x, ...) {
   myclass <- class(x)
   n_bins <- max(c(x$saddle$q1, x$saddle$q2), na.rm = TRUE)

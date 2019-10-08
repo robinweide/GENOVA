@@ -5,6 +5,7 @@ misc/*
 ^\.Rproj\.user$
 .travis.yml
 .github
+invisible_tests/
 CODE_OF_CONDUCT.md
 README.rmd
 changelog.md

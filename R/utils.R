@@ -142,50 +142,7 @@ try_require <- function(package, fun, source = NULL) {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install and try again.", call. = FALSE)
   }
-
-<<<<<<< HEAD
-=======
 }
-
-
-#' @title RCP log2 foldchange
-#' 
-#'  RAW RCP in, lfc out
-#'
-#' @param dt a data.table of rcp
-#' @param contrast the name of the contrast-sample
-#' @param breaks a set of numbers to use as intervals
-#'
-#' @return a data.table with the log2 fold changes compared to the `contrast`.
-#' @export
-RCPlfc = function(dt, contrast, breaks){
-  
-  intervalMid = (diff(breaks)/2)+breaks[-length(breaks)]
-  intervalMid[1] = 0
-  
-  # intersect with cuts
-  CT = cut(dt$distance, breaks, labels = F, include.lowest = T)
-  
-  dt$cut = intervalMid[CT]
-  
-  SPREAD = dcast(dt, cut ~ samplename, value.var = "P", fun.aggregate = mean)
-  
-  i = which(colnames(SPREAD) == contrast)
-  j = 2:ncol(SPREAD); j = j[j != i]
-  
-  out = lapply(j, function(J){
-    log2(as.matrix(SPREAD[,J, with = F]) / as.matrix(SPREAD[,i, with = F]))
-  })
-  
-  out = as.data.frame(do.call('cbind',out))
-  
-  out$distance <- SPREAD$cut
-  
-  out = melt(out, id.vars = 'distance')
-  colnames(out)[2:3] = c('samplename','P')
-  out
-}
-
 
 GENOVA_THEME = function(){
   p = ggplot2::theme(panel.background = ggplot2::element_blank(),
@@ -196,5 +153,4 @@ GENOVA_THEME = function(){
                      axis.text = ggplot2::element_text(colour = 'black'),
                      strip.text = ggplot2::element_text(colour = 'black') )
   return(p)
->>>>>>> c54e5078f78a374208f690c3bd0c4504f5938431
 }

@@ -2,7 +2,7 @@
 #'
 #' @inheritParams PESCAn
 #' 
-#' @param IDX The IDX-slot of a `contacts`-object
+#' @param IDX The IDX-slot of a \code{contacts} object
 #' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the
 #'   \code{bed} argument to match with the indices. Possible values:

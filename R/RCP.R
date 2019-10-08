@@ -304,6 +304,16 @@ RCPbed = function(explist, bedlist, chromsToUse){
 # RAW RCP in, lfc out
 #' @export
 #' @keywords internal
+#' @title RCP log2 foldchange
+#' 
+#'  RAW RCP in, lfc out
+#'
+#' @param dt a data.table of rcp
+#' @param contrast the name of the contrast-sample
+#' @param breaks a set of numbers to use as intervals
+#'
+#' @return a data.table with the log2 fold changes compared to the `contrast`.
+#' @export
 RCPlfc = function(dt, contrast, breaks){
   
   intervalMid = (diff(breaks)/2)+breaks[-length(breaks)]

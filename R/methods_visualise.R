@@ -42,9 +42,9 @@
 #'
 #' @param flipFacet \code{[RCP]} Do you want to have RCP's of different
 #'   regions in one plot, instead of facets? (default : \code{FALSE})
-#' @param chr \code{[CS & saddle]} A \code{character} of length 1 indicating a
+#' @param chr \code{[CS, saddle & IS]} A \code{character} of length 1 indicating a
 #'   chromosome name.
-#' @param start,end \code{[CS]} A \code{numeric} of length 1 with start-
+#' @param start,end \code{[CS & IS]} A \code{numeric} of length 1 with start-
 #'   and end-positions for the region to plot. If \code{NULL}, is set to
 #'   \code{-Inf} and \code{Inf} respectively.
 #'   
@@ -690,6 +690,96 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
       # limits = c(-1.25, 1.25),
       oob = scales::squish,
       limits = function(x){c(-1, 1) * max(abs(x))}
+    ) +
+    ggplot2::scale_colour_manual(
+      name = "Sample",
+      breaks = expnames,
+      limits = expnames,
+      values = cols
+    )
+  g <- g + ggplot2::theme(
+    panel.background = ggplot2::element_blank(),
+    axis.line = ggplot2::element_line(colour = "black"),
+    legend.key = ggplot2::element_blank(),
+    aspect.ratio = 2 / (1 + sqrt(5)),
+    text = ggplot2::element_text(color = 'black'),
+    axis.text = ggplot2::element_text(color = 'black'),
+  )
+  if (!is.null(cdf)) {
+    g <- g + ggplot2::theme(
+      strip.placement = "outside",
+      axis.title.y = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      strip.text = ggplot2::element_text(size = ggplot2::rel(1))
+    )
+  }
+  g
+}
+
+#' @rdname visualise
+#' @export
+visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
+                                   start = NULL, end = NULL, raw = FALSE, ...) {
+  start <- if (is.null(start)) -Inf else start
+  end <- if (is.null(end)) Inf else end
+  df <- discovery$insula_score
+  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
+                df[["end"]] <= end)
+  df <- df[ii,]
+  expnames <- colnames(df)[5:ncol(df)]
+  
+  df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
+                   df[, ..expnames])
+  
+  if (!is.null(contrast)) {
+    cdf <- as.matrix(df[,expnames])
+    cdf <- cdf - cdf[, contrast]
+    cdf <- cbind.data.frame(mid = df$mid, cdf)
+  } else {
+    cdf <- NULL
+  }
+  
+  yname <- "Insulation Score"
+  
+  # Melt df
+  df <- data.frame(mid = rep(df$mid, length(expnames)),
+                   score = unlist(df[2:ncol(df)]),
+                   exp = rep(expnames, each = nrow(df)))
+  
+  if (!is.null(contrast)) {
+    # Melt cdf
+    cdf <- data.frame(mid = rep(cdf$mid, length(expnames)),
+                      score = unlist(cdf[2:ncol(cdf)]),
+                      exp = rep(expnames, each = nrow(cdf)),
+                      panel = "Difference")
+    df$panel <- yname
+  }
+  
+  
+  rownames(df) <- NULL
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(mid, score, colour = exp)) +
+    ggplot2::geom_line()
+  
+  if (!is.null(cdf)) {
+    g <- g + ggplot2::geom_line(data = cdf) +
+      ggplot2::facet_grid(panel ~ ., scales = "free_y", switch = "y")
+  }
+  
+  if (raw) {
+    return(g)
+  }
+  cols <- attr(discovery, "colours")
+  g <- g + ggplot2::scale_x_continuous(
+    name = paste0("Location ", chr),
+    expand = c(0.01,0),
+    labels = function(x){paste0(x/1e6, " Mb")}
+  ) +
+    ggplot2::scale_y_continuous(
+      name = yname,
+      # limits = c(-1.25, 1.25),
+      oob = scales::squish,
+      limits = function(x){c(-1, 1) * diff(quantile(df$score[is.finite(df$score)], c(0.05, 0.95)))}
     ) +
     ggplot2::scale_colour_manual(
       name = "Sample",

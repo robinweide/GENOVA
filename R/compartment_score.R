@@ -72,28 +72,21 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
   # Identify centromeres
   idx <- copy(explist[[1]]$IDX)
-  cen <- unique(explist[[1]]$MAT, by = 1)[["V1"]]
-  idx[, V5 := as.numeric(V4 %in% cen)]
-  idx <- split(idx, idx[["V1"]])
-  idx <- lapply(idx, function(x) {
-    y <- x[["V5"]]
-    # Decide what is not centromere
-    cs <- cumsum(c(y[1], diff(y)))
-    rle <- rle(cs)
-    if (!any(rle$values == 0)) {
-      return(x)
-    }
-    attr <- !with(rle, values == 0 & lengths == max(lengths[values == 0]))
-    keep <- rep.int(attr, rle$lengths)
-    
-    # Diversify chromosome names if not centromere
-    rle <- rle(keep)
-    rle$values <- with(rle, ifelse(values, letters[cumsum(values) + 15], "centro"))
-    x[, V1 := paste0(V1, rep.int(rle$values, rle$lengths))]
-    x
-  })
-  idx <- rbindlist(idx)
-  partitioning <- rle(idx[["V1"]])
+
+  # Parse centromere information for experiments
+  centros <- lapply(explist, `[[`, "CENTROMERES")
+  widths <- centros[[1]][, end - start]
+  names(centros) <- expnames
+  centros <- rbindlist(centros, use.names = TRUE)
+  centros <- centros[, list(start = min(start), end = max(end)), by = chrom]
+  setkey(centros, chrom)
+  newwidths <- centros[, end - start]
+  if (any(newwidths > 2 * widths)) {
+    warning("Centromeres of experiments are probably incompatible.")
+  }
+  
+  partitioning <- partition_chromosomes(idx, centros)
+  idx[["V1"]] <- inverse.rle(partitioning)
   idx <- idx[!endsWith(V1, "centro")]
   
   # Select all cis, non-centromere bins

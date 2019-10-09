@@ -4,6 +4,7 @@
 \name{visualise}
 \alias{visualise}
 \alias{quantify.APA_discovery}
+\alias{quantify.saddle_discovery}
 \alias{visualise.default}
 \alias{visualise.APA_discovery}
 \alias{visualise.PESCAn_discovery}
@@ -19,6 +20,8 @@
 visualise(discovery, ...)
 
 \method{quantify}{APA_discovery}(discovery, signal_size = 3, ...)
+
+\method{quantify}{saddle_discovery}(x, ...)
 
 \method{visualise}{APA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), raw = FALSE, title = NULL,

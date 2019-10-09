@@ -47,7 +47,7 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
   discnames <- utils::tail(colnames(scores), length(expnames))
   
   
-  if (!identical(expnames, discnames)) {
+  if (!identical(unname(expnames), discnames)) {
     stop("The samples in 'explist' should match samples in the 'CS_discovery'.")
   }
   if (attr(explist[[1]], "resolution") != attr(CS_discovery, "resolution")) {

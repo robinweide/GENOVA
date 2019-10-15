@@ -43,6 +43,11 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
   explist <- check_compat_exp(explist)
   
+  if (attr(explist[[1]], "resolution") <= 19999) {
+    stop(paste0("Data at this resolution is unfit to compute",
+                "meaningful compartment scores. Try data with larger bins."))
+  }
+  
   znormed <- vapply(explist, attr, logical(1L), "znorm")
   if (any(znormed)) {
     stop(paste0("Compartment scores should not be computed on Z-score ",
@@ -88,6 +93,8 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   partitioning <- partition_chromosomes(idx, centros)
   idx[["V1"]] <- inverse.rle(partitioning)
   idx <- idx[!endsWith(V1, "centro")]
+  # Filter out too-small chromosomes
+  idx <- idx[, if(.N > 2) .SD, by = V1]
   
   # Select all cis, non-centromere bins
   all_cis <- idx[, CJ(V1 = V4, V2 = V4), by = list(chr = V1)]

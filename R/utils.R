@@ -104,7 +104,7 @@ dt_matrix <- function(x, i, j, dim, offset) {
 #' image(mat)
 #' }
 select_subset <- function(exp, chrom, start, end) {
-
+  # Restrict data.table core usage
   dt.cores <- data.table::getDTthreads()
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)

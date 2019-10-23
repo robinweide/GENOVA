@@ -53,6 +53,8 @@ print.contacts <- function(x, ...) {
 
 # Discovery classes -------------------------------------------------------
 
+#' @export
+#' @keywords internal
 print.ARMLA_discovery <- function(x, ...) {
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {

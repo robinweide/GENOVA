@@ -11,8 +11,8 @@
 #'   depending on the aggregate analysis functions they are used for.
 #'
 #' @param IDX The indices slot of a GENOVA \code{contacts} object.
-#' @param res The resolution attribute of a GENOVA \code{contacts} object.\emph{ Not
-#'   for ATA}.
+#' @param res The resolution attribute of a GENOVA \code{contacts} object.\emph{
+#'   Not for ATA}.
 #' @param bed A BED-formatted \code{data.frame} with the following 3 columns:
 #'   \enumerate{ \item A \code{character} giving the chromosome names. \item An
 #'   \code{integer} with start positions. \item An \code{integer} with end
@@ -40,14 +40,14 @@
 #' @return A \code{anchors} object with two colums in \code{matrix} format.
 #'
 #' @details Anchors are calculated within aggregate repeated matrix lookup
-#'   analysis, but can also be provided as the '\code{anchors}' argument for these
-#'   functions.
+#'   analysis, but can also be provided as the '\code{anchors}' argument for
+#'   these functions.
 #'
 #'   Anchors are specific for a resolution of a \code{contacts} object and
 #'   cannot be interchanged freely between resolutions.
 #'
-#'   The  \code{mode}' argument determines what pairwise interactions are reported
-#'   for \code{APA} and \code{PE-SCAn}. \code{"cis"} returns pairwise
+#'   The '\code{mode}' argument determines what pairwise interactions are
+#'   reported for \code{APA} and \code{PE-SCAn}. \code{"cis"} returns pairwise
 #'   interactions within a chromosome; \code{"trans"} gives these between
 #'   chromosomes and \code{"both"} returns both these types of interactions.
 #'
@@ -57,9 +57,9 @@
 #'   interactions of genomic coordinates from a BED-like \code{data.frame} and
 #'   maps these to indices of the Hi-C matrix. It is used within the
 #'   \code{\link[GENOVA]{PESCAn}} function. Wether these pairwise interactions
-#'   are allowed to cross chromosome boundaries is determined by the '\code{mode}'
-#'   argument, which default to \code{"cis"} to only take pairwise interactions
-#'   on the same chromosome.}
+#'   are allowed to cross chromosome boundaries is determined by the
+#'   '\code{mode}' argument, which default to \code{"cis"} to only take pairwise
+#'   interactions on the same chromosome.}
 #'
 #'   \subsection{APA anchors}{ \code{anchors_APA()} takes a BEDPE-formatted
 #'   \code{data.frame} and translates the coordinates in the first 3 and last 3
@@ -67,13 +67,19 @@
 #'   \code{\link[GENOVA]{APA}} function. The '\code{mode}' argument defaults to
 #'   \code{"both"} but optionally allows for both cis- and trans-interactions. }
 #'
-#'   \subsection{ATA anchors}{ \code{anchors_ATA()} takes the genomic coordinates
-#'   of TADs in a BED-formatted \code{data.frame} and translates to indices of
-#'   the Hi-C matrix. It is used within the \code{\link[GENOVA]{ATA}} function.
-#'   In contrast to the PE-SCAn anchors and ATA anchors, ATA anchors are
-#'   positions on the matrix's diagonal. The '\code{padding}' argument controls
-#'   how large the region around a TAD should be expanded. Since TADs have
-#'   variable sizes, ATA anchors can be calculated without resolution.}
+#'   \subsection{Extended loops anchors}{ \code{anchors_extendedloops()} takes
+#'   the same input as \code{anchors_APA()}, but transforms these coordinates to
+#'   combinations of 5' and 3' anchors outside existing loops to get 'extended'
+#'   loops. Based on the extended loops algorithm described in Haarhuis \emph{et
+#'   al.} (2017).}
+#'
+#'   \subsection{ATA anchors}{ \code{anchors_ATA()} takes the genomic
+#'   coordinates of TADs in a BED-formatted \code{data.frame} and translates to
+#'   indices of the Hi-C matrix. It is used within the \code{\link[GENOVA]{ATA}}
+#'   function. In contrast to the PE-SCAn anchors and ATA anchors, ATA anchors
+#'   are positions on the matrix's diagonal. The '\code{padding}' argument
+#'   controls how large the region around a TAD should be expanded. Since TADs
+#'   have variable sizes, ATA anchors can be calculated without resolution.}
 #'
 #'   \subsection{ARA anchors}{ \code{anchors_ARA()} takes a BED-formatted
 #'   \code{data.frame} and translates these to Hi-C matrix indices on the
@@ -89,19 +95,25 @@
 #' @examples
 #' \dontrun{
 #' # PE-SCAn
-#' anch <- anchors_PESCAn(WT_20kb$ABS, WT_20kb$RES, super_enhancers)
+#' anch <- anchors_PESCAn(WT_20kb$IDX, attr(WT_20kb, "resolution"),
+#'                        super_enhancers)
 #' PESCAn(list(WT_20kb, KO_20kb), anchors = anch)
 #'
 #' # APA
-#' anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
+#' anch <- anchors_APA(WT_20kb$IDX, attr(WT_20kb, "resolution"), loops)
 #' APA(list(WT_20kb, KO_20kb), anchors = anch)
+#' 
+#' # APA with extended loops
+#' ex_anch <- anchors_extendedloops(WT_20kb$IDX, attr(WT_20kb, "resolution"),
+#'                                  loops)
+#' APA(list(WT_20kb, KO_20kb), anchors = ex_anch)
 #'
 #' # ATA
-#' anch <- anchors_ATA(WT_10kb$ABS, tads)
+#' anch <- anchors_ATA(WT_10kb$IDX, tads)
 #' ATA(list(WT_10kb, KO_10kb), anchors = anch)
 #'
 #' # ARA
-#' anch <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
+#' anch <- anchors_ARA(WT_20kb$IDX, ctcf_sites)
 #' ARA(list(WT_20kb, KO_20kb), anchors = anch)
 #' }
 NULL
@@ -193,6 +205,8 @@ anchors_APA <- function(IDX, res, bedpe,
       pmax(newbed$idx1, newbed$idx2)
     )
     idx <- idx[order(idx[, 1]), ]
+    class(idx) <- c("anchors", "matrix")
+    attr(idx, "type") <- "APA"
     return(idx)
   }
 
@@ -287,6 +301,64 @@ anchors_ARA <- function(IDX, bed) {
   return(idx)
 }
 
+#' @rdname anchors
+#' @export
+anchors_extendedloops <- function(IDX, res, bedpe,
+                                  dist_thres = c(3e4, 3e6)) {
+  # Convert distances to bins
+  dist_thres <- dist_thres / res
+  dist_thres <- sort(dist_thres)
+  
+  # Filter for cis
+  bedpe <- bedpe[bedpe[, 1] == bedpe[, 4], ]
+  
+  # Convert bedpe to idx matrix
+  newbed <- data.table(chrom = bedpe[, 1],
+                       idx1  = bed2idx(IDX, bedpe[, 1:3], mode = "centre"),
+                       idx2  = bed2idx(IDX, bedpe[, 4:6], mode = "centre")
+  )
+  
+  # Order stuff
+  newbed <- stats::na.exclude(newbed)
+  newbed[, c("idx1", "idx2") := list(pmin(idx1, idx2), pmax(idx1, idx2))]
+  newbed <- newbed[!duplicated(newbed), ]
+  newbed <- newbed[order(idx1, idx2),]
+  
+  # Filter very large loops
+  newbed <- newbed[abs(idx1 - idx2) < dist_thres[2]]
+  
+  # Find unique 5' anchors within minimum distance
+  newbed[, uni5p := c(1, diff(idx1) > dist_thres[1]), by = chrom]
+  newbed[, uni5p := cumsum(uni5p)]
+  newbed[, row := seq_len(nrow(newbed))]
+
+  # Determine cumulative maximum of 3' anchors
+  cmax <- newbed[, list(max = max(idx2)), by = c("chrom", "uni5p")][["max"]]
+  
+  # Make all combinations of loop anchors
+  combi <- newbed[, CJ(i = row[!duplicated(uni5p)], j = row), by = chrom]
+  
+  # Filter out unwanted loops from the same 5' anchors
+  combi <- combi[newbed[i, uni5p] < newbed[j, uni5p], list(i, j)]
+  
+  # Translate back to actual indices
+  combi <- combi[, list(idx1 = newbed[i, idx1], idx2 = newbed[j, idx2], i)]
+  
+  # Filter out loops larger than maximum distance
+  combi <- combi[idx1 + dist_thres[2] > idx2]
+  
+  # Filter out loops smaller than cumulative maximum of 3' anchors
+  combi <- combi[idx2 > cmax[newbed[i, uni5p]] + dist_thres[1]]
+  
+  # Exclude duplicates
+  idx <- combi[!duplicated(combi), list(idx1, idx2)]
+  idx <- as.matrix(idx)
+  dimnames(idx) <- NULL
+  class(idx) <- c("anchors", "matrix")
+  attr(idx, "type") <- "APA"
+  return(idx)
+}
+
 # Utilities ---------------------------------------------------------------
 
 #' Finish anchors for repeated matrix lookup
@@ -360,10 +432,6 @@ anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
 #' @export
 anchors_shift <- function(IDX, anchors, rel_pos, shift = 1) {
 
-  # init
-  V4         <- NULL
-  V1         <- NULL
-  
   # Translate indices to chromosomes
   chrom   <- IDX[match(anchors, IDX[, V4]), V1]
   shifted <- IDX[match(anchors + shift + max(rel_pos), IDX[, V4]), V1]

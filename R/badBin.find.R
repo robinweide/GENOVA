@@ -23,7 +23,8 @@
 #'                chip = list(bb_out$bed))
 #' }
 badBin.find <- function(experiment, p.treshold = 0.1, plotBad = F, getBed = T) {
-  ## INIT-phase
+  
+  # Restrict data.table core usage
   cat("Initiation...\n")
   allbins <- unique(experiment$ICE$V1)
   maxbin <- max(allbins)

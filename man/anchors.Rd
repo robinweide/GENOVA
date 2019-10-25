@@ -6,6 +6,7 @@
 \alias{anchors_APA}
 \alias{anchors_ATA}
 \alias{anchors_ARA}
+\alias{anchors_extendedloops}
 \title{Anchors for Hi-C}
 \usage{
 anchors_PESCAn(IDX, res, bed, dist_thres = c(5000000L, Inf),
@@ -17,12 +18,14 @@ anchors_APA(IDX, res, bedpe, dist_thres = c(0, Inf), mode = c("both",
 anchors_ATA(IDX, bed, dist_thres = c(225000, Inf), padding = 1)
 
 anchors_ARA(IDX, bed)
+
+anchors_extendedloops(IDX, res, bedpe, dist_thres = c(30000, 3e+06))
 }
 \arguments{
 \item{IDX}{The indices slot of a GENOVA \code{contacts} object.}
 
-\item{res}{The resolution attribute of a GENOVA \code{contacts} object.\emph{ Not
-for ATA}.}
+\item{res}{The resolution attribute of a GENOVA \code{contacts} object.\emph{
+Not for ATA}.}
 
 \item{bed}{A BED-formatted \code{data.frame} with the following 3 columns:
 \enumerate{ \item A \code{character} giving the chromosome names. \item An
@@ -66,14 +69,14 @@ Anchors are indices to the matrix in a \code{contacts} object.
 }
 \details{
 Anchors are calculated within aggregate repeated matrix lookup
-  analysis, but can also be provided as the '\code{anchors}' argument for these
-  functions.
+  analysis, but can also be provided as the '\code{anchors}' argument for
+  these functions.
 
   Anchors are specific for a resolution of a \code{contacts} object and
   cannot be interchanged freely between resolutions.
 
-  The  \code{mode}' argument determines what pairwise interactions are reported
-  for \code{APA} and \code{PE-SCAn}. \code{"cis"} returns pairwise
+  The '\code{mode}' argument determines what pairwise interactions are
+  reported for \code{APA} and \code{PE-SCAn}. \code{"cis"} returns pairwise
   interactions within a chromosome; \code{"trans"} gives these between
   chromosomes and \code{"both"} returns both these types of interactions.
 }
@@ -84,9 +87,9 @@ Anchors are calculated within aggregate repeated matrix lookup
   interactions of genomic coordinates from a BED-like \code{data.frame} and
   maps these to indices of the Hi-C matrix. It is used within the
   \code{\link[GENOVA]{PESCAn}} function. Wether these pairwise interactions
-  are allowed to cross chromosome boundaries is determined by the '\code{mode}'
-  argument, which default to \code{"cis"} to only take pairwise interactions
-  on the same chromosome.}
+  are allowed to cross chromosome boundaries is determined by the
+  '\code{mode}' argument, which default to \code{"cis"} to only take pairwise
+  interactions on the same chromosome.}
 
   \subsection{APA anchors}{ \code{anchors_APA()} takes a BEDPE-formatted
   \code{data.frame} and translates the coordinates in the first 3 and last 3
@@ -94,13 +97,19 @@ Anchors are calculated within aggregate repeated matrix lookup
   \code{\link[GENOVA]{APA}} function. The '\code{mode}' argument defaults to
   \code{"both"} but optionally allows for both cis- and trans-interactions. }
 
-  \subsection{ATA anchors}{ \code{anchors_ATA()} takes the genomic coordinates
-  of TADs in a BED-formatted \code{data.frame} and translates to indices of
-  the Hi-C matrix. It is used within the \code{\link[GENOVA]{ATA}} function.
-  In contrast to the PE-SCAn anchors and ATA anchors, ATA anchors are
-  positions on the matrix's diagonal. The '\code{padding}' argument controls
-  how large the region around a TAD should be expanded. Since TADs have
-  variable sizes, ATA anchors can be calculated without resolution.}
+  \subsection{Extended loops anchors}{ \code{anchors_extendedloops()} takes
+  the same input as \code{anchors_APA()}, but transforms these coordinates to
+  combinations of 5' and 3' anchors outside existing loops to get 'extended'
+  loops. Based on the extended loops algorithm described in Haarhuis \emph{et
+  al.} (2017).}
+
+  \subsection{ATA anchors}{ \code{anchors_ATA()} takes the genomic
+  coordinates of TADs in a BED-formatted \code{data.frame} and translates to
+  indices of the Hi-C matrix. It is used within the \code{\link[GENOVA]{ATA}}
+  function. In contrast to the PE-SCAn anchors and ATA anchors, ATA anchors
+  are positions on the matrix's diagonal. The '\code{padding}' argument
+  controls how large the region around a TAD should be expanded. Since TADs
+  have variable sizes, ATA anchors can be calculated without resolution.}
 
   \subsection{ARA anchors}{ \code{anchors_ARA()} takes a BED-formatted
   \code{data.frame} and translates these to Hi-C matrix indices on the
@@ -114,19 +123,25 @@ Anchors are calculated within aggregate repeated matrix lookup
 \examples{
 \dontrun{
 # PE-SCAn
-anch <- anchors_PESCAn(WT_20kb$ABS, WT_20kb$RES, super_enhancers)
+anch <- anchors_PESCAn(WT_20kb$IDX, attr(WT_20kb, "resolution"),
+                       super_enhancers)
 PESCAn(list(WT_20kb, KO_20kb), anchors = anch)
 
 # APA
-anch <- anchors_APA(WT_20kb$ABS, WT_20kb$RES, loops)
+anch <- anchors_APA(WT_20kb$IDX, attr(WT_20kb, "resolution"), loops)
 APA(list(WT_20kb, KO_20kb), anchors = anch)
 
+# APA with extended loops
+ex_anch <- anchors_extendedloops(WT_20kb$IDX, attr(WT_20kb, "resolution"),
+                                 loops)
+APA(list(WT_20kb, KO_20kb), anchors = ex_anch)
+
 # ATA
-anch <- anchors_ATA(WT_10kb$ABS, tads)
+anch <- anchors_ATA(WT_10kb$IDX, tads)
 ATA(list(WT_10kb, KO_10kb), anchors = anch)
 
 # ARA
-anch <- anchors_ARA(WT_20kb$ABS, ctcf_sites)
+anch <- anchors_ARA(WT_20kb$IDX, ctcf_sites)
 ARA(list(WT_20kb, KO_20kb), anchors = anch)
 }
 }

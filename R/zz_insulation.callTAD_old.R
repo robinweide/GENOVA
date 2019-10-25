@@ -27,7 +27,6 @@
 #'               tads.type = "lower", 
 #'               cut.off = 25)
 #' }
-#' @export
 insulation.callTAD <- function(exp, gw_insulation, BEDcolor = "127,201,127") {
   # if (is.null(exp$INSULATION)) {
   #   stop("Call insulation score first and store in experiment$INSULATION")

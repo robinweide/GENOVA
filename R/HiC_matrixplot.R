@@ -383,6 +383,8 @@ plot.bw <- function(file, chrom, start, end, y1, y2, col,
   # official call but don't need it
   # d <- read_bigwig( file, chrom=chrom, start=start, end=end)
   # d <- as.data.frame(d)
+  
+  try_require("bigwrig", "plot.bw", "github")
 
   d <- bigwrig::read_bigwig_impl(file, chrom = chrom, start = start, end = end)
 

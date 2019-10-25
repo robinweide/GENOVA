@@ -8,11 +8,10 @@
 #' @export
 cis_trans = function(exp, bed = NULL){
   
-  # init
-  .          <- NULL
-  V1         <- NULL
-  V3         <- NULL
-  V4         <- NULL
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
   
   if (any(c("MAT", "IDX") %in% names(exp))) {
     exp <- list(exp)

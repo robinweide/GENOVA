@@ -12,6 +12,11 @@ virtual_4C <- function(exp, viewpoint, xlim = NULL){
   # ! someday: allow mulitple samples
   vp_idx <- median(bed2idx(exp$IDX, viewpoint))
   
+  # Restrict data.table core usage
+  dt.cores <- data.table::getDTthreads()
+  on.exit(data.table::setDTthreads(dt.cores))
+  data.table::setDTthreads(1)
+  
   signal <- NULL
   if( is.null(xlim) ){
     # run genome-wide ==========================================================

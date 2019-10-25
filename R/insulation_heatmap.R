@@ -39,7 +39,7 @@
 #' @return A \code{ggplot} object.
 #' @export
 #'
-#' @seealso \code{\link[GENOVA]insulation_score} for calculating insulation
+#' @seealso \code{\link[GENOVA]{insulation_score}} for calculating insulation
 #'   scores. \code{\link[GENOVA]{call_TAD_insulation}} for calling TADs on the
 #'   insulation score.
 #'

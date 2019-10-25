@@ -91,8 +91,8 @@ call_TAD_insulation <- function(IS_discovery, method = "crane",
   
   # Search for the truly smallest insulation score within a small window
   shft <- zerocross[, lengths + c(-3:3), by = seq_len(nrow(zerocross))]
-  shft[, is := m[pmax(1, V1), value]]
-  shft <- shft[, list(shift = c(-3:3)[which.min(is)]), by = seq_len]
+  shft[, ins := m[pmax(1, V1), value]]
+  shft <- shft[, list(shift = c(-3:3)[which.min(ins)]), by = seq_len]
   zerocross[, lengths := lengths + shft$shift]
   
   # Calculate local extrema in delta space

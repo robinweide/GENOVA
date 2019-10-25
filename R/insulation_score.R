@@ -51,6 +51,8 @@ insulation_score <- function(explist, window = 30, norm_to = c("chromosome", "ge
   grid <- grid - 1 # when added to idx, re-base to 0
   mode(grid$x) <- "integer"
   mode(grid$y) <- "integer"
+  grix <- grid$x
+  griy <- grid$y
   
   # Prep stuff
   idx <- explist[[1]]$IDX[, head(V4, - window), by = V1]
@@ -59,9 +61,9 @@ insulation_score <- function(explist, window = 30, norm_to = c("chromosome", "ge
   # Loop over chromosomes so that sorting doesn't take ages
   chroms <- split(idx[, list(V2)], idx$V1)
   insula <- lapply(chroms, function(indices) {
-
+    
     # Setup indices to look up
-    looper <- indices[, list(V2 + grid[["x"]], V2 + grid[["y"]]),
+    looper <- indices[, list(V1 = grix + .BY[[1]], V2 = griy + .BY[[1]]),
                       by = list("id" = V2)]
     setcolorder(looper, c(2,3,1))
     setkey(looper, V1, V2)

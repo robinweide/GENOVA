@@ -41,7 +41,6 @@
 #'   zlim = c(-.5, 0.25), profileZlim = c(-.75, -.1)
 #' )
 #' }
-#' @export
 insulation.heatmap <- function(insulationList, bed = NULL, borders = NULL, focus = 1, sortWidth = 10,
                                whatToPlot = "both", profileFunct = mean, title = NULL,
                                flank = 500e3, zlim = c(-1, 1), profileCols = NULL,

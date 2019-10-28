@@ -69,6 +69,7 @@ heatmap_insulation <- function(IS_discovery,
   mode <- match.arg(mode, c("both", "heatmap", "profile"))
   
   # Experiment parameters
+  ins <- IS_discovery$insula_score
   expcols <- attr(IS_discovery, "colours")
   expnames <- tail(colnames(ins), -4)
   res <- attr(IS_discovery, "resolution")
@@ -80,7 +81,6 @@ heatmap_insulation <- function(IS_discovery,
   funname <- paste0(funname, collapse = "")
   
   # Grab relevant data
-  ins <- IS_discovery$insula_score
   binwidth <- region_width / res + 1
   
   # Translate bed to indices

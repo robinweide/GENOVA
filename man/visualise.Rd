@@ -14,6 +14,7 @@
 \alias{visualise.RCP_discovery}
 \alias{visualise.virtual4C_discovery}
 \alias{visualise.saddle_discovery}
+\alias{visualise.domainogram_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -54,6 +55,9 @@ visualise(discovery, ...)
 \method{visualise}{saddle_discovery}(discovery, contrast = 1,
   chr = "all", raw = FALSE, title = NULL, colour_lim = NULL,
   colour_lim_contrast = NULL, ...)
+
+\method{visualise}{domainogram_discovery}(domainogram_discovery,
+  colour_lim = c(-1, 1), title = NULL, raw = FALSE)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

@@ -1235,6 +1235,41 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
   return(g)
 }
 
+#' @rdname visualise
+#' @export
+visualise.domainogram_discovery <- function(domainogram_discovery, 
+                                            colour_lim = c(-1, 1),
+                                            title = NULL,
+                                            raw = FALSE) {
+  df <- domainogram_discovery
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(id, window, fill = ins)) +
+    ggplot2::geom_raster() +
+    ggplot2::facet_grid(exp ~ .)
+  
+  if (!is.null(title)) {
+    g <- g + ggplot2::ggtitle(title)
+  }
+  
+  if (!raw) {
+    g <- g + 
+      ggplot2::scale_x_continuous(name = paste0("Position ", 
+                                                attr(df, "chrom"), " (Mb)"),
+                                  labels = function(x){x/1e6},
+                                  expand = c(0,0)) +
+      ggplot2::scale_y_continuous(name = "Window Size", expand = c(0, 0)) +
+      ggplot2::scale_fill_gradient2(low = "#ff5c49", high = "#009bef",
+                                    limits = colour_lim, oob = scales::squish,
+                                    name = "Insulation\nScore") +
+      gglot2::theme(axis.text = ggplot2::element_text(colour = "black"),
+                    strip.background = ggplot2::element_blank(),
+                    axis.ticks = ggplot2::element_line(colour = "black"),
+                    axis.line  = ggplot2::element_line(colour = "black"))
+  }
+  
+  g
+}
+
 # Utilities ---------------------------------------------------------------
 
 

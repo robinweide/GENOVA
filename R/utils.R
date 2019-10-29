@@ -14,7 +14,7 @@
 #' @details Out of bounds values are matched to nearest bin.
 #' @export
 bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
-  if (!inherits(bed, "data.frame")) {
+  if (!inherits(bed, "data.frame") | is.data.table(bed)) {
     bed <- as.data.frame(bed)
   }
 

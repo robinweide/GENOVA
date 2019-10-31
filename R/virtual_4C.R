@@ -10,7 +10,7 @@
 #' @export
 virtual_4C <- function(explist, viewpoint, xlim = NULL){
   # ! someday: allow mulitple samples
-  explist  <- GENOVA:::check_compat_exp(explist)
+  explist  <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")
   } else {
@@ -37,7 +37,7 @@ virtual_4C <- function(explist, viewpoint, xlim = NULL){
     downstream_signal <- signal[V1 %in% vp_idx][, 2:4]
   } else {
     # run for a region =========================================================
-    flank <- floor(xlim/attr(exp, 'resolution'))
+    flank <- floor(xlim/attr(explist[[1]], 'resolution'))
 
     range_idx <- unlist(vp_idx - flank[1]):unlist(vp_idx + flank[2])
     
@@ -75,8 +75,8 @@ virtual_4C <- function(explist, viewpoint, xlim = NULL){
                       class = "virtual4C_discovery",
                       'viewpoint' = viewpoint, 
                       'xlim' = xlim,
-                      'sample' = attr(exp, 'sample'),
-                      'resolution' = attr(exp, 'resolution'),
+                      'sample' = expnames,
+                      'resolution' = attr(explist[[1]], 'resolution'),
                       package = "GENOVA")
   
   signal

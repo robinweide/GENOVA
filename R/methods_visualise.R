@@ -997,6 +997,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   # ! someday: allow mulitple samples
   data <- discovery$data
   VP   <- attr(discovery,"viewpoint")
+  data <- data[chromosome == VP[1, 1]]
   
   if(!is.null(extend_viewpoint)){
     VP[1,2] <- VP[1,2] - extend_viewpoint

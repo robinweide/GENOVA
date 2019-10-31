@@ -49,8 +49,6 @@
 #'   \code{-Inf} and \code{Inf} respectively.
 #'   
 #' @param title add a title
-#' @param signal_size The width/height of the signal (e.g. a value of 3 will 
-#' take the middle 3x3 matrix of the APA).
 #' @param ... further arguments passed to or from other methods.
 #'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
@@ -1013,7 +1011,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   
   blackout_up   <- VP[1,2]
   blackout_down <- VP[1,3]
-  data_blackout <- data[(data$mid >= blackout_up & data$mid <= blackout_down)]
+  data_blackout <- data[mid >= blackout_up & mid <= blackout_down]
   
   if( !is.null(bed)) {
     bed = bed[bed[,1] == attr(discovery, 'viewpoint')[1,1],2:3]
@@ -1023,7 +1021,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   
   breaks   <- seq(min(data$mid), max(data$mid), length.out = bins)
   bin_size <- median(diff(breaks))
-  smooth   <- data[, mean(signal),by = findInterval(data$mid, breaks)]
+  smooth   <- data[, mean(signal), by = findInterval(data$mid, breaks)]
   smooth$mid = breaks[unlist(smooth[,1])] +(bin_size/2)
   smooth[,1] = NULL
   colnames(smooth) = c("signal","mid")
@@ -1031,23 +1029,28 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   p = ggplot2::ggplot(data, ggplot2::aes(x= mid/1e6, y = signal)) +
     ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size/1e6) +
     ggplot2::theme_classic() +
-    ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1])
+    ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1]) +
+    ggplot2::facet_grid(experiment ~ .)
   
   # draw_blackout ===+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   ymax <- ceiling(max(smooth$signal))
   data_blackout$signal <- ymax
 
-  p = p + ggplot2::annotate('rect', 
-                            fill = "#D8D8D8", 
-                            xmin = (min(data_blackout$mid)/1e6)-(bin_size/1e6), 
-                            xmax = (max(data_blackout$mid)/1e6)+(bin_size/1e6), 
-                            ymin = 0, 
-                            ymax = max(data_blackout$signal) )+
-    ggplot2::annotate(geom = 'text',
-                      vjust = 1,
-                      x = rowMeans(VP[,2:3])/1e6,
-                      y =  ymax*0.9,
-                      label = '\u2693')
+  if (nrow(data_blackout) > 0) {
+    p = p + ggplot2::annotate(
+      'rect', 
+      fill = "#D8D8D8", 
+      xmin = (min(data_blackout$mid)/1e6)-(bin_size/1e6), 
+      xmax = (max(data_blackout$mid)/1e6)+(bin_size/1e6), 
+      ymin = 0, 
+      ymax = max(data_blackout$signal) 
+    ) +
+      ggplot2::annotate(geom = 'text',
+                        vjust = 1,
+                        x = rowMeans(VP[,2:3])/1e6,
+                        y =  ymax*0.9,
+                        label = '\u2693')
+  }
 
   if( !is.null(bed)){
     p = p + ggplot2::annotate('rect', 
@@ -1081,7 +1084,8 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   }
 
   p <- p + ggplot2::theme(axis.line = ggplot2::element_line(colour = 'black'),
-                          axis.text = ggplot2::element_text(colour = 'black'))
+                          axis.text = ggplot2::element_text(colour = 'black'),
+                          strip.background = element_blank())
   suppressWarnings(p)
 }
 

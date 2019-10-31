@@ -8,9 +8,17 @@
 #' of the viewpoint, resp. 
 #' @return A virtual4C_discovery object.
 #' @export
-virtual_4C <- function(exp, viewpoint, xlim = NULL){
+virtual_4C <- function(explist, viewpoint, xlim = NULL){
   # ! someday: allow mulitple samples
-  vp_idx <- median(bed2idx(exp$IDX, viewpoint))
+  explist  <- GENOVA:::check_compat_exp(explist)
+  expnames <- if (is.null(names(explist))) {
+    vapply(explist, attr, character(1L), "samplename")
+  } else {
+    names(explist)
+  }
+  IDX <- explist[[1]]$IDX
+  
+  vp_idx <- median(bed2idx(IDX, viewpoint))
   
   # Restrict data.table core usage
   dt.cores <- data.table::getDTthreads()
@@ -20,29 +28,37 @@ virtual_4C <- function(exp, viewpoint, xlim = NULL){
   signal <- NULL
   if( is.null(xlim) ){
     # run genome-wide ==========================================================
-    signal <- exp$MAT[V1 == vp_idx | V2 == vp_idx]
-    
-    upstream_signal   <- signal[V2 %in% vp_idx][,c(1,3)]
-    downstream_signal <- signal[V1 %in% vp_idx][,2:3]
+    signal <- lapply(seq_along(explist), function(i) {
+      explist[[i]]$MAT[V1 == vp_idx | V2 == vp_idx, 
+                       list(V1, V2, V3, exp = i)]
+    })
+    signal <- rbindlist(signal)
+    upstream_signal <- signal[V2 %in% vp_idx][, c(1, 3, 4)]
+    downstream_signal <- signal[V1 %in% vp_idx][, 2:4]
   } else {
     # run for a region =========================================================
     flank <- floor(xlim/attr(exp, 'resolution'))
 
     range_idx <- unlist(vp_idx - flank[1]):unlist(vp_idx + flank[2])
     
-    upstream_signal <- exp$MAT[list(range_idx,vp_idx), nomatch = 0][,c(1,3)]
-    downstream_signal <- exp$MAT[list(vp_idx, range_idx), nomatch = 0][,2:3]
+    upstream_signal <- lapply(seq_along(explist), function(i) {
+      explist[[i]]$MAT[list(range_idx, vp_idx), 
+                       nomatch = 0][, list(V1, V3, exp = i)]
+    })
+    upstream_signal <- rbindlist(upstream_signal)
+    downstream_signal <- lapply(seq_along(explist), function(i) {
+      explist[[i]]$MAT[list(vp_idx, range_idx),
+                       nomatch = 0][, list(V2, V3, exp = i)]
+    })
+    downstream_signal <- rbindlist(downstream_signal)
   }
   
   signal <- rbind(upstream_signal, downstream_signal, use.names = FALSE)
-  colnames(signal) = c('V4','signal')
-  setkey(signal, 'V4')
+  colnames(signal) <- c('idx', 'signal', 'experiment')
+  signal <- signal[IDX, on = "idx==V4", nomatch = 0]
   
   # set basepairs --------------------------------------------------------------
-  bed_ranges <- exp$IDX[match(signal$V4, exp$IDX$V4)]
-  setkey(bed_ranges, 'V4')
-  signal <- signal[bed_ranges]
-  signal$mid = rowMeans(signal[,4:5])
+  signal$mid = rowMeans(signal[, 5:6])
   
   if( !is.null(xlim) ){
     signal <- signal[V1 == viewpoint[1,1]]
@@ -50,8 +66,9 @@ virtual_4C <- function(exp, viewpoint, xlim = NULL){
  
   
   # output ---------------------------------------------------------------------
-  signal <- unique(signal[,c(3,6,2)])
-  colnames(signal) <- c('chromosome','mid','signal')
+  signal <- unique(signal[, c(4, 7, 2, 3)])
+  colnames(signal) <- c("chromosome", "mid", "signal", "experiment")
+  signal$experiment <- expnames[signal$experiment]
   signal <- list(data = signal)
   
   signal <- structure(signal, 

@@ -280,6 +280,35 @@ print.domainogram_discovery <- function(x, ...) {
   print(as.data.table(x))
 }
 
+#' @export
+#' @keywords internal
+print.virtual4C_discovery <- function(x, ...) {
+  myclass <- class(x)[[1]]
+  expnames <- unique(x$data$experiment)
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  
+  vp <- attr(x, "viewpoint")
+
+  string <- paste0("A ", attr(x, "package"), " '", myclass,
+                   "' object involving the following ",
+                   length(expnames), " experiments:\n'",
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n")
+  string1 <- paste0("The viewpoint of this virtual 4C is located at ",
+                    vp[1, 1], ":", format(vp[1, 2], scientific = FALSE), "-",
+                    format(vp[1, 3], scientific = FALSE), ".")
+  
+  cat(string)
+  cat(string1)
+}
+
 # Other classes -----------------------------------------------------------
 
 #' @export

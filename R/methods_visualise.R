@@ -1243,9 +1243,9 @@ visualise.domainogram_discovery <- function(domainogram_discovery,
                                             raw = FALSE) {
   df <- domainogram_discovery
   
-  g <- ggplot2::ggplot(df, ggplot2::aes(id, window, fill = ins)) +
+  g <- ggplot2::ggplot(df, ggplot2::aes(position, window, fill = insulation)) +
     ggplot2::geom_raster() +
-    ggplot2::facet_grid(exp ~ .)
+    ggplot2::facet_grid(experiment ~ .)
   
   if (!is.null(title)) {
     g <- g + ggplot2::ggtitle(title)
@@ -1261,7 +1261,7 @@ visualise.domainogram_discovery <- function(domainogram_discovery,
       ggplot2::scale_fill_gradient2(low = "#ff5c49", high = "#009bef",
                                     limits = colour_lim, oob = scales::squish,
                                     name = "Insulation\nScore") +
-      gglot2::theme(axis.text = ggplot2::element_text(colour = "black"),
+      ggplot2::theme(axis.text = ggplot2::element_text(colour = "black"),
                     strip.background = ggplot2::element_blank(),
                     axis.ticks = ggplot2::element_line(colour = "black"),
                     axis.line  = ggplot2::element_line(colour = "black"))

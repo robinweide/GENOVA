@@ -99,6 +99,7 @@ insulation_domainogram <- function(
   scores$exp <- expnames[scores$exp]
   scores[, id := (id - bed[1] + maxwin - 1) * res + pos_start]
   scores <- as.data.frame(scores)
+  colnames(scores) <- c("position", "experiment", "insulation", "window")
   structure(scores, class = c("domainogram_discovery", "data.frame"),
             package = "GENOVA",
             chrom = chrom, resolution = res)

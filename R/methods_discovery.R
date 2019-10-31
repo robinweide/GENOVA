@@ -163,6 +163,33 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
   out
 }
 
+bundle.domainogram_discovery <- function(..., collapse = "_"){
+  discos <- list(...)
+  classes <- vapply(lapply(discos, class), `[`, character(1), 1)
+  if (length(unique(classes)) > 1) {
+    stop("Can only bundle discoveries of the same type.", call. = FALSE)
+  }
+  chroms <- vapply(discos, attr, character(1), "chrom")
+  if (lengths(unique(chroms)) > 1) {
+    stop("Can only bundle domainograms at the same chromosome.", call. = FALSE)
+  }
+  res <- vapply(discos, attr, numeric(1), "resolution")
+  if (length(unique(res)) > 1) {
+    stop("Can only bundle domainograms with the same resolution.", 
+         call. = FALSE)
+  }
+  
+  out <- do.call(rbind, discos)
+  out <- out[order(out$window, out$position, out$experiment), ]
+  
+  dups <- duplicated(out[, c("window", "position", "experiment")])
+  if (sum(dups) > 0) {
+    message("Found duplicated insulation scores which are discarded.")
+  }
+  out <- out[!dups,]
+  out
+}
+
 # Unbundle documentation --------------------------------------------------
 
 #' @title Split discovery objects
@@ -223,6 +250,10 @@ unbundle.ARMLA_discovery <- function(discovery, ...) {
   out <- lapply(expnames, function(ename) {
     subset(discovery, ename)
   })
+}
+
+unbundle.domainogram_discovery <- function(discovery, ...) {
+  split(discovery, discovery$experiment)
 }
 
 # Utilities ---------------------------------------------------------------

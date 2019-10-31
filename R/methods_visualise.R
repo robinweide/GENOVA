@@ -1264,7 +1264,9 @@ visualise.domainogram_discovery <- function(domainogram_discovery,
       ggplot2::theme(axis.text = ggplot2::element_text(colour = "black"),
                     strip.background = ggplot2::element_blank(),
                     axis.ticks = ggplot2::element_line(colour = "black"),
-                    axis.line  = ggplot2::element_line(colour = "black"))
+                    axis.line  = ggplot2::element_line(colour = "black"),
+                    panel.grid = element_blank(),
+                    panel.background = element_blank())
   }
   
   g

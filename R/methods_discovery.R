@@ -163,8 +163,12 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
   out
 }
 
+#' @rdname bundle
+#' @export
 bundle.domainogram_discovery <- function(..., collapse = "_"){
   discos <- list(...)
+  
+  # Check for possible errors
   classes <- vapply(lapply(discos, class), `[`, character(1), 1)
   if (length(unique(classes)) > 1) {
     stop("Can only bundle discoveries of the same type.", call. = FALSE)
@@ -179,15 +183,68 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
          call. = FALSE)
   }
   
+  # Combine and reorder
   out <- do.call(rbind, discos)
   out <- out[order(out$window, out$position, out$experiment), ]
   
+  # Filter out duplicates
   dups <- duplicated(out[, c("window", "position", "experiment")])
   if (sum(dups) > 0) {
     message("Found duplicated insulation scores which are discarded.")
   }
   out <- out[!dups,]
   out
+}
+
+#' @rdname bundle
+#' @export
+bundle.IS_discovery <- function(..., collapse = "_"){
+  discos <- list(...)
+  
+
+  # Check for possible errors
+  classes <- vapply(lapply(discos, class), `[`, character(1), 1)
+  if (length(unique(classes)) > 1) {
+    stop("Can only bundle discoveries of the same type.", call. = FALSE)
+  }
+  res <- vapply(discos, attr, numeric(1), "resolution")
+  if (length(unique(res)) > 1) {
+    stop("Can only bundle insulation scores of the same resolution.",
+         call. = FALSE)
+  }
+  # Grab colours
+  cols <- lapply(discos, attr, "colours")
+  cols <- unlist(cols)
+  
+  # Extract insulation scores
+  dfs <- lapply(discos, `[[`, "insula_score")
+  expnames <- lapply(lapply(dfs, colnames), tail, -4)
+  
+  # Merge insulation scores
+  out <- dfs[[1]]
+  if (length(dfs) > 1) {
+    for (i in tail(seq_along(dfs), -1)) {
+      out <- merge(out, dfs[[2]], by = c("chrom", "start", "end", "bin"))
+    }
+  }
+  
+  # Check output column names
+  cnames <- tail(colnames(out), -4)
+  if (!identical(cnames, unlist(expnames))) {
+    newnames <- lapply(seq_along(expnames), function(i) {
+      paste0(expnames[[i]], collapse, i)
+    })
+    colnames(out)[-c(1:4)] <- unlist(newnames)
+    return(out)
+  }
+  setkey(out, "chrom", "start")
+  
+  structure(list(insula_score = out),
+            PACKAGE = "GENOVA",
+            colours = cols,
+            class = "IS_discovery",
+            resolution = attr(discos[[1]], "resolution"),
+            window = attr(discos[[1]], "window"))
 }
 
 # Unbundle documentation --------------------------------------------------
@@ -252,8 +309,29 @@ unbundle.ARMLA_discovery <- function(discovery, ...) {
   })
 }
 
+#' @rdname unbundle
+#' @export
 unbundle.domainogram_discovery <- function(discovery, ...) {
   split(discovery, discovery$experiment)
+}
+
+#' @rdname unbundle
+#' @export
+unbundle.IS_discovery <- function(discovery, ...) {
+  exps <- tail(colnames(discovery$insula_score), -4)
+  cols <- lapply(setNames(exps, exps), function(i) {
+    c("chrom", "start", "end", "bin", i)
+  })
+  
+  out <- lapply(setNames(seq_along(exps), exps), function(i) {
+    structure(list(insula_score = discovery$insula_score[, cols[[i]], 
+                                                         with = FALSE]),
+              PACKAGE = "GENOVA",
+              colours = attr(discovery, "colours")[i],
+              class = "IS_discovery",
+              resolution = attr(discovery, "resolution"),
+              window = attr(discovery, "window"))
+  })
 }
 
 # Utilities ---------------------------------------------------------------

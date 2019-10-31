@@ -1086,7 +1086,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
 
   p <- p + ggplot2::theme(axis.line = ggplot2::element_line(colour = 'black'),
                           axis.text = ggplot2::element_text(colour = 'black'),
-                          strip.background = element_blank())
+                          strip.background = ggplot2::element_blank())
   suppressWarnings(p)
 }
 

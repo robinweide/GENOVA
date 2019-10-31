@@ -16,6 +16,12 @@
 #'     \item{\code{\link[GENOVA]{APA}}}{\code{APA_discovery} objects}
 #'     \item{\code{\link[GENOVA]{ATA}}}{\code{ATA_discovery} objects}
 #'     \item{\code{\link[GENOVA]{ARA}}}{\code{ARA_discovery} objects}
+#'     \item{\code{\link[GENOVA]{RCP}}}{\code{RCP_discovery} objects}
+#'     \item{\code{\link[GENOVA]{compartment_score}}}{\code{CS_discovery} objects}
+#'     \item{\code{\link[GENOVA]{saddle}}}{\code{saddle_discovery} objects}
+#'     \item{\code{\link[GENOVA]{insulation_score}}}{\code{IS_discovery} objects}
+#'     \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery} objects}
+#'     \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
 #'   }
 #'
 #' @section Operations: \subsection{Subsetting}{\code{discovery} objects can be
@@ -200,7 +206,6 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
 #' @export
 bundle.IS_discovery <- function(..., collapse = "_"){
   discos <- list(...)
-  
 
   # Check for possible errors
   classes <- vapply(lapply(discos, class), `[`, character(1), 1)
@@ -245,6 +250,51 @@ bundle.IS_discovery <- function(..., collapse = "_"){
             class = "IS_discovery",
             resolution = attr(discos[[1]], "resolution"),
             window = attr(discos[[1]], "window"))
+}
+
+#' @rdname bundle
+#' @export
+bundle.virtual4C_discovery <- function(..., collapse = "_") {
+  discos <- list(...)
+  
+  # Check for possible errors
+  classes <- vapply(lapply(discos, class), `[`, character(1), 1)
+  if (length(unique(classes)) > 1) {
+    stop("Can only bundle discoveries of the same type.", call. = FALSE)
+  }
+  res <- vapply(discos, attr, numeric(1), "resolution")
+  if (length(unique(res)) > 1) {
+    stop("Can only bundle insulation scores of the same resolution.",
+         call. = FALSE)
+  }
+  
+  vps <- lapply(discos, attr, "viewpoint")
+  vps <- do.call(rbind, vps)
+  
+  if (length(unique(vps[, 1])) > 1) {
+    stop("Can only bundle virtual 4Cs with the",
+         "viewpoint on the same chromosome", call. = FALSE)
+  }
+
+  vps <- vps[!duplicated(vps),]
+  rownames(vps) <- NULL
+  
+  xlims <- unique(unlist(lapply(discos, attr, "xlim")))
+  expnames <- unname(vapply(discos, 
+                            function(disc){unique(disc$data$experiment)},
+                     character(1)))
+  
+  datas <- lapply(discos, function(disc){disc$data})
+  datas <- rbindlist(datas)
+  datas <- datas[order(chromosome, mid)]
+  
+  structure(list(data = datas), 
+            class = "virtual4C_discovery",
+            'viewpoint' = vps, 
+            'xlim' = xlims,
+            'sample' = expnames,
+            'resolution' = attr(explist[[1]], 'resolution'),
+            package = "GENOVA")
 }
 
 # Unbundle documentation --------------------------------------------------
@@ -331,6 +381,21 @@ unbundle.IS_discovery <- function(discovery, ...) {
               class = "IS_discovery",
               resolution = attr(discovery, "resolution"),
               window = attr(discovery, "window"))
+  })
+}
+
+#' @rdname unbundle
+#' @export
+unbundle.virtual4C_discovery <- function(discovery, ...) {
+  attris <- attributes(discovery)
+  newdata <- split(discovery$data, discovery$data$experiment)
+  lapply(setNames(seq_along(newdata), names(newdata)), function(i) {
+    structure(list(data = newdata[[i]]), class = "virtual4C_discovery",
+              xlim = attris$xlim,
+              viewpoint = attris$viewpoint,
+              sample = attris$sample[i],
+              resolution = attris$resolution,
+              package = attris$package)
   })
 }
 

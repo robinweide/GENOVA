@@ -4,15 +4,15 @@
 \alias{virtual_4C}
 \title{Get an average virtual 4C of 2D-regions (e.g. loops).}
 \usage{
-virtual_4C(exp, viewpoint, xlim = NULL)
+virtual_4C(explist, viewpoint, xlim = NULL)
 }
 \arguments{
-\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
-
 \item{viewpoint}{The viewpoint: will take the middle Hi-C bin if it spans mulitple bins.}
 
 \item{xlim}{A vector of two with the flanking basepairs up- and downstream 
 of the viewpoint, resp.}
+
+\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
 }
 \value{
 A virtual4C_discovery object.

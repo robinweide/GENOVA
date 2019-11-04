@@ -65,9 +65,6 @@ functions.}
 
 \item{...}{further arguments passed to or from other methods.}
 
-\item{signal_size}{The width/height of the signal (e.g. a value of 3 will 
-take the middle 3x3 matrix of the APA).}
-
 \item{contrast}{An \code{integer} or \code{character} matching an experiment
 (name) of length 1, specifying which sample should be used to make a
 contrast with all other samples. Alternatively, set to \code{NULL} to not

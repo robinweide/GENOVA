@@ -3,11 +3,29 @@
 \name{bundle}
 \alias{bundle}
 \alias{bundle.ARMLA_discovery}
+\alias{bundle.domainogram_discovery}
+\alias{bundle.IS_discovery}
+\alias{bundle.virtual4C_discovery}
+\alias{bundle.CS_discovery}
+\alias{bundle.saddle_discovery}
+\alias{bundle.RCP_discovery}
 \title{Combine discovery objects}
 \usage{
 bundle(..., collapse = "_")
 
 \method{bundle}{ARMLA_discovery}(..., collapse = "_")
+
+\method{bundle}{domainogram_discovery}(..., collapse = "_")
+
+\method{bundle}{IS_discovery}(..., collapse = "_")
+
+\method{bundle}{virtual4C_discovery}(..., collapse = "_")
+
+\method{bundle}{CS_discovery}(..., collapse = "_")
+
+\method{bundle}{saddle_discovery}(..., collapse = "_")
+
+\method{bundle}{RCP_discovery}(..., collapse = "_")
 }
 \arguments{
 \item{...}{A number of \code{discovery} objects from the same analysis type.}

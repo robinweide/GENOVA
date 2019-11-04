@@ -3,11 +3,29 @@
 \name{unbundle}
 \alias{unbundle}
 \alias{unbundle.ARMLA_discovery}
+\alias{unbundle.domainogram_discovery}
+\alias{unbundle.IS_discovery}
+\alias{unbundle.virtual4C_discovery}
+\alias{unbundle.CS_discovery}
+\alias{unbundle.saddle_discovery}
+\alias{unbundle.RCP_discovery}
 \title{Split discovery objects}
 \usage{
 unbundle(discovery, ...)
 
 \method{unbundle}{ARMLA_discovery}(discovery, ...)
+
+\method{unbundle}{domainogram_discovery}(discovery, ...)
+
+\method{unbundle}{IS_discovery}(discovery, ...)
+
+\method{unbundle}{virtual4C_discovery}(discovery, ...)
+
+\method{unbundle}{CS_discovery}(discovery, ...)
+
+\method{unbundle}{saddle_discovery}(discovery, ...)
+
+\method{unbundle}{RCP_discovery}(discovery, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object with more than 1 sample.}

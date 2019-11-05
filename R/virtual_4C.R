@@ -2,10 +2,12 @@
 #'
 #' Extract matrices around a defined region a.k.a. the viewpoint
 #'
-#' @param exp The Hi-C experiment object of a sample: produced by construct.experiment().
-#' @param viewpoint The viewpoint: will take the middle Hi-C bin if it spans mulitple bins.
-#' @param xlim A vector of two with the flanking basepairs up- and downstream 
-#' of the viewpoint, resp. 
+#' @param explist Either a single GENOVA \code{contacts} object or list of
+#'   GENOVA \code{contacts}.
+#' @param viewpoint The viewpoint: will take the middle Hi-C bin if it spans
+#'   mulitple bins.
+#' @param xlim A vector of two with the flanking basepairs up- and downstream of
+#'   the viewpoint, resp.
 #' @return A virtual4C_discovery object.
 #' @export
 virtual_4C <- function(explist, viewpoint, xlim = NULL){

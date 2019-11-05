@@ -1327,11 +1327,11 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
 
 #' @rdname visualise
 #' @export
-visualise.domainogram_discovery <- function(domainogram_discovery, 
+visualise.domainogram_discovery <- function(discovery, 
                                             colour_lim = c(-1, 1),
                                             title = NULL,
-                                            raw = FALSE) {
-  df <- domainogram_discovery
+                                            raw = FALSE, ...) {
+  df <- discovery
   
   g <- ggplot2::ggplot(df, ggplot2::aes(position, window, fill = insulation)) +
     ggplot2::geom_raster() +
@@ -1355,8 +1355,8 @@ visualise.domainogram_discovery <- function(domainogram_discovery,
                     strip.background = ggplot2::element_blank(),
                     axis.ticks = ggplot2::element_line(colour = "black"),
                     axis.line  = ggplot2::element_line(colour = "black"),
-                    panel.grid = element_blank(),
-                    panel.background = element_blank())
+                    panel.grid = ggplot2::element_blank(),
+                    panel.background = ggplot2::element_blank())
   }
   
   g

@@ -294,7 +294,7 @@ bundle.virtual4C_discovery <- function(..., collapse = "_") {
             'viewpoint' = vps, 
             'xlim' = xlims,
             'sample' = expnames,
-            'resolution' = attr(explist[[1]], 'resolution'),
+            'resolution' = attr(discos[[1]], 'resolution'),
             package = "GENOVA")
 }
 

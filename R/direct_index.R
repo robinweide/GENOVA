@@ -48,7 +48,7 @@ direct_index <- function(explist, range = 100) {
   data.table::setDTthreads(1)
   
   # Pre-flight checklist
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")
   } else {

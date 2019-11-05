@@ -7,12 +7,14 @@
 virtual_4C(explist, viewpoint, xlim = NULL)
 }
 \arguments{
-\item{viewpoint}{The viewpoint: will take the middle Hi-C bin if it spans mulitple bins.}
+\item{explist}{Either a single GENOVA \code{contacts} object or list of
+GENOVA \code{contacts}.}
 
-\item{xlim}{A vector of two with the flanking basepairs up- and downstream 
-of the viewpoint, resp.}
+\item{viewpoint}{The viewpoint: will take the middle Hi-C bin if it spans
+mulitple bins.}
 
-\item{exp}{The Hi-C experiment object of a sample: produced by construct.experiment().}
+\item{xlim}{A vector of two with the flanking basepairs up- and downstream of
+the viewpoint, resp.}
 }
 \value{
 A virtual4C_discovery object.

@@ -11,6 +11,7 @@
 \alias{visualise.ARA_discovery}
 \alias{visualise.CS_discovery}
 \alias{visualise.IS_discovery}
+\alias{visualise.DI_discovery}
 \alias{visualise.RCP_discovery}
 \alias{visualise.virtual4C_discovery}
 \alias{visualise.saddle_discovery}
@@ -43,6 +44,9 @@ visualise(discovery, ...)
   chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
 
 \method{visualise}{IS_discovery}(discovery, contrast = NULL,
+  chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
+
+\method{visualise}{DI_discovery}(discovery, contrast = NULL,
   chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
 
 \method{visualise}{RCP_discovery}(discovery, contrast = 1,

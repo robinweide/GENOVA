@@ -804,6 +804,91 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   g
 }
 
+#' @rdname visualise
+#' @export
+visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
+                                    start = NULL, end = NULL, raw = FALSE, ...) {
+  start <- if (is.null(start)) -Inf else start
+  end <- if (is.null(end)) Inf else end
+  df <- discovery$DI
+  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
+                df[["end"]] <= end)
+  df <- df[ii,]
+  expnames <- unique(df$experiment)
+  
+  df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
+                   exp = df$experiment,
+                   dir_index = df$DI)
+  
+  yname <- "Directionality Index"
+  
+  if (!is.null(contrast)) {
+    cdf <- dcast(as.data.table(df), mid ~ exp, value.var = "dir_index")
+    locs <- cdf[, 1]
+    cdf <- cdf[, tail(seq_len(ncol(cdf)), -1), with = FALSE]
+    contr <- cdf[, contrast, with = FALSE][[1]]
+    cdf <- cdf - contr
+    cdf[, mid := locs]
+    cdf <- melt(cdf, id.vars = "mid")
+    setnames(cdf, 2:3, c("exp", "dir_index"))
+    cdf[, panel := factor("Difference", levels = c(yname, "Difference"))]
+    df$panel <- factor(yname, levels = c(yname, "Difference"))
+  } else {
+    cdf <- NULL
+  }
+
+  rownames(df) <- NULL
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(mid, dir_index, colour = exp)) +
+    ggplot2::geom_line()
+  
+  if (!is.null(cdf)) {
+    g <- g + ggplot2::geom_line(data = cdf) +
+      ggplot2::facet_grid(panel ~ ., scales = "free_y", switch = "y")
+  }
+  
+  if (raw) {
+    return(g)
+  }
+  cols <- attr(discovery, "colours")
+  g <- g + ggplot2::scale_x_continuous(
+    name = paste0("Location ", chr),
+    expand = c(0.01,0),
+    labels = function(x){paste0(x/1e6, " Mb")}
+  ) +
+    ggplot2::scale_y_continuous(
+      name = yname,
+      # limits = c(-1.25, 1.25),
+      oob = scales::squish,
+      limits = function(x){c(-1, 1) * diff(
+        quantile(df$dir_index[is.finite(df$dir_index)], c(0.005, 0.995))
+        )}
+    ) +
+    ggplot2::scale_colour_manual(
+      name = "Sample",
+      breaks = expnames,
+      limits = expnames,
+      values = cols
+    )
+  g <- g + ggplot2::theme(
+    panel.background = ggplot2::element_blank(),
+    axis.line = ggplot2::element_line(colour = "black"),
+    legend.key = ggplot2::element_blank(),
+    aspect.ratio = 2 / (1 + sqrt(5)),
+    text = ggplot2::element_text(color = 'black'),
+    axis.text = ggplot2::element_text(color = 'black'),
+  )
+  if (!is.null(cdf)) {
+    g <- g + ggplot2::theme(
+      strip.placement = "outside",
+      axis.title.y = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      strip.text = ggplot2::element_text(size = ggplot2::rel(1))
+    )
+  }
+  g
+}
+
 # Miscellaneous discoveries ----------------------------------------------------
 
 #' @rdname visualise

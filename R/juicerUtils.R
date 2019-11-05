@@ -21,12 +21,14 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
     ec = expandedChromosomes[eci,]
     
     juicer_in <- tryCatch(
-      {strawr::straw(norm = strawNorm,
-                     fname =juicerPath,
-                     chr1loc =  ec[2],
-                     chr2loc =  ec[1],
-                     unit = 'BP',
-                     binsize = resolution)
+      {
+        try_require("strawr", "loadJuicer", "github")
+        strawr::straw(norm = strawNorm,
+                      fname =juicerPath,
+                      chr1loc =  ec[2],
+                      chr2loc =  ec[1],
+                      unit = 'BP',
+                      binsize = resolution)
       },error=function(cond) {
         
         return(NULL)

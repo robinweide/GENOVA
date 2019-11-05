@@ -14,13 +14,16 @@ LazyData: true
 Imports: ggplot2,
     scales
 RoxygenNote: 6.1.1
-Suggests: knitr,
+Suggests: 
+    knitr,
     rmarkdown,
     HiCseg,
     RhpcBLASctl,
-    RCurl
+    RCurl,
+    strawr (>= 0.0.1),
+    bigwrig (>= 0.1.0),
+    rhdf5 (>= 2.30.0)
 VignetteBuilder: knitr
 Remotes: rnabioco/RcppLibBigWig,
    aidenlab/straw/R,
    bioc::release/rhdf5
-

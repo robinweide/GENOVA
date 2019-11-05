@@ -39,7 +39,7 @@ insulation_domainogram <- function(
   data.table::setDTthreads(1)
   
   # Setup experiments
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")
   } else {

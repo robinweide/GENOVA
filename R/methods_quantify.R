@@ -46,3 +46,48 @@ quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
   return(out[,c(1,3,2,4,5)])
   
 }
+
+#' @rdname visualise
+#' @export
+quantify.saddle_discovery <- function(x, ...){
+  dat <- x$saddle
+  
+  # get bins
+  MAXbin <- max(dat$q1)
+  binsTOse = floor(MAXbin * .2)
+  binsTOse = max(1, binsTOse)
+  
+  # transform from log2-space
+  dat$unLog = 2 ** dat$mean
+  
+  # assign cat
+  dat$CC <- 'XXX'
+  dat[dat$q1 <= binsTOse & dat$q2 <= binsTOse,"CC"] = "BB"
+  dat[dat$q1 >= MAXbin-binsTOse+1 & dat$q2 >= MAXbin-binsTOse+1,"CC"] = "AA"
+  dat[dat$q1 <= binsTOse & dat$q2 >= MAXbin-binsTOse+1,"CC"] = "AB"
+  dat <- dat[! dat$CC == 'XXX',]
+  
+  # summarise
+  dat[ , score := mean(unLog), by = c("exp", "chr", "CC")]
+  dat <- unique(dat[,-c(3:6)])
+  
+  # compute strength
+  SPLT <- split(dat, list(dat$exp, dat$chr))
+  SPLT <- SPLT[lapply(SPLT, nrow) == 3]
+  SPLT <- lapply(SPLT, function(y){
+    # check if all exist
+    
+    data.frame(exp = y[1,1], 
+               chr = y[1,2], 
+               strength = log2( 
+                 (y[y$CC == 'AA',score] * y[y$CC == 'BB',score]) / 
+                   (y[y$CC == 'AB',score]**2) 
+               )) 
+  })
+  strength <- data.table::rbindlist(SPLT)
+  dat <- merge(dat, strength, by = c('exp', 'chr'))
+  dat$exp <- factor(dat$exp, levels = unique(x$saddle$exp))
+  dat$CC  <- factor(dat$CC, levels = c('AA', 'BB', 'AB'))
+  # maybe add class?
+  return(dat)
+}

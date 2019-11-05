@@ -2,6 +2,8 @@
 % Please edit documentation in R/all_generics.R, R/methods_visualise.R
 \name{visualise}
 \alias{visualise}
+\alias{quantify.APA_discovery}
+\alias{quantify.saddle_discovery}
 \alias{visualise.default}
 \alias{visualise.APA_discovery}
 \alias{visualise.PESCAn_discovery}
@@ -18,6 +20,9 @@
 \usage{
 visualise(discovery, ...)
 
+\method{quantify}{APA_discovery}(discovery, signal_size = 3, ...)
+
+\method{quantify}{saddle_discovery}(x, ...)
 \method{visualise}{APA_discovery}(discovery, contrast = 1,
   metric = c("diff", "lfc"), raw = FALSE, title = NULL,
   colour_lim = NULL, colour_lim_contrast = NULL, ...)

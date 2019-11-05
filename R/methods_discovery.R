@@ -22,6 +22,7 @@
 #'     \item{\code{\link[GENOVA]{insulation_score}}}{\code{IS_discovery} objects}
 #'     \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery} objects}
 #'     \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
+#'     \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects}
 #'   }
 #'
 #' @section Operations: \subsection{Subsetting}{\code{discovery} objects can be
@@ -441,6 +442,38 @@ bundle.RCP_discovery <- function(..., collapse = "_") {
             norm = norms[1])
 }
 
+bundle.DI_discovery <- function(..., collapse = "_") {
+  discos <- list(...)
+  if (length(discos) < 2) {
+    message("Attempting to bundle a single object. Input is returned.")
+    return(discos[[1]])
+  }
+  
+  # Check for possible errors
+  classes <- vapply(lapply(discos, class), `[`, character(1), 1)
+  if (length(unique(classes)) > 1) {
+    stop("Can only bundle discoveries of the same type.", call. = FALSE)
+  }
+  
+  res <- unique(vapply(discos, attr, numeric(1), "resolution"))
+  if (length(res) > 1) {
+    stop("Can only bundle discoveries of the same resolution.",
+         call. = FALSE)
+  }
+  
+  cols <- unname(vapply(discos, attr, character(1), "colours"))
+  
+  dats <- lapply(discos, `[[`, "DI")
+  dats <- rbindlist(dats)
+  setkeyv(dats, "bin")
+  
+  structure(list(DI = dats),
+            class = "DI_discovery",
+            package = "GENOVA",
+            resolution = res,
+            colours = cols)
+}
+
 # Unbundle documentation --------------------------------------------------
 
 #' @title Split discovery objects
@@ -596,6 +629,19 @@ unbundle.RCP_discovery <- function(discovery, ...) {
               package = "GENOVA",
               norm = nor)
   }, r = raw, s = smooth, SIMPLIFY = FALSE)
+}
+
+#' @rdname unbundle
+#' @export
+unbundle.DI_discovery <- function(discovery, ...) {
+  dats <- split(discovery$DI, discovery$DI$experiment)
+  lapply(setNames(seq_along(dats), names(dats)), function(i) {
+    structure(list(DI = dats[[i]]),
+              package = "GENOVA",
+              colours = attr(discovery, "colours")[i],
+              resolution = attr(discovery, "resolution"),
+              class = "DI_discovery")
+  })
 }
 
 # Utilities ---------------------------------------------------------------

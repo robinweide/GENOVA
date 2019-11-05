@@ -22,7 +22,7 @@ quantify.default <- function(discovery, ...) {
 }
 
 
-#' @rdname visualise
+#' @rdname quantify
 #' @export
 quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
 

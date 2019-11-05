@@ -14,7 +14,7 @@
 #' @details Out of bounds values are matched to nearest bin.
 #' @export
 bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
-  if (!inherits(bed, "data.frame")) {
+  if (!inherits(bed, "data.frame") | is.data.table(bed)) {
     bed <- as.data.frame(bed)
   }
 
@@ -137,6 +137,45 @@ try_require <- function(package, fun, source = NULL) {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install and try again.", call. = FALSE)
   }
+}
+
+#' Check compatability of a list of GENOVA experiments
+#'
+#' Checks if the indices (ABS slot) across experiments are identical.
+#'
+#' @inheritParams APA
+#'
+#' @return A \code{list} of GENOVA experiment(s).
+#'
+#' @keywords internal
+check_compat_exp <- function(explist) {
+  if (!is.list(explist)) {
+    stop("Supply either a GENOVA experiment or list of GENOVA experiments",
+         call. = FALSE
+    )
+  }
+  
+  # Re-list of only one experiment was given
+  if (any(c("MAT", "IDX") %in% names(explist))) {
+    explist <- list(explist)
+  }
+  
+  # Test equality of experiments in list
+  if (length(explist) > 1) {
+    equal <- vapply(seq_along(explist)[-1], function(i) {
+      all.equal(explist[[1]]$IDX, explist[[i]]$IDX)
+    }, logical(1))
+    
+    if (any(!equal)) {
+      stop(paste(
+        "Indices of experiment(s)",
+        paste(which(!equal) + 1, collapse = " & "),
+        "are not equal to indices of experiment 1"
+      ), call. = FALSE)
+    }
+  }
+  
+  return(explist)
 }
 
 GENOVA_THEME = function(){

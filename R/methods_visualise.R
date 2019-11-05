@@ -49,8 +49,6 @@
 #'   \code{-Inf} and \code{Inf} respectively.
 #'   
 #' @param title add a title
-#' @param signal_size The width/height of the signal (e.g. a value of 3 will 
-#' take the middle 3x3 matrix of the APA).
 #' @param ... further arguments passed to or from other methods.
 #'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
@@ -806,6 +804,91 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   g
 }
 
+#' @rdname visualise
+#' @export
+visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
+                                    start = NULL, end = NULL, raw = FALSE, ...) {
+  start <- if (is.null(start)) -Inf else start
+  end <- if (is.null(end)) Inf else end
+  df <- discovery$DI
+  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
+                df[["end"]] <= end)
+  df <- df[ii,]
+  expnames <- unique(df$experiment)
+  
+  df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
+                   exp = df$experiment,
+                   dir_index = df$DI)
+  
+  yname <- "Directionality Index"
+  
+  if (!is.null(contrast)) {
+    cdf <- dcast(as.data.table(df), mid ~ exp, value.var = "dir_index")
+    locs <- cdf[, 1]
+    cdf <- cdf[, tail(seq_len(ncol(cdf)), -1), with = FALSE]
+    contr <- cdf[, contrast, with = FALSE][[1]]
+    cdf <- cdf - contr
+    cdf[, mid := locs]
+    cdf <- melt(cdf, id.vars = "mid")
+    setnames(cdf, 2:3, c("exp", "dir_index"))
+    cdf[, panel := factor("Difference", levels = c(yname, "Difference"))]
+    df$panel <- factor(yname, levels = c(yname, "Difference"))
+  } else {
+    cdf <- NULL
+  }
+
+  rownames(df) <- NULL
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(mid, dir_index, colour = exp)) +
+    ggplot2::geom_line()
+  
+  if (!is.null(cdf)) {
+    g <- g + ggplot2::geom_line(data = cdf) +
+      ggplot2::facet_grid(panel ~ ., scales = "free_y", switch = "y")
+  }
+  
+  if (raw) {
+    return(g)
+  }
+  cols <- attr(discovery, "colours")
+  g <- g + ggplot2::scale_x_continuous(
+    name = paste0("Location ", chr),
+    expand = c(0.01,0),
+    labels = function(x){paste0(x/1e6, " Mb")}
+  ) +
+    ggplot2::scale_y_continuous(
+      name = yname,
+      # limits = c(-1.25, 1.25),
+      oob = scales::squish,
+      limits = function(x){c(-1, 1) * diff(
+        quantile(df$dir_index[is.finite(df$dir_index)], c(0.005, 0.995))
+        )}
+    ) +
+    ggplot2::scale_colour_manual(
+      name = "Sample",
+      breaks = expnames,
+      limits = expnames,
+      values = cols
+    )
+  g <- g + ggplot2::theme(
+    panel.background = ggplot2::element_blank(),
+    axis.line = ggplot2::element_line(colour = "black"),
+    legend.key = ggplot2::element_blank(),
+    aspect.ratio = 2 / (1 + sqrt(5)),
+    text = ggplot2::element_text(color = 'black'),
+    axis.text = ggplot2::element_text(color = 'black'),
+  )
+  if (!is.null(cdf)) {
+    g <- g + ggplot2::theme(
+      strip.placement = "outside",
+      axis.title.y = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      strip.text = ggplot2::element_text(size = ggplot2::rel(1))
+    )
+  }
+  g
+}
+
 # Miscellaneous discoveries ----------------------------------------------------
 
 #' @rdname visualise
@@ -999,6 +1082,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   # ! someday: allow mulitple samples
   data <- discovery$data
   VP   <- attr(discovery,"viewpoint")
+  data <- data[chromosome == VP[1, 1]]
   
   if(!is.null(extend_viewpoint)){
     VP[1,2] <- VP[1,2] - extend_viewpoint
@@ -1013,7 +1097,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   
   blackout_up   <- VP[1,2]
   blackout_down <- VP[1,3]
-  data_blackout <- data[(data$mid >= blackout_up & data$mid <= blackout_down)]
+  data_blackout <- data[mid >= blackout_up & mid <= blackout_down]
   
   if( !is.null(bed)) {
     bed = bed[bed[,1] == attr(discovery, 'viewpoint')[1,1],2:3]
@@ -1023,7 +1107,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   
   breaks   <- seq(min(data$mid), max(data$mid), length.out = bins)
   bin_size <- median(diff(breaks))
-  smooth   <- data[, mean(signal),by = findInterval(data$mid, breaks)]
+  smooth   <- data[, mean(signal), by = findInterval(data$mid, breaks)]
   smooth$mid = breaks[unlist(smooth[,1])] +(bin_size/2)
   smooth[,1] = NULL
   colnames(smooth) = c("signal","mid")
@@ -1031,23 +1115,28 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   p = ggplot2::ggplot(data, ggplot2::aes(x= mid/1e6, y = signal)) +
     ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size/1e6) +
     ggplot2::theme_classic() +
-    ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1])
+    ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1]) +
+    ggplot2::facet_grid(experiment ~ .)
   
   # draw_blackout ===+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   ymax <- ceiling(max(smooth$signal))
   data_blackout$signal <- ymax
 
-  p = p + ggplot2::annotate('rect', 
-                            fill = "#D8D8D8", 
-                            xmin = (min(data_blackout$mid)/1e6)-(bin_size/1e6), 
-                            xmax = (max(data_blackout$mid)/1e6)+(bin_size/1e6), 
-                            ymin = 0, 
-                            ymax = max(data_blackout$signal) )+
-    ggplot2::annotate(geom = 'text',
-                      vjust = 1,
-                      x = rowMeans(VP[,2:3])/1e6,
-                      y =  ymax*0.9,
-                      label = '\u2693')
+  if (nrow(data_blackout) > 0) {
+    p = p + ggplot2::annotate(
+      'rect', 
+      fill = "#D8D8D8", 
+      xmin = (min(data_blackout$mid)/1e6)-(bin_size/1e6), 
+      xmax = (max(data_blackout$mid)/1e6)+(bin_size/1e6), 
+      ymin = 0, 
+      ymax = max(data_blackout$signal) 
+    ) +
+      ggplot2::annotate(geom = 'text',
+                        vjust = 1,
+                        x = rowMeans(VP[,2:3])/1e6,
+                        y =  ymax*0.9,
+                        label = '\u2693')
+  }
 
   if( !is.null(bed)){
     p = p + ggplot2::annotate('rect', 
@@ -1081,7 +1170,8 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   }
 
   p <- p + ggplot2::theme(axis.line = ggplot2::element_line(colour = 'black'),
-                          axis.text = ggplot2::element_text(colour = 'black'))
+                          axis.text = ggplot2::element_text(colour = 'black'),
+                          strip.background = ggplot2::element_blank())
   suppressWarnings(p)
 }
 
@@ -1234,6 +1324,43 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
       ggplot2::coord_cartesian(clip = "off")
   }
   return(g)
+}
+
+#' @rdname visualise
+#' @export
+visualise.domainogram_discovery <- function(discovery, 
+                                            colour_lim = c(-1, 1),
+                                            title = NULL,
+                                            raw = FALSE, ...) {
+  df <- discovery
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(position, window, fill = insulation)) +
+    ggplot2::geom_raster() +
+    ggplot2::facet_grid(experiment ~ .)
+  
+  if (!is.null(title)) {
+    g <- g + ggplot2::ggtitle(title)
+  }
+  
+  if (!raw) {
+    g <- g + 
+      ggplot2::scale_x_continuous(name = paste0("Position ", 
+                                                attr(df, "chrom"), " (Mb)"),
+                                  labels = function(x){x/1e6},
+                                  expand = c(0,0)) +
+      ggplot2::scale_y_continuous(name = "Window Size", expand = c(0, 0)) +
+      ggplot2::scale_fill_gradient2(low = "#ff5c49", high = "#009bef",
+                                    limits = colour_lim, oob = scales::squish,
+                                    name = "Insulation\nScore") +
+      ggplot2::theme(axis.text = ggplot2::element_text(colour = "black"),
+                    strip.background = ggplot2::element_blank(),
+                    axis.ticks = ggplot2::element_line(colour = "black"),
+                    axis.line  = ggplot2::element_line(colour = "black"),
+                    panel.grid = ggplot2::element_blank(),
+                    panel.background = ggplot2::element_blank())
+  }
+  
+  g
 }
 
 # Utilities ---------------------------------------------------------------

@@ -204,8 +204,7 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
 #'                        window.size2 = 101, 
 #'                        step = 2)
 #' }
-#' @export
-insulation.domainogram <- function(exp, chrom, start, end, axes = T, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim = c(-1, 0.5)) {
+insulation.domainogram_old <- function(exp, chrom, start, end, axes = T, window.size1 = 5, window.size2 = 101, step = 2, local = T, zlim = c(-1, 0.5)) {
   if (step %% 2) {
     stop("Step size has to be even")
   }

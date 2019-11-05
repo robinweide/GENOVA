@@ -282,6 +282,28 @@ print.domainogram_discovery <- function(x, ...) {
 
 #' @export
 #' @keywords internal
+print.DI_discovery <- function(x, ...) {
+  myclass <- class(x)[1]
+  expnames <- unique(x$DI$experiment)
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  string <- paste0("A ", attr(x, "package"), " '", myclass,
+                   "' object involving the following ",
+                   length(expnames), " experiments:\n'",
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n")
+  cat(string)
+  print(as.data.table(x$DI))
+}
+
+#' @export
+#' @keywords internal
 print.virtual4C_discovery <- function(x, ...) {
   myclass <- class(x)[[1]]
   expnames <- unique(x$data$experiment)

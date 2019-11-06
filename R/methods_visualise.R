@@ -500,7 +500,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
       name = "",
       expand = c(0, 0),
       breaks = pos_breaks,
-      labels = c("5' border", "3' border")
+      labels = c("3' border", "5' border")
     )
 
   if(!is.null(title)){

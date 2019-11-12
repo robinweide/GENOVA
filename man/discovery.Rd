@@ -13,19 +13,18 @@ Next to the results, the \code{discovery} objects may also contain
   used.
 
   Functions that generate \code{discovery} objects are the following:
-  \describe{
-   \item{\code{\link[GENOVA]{PESCAn}}}{\code{PESCAn_discovery} objects}
-    \item{\code{\link[GENOVA]{APA}}}{\code{APA_discovery} objects}
-    \item{\code{\link[GENOVA]{ATA}}}{\code{ATA_discovery} objects}
-    \item{\code{\link[GENOVA]{ARA}}}{\code{ARA_discovery} objects}
-    \item{\code{\link[GENOVA]{RCP}}}{\code{RCP_discovery} objects}
-    \item{\code{\link[GENOVA]{compartment_score}}}{\code{CS_discovery} objects}
-    \item{\code{\link[GENOVA]{saddle}}}{\code{saddle_discovery} objects}
-    \item{\code{\link[GENOVA]{insulation_score}}}{\code{IS_discovery} objects}
-    \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery} objects}
-    \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
-    \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects}
-  }
+  \describe{ \item{\code{\link[GENOVA]{PESCAn}}}{\code{PESCAn_discovery}
+  objects} \item{\code{\link[GENOVA]{APA}}}{\code{APA_discovery} objects}
+  \item{\code{\link[GENOVA]{ATA}}}{\code{ATA_discovery} objects}
+  \item{\code{\link[GENOVA]{ARA}}}{\code{ARA_discovery} objects}
+  \item{\code{\link[GENOVA]{RCP}}}{\code{RCP_discovery} objects}
+  \item{\code{\link[GENOVA]{compartment_score}}}{\code{CS_discovery} objects}
+  \item{\code{\link[GENOVA]{saddle}}}{\code{saddle_discovery} objects}
+  \item{\code{\link[GENOVA]{insulation_score}}}{\code{IS_discovery} objects}
+  \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery}
+   objects}
+  \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
+  \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects} }
 }
 \section{Operations}{
  \subsection{Subsetting}{\code{discovery} objects can be
@@ -33,12 +32,14 @@ Next to the results, the \code{discovery} objects may also contain
   \code{integer} or \code{character} corresponding to the intended
   sample(s).} \subsection{Combining}{\code{discovery} objects of the same
   type can be combined by using \code{\link[GENOVA]{bundle}(discovery_A,
-  discovery_B)}.} \subsection{Splitting}{\code{discovery} objects can be
-  split to individual samples by using
-  \code{\link[GENOVA]{unbundle}(discovery)}.}
-  \subsection{Visualisation}{\code{discovery} objects can be visualised using
-  \code{\link[GENOVA]{visualise}(discovery)}}
-  \subsection{Quantification}{\code{discovery} objects can be quantified
-  using \code{\link[GENOVA]{quantify}(discovery)}}
+  discovery_B)}. Generally, discovery objects generated from different
+  resolutions or specific to a particular genomic region can not be
+  combined.} \subsection{Splitting}{\code{discovery} objects can be split to
+  individual samples by using \code{\link[GENOVA]{unbundle}(discovery)}.}
+  \subsection{Visualisation}{\code{discovery} objects can be visualised with
+  ggplot2 using \code{\link[GENOVA]{visualise}(discovery)}. Alternatively,
+  the different discovery types also have base R plotting methods by using
+  \code{plot(discovery)}.} \subsection{Quantification}{\code{discovery}
+  objects can be quantified using \code{\link[GENOVA]{quantify}(discovery)}}
 }
 

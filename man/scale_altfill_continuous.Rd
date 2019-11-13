@@ -2,20 +2,17 @@
 % Please edit documentation in R/methods_visualise.R
 \name{scale_altfill_continuous}
 \alias{scale_altfill_continuous}
-\title{scale_altfill_continuous
-Makes sure no errors are returned when visualise(..., raw = TRUE)
-Unfortunately has to be exported, but is better than throwing errors}
+\title{scale_altfill_continuous Makes sure no errors are returned when
+visualise(..., raw = TRUE) Unfortunately has to be exported, but that is
+better than throwing errors anytime an attempt is mode to print a raw plot.}
 \usage{
 scale_altfill_continuous(...)
 }
 \arguments{
-\item{...}{whatever.}
-}
-\value{
-a thing
+\item{...}{Arguments to \code{\link[ggplot2]{scale_fill_gradient2}}.}
 }
 \description{
-scale_altfill_continuous
-Makes sure no errors are returned when visualise(..., raw = TRUE)
-Unfortunately has to be exported, but is better than throwing errors
+scale_altfill_continuous Makes sure no errors are returned when
+visualise(..., raw = TRUE) Unfortunately has to be exported, but that is
+better than throwing errors anytime an attempt is mode to print a raw plot.
 }

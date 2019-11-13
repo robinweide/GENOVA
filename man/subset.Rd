@@ -14,6 +14,8 @@
 \item{start}{A single postion in bp.}
 
 \item{end}{A single posttion in bp.}
+
+\item{...}{Currently not in use.}
 }
 \description{
 subset

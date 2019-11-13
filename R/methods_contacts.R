@@ -3,6 +3,7 @@
 #' @param chrom A vector of chromosomes to subset
 #' @param start A single postion in bp.
 #' @param end A single posttion in bp.
+#' @param ... Currently not in use.
 #' @examples 
 #' \dontrun{
 #' WT_chr1 <- subset(WT_new, chrom = 'chr1')

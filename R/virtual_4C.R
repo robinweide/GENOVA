@@ -73,6 +73,11 @@ virtual_4C <- function(explist, viewpoint, xlim = NULL){
   signal$experiment <- expnames[signal$experiment]
   signal <- list(data = signal)
   
+  viewpoint <- data.frame(chrom = viewpoint[1, 1],
+                          start = viewpoint[1, 2],
+                          end   = viewpoint[1, 3],
+                          exp = expnames)
+  
   signal <- structure(signal, 
                       class = "virtual4C_discovery",
                       'viewpoint' = viewpoint, 

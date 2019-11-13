@@ -11,32 +11,33 @@
 #'   used.
 #'
 #'   Functions that generate \code{discovery} objects are the following:
-#'   \describe{
-#'    \item{\code{\link[GENOVA]{PESCAn}}}{\code{PESCAn_discovery} objects}
-#'     \item{\code{\link[GENOVA]{APA}}}{\code{APA_discovery} objects}
-#'     \item{\code{\link[GENOVA]{ATA}}}{\code{ATA_discovery} objects}
-#'     \item{\code{\link[GENOVA]{ARA}}}{\code{ARA_discovery} objects}
-#'     \item{\code{\link[GENOVA]{RCP}}}{\code{RCP_discovery} objects}
-#'     \item{\code{\link[GENOVA]{compartment_score}}}{\code{CS_discovery} objects}
-#'     \item{\code{\link[GENOVA]{saddle}}}{\code{saddle_discovery} objects}
-#'     \item{\code{\link[GENOVA]{insulation_score}}}{\code{IS_discovery} objects}
-#'     \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery} objects}
-#'     \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
-#'     \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects}
-#'   }
+#'   \describe{ \item{\code{\link[GENOVA]{PESCAn}}}{\code{PESCAn_discovery}
+#'   objects} \item{\code{\link[GENOVA]{APA}}}{\code{APA_discovery} objects}
+#'   \item{\code{\link[GENOVA]{ATA}}}{\code{ATA_discovery} objects}
+#'   \item{\code{\link[GENOVA]{ARA}}}{\code{ARA_discovery} objects}
+#'   \item{\code{\link[GENOVA]{RCP}}}{\code{RCP_discovery} objects}
+#'   \item{\code{\link[GENOVA]{compartment_score}}}{\code{CS_discovery} objects}
+#'   \item{\code{\link[GENOVA]{saddle}}}{\code{saddle_discovery} objects}
+#'   \item{\code{\link[GENOVA]{insulation_score}}}{\code{IS_discovery} objects}
+#'   \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery}
+#'    objects}
+#'   \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
+#'   \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects} }
 #'
 #' @section Operations: \subsection{Subsetting}{\code{discovery} objects can be
 #'   subsetted by using \code{subset(discovery, i)} wherein \code{i} is an
 #'   \code{integer} or \code{character} corresponding to the intended
 #'   sample(s).} \subsection{Combining}{\code{discovery} objects of the same
 #'   type can be combined by using \code{\link[GENOVA]{bundle}(discovery_A,
-#'   discovery_B)}.} \subsection{Splitting}{\code{discovery} objects can be
-#'   split to individual samples by using
-#'   \code{\link[GENOVA]{unbundle}(discovery)}.}
-#'   \subsection{Visualisation}{\code{discovery} objects can be visualised using
-#'   \code{\link[GENOVA]{visualise}(discovery)}}
-#'   \subsection{Quantification}{\code{discovery} objects can be quantified
-#'   using \code{\link[GENOVA]{quantify}(discovery)}}
+#'   discovery_B)}. Generally, discovery objects generated from different
+#'   resolutions or specific to a particular genomic region can not be
+#'   combined.} \subsection{Splitting}{\code{discovery} objects can be split to
+#'   individual samples by using \code{\link[GENOVA]{unbundle}(discovery)}.}
+#'   \subsection{Visualisation}{\code{discovery} objects can be visualised with
+#'   ggplot2 using \code{\link[GENOVA]{visualise}(discovery)}. Alternatively,
+#'   the different discovery types also have base R plotting methods by using
+#'   \code{plot(discovery)}.} \subsection{Quantification}{\code{discovery}
+#'   objects can be quantified using \code{\link[GENOVA]{quantify}(discovery)}}
 NULL
 
 # Bundle documentation ----------------------------------------------------
@@ -270,6 +271,7 @@ bundle.virtual4C_discovery <- function(..., collapse = "_") {
   }
   
   vps <- lapply(discos, attr, "viewpoint")
+  vps <- lapply(vps, `colnames<-`, c("chr", "start", "end", "exp"))
   vps <- do.call(rbind, vps)
   
   if (length(unique(vps[, 1])) > 1) {
@@ -277,17 +279,32 @@ bundle.virtual4C_discovery <- function(..., collapse = "_") {
          "viewpoint on the same chromosome", call. = FALSE)
   }
 
-  vps <- vps[!duplicated(vps),]
+  # vps <- vps[!duplicated(vps),]
   rownames(vps) <- NULL
   
   xlims <- unique(unlist(lapply(discos, attr, "xlim")))
-  expnames <- unname(vapply(discos, 
-                            function(disc){unique(disc$data$experiment)},
-                     character(1)))
-  
+  expnames <- unlist(lapply(discos, function(disc) {
+    unique(disc$data$experiment)
+  }))
+
   datas <- lapply(discos, function(disc){disc$data})
+  if (any(duplicated(expnames))) {
+    vps <- lapply(seq_along(discos), function(i) {
+      vp <- attr(discos[[i]], "viewpoint")
+      vp$exp <- paste0(vp$exp, collapse, i)
+      vp
+    })
+    vps <- do.call(rbind, vps)
+  
+    datas <- lapply(seq_along(datas), function(i) {
+      x <- datas[[i]]
+      x$experiment <- paste0(x$experiment, collapse, i)
+      x
+    })
+  }
   datas <- rbindlist(datas)
   datas <- datas[order(chromosome, mid)]
+  expnames <- unique(datas$experiment)
   
   structure(list(data = datas), 
             class = "virtual4C_discovery",
@@ -567,9 +584,11 @@ unbundle.virtual4C_discovery <- function(discovery, ...) {
   attris <- attributes(discovery)
   newdata <- split(discovery$data, discovery$data$experiment)
   lapply(setNames(seq_along(newdata), names(newdata)), function(i) {
+    vp <- attris$viewpoint[attris$viewpoint$exp == newdata[[i]]$experiment[1],]
+    rownames(vp) <- NULL
     structure(list(data = newdata[[i]]), class = "virtual4C_discovery",
               xlim = attris$xlim,
-              viewpoint = attris$viewpoint,
+              viewpoint = vp,
               sample = attris$sample[i],
               resolution = attris$resolution,
               package = attris$package)

@@ -16,22 +16,29 @@
 #'
 #'   \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
 #'   \code{"lfc"} for \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold
-#'   changes.} \item{RCP}{\code{"smooth"} for a \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line, \code{both}
-#'   for adding the raw distance-bins as points and \code{lfc} for
+#'   changes.} \item{RCP}{\code{"smooth"} for a
+#'   \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line,
+#'   \code{both} for adding the raw distance-bins as points and \code{lfc} for
 #'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }
 #'
-#' @param colour_lim,colour_lim_contrast One of: \itemize{
-#'   \item \code{NULL} to have an educated quess for the scale.
-#'   \item A \code{numeric} vector of length two providing the limits of the scale. Use \code{NA} to refer to existing minima or maxima.
-#'   \item A \code{function} that accepts the existing (automatic) limits and returns new limits.
-#' }
+#' @param colour_lim,colour_lim_contrast One of: \itemize{ \item \code{NULL} to
+#'   have an educated quess for the scale. \item A \code{numeric} vector of
+#'   length two providing the limits of the scale. Use \code{NA} to refer to
+#'   existing minima or maxima. \item A \code{function} that accepts the
+#'   existing (automatic) limits and returns new limits. }
 #'
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
 #'
 #' @param bins \code{[virtual4C]} Set the number of histogram-bins
 #'
-#' @param bed \code{[virtual4C]} A data.frame of bed-entries to plot underneath.
+#' @param bedlist \code{[virtual4C]} Either a BED-formatted \code{data.frame} or
+#'   list thereof to plot underneath the tracks.
+#'
+#' @param bed_colours \code{[virtual4C]} A \code{character} vector with colours
+#'   parallel to the number of list-elements in the \code{bedlist} argument.
+#'   Last colour is repeated if \code{bedlist} is longer than
+#'   \code{bed_colours}.
 #'
 #' @param extend_viewpoint \code{[virtual4C]} Add a set bp to both sides of the
 #'   viewpoint. Makes the viewpoint-box broader.
@@ -40,14 +47,14 @@
 #'   visualisation? \code{"obsexp"} for the observed over expected metric or
 #'   \code{"signal"} for mean contacts at unshifted anchors.
 #'
-#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different
-#'   regions in one plot, instead of facets? (default : \code{FALSE})
-#' @param chr \code{[CS, saddle & IS]} A \code{character} of length 1 indicating a
-#'   chromosome name.
-#' @param start,end \code{[CS & IS]} A \code{numeric} of length 1 with start-
-#'   and end-positions for the region to plot. If \code{NULL}, is set to
+#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different regions
+#'   in one plot, instead of facets? (default : \code{FALSE})
+#' @param chr \code{[CS, saddle & IS & DI]} A \code{character} of length 1
+#'   indicating a chromosome name.
+#' @param start,end \code{[CS & IS & DI]} A \code{numeric} of length 1 with
+#'   start- and end-positions for the region to plot. If \code{NULL}, is set to
 #'   \code{-Inf} and \code{Inf} respectively.
-#'   
+#'
 #' @param title add a title
 #' @param ... further arguments passed to or from other methods.
 #'
@@ -90,11 +97,11 @@
 #' # ARA
 #' ara <- ARA(list(WT = WT_20kb, KO = KO_20kb), ctcf_sites)
 #' visualise(ara)
-#' 
+#'
 #' # Compartment score
 #' cs <- compartment_score(list(WT = WT_100kb, KO = KO_100kb), H3K4me1_peaks)
 #' visualise(cs, chr = "chr1")
-#' 
+#'
 #' # Saddle function
 #' sadl <- saddle(list(WT = WT_100kb, KO = KO_100kb), cs) # see example above
 #' visualise(sadl)
@@ -500,7 +507,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
       name = "",
       expand = c(0, 0),
       breaks = pos_breaks,
-      labels = c("5' border", "3' border")
+      labels = c("3' border", "5' border")
     )
 
   if(!is.null(title)){
@@ -893,7 +900,9 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
 
 #' @rdname visualise
 #' @export
-visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F, ...){
+visualise.RCP_discovery = function(discovery, contrast = 1, 
+                                   metric = c("smooth","both","lfc"), raw = F, 
+                                   title = NULL, flipFacet = F, ...){
   
   metric <- match.arg(metric)
   
@@ -1078,44 +1087,87 @@ visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth",
 
 #' @rdname visualise
 #' @export
-visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, extend_viewpoint = NULL, ...){
-  # ! someday: allow mulitple samples
+visualise.virtual4C_discovery <- function(discovery, bins = NULL, 
+                                          bedlist = NULL, bed_colours = "black", 
+                                          extend_viewpoint = NULL, ...){
   data <- discovery$data
   VP   <- attr(discovery,"viewpoint")
   data <- data[chromosome == VP[1, 1]]
+  expnames <- unique(data$experiment)
   
   if(!is.null(extend_viewpoint)){
-    VP[1,2] <- VP[1,2] - extend_viewpoint
-    VP[1,3] <- VP[1,3] + extend_viewpoint
+    VP[, 2] <- VP[, 2] - extend_viewpoint
+    VP[, 3] <- VP[, 3] + extend_viewpoint
   }
   
   if( is.null(bins) ) {
-    bins = nrow(data)
+    bins = nrow(data[!duplicated(mid)])
   }
   
-  VP_mid <- rowMeans(attr(discovery, 'viewpoint')[1,2:3])
+  VP_mid <- rowMeans(attr(discovery, 'viewpoint')[, 2:3])
   
-  blackout_up   <- VP[1,2]
-  blackout_down <- VP[1,3]
-  data_blackout <- data[mid >= blackout_up & mid <= blackout_down]
+  blackout_up   <- VP[, 2]
+  blackout_down <- VP[, 3]
   
-  if( !is.null(bed)) {
-    bed = bed[bed[,1] == attr(discovery, 'viewpoint')[1,1],2:3]
+  data_blackout <- data
+  for (i in seq_len(nrow(VP))) {
+    if (nrow(VP) > 1) {
+      expcheck1 <- data_blackout$experiment != expnames[i]
+      expcheck2 <- data$experiment != expnames[i]
+    } else {
+      expcheck1 <- expcheck2 <- FALSE
+    }
+    data_blackout <- data_blackout[(mid >= blackout_up[i] & 
+                                      mid <= blackout_down[i]) |
+                                     expcheck1]
+    data <- data[!(mid >= blackout_up[i] & mid <= blackout_down[i]) |
+                   expcheck2]
   }
-  
-  data <- data[!(data$mid >= blackout_up & data$mid <= blackout_down)]
-  
+
+  if( !is.null(bedlist)) {
+    if (inherits(bedlist, "list")) {
+      bedlist <- lapply(seq_along(bedlist), function(i) {
+        bed <- bedlist[[i]]
+        if (!inherits(bed, "data.frame") | is.data.table(bed)) {
+          bed <- as.data.frame(bed)
+        }
+        bed <- bed[bed[,1] == VP[1, 1], 2:3]
+        colnames(bed) <- c("start", "end")
+        bed$entry <- i
+        bed
+      })
+      bed <- do.call(rbind, bedlist)
+    } else {
+      if (!inherits(bedlist, "data.frame") | is.data.table(bedlist)) {
+        bedlist <- as.data.frame(bedlist)
+      }
+      bed <- bedlist
+      bed <- bed[bed[,1] == VP[1, 1], 2:3]
+      colnames(bed) <- c("start", "end")
+      bed$entry <- 1
+    }
+  } else {
+    bed <- NULL
+  }
+
   breaks   <- seq(min(data$mid), max(data$mid), length.out = bins)
   bin_size <- median(diff(breaks))
-  smooth   <- data[, mean(signal), by = findInterval(data$mid, breaks)]
-  smooth$mid = breaks[unlist(smooth[,1])] +(bin_size/2)
+  smooth   <- data[, mean(signal), 
+                   by = list(findInterval(data$mid, breaks), experiment)]
+  smooth$mid = breaks[smooth[[1]]] + (bin_size/2)
   smooth[,1] = NULL
-  colnames(smooth) = c("signal","mid")
+  colnames(smooth) = c("experiment", "signal","mid")
   
-  p = ggplot2::ggplot(data, ggplot2::aes(x= mid/1e6, y = signal)) +
-    ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size/1e6) +
+  p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = signal)) +
+    ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size,
+                      colour = NA) +
     ggplot2::theme_classic() +
-    ggplot2::labs(x = attr(discovery, 'viewpoint')[1,1]) +
+    ggplot2::scale_x_continuous(name = paste0("Location ", VP[1, 1], " (Mb)"),
+                                labels = function(x){x/1e6}) +
+    ggplot2::scale_y_continuous(name = "Signal",
+                                breaks = function(x) {
+                                  scales::extended_breaks()(pmax(x, 0))
+                                }) +
     ggplot2::facet_grid(experiment ~ .)
   
   # draw_blackout ===+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1123,47 +1175,40 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL, bed = NULL, ex
   data_blackout$signal <- ymax
 
   if (nrow(data_blackout) > 0) {
-    p = p + ggplot2::annotate(
-      'rect', 
-      fill = "#D8D8D8", 
-      xmin = (min(data_blackout$mid)/1e6)-(bin_size/1e6), 
-      xmax = (max(data_blackout$mid)/1e6)+(bin_size/1e6), 
-      ymin = 0, 
-      ymax = max(data_blackout$signal) 
+    blackout <- data_blackout[, list(min = min(mid), max = max(mid)), 
+                              by = "experiment"]
+    blackout[, "mid" := (min + max) / 2]
+    p <- p + ggplot2::geom_rect(
+      data = blackout, fill = "#D8D8D8", colour = "#D8D8D8",
+      ggplot2::aes(xmin = min, xmax = max, ymin = 0, ymax = ymax),
+      inherit.aes = FALSE
     ) +
-      ggplot2::annotate(geom = 'text',
-                        vjust = 1,
-                        x = rowMeans(VP[,2:3])/1e6,
-                        y =  ymax*0.9,
-                        label = '\u2693')
+      ggplot2::geom_text(
+        data = blackout, label = "\u2693", vjust = 1,
+        ggplot2::aes(mid, ymax * 0.9)
+      )
   }
-
-  if( !is.null(bed)){
-    p = p + ggplot2::annotate('rect', 
-                              fill = "black",
-                              xmin = bed[,1]/1e6, 
-                              xmax = bed[,2]/1e6,
-                              ymin = -ceiling(max(smooth$signal))/100,
-                              ymax = 0)  
-  }
-  p
-  bed_track_size <- ceiling(max(smooth$signal))/50
-  bed_track_padding <- ceiling(max(smooth$signal))/200
+  bed_size <- ymax/50
+  bed_padding <- ymax/200
   
   if( !is.null(bed) ){
-    bed <- bed/1e6
+    bed$colour <- bed_colours[pmin(bed$entry, length(bed_colours))]
+    bed$ymin <- -1 * bed_size * bed$entry - bed_padding * (bed$entry)
+    bed$ymax <- bed$ymin + bed_size
+    n_entries <- length(unique(bed$entry))
     
-    p = p+ ggplot2::annotate(geom = 'rect', 
-                             xmin = bed[,1], 
-                             xmax = bed[,2], 
-                             ymin = -bed_track_size, 
-                             ymax = -bed_track_padding, 
-                             fill = 'black') +
-      ggplot2::coord_cartesian(expand = F, 
-                               ylim = c(-1*(bed_track_size+
-                                              bed_track_padding+
-                                              bed_track_padding), 
-                                        ymax))
+    p <- p + ggplot2::geom_rect(
+      data = bed, inherit.aes = FALSE,
+      ggplot2::aes(xmin = start, xmax = end, 
+                   ymin = ymin,
+                   ymax = ymax),
+      fill = rep(bed$colour, length(expnames))
+    ) +
+      ggplot2::coord_cartesian(
+        expand = F,
+        ylim = c(-1 * (bed_size * n_entries) - bed_padding * (n_entries + 1),
+                 ymax)
+      )
   } else {
     p = p + ggplot2::coord_cartesian(expand = F, 
                                      ylim = c(0, ymax))
@@ -1365,14 +1410,12 @@ visualise.domainogram_discovery <- function(discovery,
 
 # Utilities ---------------------------------------------------------------
 
-
-#' scale_altfill_continuous
-#' Makes sure no errors are returned when visualise(..., raw = TRUE)
-#' Unfortunately has to be exported, but is better than throwing errors
+#' scale_altfill_continuous Makes sure no errors are returned when
+#' visualise(..., raw = TRUE) Unfortunately has to be exported, but that is
+#' better than throwing errors anytime an attempt is mode to print a raw plot.
 #'
-#' @param ... whatever. 
+#' @param ... Arguments to \code{\link[ggplot2]{scale_fill_gradient2}}.
 #'
-#' @return a thing
 #' @export
 scale_altfill_continuous <- function(...) {
   ggplot2::scale_fill_gradient2(..., aesthetics = "altfill")

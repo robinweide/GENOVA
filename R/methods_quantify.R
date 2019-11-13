@@ -47,10 +47,10 @@ quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
   
 }
 
-#' @rdname visualise
+#' @rdname quantify
 #' @export
-quantify.saddle_discovery <- function(x, ...){
-  dat <- x$saddle
+quantify.saddle_discovery <- function(discovery, ...){
+  dat <- discovery$saddle
   
   # get bins
   MAXbin <- max(dat$q1)
@@ -86,7 +86,7 @@ quantify.saddle_discovery <- function(x, ...){
   })
   strength <- data.table::rbindlist(SPLT)
   dat <- merge(dat, strength, by = c('exp', 'chr'))
-  dat$exp <- factor(dat$exp, levels = unique(x$saddle$exp))
+  dat$exp <- factor(dat$exp, levels = unique(discovery$saddle$exp))
   dat$CC  <- factor(dat$CC, levels = c('AA', 'BB', 'AB'))
   # maybe add class?
   return(dat)

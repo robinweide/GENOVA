@@ -900,7 +900,9 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
 
 #' @rdname visualise
 #' @export
-visualise.RCP_discovery = function(discovery, contrast = 1, metric = c("smooth","both","lfc"), raw = F, title = NULL, flipFacet = F, ...){
+visualise.RCP_discovery = function(discovery, contrast = 1, 
+                                   metric = c("smooth","both","lfc"), raw = F, 
+                                   title = NULL, flipFacet = F, ...){
   
   metric <- match.arg(metric)
   
@@ -1408,14 +1410,12 @@ visualise.domainogram_discovery <- function(discovery,
 
 # Utilities ---------------------------------------------------------------
 
-
-#' scale_altfill_continuous
-#' Makes sure no errors are returned when visualise(..., raw = TRUE)
-#' Unfortunately has to be exported, but is better than throwing errors
+#' scale_altfill_continuous Makes sure no errors are returned when
+#' visualise(..., raw = TRUE) Unfortunately has to be exported, but that is
+#' better than throwing errors anytime an attempt is mode to print a raw plot.
 #'
-#' @param ... whatever. 
+#' @param ... Arguments to \code{\link[ggplot2]{scale_fill_gradient2}}.
 #'
-#' @return a thing
 #' @export
 scale_altfill_continuous <- function(...) {
   ggplot2::scale_fill_gradient2(..., aesthetics = "altfill")

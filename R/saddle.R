@@ -86,12 +86,13 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
     i <- as.symbol(i)
     quants[, 
            as.character(i) := as.numeric(pmin(
-                                   findInterval(eval(i), stats::quantile(eval(i), 
-                                                                         qbins, 
-                                                                         na.rm = TRUE),
-                                                left.open = TRUE, 
-                                                rightmost.closed = TRUE), 
-                                   bins)), 
+             findInterval(eval(i), 
+                          stats::quantile(eval(i), 
+                                          qbins, 
+                                          na.rm = TRUE),
+                          left.open = TRUE, 
+                          rightmost.closed = TRUE), 
+             bins)), 
            by = "part"]
     
   }

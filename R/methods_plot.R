@@ -25,6 +25,8 @@
 #'   region to be plotted.
 #' @param censor_vp \code{[virtual_4C]} A \code{logical} of length 1 deciding
 #'   wether the values underneath the viewpoint should be excluded.
+#' @param metric \code{[RCP]} Currently not in use.
+#' @param ... Not currently used for discovery plots.
 #'
 #' @return Nothing, but outputs a plot to the graphics device.
 #'
@@ -44,7 +46,8 @@ plot.APA_discovery <- function(
   colour_fun = NULL,
   colour_fun_contrast = NULL,
   colour_lim = NULL,
-  colour_lim_contrast = NULL
+  colour_lim_contrast = NULL,
+  ...
 ) {
   
   par(mar = c(1, 1, 1, 1))
@@ -146,7 +149,8 @@ plot.PESCAn_discovery <- function(
   colour_fun = NULL,
   colour_fun_contrast = NULL,
   colour_lim = NULL,
-  colour_lim_contrast = NULL
+  colour_lim_contrast = NULL,
+  ...
 ) {
   
   par(mar = c(1, 1, 1, 1))
@@ -249,7 +253,8 @@ plot.ATA_discovery <- function(
   colour_fun = NULL,
   colour_fun_contrast = NULL,
   colour_lim = NULL,
-  colour_lim_contrast = NULL
+  colour_lim_contrast = NULL,
+  ...
 ) {
   
   par(mar = c(1, 1, 1, 1))
@@ -371,7 +376,8 @@ plot.ARA_discovery <- function(
   colour_fun = NULL,
   colour_fun_contrast = NULL,
   colour_lim = NULL,
-  colour_lim_contrast = NULL
+  colour_lim_contrast = NULL,
+  ...
 ) {
   
   par(mar = c(1, 1, 1, 1))
@@ -472,7 +478,7 @@ plot.ARA_discovery <- function(
 #' @rdname plot_discovery
 #' @export
 plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
-                              contrast = NULL) {
+                              contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- x$compart_scores
@@ -509,7 +515,7 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
 #' @rdname plot_discovery
 #' @export
 plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
-                              contrast = NULL) {
+                              contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- x$insula_score
@@ -547,7 +553,7 @@ plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
 #' @rdname plot_discovery
 #' @export
 plot.DI_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
-                              contrast = NULL) {
+                              contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- x$DI
@@ -594,7 +600,8 @@ plot.saddle_discovery <- function(
   colour_fun = NULL,
   colour_fun_contrast = NULL,
   colour_lim = NULL,
-  colour_lim_contrast = NULL
+  colour_lim_contrast = NULL,
+  ...
 ) {
   
   par(mar = c(1, 1, 1, 1))
@@ -703,7 +710,7 @@ plot.saddle_discovery <- function(
 #' @rdname plot_discovery
 #' @export
 plot.domainogram_discovery <- function(
-  x, colour_fun = NULL, colour_lim = c(-1, 1)
+  x, colour_fun = NULL, colour_lim = c(-1, 1), ...
 ) {
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
@@ -738,7 +745,7 @@ plot.domainogram_discovery <- function(
   }
   
   if (is.null(colour_lim)) {
-    colour_lim <- range(obj)
+    colour_lim <- range(vapply(mats, range, numeric(2)))
   }
   replace <- which(is.na(colour_lim))
   colour_lim[replace] <- range(unlist(mats))[replace]
@@ -775,7 +782,7 @@ plot.domainogram_discovery <- function(
 #' @rdname plot_discovery
 #' @export
 plot.RCP_discovery <- function(x, contrast = 1, 
-                               metric = c("smooth")) {
+                               metric = c("smooth"), ...) {
   metric <- match.arg(metric, c("smooth", "both", "lfc"))
   
   nregion <- length(unique(x$smooth$region))
@@ -799,7 +806,7 @@ plot.RCP_discovery <- function(x, contrast = 1,
 
 #' @rdname plot_discovery
 #' @export
-plot.virtual4C_discovery <- function(x, censor_vp = TRUE) {
+plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 1))

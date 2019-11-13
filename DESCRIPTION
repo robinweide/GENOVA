@@ -21,7 +21,6 @@ Suggests:
     RhpcBLASctl,
     RCurl,
     strawr (>= 0.0.1),
-    bigwrig (>= 0.1.0),
     rhdf5 (>= 2.30.0)
 VignetteBuilder: knitr
 Remotes: rnabioco/RcppLibBigWig,

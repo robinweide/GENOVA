@@ -1227,6 +1227,7 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
                                        colour_lim_contrast = NULL, ...) {
   df <- discovery$saddle
   df <- df[!is.na(mean) & !is.na(q1),]
+  df$exp <- factor(df$exp, levels = unique(df$exp))
   
   if (chr != "all") {
     if (endsWith(chr, "p") || endsWith(chr, "q")) {
@@ -1353,10 +1354,10 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
       panel.spacing.x = grid::unit(0.8 * 0.5, "strwidth", data = c("1.00.0")),
       panel.spacing.y = grid::unit(0.8 * 1.5, "strheight", data = c("1.00.0"))
     ) +
-    ggplot2::scale_x_continuous(name = "Quantile", expand = c(0,0),
-                                breaks = c(0, 0.5, 1)) +
+      ggplot2::scale_x_continuous(name = "Quantile", expand = c(0,0),
+                                  breaks = c(0, 1), labels = c("B", "A")) +
       ggplot2::scale_y_continuous(name = "Quantile", expand = c(0,0),
-                                  breaks = c(0, 0.5, 1)) +
+                                  breaks = c(0, 1), labels = c("B", "A")) +
       ggplot2::scale_fill_gradientn(
         colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
         limits = colour_lim,

@@ -44,11 +44,13 @@ intra_inter_TAD <- function(explist, tad_bed, max_neighbour = 5) {
   # Verify experiment compatability
   explist <- GENOVA:::check_compat_exp(explist)
   
+  # Grab some relevant info
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")
   } else {
     names(explist)
   }
+  cols <- vapply(explist, attr, character(1L), "colour")
   
   # Set data.table core usage
   dt.cores <- data.table::getDTthreads()
@@ -101,6 +103,7 @@ intra_inter_TAD <- function(explist, tad_bed, max_neighbour = 5) {
       tads = cbind(tad_bed, id = seq_len(nrow(tad_bed)))
     ),
     class = "IIT_discovery", package = "GENOVA",
+    colours = cols,
     resolution = attr(explist[[1]], "resolution")
   )
 }

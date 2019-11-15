@@ -54,7 +54,7 @@
 \method{plot}{virtual4C_discovery}(x, censor_vp = TRUE, ...)
 
 \method{plot}{IIT_discovery}(x, contrast = 1, censor_contrast = TRUE,
-  ...)
+  geom = c("boxplot", "point"), ...)
 }
 \arguments{
 \item{x}{A \code{\link[GENOVA]{discovery}} object.}
@@ -91,6 +91,9 @@ wether the values underneath the viewpoint should be excluded.}
 \item{censor_contrast}{\code{[IIT]} A \code{logical} of length 1 deciding
 wether the contrasting experiment itself should be censored (\code{TRUE})
 or included (\code{FALSE}).}
+
+\item{geom}{A \code{character} of length 1 indicating what geometry should be
+plotted. Either \code{"boxplot"} or \code{"point"}.}
 }
 \value{
 Nothing, but outputs a plot to the graphics device.

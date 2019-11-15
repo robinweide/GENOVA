@@ -28,6 +28,8 @@
 #' @param censor_contrast \code{[IIT]} A \code{logical} of length 1 deciding
 #'   wether the contrasting experiment itself should be censored (\code{TRUE})
 #'   or included (\code{FALSE}).
+#' @param geom A \code{character} of length 1 indicating what geometry should be
+#'   plotted. Either \code{"boxplot"} or \code{"point"}.
 #' @param metric \code{[RCP]} Currently not in use.
 #' @param ... Not currently used for discovery plots.
 #'
@@ -925,7 +927,10 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
 
 #' @rdname plot_discovery
 #' @export
-plot.IIT_discovery <- function(x, contrast = 1, censor_contrast = TRUE, ...) {
+plot.IIT_discovery <- function(x, contrast = 1, censor_contrast = TRUE, 
+                               geom = c("boxplot", "point"),
+                               ...) {
+  geom <- match.arg(geom)
   dat <- as.data.table(x$results)
   cols <- attr(x, "colours")
   
@@ -976,10 +981,19 @@ plot.IIT_discovery <- function(x, contrast = 1, censor_contrast = TRUE, ...) {
                      paste(.(contrast)) ~ "contacts)")
   }
   
-  boxplot(value ~ variable + diff, df,
-          at = xpos, xaxt = "n", yaxt = "n",
-          col = cols, pch = 19, cex = 0.5,
-          xlab = "TAD Distance", ylab = ylab)
+  if (geom == "boxplot") {
+    boxplot(value ~ variable + diff, df,
+            at = xpos, xaxt = "n", yaxt = "n",
+            col = cols, pch = 19, cex = 0.5,
+            xlab = "TAD Distance", ylab = ylab)
+  } else {
+    xjitter <- jitter(xpos[as.numeric(interaction(df$variable, df$diff))])
+    plot(xjitter, 
+         df$value,
+         col = scales::alpha(cols[as.numeric(df$variable)], 0.3),
+         pch = 19, cex = 0.5, xaxt = "n", yaxt = "n",
+         xlab = "TAD Distance", ylab = ylab)
+  }
   
   axis(1, at = xticks, labels = paste0("n + ", udiffs),
        lwd = 0, lwd.ticks = 1)

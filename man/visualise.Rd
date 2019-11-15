@@ -63,7 +63,7 @@ visualise(discovery, ...)
 
 \method{visualise}{IIT_discovery}(discovery, contrast = 1, raw = FALSE,
   geom = c("boxplot", "violin", "jitter"), censor_contrast = TRUE,
-  title = NULL)
+  title = NULL, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

@@ -1419,16 +1419,16 @@ visualise.domainogram_discovery <- function(discovery,
 #' @export
 visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
                                     geom = c("boxplot", "violin", "jitter"),
-                                    censor_contrast = TRUE, title = NULL) {
+                                    censor_contrast = TRUE, title = NULL, ...) {
   geom <- match.arg(geom)
   dat <- as.data.table(discovery$results)
   cols <- attr(discovery, "colours")
   
   expnames <- tail(colnames(dat), -2)
   
-  if(!is.null(contrast) & length(expnames) < 2) {
-    warning("Cannot compute a contrast for one sample. Reverting to
-            visualising plain values.")
+  if (!is.null(contrast) & length(expnames) < 2) {
+    message("Cannot compute a contrast for one sample. Reverting to ",
+            "visualising plain values.")
     contrast <- NULL
   } else if (!is.null(contrast)){
     contrast <- expnames[contrast]

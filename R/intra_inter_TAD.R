@@ -42,7 +42,7 @@
 intra_inter_TAD <- function(explist, tad_bed, max_neighbour = 5) {
   
   # Verify experiment compatability
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   
   # Grab some relevant info
   expnames <- if (is.null(names(explist))) {

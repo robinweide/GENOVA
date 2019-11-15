@@ -331,6 +331,38 @@ print.virtual4C_discovery <- function(x, ...) {
   cat(string1)
 }
 
+#' @export
+#' @keywords internal
+print.IIT_discovery <- function(x, ...) {
+  myclass <- class(x)[[1]]
+  expnames <- tail(colnames(x$results), -2)
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  string <- paste0("A ", attr(x, "package"), " '", myclass,
+                   "' object involving the following ",
+                   length(expnames), " experiments:\n'",
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n\n")
+  cat(string)
+  
+  slots0 <- paste0("Contains the following slots:\n")
+  slots1 <- paste0("- results:\tA ", paste0(dim(x$results), collapse = " x "),
+                   " data.table with TAD IDs and scores.\n")
+  slots2 <- paste0("- tads:\t\tA ", paste0(dim(x$tads), collapse = " x "),
+                   " data.frame with TAD positions and IDs.\n")
+  
+  cat(slots0)
+  cat(slots1)
+  cat(slots2)
+  
+}
+
 # Other classes -----------------------------------------------------------
 
 #' @export

@@ -55,6 +55,13 @@
 #'   start- and end-positions for the region to plot. If \code{NULL}, is set to
 #'   \code{-Inf} and \code{Inf} respectively.
 #'
+#' @param geom \code{[IIT]} A \code{character} vector of length 1; either one of
+#'   \code{"boxplot"}, \code{"violin"}, \code{"jitter"} to get boxplots, violin
+#'   plots or jittered point plots.
+#' @param censor_contrast \code{[IIT]} A \code{logical} of length 1 deciding
+#'   wether the contrasting experiment itself should be censored (\code{TRUE})
+#'   or included (\code{FALSE}).
+#'
 #' @param title add a title
 #' @param ... further arguments passed to or from other methods.
 #'
@@ -1406,6 +1413,109 @@ visualise.domainogram_discovery <- function(discovery,
   }
   
   g
+}
+
+#' @rdname visualise
+#' @export
+visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
+                                    geom = c("boxplot", "violin", "jitter"),
+                                    censor_contrast = TRUE, title = NULL, ...) {
+  geom <- match.arg(geom)
+  dat <- as.data.table(discovery$results)
+  cols <- attr(discovery, "colours")
+  
+  expnames <- tail(colnames(dat), -2)
+  
+  if (!is.null(contrast) & length(expnames) < 2) {
+    message("Cannot compute a contrast for one sample. Reverting to ",
+            "visualising plain values.")
+    contrast <- NULL
+  } else if (!is.null(contrast)){
+    contrast <- expnames[contrast]
+    
+    trans <- lapply(setNames(expnames, expnames), function(i) {
+      log2(dat[[i]] / dat[[contrast]])
+    })
+    
+    for (i in expnames) {
+      dat[, as.character(i) := trans[[i]]]
+    }
+    
+    if (censor_contrast & !is.null(contrast)) {
+      dat <- dat[, -..contrast]
+      cols <- cols[which(expnames != contrast)]
+    }
+  }
+  
+  df <- melt.data.table(
+    dat, id.vars = c("x", "y"), 
+    measure.vars = intersect(colnames(dat), expnames)
+  )
+  
+  df$diff <- as.factor(df$y - df$x)
+
+  g <- ggplot2::ggplot(df, ggplot2::aes(diff, value))
+  
+  if (!is.null(title)) {
+    g <- g + ggplot2::ggtitle(title)
+  }
+  
+  if (geom == "boxplot") {
+    g <- g + ggplot2::geom_boxplot(ggplot2::aes(fill = variable),
+                                   key_glyph = "polygon")
+  } else if (geom == "violin") {
+    g <- g + ggplot2::geom_violin(ggplot2::aes(fill = variable))
+  } else if (geom == "jitter") {
+    g <- g + ggplot2::geom_point(ggplot2::aes(colour = variable),
+                                 position = ggplot2::position_jitterdodge(),
+                                 size = 1, alpha = 0.3, shape = 16)
+  }
+  
+  if (raw) {
+    return(g)
+  }
+  
+  if ("fill" %in% names(g$layers[[1]]$mapping)) {
+    g <- g + ggplot2::scale_fill_manual(
+      values = cols, name = "Experiment"
+    )
+  } else {
+    g <- g + ggplot2::scale_colour_manual(
+      values = cols, name = "Experiment",
+      guide = ggplot2::guide_legend(
+        override.aes = list(size = 2, alpha = 1)
+      )
+    )
+  }
+  
+  g <- g + ggplot2::scale_x_discrete(name = "TAD Distance",
+                                     labels = function(x){paste0("n + ", x)})
+  
+  if (is.null(contrast)) {
+    g <- g + ggplot2::scale_y_continuous(
+      name = "Contacts",
+      trans = "log10",
+      labels = scales::math_format(format = log10)
+    )
+  } else {
+    ytitle <- bquote("Log"[2]~" (Experiment contacts /" ~ 
+                       paste(.(contrast)) ~ "contacts)")
+    g <- g + ggplot2::scale_y_continuous(
+      name = ytitle,
+    )
+  }
+  
+  g <- g + ggplot2::theme(
+    text = ggplot2::element_text(colour = "black"),
+    axis.text = ggplot2::element_text(colour = "black"),
+    axis.line = ggplot2::element_line(colour = "black"),
+    panel.background = ggplot2::element_blank(),
+    panel.grid = ggplot2::element_blank(),
+    panel.grid.major = ggplot2::element_blank(),
+    legend.key = ggplot2::element_blank()
+  )
+  
+  return(g)
 }
 
 # Utilities ---------------------------------------------------------------

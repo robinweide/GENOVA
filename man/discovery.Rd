@@ -24,7 +24,8 @@ Next to the results, the \code{discovery} objects may also contain
   \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery}
    objects}
   \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
-  \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects} }
+  \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects}
+  \item{\code{\link[GENOVA]{intra_inter_TAD}}}{\code{IIT_discovery} objects}}
 }
 \section{Operations}{
  \subsection{Subsetting}{\code{discovery} objects can be

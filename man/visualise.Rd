@@ -14,6 +14,7 @@
 \alias{visualise.virtual4C_discovery}
 \alias{visualise.saddle_discovery}
 \alias{visualise.domainogram_discovery}
+\alias{visualise.IIT_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -59,6 +60,10 @@ visualise(discovery, ...)
 
 \method{visualise}{domainogram_discovery}(discovery, colour_lim = c(-1,
   1), title = NULL, raw = FALSE, ...)
+
+\method{visualise}{IIT_discovery}(discovery, contrast = 1, raw = FALSE,
+  geom = c("boxplot", "violin", "jitter"), censor_contrast = TRUE,
+  title = NULL, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis
@@ -117,6 +122,14 @@ Last colour is repeated if \code{bedlist} is longer than
 
 \item{extend_viewpoint}{\code{[virtual4C]} Add a set bp to both sides of the
 viewpoint. Makes the viewpoint-box broader.}
+
+\item{geom}{\code{[IIT]} A \code{character} vector of length 1; either one of
+\code{"boxplot"}, \code{"violin"}, \code{"jitter"} to get boxplots, violin
+plots or jittered point plots.}
+
+\item{censor_contrast}{\code{[IIT]} A \code{logical} of length 1 deciding
+wether the contrasting experiment itself should be censored (\code{TRUE})
+or included (\code{FALSE}).}
 }
 \description{
 Plot the results of \code{discovery} objects. By default

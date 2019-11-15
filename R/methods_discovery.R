@@ -22,7 +22,8 @@
 #'   \item{\code{\link[GENOVA]{insulation_domainogram}}}{\code{domainogram_discovery}
 #'    objects}
 #'   \item{\code{\link[GENOVA]{virtual_4C}}}{\code{virtual4C_discovery} objects}
-#'   \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects} }
+#'   \item{\code{\link[GENOVA]{direct_index}}}{\code{DI_discovery} objects}
+#'   \item{\code{\link[GENOVA]{intra_inter_TAD}}}{\code{IIT_discovery} objects}}
 #'
 #' @section Operations: \subsection{Subsetting}{\code{discovery} objects can be
 #'   subsetted by using \code{subset(discovery, i)} wherein \code{i} is an
@@ -459,6 +460,8 @@ bundle.RCP_discovery <- function(..., collapse = "_") {
             norm = norms[1])
 }
 
+#' @rdname bundle
+#' @export
 bundle.DI_discovery <- function(..., collapse = "_") {
   discos <- list(...)
   if (length(discos) < 2) {
@@ -489,6 +492,69 @@ bundle.DI_discovery <- function(..., collapse = "_") {
             package = "GENOVA",
             resolution = res,
             colours = cols)
+}
+
+#' @rdname bundle
+#' @export
+bundle.IIT_discovery <- function(..., collapse = "_") {
+  discos <- list(...)
+  if (length(discos) < 2) {
+    message("Attempting to bundle a single object. Input is returned.")
+    return(discos[[1]])
+  }
+  # Check for possible errors
+  classes <- vapply(lapply(discos, class), `[`, character(1), 1)
+  if (length(unique(classes)) > 1) {
+    stop("Can only bundle discoveries of the same type.", call. = FALSE)
+  }
+  res <- unique(vapply(discos, attr, numeric(1), "resolution"))
+  if (length(res) > 1) {
+    stop("Can only bundle discoveries of the same resolution.",
+         call. = FALSE)
+  }
+  
+  dat <- lapply(discos, `[[`, "results")
+  
+  # Check if TADs are the same
+  tads <- discos[[1]]$tads
+  checktads <- vapply(discos, function(disc) {
+    identical(tads, disc$tads)
+  }, logical(1L))
+  if (!all(checktads)) {
+    warning("Cannot couple observations from different TAD calls.",
+            "Returning a plain data.frame with observations.")
+    newdata <- lapply(dat, melt.data.table, id.vars = c("x", "y"))
+    newdata <- rbindlist(newdata)
+    return(as.data.frame(newdata))
+  }
+  
+  expnames <- unlist(lapply(dat, function(df) {
+    tail(colnames(df), -2)
+  }))
+  if (any(duplicated(expnames))) {
+    dat <- lapply(seq_along(dat), function(i) {
+      df <- dat[[i]]
+      colnames(df)[-c(1,2)] <- paste0(colnames(df)[-c(1,2)], collapse, i)
+      df
+    })
+  }
+  
+  newdat <- dat[[1]]
+  for (i in tail(seq_along(dat), -1)) {
+    newdat <- merge.data.table(newdat, dat[[i]], by = c("x", "y"))
+  }
+  setkeyv(newdat, NULL)
+  
+  cols <- unlist(lapply(discos, attr, "colours"))
+  
+  structure(
+    list(results = newdat,
+         tads = tads),
+    class = "IIT_discovery",
+    package = attr(discos[[1]], "package"),
+    colours = unname(cols),
+    resolution = res
+  )
 }
 
 # Unbundle documentation --------------------------------------------------
@@ -660,6 +726,28 @@ unbundle.DI_discovery <- function(discovery, ...) {
               colours = attr(discovery, "colours")[i],
               resolution = attr(discovery, "resolution"),
               class = "DI_discovery")
+  })
+}
+
+#' @rdname unbundle
+#' @export
+unbundle.IIT_discovery <- function(discovery, ...) {
+  
+  dat <- discovery$results
+  expnames <- tail(colnames(dat), -2)
+  colours <- attr(discovery, "colours")
+  
+  lapply(setNames(seq_along(expnames), expnames), function(i) {
+    grab <- c("x", "y", expnames[i])
+    structure(
+      list(
+        results = dat[, ..grab],
+        tads = discovery$tads
+      ),
+      class = "IIT_discovery", package = attr(discovery, "package"),
+      resolution = attr(discovery, "resolution"),
+      colours = colours[i]
+    )
   })
 }
 

@@ -35,7 +35,6 @@
 #'   exp2 = TAD_N_WAPL
 #' ) # numerator
 #' }
-#' @export
 differential.TAD.dotplot <- function(exp1, exp2, color.fun = NULL, yRange = NULL,
                                      pch = ".", title = NULL, cex = 1, ...) {
   comb.exp <- merge(exp1$hic, exp2$hic, by = c("x", "y"))

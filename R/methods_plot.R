@@ -25,6 +25,11 @@
 #'   region to be plotted.
 #' @param censor_vp \code{[virtual_4C]} A \code{logical} of length 1 deciding
 #'   wether the values underneath the viewpoint should be excluded.
+#' @param censor_contrast \code{[IIT]} A \code{logical} of length 1 deciding
+#'   wether the contrasting experiment itself should be censored (\code{TRUE})
+#'   or included (\code{FALSE}).
+#' @param geom A \code{character} of length 1 indicating what geometry should be
+#'   plotted. Either \code{"boxplot"} or \code{"point"}.
 #' @param metric \code{[RCP]} Currently not in use.
 #' @param ... Not currently used for discovery plots.
 #'
@@ -32,7 +37,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' plot(disocvery)
+#' plot(discovery)
 #' }
 NULL
 
@@ -918,4 +923,99 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   mtext(paste0("Location ", vp[1, 1], " (Mb)"), 
         side = 1, line = 2, outer = TRUE)
   mtext("Signal", side = 2, line = 2, outer = TRUE)
+}
+
+#' @rdname plot_discovery
+#' @export
+plot.IIT_discovery <- function(x, contrast = 1, censor_contrast = TRUE, 
+                               geom = c("boxplot", "point"),
+                               ...) {
+  geom <- match.arg(geom)
+  dat <- as.data.table(x$results)
+  cols <- attr(x, "colours")
+  
+  expnames <- tail(colnames(dat), -2)
+  
+  if (!is.null(contrast) & length(expnames) < 2) {
+    message("Cannot compute a contrast for one sample. Reverting to ",
+            "plotting plain values.")
+    contrast <- NULL
+  } else if (!is.null(contrast)) {
+    contrast <- expnames[contrast]
+    
+    trans <- lapply(setNames(expnames, expnames), function(i) {
+      log2(dat[[i]] / dat[[contrast]])
+    })
+    
+    for (i in expnames) {
+      dat[, as.character(i) := trans[[i]]]
+    }
+    
+    if (censor_contrast & !is.null(contrast)) {
+      dat <- dat[, -..contrast]
+      cols <- cols[which(expnames != contrast)]
+    }
+  }
+  
+  df <- melt.data.table(
+    dat, id.vars = c("x", "y"),
+    measure.vars = intersect(colnames(dat), expnames)
+  )
+  
+  df$diff <- as.factor(df$y - df$x)
+  
+  udiffs <- unique(df$diff)
+  ndiffs <- length(udiffs)
+  nvars <- length(unique(df$variable))
+  
+  groups <- rep(seq_len(ndiffs), 
+                each = nvars)
+  xpos <- groups + seq_along(groups) - 1
+  xticks <- unlist(by(xpos, groups, mean, simplify = FALSE))
+  
+  if (is.null(contrast)) {
+    ylab <- "Contacts"
+    df$value <- log10(df$value)
+  } else {
+    ylab <- bquote("Log"[2]~" (Experiment contacts /" ~
+                     paste(.(contrast)) ~ "contacts)")
+  }
+  
+  if (geom == "boxplot") {
+    boxplot(value ~ variable + diff, df,
+            at = xpos, xaxt = "n", yaxt = "n",
+            col = cols, pch = 19, cex = 0.5,
+            xlab = "TAD Distance", ylab = ylab)
+  } else {
+    xjitter <- jitter(xpos[as.numeric(interaction(df$variable, df$diff))])
+    plot(xjitter, 
+         df$value,
+         col = scales::alpha(cols[as.numeric(df$variable)], 0.3),
+         pch = 19, cex = 0.5, xaxt = "n", yaxt = "n",
+         xlab = "TAD Distance", ylab = ylab)
+  }
+  
+  axis(1, at = xticks, labels = paste0("n + ", udiffs),
+       lwd = 0, lwd.ticks = 1)
+  
+  ybreaks <- scales::extended_breaks()(range(df$value))
+  if (is.null(contrast)) {
+    ylabels <- scales::math_format()(ybreaks)
+    axis(2, at = ybreaks, labels = as.expression(ylabels), las = 1,
+         lwd = 0, lwd.ticks = 1)
+  } else {
+    ylabels <- scales::format_format()(ybreaks)
+    axis(2, at = ybreaks, labels = ylabels, las = 1,
+         lwd = 0, lwd.ticks = 1)
+  }
+  
+  pos <- if (mean(df$value[df$diff == 1]) > mean(range(df$value))) {
+    "bottomleft"
+  } else {
+    "topleft"
+  }
+  
+  legend(pos, legend = intersect(colnames(dat), expnames),
+         fill = cols, bty = "n")
+  
 }

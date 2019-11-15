@@ -42,7 +42,6 @@
 #'   allData = T
 #' )
 #' }
-#' @export
 intra.inter.TAD.contacts <- function(exp, TAD, max_neighbour = 10) {
   # error handling
   if (any(TAD[, 3] < TAD[, 2])) {

@@ -30,6 +30,11 @@
 #'   insulation scores for each element in the '\code{explist}' argument.}}
 #' @export
 #'
+#' @seealso For calling TADs from insulation scores, see
+#'   \code{\link[GENOVA]{call_TAD_insulation}}. For plotting a heatmap of
+#'   insulation over genomic locations, see
+#'   \code{\link[GENOVA]{heatmap_insulation}}.
+#'
 #' @examples
 #' \dontrun{
 #' iscore <- insulation_score(list(WT_20kb, KO_20kb), window = 20)

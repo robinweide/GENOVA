@@ -91,3 +91,16 @@ quantify.saddle_discovery <- function(discovery, ...){
   # maybe add class?
   return(dat)
 }
+
+#' @rdname quantify
+#' @export
+quantify.IIT_discovery <- function(discovery, ...) {
+  data <- discovery$results
+  data <- melt(data, id.vars = c("x", "y"))
+  data$distance <- data$y - data$x
+  
+  summ <- data[, as.list(summary(value)), by = c("distance", "variable")]
+  setnames(summ, 2, "sample")
+  as.data.frame(summ)
+}
+

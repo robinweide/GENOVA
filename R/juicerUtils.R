@@ -93,40 +93,55 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
 get_juicer_metadata = function(juicerPath){
   file2read = file(juicerPath, "rb")
   number_of_integers_in_file = 125
-
+  
   # check if magicstring is there
   magic_string = readBin(file2read, character(), n = 1, size = 3)
   if(magic_string != 'HIC'){
     stop('magic sting comparison failed. Check the .hic file!')
   }
-
+  
   hic_version = readBin(file2read, integer(), n = 1, size = 4)
-
+  
   master_index = readBin(file2read, integer(), n = 1, size = 8)
-
+  
   genome = readBin(file2read, character())
-
+  
   n_attributes = readBin(file2read, integer(), n = 1, size = 4)
-
+  
+  if (n_attributes > 0) {
+    block <- 256*4
+    found <- 0
+    # Find key-value pairs for each attribute by searching 
+    # for string terminators (raw == 0)
+    while (found < n_attributes * 2) {
+      r <- readBin(file2read, "raw", block)
+      if (length(w <- head(which(r == 0), 1))) {
+        found <- found + 1
+        # Rewind to previous terminator
+        seek(file2read, -(block - w), origin = "current")
+      }
+    }
+  }
+  
   n_chrs = readBin(file2read, integer(), n = 1, size = 4)
-
-
+  
+  
   chrom_name_length = lapply(1:n_chrs, function(x){
     chrom = readBin(file2read, character(), size = 1)
     len = readBin(file2read, integer(), n = 1)
     data.table::data.table(chrom, len)
   })
   chrom_name_length = data.table::rbindlist(chrom_name_length)
-
+  
   n_BP_Res  = readBin(file2read, integer(), n = 1, size = 4)
-
-
+  
+  
   resolutions = sapply(1:n_BP_Res, function(x){
     readBin(file2read, integer(), n = 1)
   })
-
+  
   close(file2read)
-
+  
   return(list(chrom_name_length, resolutions))
 }
 

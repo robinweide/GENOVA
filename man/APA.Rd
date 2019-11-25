@@ -4,8 +4,16 @@
 \alias{APA}
 \title{Aggregrate Peak Analysis}
 \usage{
-APA(explist, bedpe, dist_thres = NULL, size_bin = 21, size_bp = NULL,
-  outlier_filter = c(0, 0.995), anchors = NULL, raw = TRUE)
+APA(
+  explist,
+  bedpe,
+  dist_thres = NULL,
+  size_bin = 21,
+  size_bp = NULL,
+  outlier_filter = c(0, 0.995),
+  anchors = NULL,
+  raw = TRUE
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA experiment or a list of GENOVA

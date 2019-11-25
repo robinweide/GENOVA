@@ -4,8 +4,14 @@
 \alias{rep_mat_lookup}
 \title{Repeated Hi-C matrix lookup}
 \usage{
-rep_mat_lookup(explist, anchors, rel_pos, shift = 0,
-  outlier_filter = c(0, 1), raw = FALSE)
+rep_mat_lookup(
+  explist,
+  anchors,
+  rel_pos,
+  shift = 0,
+  outlier_filter = c(0, 1),
+  raw = FALSE
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA experiment or a list of GENOVA

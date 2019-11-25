@@ -4,8 +4,12 @@
 \alias{insulation_score}
 \title{Calculate insulation scores}
 \usage{
-insulation_score(explist, window = 30, norm_to = c("chromosome",
-  "genome", "none"), norm_fun = log2overmedian)
+insulation_score(
+  explist,
+  window = 30,
+  norm_to = c("chromosome", "genome", "none"),
+  norm_fun = log2overmedian
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA \code{contacts} object or list of
@@ -33,10 +37,10 @@ Insulation scores are calculated by sliding a square along the diagonal of
 the Hi-C matrix and averaging the values in that square.
 }
 \details{
-Typically, when the sliding square passes a TAD it yields high
-  insulation scores whereas in between TADs it yields low insulation scores.
-  Hence, TAD boundaries can be identified as local minima in the insulation
-  score.
+Typically, when the sliding square passes within a TAD, it yields
+  high insulation scores whereas in between TADs it yields low insulation
+  scores. Hence, TAD boundaries can be identified as local minima in the
+  insulation score.
 
   To follow the Crane \emph{et al}. (2015) strategy for insulation scores,
   use a 10kb resolution \code{contacts} objects, set the '\code{window}'
@@ -47,4 +51,10 @@ Typically, when the sliding square passes a TAD it yields high
 \dontrun{
 iscore <- insulation_score(list(WT_20kb, KO_20kb), window = 20)
 }
+}
+\seealso{
+For calling TADs from insulation scores, see
+  \code{\link[GENOVA]{call_TAD_insulation}}. For plotting a heatmap of
+  insulation over genomic locations, see
+  \code{\link[GENOVA]{heatmap_insulation}}.
 }

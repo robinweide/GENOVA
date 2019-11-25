@@ -4,8 +4,15 @@
 \alias{insulation.plot.single}
 \title{plot.insulation.single}
 \usage{
-insulation.plot.single(exp, chrom, start, end, cut.off = NULL,
-  window.size = 21, local = T)
+insulation.plot.single(
+  exp,
+  chrom,
+  start,
+  end,
+  cut.off = NULL,
+  window.size = 21,
+  local = T
+)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object: produced by construct.experiment().}

@@ -5,11 +5,14 @@
 \alias{quantify.default}
 \alias{quantify.APA_discovery}
 \alias{quantify.saddle_discovery}
+\alias{quantify.IIT_discovery}
 \title{Quantification of results}
 \usage{
 \method{quantify}{APA_discovery}(discovery, signal_size = 3, ...)
 
 \method{quantify}{saddle_discovery}(discovery, ...)
+
+\method{quantify}{IIT_discovery}(discovery, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis functions.}

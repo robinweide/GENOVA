@@ -4,12 +4,23 @@
 \alias{insulation.heatmap}
 \title{Plot insulation-heatmaps.}
 \usage{
-insulation.heatmap(insulationList, bed = NULL, borders = NULL,
-  focus = 1, sortWidth = 10, whatToPlot = "both",
-  profileFunct = mean, title = NULL, flank = 5e+05, zlim = c(-1,
-  1), profileCols = NULL, profileZlim = NULL,
+insulation.heatmap(
+  insulationList,
+  bed = NULL,
+  borders = NULL,
+  focus = 1,
+  sortWidth = 10,
+  whatToPlot = "both",
+  profileFunct = mean,
+  title = NULL,
+  flank = 5e+05,
+  zlim = c(-1, 1),
+  profileCols = NULL,
+  profileZlim = NULL,
   heatmapCols = rev(c("white", "white", "white", "red", "black")),
-  leftNorm = F, verbose = F)
+  leftNorm = F,
+  verbose = F
+)
 }
 \arguments{
 \item{insulationList}{A named list of results from genome.wide.insulation().}

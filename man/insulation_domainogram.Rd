@@ -4,8 +4,14 @@
 \alias{insulation_domainogram}
 \title{Domainogram of insulation}
 \usage{
-insulation_domainogram(explist, chrom, start, end, window_range = c(5,
-  101), step = 2)
+insulation_domainogram(
+  explist,
+  chrom,
+  start,
+  end,
+  window_range = c(5, 101),
+  step = 2
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA \code{contacts} object or list of

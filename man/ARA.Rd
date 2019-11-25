@@ -4,8 +4,16 @@
 \alias{ARA}
 \title{Aggregate Region Analysis}
 \usage{
-ARA(explist, bed, shift = 1e+06, size_bin = 21, size_bp = NULL,
-  outlier_filter = c(0, 1), anchors = NULL, raw = FALSE)
+ARA(
+  explist,
+  bed,
+  shift = 1e+06,
+  size_bin = 21,
+  size_bp = NULL,
+  outlier_filter = c(0, 1),
+  anchors = NULL,
+  raw = FALSE
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA experiment or a list of GENOVA

@@ -9,11 +9,22 @@
 \alias{anchors_extendedloops}
 \title{Anchors for Hi-C}
 \usage{
-anchors_PESCAn(IDX, res, bed, dist_thres = c(5000000L, Inf),
-  min_compare = 10L, mode = c("cis", "trans", "both"))
+anchors_PESCAn(
+  IDX,
+  res,
+  bed,
+  dist_thres = c(5000000L, Inf),
+  min_compare = 10L,
+  mode = c("cis", "trans", "both")
+)
 
-anchors_APA(IDX, res, bedpe, dist_thres = c(0, Inf), mode = c("both",
-  "cis", "trans"))
+anchors_APA(
+  IDX,
+  res,
+  bedpe,
+  dist_thres = c(0, Inf),
+  mode = c("both", "cis", "trans")
+)
 
 anchors_ATA(IDX, bed, dist_thres = c(225000, Inf), padding = 1)
 

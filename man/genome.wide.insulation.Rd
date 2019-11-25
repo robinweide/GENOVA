@@ -4,8 +4,7 @@
 \alias{genome.wide.insulation}
 \title{genome.wide.insulation}
 \usage{
-genome.wide.insulation(exp, window.size, normalize.genome = F,
-  verbose = F)
+genome.wide.insulation(exp, window.size, normalize.genome = F, verbose = F)
 }
 \arguments{
 \item{exp}{A GENOVA-experiment}

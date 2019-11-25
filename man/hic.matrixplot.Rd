@@ -4,14 +4,36 @@
 \alias{hic.matrixplot}
 \title{hic.matrixplot}
 \usage{
-hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
-  chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
-  chip.colour = "black", chip.yMax = NULL, type = rep("triangle", 4),
-  guessType = T, coplot = "dual", genes = NULL, tads = NULL,
-  tads.type = "lower", loops = NULL, loops.type = "lower",
-  tads.colour = "#1faee3", loops.radius = NULL,
-  loops.colour = "#1faee3", skipAnn = F, symmAnn = F,
-  check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F)
+hic.matrixplot(
+  exp1,
+  exp2 = NULL,
+  chrom,
+  start,
+  end,
+  cut.off = NULL,
+  chip = list(NULL, NULL, NULL, NULL),
+  inferno = T,
+  cexTicks = 1,
+  chip.colour = "black",
+  chip.yMax = NULL,
+  type = rep("triangle", 4),
+  guessType = T,
+  coplot = "dual",
+  genes = NULL,
+  tads = NULL,
+  tads.type = "lower",
+  loops = NULL,
+  loops.type = "lower",
+  tads.colour = "#1faee3",
+  loops.radius = NULL,
+  loops.colour = "#1faee3",
+  skipAnn = F,
+  symmAnn = F,
+  check.genome = T,
+  smoothNA = F,
+  fillNAtreshold = 2,
+  antoni = F
+)
 }
 \arguments{
 \item{exp1}{The Hi-C experiment object: produced by construct.experiment().}

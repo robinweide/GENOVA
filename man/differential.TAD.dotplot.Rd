@@ -4,8 +4,16 @@
 \alias{differential.TAD.dotplot}
 \title{differential.TAD.dotplot}
 \usage{
-differential.TAD.dotplot(exp1, exp2, color.fun = NULL, yRange = NULL,
-  pch = ".", title = NULL, cex = 1, ...)
+differential.TAD.dotplot(
+  exp1,
+  exp2,
+  color.fun = NULL,
+  yRange = NULL,
+  pch = ".",
+  title = NULL,
+  cex = 1,
+  ...
+)
 }
 \arguments{
 \item{exp1}{Output of intra.inter.TAD.contacts for experiment 1.}

@@ -4,8 +4,14 @@
 \alias{centromere.telomere.analysis}
 \title{centromere.telomere.analysis}
 \usage{
-centromere.telomere.analysis(exp, chrom.vec, nrow = 100,
-  leave.out = NULL, q.top = 1e-05, verbose = F)
+centromere.telomere.analysis(
+  exp,
+  chrom.vec,
+  nrow = 100,
+  leave.out = NULL,
+  q.top = 1e-05,
+  verbose = F
+)
 }
 \arguments{
 \item{exp}{GENOVA data structure for your experiment of interest}

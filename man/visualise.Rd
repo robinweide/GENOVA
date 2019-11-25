@@ -19,51 +19,123 @@
 \usage{
 visualise(discovery, ...)
 
-\method{visualise}{APA_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), raw = FALSE, title = NULL,
-  colour_lim = NULL, colour_lim_contrast = NULL, ...)
+\method{visualise}{APA_discovery}(
+  discovery,
+  contrast = 1,
+  metric = c("diff", "lfc"),
+  raw = FALSE,
+  title = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{visualise}{PESCAn_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
-  raw = FALSE, title = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{visualise}{PESCAn_discovery}(
+  discovery,
+  contrast = 1,
+  metric = c("diff", "lfc"),
+  mode = c("obsexp", "signal"),
+  raw = FALSE,
+  title = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{visualise}{ATA_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), raw = FALSE, title = NULL,
-  colour_lim = NULL, colour_lim_contrast = NULL, ...)
+\method{visualise}{ATA_discovery}(
+  discovery,
+  contrast = 1,
+  metric = c("diff", "lfc"),
+  raw = FALSE,
+  title = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{visualise}{ARA_discovery}(discovery, contrast = 1,
-  metric = c("diff", "lfc"), mode = c("obsexp", "signal"),
-  raw = FALSE, title = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{visualise}{ARA_discovery}(
+  discovery,
+  contrast = 1,
+  metric = c("diff", "lfc"),
+  mode = c("obsexp", "signal"),
+  raw = FALSE,
+  title = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{visualise}{CS_discovery}(discovery, contrast = NULL,
-  chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
+\method{visualise}{CS_discovery}(
+  discovery,
+  contrast = NULL,
+  chr = "chr1",
+  start = NULL,
+  end = NULL,
+  raw = FALSE,
+  ...
+)
 
-\method{visualise}{IS_discovery}(discovery, contrast = NULL,
-  chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
+\method{visualise}{IS_discovery}(
+  discovery,
+  contrast = NULL,
+  chr = "chr1",
+  start = NULL,
+  end = NULL,
+  raw = FALSE,
+  ...
+)
 
-\method{visualise}{DI_discovery}(discovery, contrast = NULL,
-  chr = "chr1", start = NULL, end = NULL, raw = FALSE, ...)
+\method{visualise}{DI_discovery}(
+  discovery,
+  contrast = NULL,
+  chr = "chr1",
+  start = NULL,
+  end = NULL,
+  raw = FALSE,
+  ...
+)
 
-\method{visualise}{RCP_discovery}(discovery, contrast = 1,
-  metric = c("smooth", "both", "lfc"), raw = F, title = NULL,
-  flipFacet = F, ...)
+\method{visualise}{RCP_discovery}(
+  discovery,
+  contrast = 1,
+  metric = c("smooth", "both", "lfc"),
+  raw = F,
+  title = NULL,
+  flipFacet = F,
+  ...
+)
 
-\method{visualise}{virtual4C_discovery}(discovery, bins = NULL,
-  bedlist = NULL, bed_colours = "black", extend_viewpoint = NULL,
-  ...)
+\method{visualise}{virtual4C_discovery}(
+  discovery,
+  bins = NULL,
+  bedlist = NULL,
+  bed_colours = "black",
+  extend_viewpoint = NULL,
+  ...
+)
 
-\method{visualise}{saddle_discovery}(discovery, contrast = 1,
-  chr = "all", raw = FALSE, title = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{visualise}{saddle_discovery}(
+  discovery,
+  contrast = 1,
+  chr = "all",
+  raw = FALSE,
+  title = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{visualise}{domainogram_discovery}(discovery, colour_lim = c(-1,
-  1), title = NULL, raw = FALSE, ...)
+\method{visualise}{domainogram_discovery}(discovery, colour_lim = c(-1, 1), title = NULL, raw = FALSE, ...)
 
-\method{visualise}{IIT_discovery}(discovery, contrast = 1, raw = FALSE,
-  geom = c("boxplot", "violin", "jitter"), censor_contrast = TRUE,
-  title = NULL, ...)
+\method{visualise}{IIT_discovery}(
+  discovery,
+  contrast = 1,
+  raw = FALSE,
+  geom = c("boxplot", "violin", "jitter"),
+  censor_contrast = TRUE,
+  title = NULL,
+  ...
+)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

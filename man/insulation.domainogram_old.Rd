@@ -4,9 +4,18 @@
 \alias{insulation.domainogram_old}
 \title{insulation.domainogram}
 \usage{
-insulation.domainogram_old(exp, chrom, start, end, axes = T,
-  window.size1 = 5, window.size2 = 101, step = 2, local = T,
-  zlim = c(-1, 0.5))
+insulation.domainogram_old(
+  exp,
+  chrom,
+  start,
+  end,
+  axes = T,
+  window.size1 = 5,
+  window.size2 = 101,
+  step = 2,
+  local = T,
+  zlim = c(-1, 0.5)
+)
 }
 \arguments{
 \item{exp}{A Hi-C experiment object: produced by loadContacts().}

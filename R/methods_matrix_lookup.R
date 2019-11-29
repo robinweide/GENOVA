@@ -27,6 +27,11 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   shft_id <- eval(attr(anchors, "shft_id"))
 
   dnames <- format(rel_pos * attr(explist[[1]], "res"), trim = TRUE)
+  rawnames <- if (is.null(rownames(anchors))) {
+    paste0(anchors[anch_id, 1], ",", anchors[anch_id, 2])
+  } else {
+    rownames(anchors)
+  }
 
   # Set data.table core usage
   dt.cores <- data.table::getDTthreads()
@@ -49,10 +54,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
-      dimnames(arr) <- list(
-        paste0(anchors[anch_id, 1], ",", anchors[anch_id, 2]),
-        rev(dnames), dnames
-      )
+      dimnames(arr) <- list(rawnames, rev(dnames), dnames)
       arr <- arr[mat_mu$keep, , ]
     } else {
       arr <- NULL

@@ -16,45 +16,75 @@
 \alias{plot.IIT_discovery}
 \title{Plot discoveries}
 \usage{
-\method{plot}{APA_discovery}(x, contrast = 1, colour_fun = NULL,
-  colour_fun_contrast = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{plot}{APA_discovery}(
+  x,
+  contrast = 1,
+  colour_fun = NULL,
+  colour_fun_contrast = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{plot}{PESCAn_discovery}(x, contrast = 1, colour_fun = NULL,
-  colour_fun_contrast = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{plot}{PESCAn_discovery}(
+  x,
+  contrast = 1,
+  colour_fun = NULL,
+  colour_fun_contrast = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{plot}{ATA_discovery}(x, contrast = 1, colour_fun = NULL,
-  colour_fun_contrast = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{plot}{ATA_discovery}(
+  x,
+  contrast = 1,
+  colour_fun = NULL,
+  colour_fun_contrast = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{plot}{ARA_discovery}(x, contrast = 1, colour_fun = NULL,
-  colour_fun_contrast = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{plot}{ARA_discovery}(
+  x,
+  contrast = 1,
+  colour_fun = NULL,
+  colour_fun_contrast = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{plot}{CS_discovery}(x, chr = "chr1", start = NULL,
-  end = NULL, contrast = NULL, ...)
+\method{plot}{CS_discovery}(x, chr = "chr1", start = NULL, end = NULL, contrast = NULL, ...)
 
-\method{plot}{IS_discovery}(x, chr = "chr1", start = NULL,
-  end = NULL, contrast = NULL, ...)
+\method{plot}{IS_discovery}(x, chr = "chr1", start = NULL, end = NULL, contrast = NULL, ...)
 
-\method{plot}{DI_discovery}(x, chr = "chr1", start = NULL,
-  end = NULL, contrast = NULL, ...)
+\method{plot}{DI_discovery}(x, chr = "chr1", start = NULL, end = NULL, contrast = NULL, ...)
 
-\method{plot}{saddle_discovery}(x, contrast = 1, colour_fun = NULL,
-  colour_fun_contrast = NULL, colour_lim = NULL,
-  colour_lim_contrast = NULL, ...)
+\method{plot}{saddle_discovery}(
+  x,
+  contrast = 1,
+  colour_fun = NULL,
+  colour_fun_contrast = NULL,
+  colour_lim = NULL,
+  colour_lim_contrast = NULL,
+  ...
+)
 
-\method{plot}{domainogram_discovery}(x, colour_fun = NULL,
-  colour_lim = c(-1, 1), ...)
+\method{plot}{domainogram_discovery}(x, colour_fun = NULL, colour_lim = c(-1, 1), ...)
 
-\method{plot}{RCP_discovery}(x, contrast = 1, metric = c("smooth"),
-  ...)
+\method{plot}{RCP_discovery}(x, contrast = 1, metric = c("smooth"), ...)
 
 \method{plot}{virtual4C_discovery}(x, censor_vp = TRUE, ...)
 
-\method{plot}{IIT_discovery}(x, contrast = 1, censor_contrast = TRUE,
-  geom = c("boxplot", "point"), ...)
+\method{plot}{IIT_discovery}(
+  x,
+  contrast = 1,
+  censor_contrast = TRUE,
+  geom = c("boxplot", "point"),
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{\link[GENOVA]{discovery}} object.}

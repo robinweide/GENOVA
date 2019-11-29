@@ -4,9 +4,18 @@
 \alias{trans.compartment.plot}
 \title{trans.compartment.plot}
 \usage{
-trans.compartment.plot(exp, chrom1, arm1 = "p", chrom2, arm2 = "p",
-  cut.off = NULL, invert = c(F, F), color.scheme = "fall",
-  cs.lim = NULL, chip = NULL)
+trans.compartment.plot(
+  exp,
+  chrom1,
+  arm1 = "p",
+  chrom2,
+  arm2 = "p",
+  cut.off = NULL,
+  invert = c(F, F),
+  color.scheme = "fall",
+  cs.lim = NULL,
+  chip = NULL
+)
 }
 \arguments{
 \item{exp}{A GENOVA experiment-object}

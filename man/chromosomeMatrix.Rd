@@ -4,8 +4,14 @@
 \alias{chromosomeMatrix}
 \title{chromosomeMatrix}
 \usage{
-chromosomeMatrix(exp, color.fun = NULL, cut.off = NULL,
-  chromsToUse = NULL, remove = NULL, plot = TRUE)
+chromosomeMatrix(
+  exp,
+  color.fun = NULL,
+  cut.off = NULL,
+  chromsToUse = NULL,
+  remove = NULL,
+  plot = TRUE
+)
 }
 \arguments{
 \item{exp}{The Hi-C experiment object of a sample: produced by

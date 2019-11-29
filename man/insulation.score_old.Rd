@@ -4,8 +4,15 @@
 \alias{insulation.score_old}
 \title{insulation.score}
 \usage{
-insulation.score_old(exp, window.size, chrom, start, end, diag.add = 0,
-  local = T)
+insulation.score_old(
+  exp,
+  window.size,
+  chrom,
+  start,
+  end,
+  diag.add = 0,
+  local = T
+)
 }
 \arguments{
 \item{exp}{A Hi-C experiment object: produced by \code{loadContacts()}.}

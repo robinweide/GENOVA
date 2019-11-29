@@ -42,12 +42,16 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
 
   # Check argument compatability
   explist <- check_compat_exp(explist)
-  expnames <- vapply(explist, attr, character(1L), "samplename")
+  expnames <- if (is.null(names(explist))) {
+    vapply(explist, attr, character(1L), "samplename")
+  } else {
+    names(explist)
+  }
   scores <- copy(CS_discovery$compart_scores)[order(chrom, start)]
   discnames <- utils::tail(colnames(scores), length(expnames))
   
   
-  if (!identical(names(expnames), discnames)) {
+  if (!identical(expnames, discnames)) {
     stop("The samples in 'explist' should match samples in the 'CS_discovery'.")
   }
   if (attr(explist[[1]], "resolution") != attr(CS_discovery, "resolution")) {

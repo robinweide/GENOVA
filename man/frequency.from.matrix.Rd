@@ -4,9 +4,19 @@
 \alias{frequency.from.matrix}
 \title{Plot pyramid-style HiC-regions.}
 \usage{
-\method{frequency}{from.matrix}(experiment, chrom, start, end,
-  window = 10000, q.val = 0.95, cut.off = NULL,
-  extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ...)
+\method{frequency}{from.matrix}(
+  experiment,
+  chrom,
+  start,
+  end,
+  window = 10000,
+  q.val = 0.95,
+  cut.off = NULL,
+  extraPadding = 1.75,
+  ylim = c(0, 250),
+  shinyAxis = T,
+  ...
+)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object of a sample: produced by construct.experiment().}

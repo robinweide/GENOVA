@@ -4,8 +4,13 @@
 \alias{RCP}
 \title{Relative Contact Probabilities}
 \usage{
-RCP(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL,
-  genomeWide = NULL)
+RCP(
+  explist,
+  bedlist = NULL,
+  chromsToUse = NULL,
+  maxDistance = NULL,
+  genomeWide = NULL
+)
 }
 \arguments{
 \item{explist}{List of  GENOVA contacts-objects from `loadContacts()`.}

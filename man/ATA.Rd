@@ -4,8 +4,15 @@
 \alias{ATA}
 \title{Aggregate TAD analysis}
 \usage{
-ATA(explist, bed, dist_thres = c(225000, Inf), size = 100L,
-  outlier_filter = c(0, 1), anchors = NULL, raw = TRUE)
+ATA(
+  explist,
+  bed,
+  dist_thres = c(225000, Inf),
+  size = 100L,
+  outlier_filter = c(0, 1),
+  anchors = NULL,
+  raw = TRUE
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA experiment or a list of GENOVA

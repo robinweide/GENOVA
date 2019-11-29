@@ -4,10 +4,20 @@
 \alias{load_contacts}
 \title{Construct a contacts-object.}
 \usage{
-load_contacts(signal_path, indices_path = NULL, resolution = 10000,
-  sample_name, centromeres = NULL, colour = NULL, z_norm = F,
-  scale_bp = 1e+09, scale_cis = F, balancing = T, legacy = F,
-  verbose = T)
+load_contacts(
+  signal_path,
+  indices_path = NULL,
+  resolution = 10000,
+  sample_name,
+  centromeres = NULL,
+  colour = NULL,
+  z_norm = F,
+  scale_bp = 1e+09,
+  scale_cis = F,
+  balancing = T,
+  legacy = F,
+  verbose = T
+)
 }
 \arguments{
 \item{signal_path}{Full path to an Hi-C file. This could be \*.matrix (for HiCpro), \*.cooler or \*.hic (for juicer).}

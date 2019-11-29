@@ -4,8 +4,12 @@
 \alias{sign_compartmentscore}
 \title{Sign compartment score.}
 \usage{
-sign_compartmentscore(CS_discovery, bed = NULL, bedgraph = NULL,
-  verbose = FALSE)
+sign_compartmentscore(
+  CS_discovery,
+  bed = NULL,
+  bedgraph = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{CS_discovery}{A \code{CS_discovery} object as produced by the

@@ -188,12 +188,14 @@ anchors_APA <- function(IDX, res, bedpe,
                         mode = c("both", "cis", "trans")) {
   mode <- match.arg(mode)
 
+  posnames <- names_from_bedpe(bedpe)
   
   # Convert bedpe to idx matrix
   newbed <- cbind(bedpe[, 1:6],
     idx1 = bed2idx(IDX, bedpe[, 1:3], mode = "centre"),
     idx2 = bed2idx(IDX, bedpe[, 4:6], mode = "centre")
   )
+  rownames(newbed) <- posnames
   newbed <- stats::na.exclude(newbed)
   newbed <- newbed[!duplicated(newbed[, 7:8]), ]
 
@@ -204,6 +206,7 @@ anchors_APA <- function(IDX, res, bedpe,
       pmin(newbed$idx1, newbed$idx2),
       pmax(newbed$idx1, newbed$idx2)
     )
+    rownames(idx) <- rownames(newbed)
     idx <- idx[order(idx[, 1]), ]
     class(idx) <- c("anchors", "matrix")
     attr(idx, "type") <- "APA"
@@ -235,6 +238,7 @@ anchors_APA <- function(IDX, res, bedpe,
     pmin(newbed$idx1, newbed$idx2),
     pmax(newbed$idx1, newbed$idx2)
   )
+  rownames(idx) <- rownames(newbed)
   idx <- idx[order(idx[, 1]), ]
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "APA"
@@ -311,6 +315,13 @@ anchors_extendedloops <- function(IDX, res, bedpe,
   
   # Filter for cis
   bedpe <- bedpe[bedpe[, 1] == bedpe[, 4], ]
+  
+  posnames <- paste0(bedpe[, 1], ":", 
+                     format(bedpe[, 2], scientific = FALSE, trim = TRUE), "-", 
+                     format(bedpe[, 3], scientific = FALSE, trim = TRUE), ";",
+                     bedpe[, 4], ":", 
+                     format(bedpe[, 5], scientific = FALSE, trim = TRUE), "-", 
+                     format(bedpe[, 6], scientific = FALSE, trim = TRUE))
   
   # Convert bedpe to idx matrix
   newbed <- data.table(chrom = bedpe[, 1],
@@ -578,4 +589,13 @@ is_anchors <- function(x) {
   }
   attributes(y) <- c(attributes(y), x_attr)
   y
+}
+
+names_from_bedpe <- function(bedpe) {
+  paste0(bedpe[, 1], ":", 
+         format(bedpe[, 2], scientific = FALSE, trim = TRUE), "-", 
+         format(bedpe[, 3], scientific = FALSE, trim = TRUE), ";",
+         bedpe[, 4], ":", 
+         format(bedpe[, 5], scientific = FALSE, trim = TRUE), "-", 
+         format(bedpe[, 6], scientific = FALSE, trim = TRUE))
 }

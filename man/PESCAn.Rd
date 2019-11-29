@@ -4,9 +4,18 @@
 \alias{PESCAn}
 \title{Paired-end spatial chromatin analysis}
 \usage{
-PESCAn(explist, bed, shift = 1000000L, dist_thres = c(5000000L, Inf),
-  size_bin = NULL, size_bp = 4e+05, outlier_filter = c(0, 1),
-  min_compare = 10, anchors = NULL, raw = FALSE)
+PESCAn(
+  explist,
+  bed,
+  shift = 1000000L,
+  dist_thres = c(5000000L, Inf),
+  size_bin = NULL,
+  size_bp = 4e+05,
+  outlier_filter = c(0, 1),
+  min_compare = 10,
+  anchors = NULL,
+  raw = FALSE
+)
 }
 \arguments{
 \item{explist}{Either a single GENOVA experiment or a list of GENOVA

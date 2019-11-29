@@ -4,11 +4,20 @@
 \alias{heatmap_insulation}
 \title{Plot a heatmap or profile of insulation scores}
 \usage{
-heatmap_insulation(IS_discovery, bed, bed_pos = "end",
-  region_width = 1e+06, sort_bins = 11, sort_on = 1,
-  mode = c("both", "heatmap", "profile"), colour_lim = c(-1, 1),
-  colours = NULL, profile_fun = mean, custom_fill_scale = NULL,
-  title = NULL)
+heatmap_insulation(
+  IS_discovery,
+  bed,
+  bed_pos = "end",
+  region_width = 1e+06,
+  sort_bins = 11,
+  sort_on = 1,
+  mode = c("both", "heatmap", "profile"),
+  colour_lim = c(-1, 1),
+  colours = NULL,
+  profile_fun = mean,
+  custom_fill_scale = NULL,
+  title = NULL
+)
 }
 \arguments{
 \item{IS_discovery}{A GENOVA \code{IS_discovery} object as created by

@@ -4,8 +4,16 @@
 \alias{differential.TAD.scatterplot}
 \title{differential.TAD.scatterplot}
 \usage{
-differential.TAD.scatterplot(exp1, exp2, line = T, allData = T,
-  color.fun = NULL, xlab = NULL, ylab = NULL, ...)
+differential.TAD.scatterplot(
+  exp1,
+  exp2,
+  line = T,
+  allData = T,
+  color.fun = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
 }
 \arguments{
 \item{exp1}{Output of intra.inter.TAD.contacts for experiment 1.}

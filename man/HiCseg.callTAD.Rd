@@ -4,8 +4,14 @@
 \alias{HiCseg.callTAD}
 \title{HiCseg.callTAD}
 \usage{
-HiCseg.callTAD(experiment, chromsToUse = NULL, binPerBorder = 3,
-  chunk = NULL, BEDcolor = "255,255,0", verbose = F)
+HiCseg.callTAD(
+  experiment,
+  chromsToUse = NULL,
+  binPerBorder = 3,
+  chunk = NULL,
+  BEDcolor = "255,255,0",
+  verbose = F
+)
 }
 \arguments{
 \item{experiment}{The Hi-C experiment object: produced by construct.experiment().}

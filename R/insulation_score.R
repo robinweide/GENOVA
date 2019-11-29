@@ -9,28 +9,47 @@
 #'   square.
 #' @param norm_to A \code{character} of length 1, either \code{"chromosome"} or
 #'   \code{"genome"} noting whether normalisation should occur per chromosome or
-#'   for the genome as a whole.
+#'   for the genome as a whole. Can be set to \code{"none"} to skip
+#'   normalisation.
+#' @param norm_fun A \code{function} that takes a numeric vector as input and
+#'   returns normalised values of equal length. Defaults to calculating the
+#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} value over the median.
 #'
-#' @details Typically, when the sliding square passes a TAD it yields high
-#'   insulation scores whereas in between TADs it yields low insulation scores.
-#'   Hence, TAD boundaries can be identified as local minima in the insulation
-#'   score.
+#' @details Typically, when the sliding square passes within a TAD, it yields
+#'   high insulation scores whereas in between TADs it yields low insulation
+#'   scores. Hence, TAD boundaries can be identified as local minima in the
+#'   insulation score.
 #'
-#'   The normalisation is performed by taking the
-#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} value over median,
-#'   wherein the median is either calculated per chromosome or across the
-#'   genome.
+#'   To follow the Crane \emph{et al}. (2015) strategy for insulation scores,
+#'   use a 10kb resolution \code{contacts} objects, set the '\code{window}'
+#'   argument to 50, set the '\code{norm_to}' argument to \code{"chromosome"}
+#'   and the '\code{norm_fun}' argument to \code{log2overmean}.
 #'
-#' @return A \code{IS_discovery} object
+#' @return An \code{IS_discovery} object containing the follow slot: \describe{
+#'   \item{insula_score}{A \code{data.table} with genomic locations and
+#'   insulation scores for each element in the '\code{explist}' argument.}}
 #' @export
+#'
+#' @seealso For calling TADs from insulation scores, see
+#'   \code{\link[GENOVA]{call_TAD_insulation}}. For plotting a heatmap of
+#'   insulation over genomic locations, see
+#'   \code{\link[GENOVA]{heatmap_insulation}}.
 #'
 #' @examples
 #' \dontrun{
-#' iscore <- insulation_score(explist(WT_20kb, KO_20kb), window = 20) 
+#' iscore <- insulation_score(list(WT_20kb, KO_20kb), window = 20)
 #' }
-insulation_score <- function(explist, window = 30, norm_to = c("chromosome", "genome")) {
-  
+insulation_score <- function(explist, window = 30, 
+                             norm_to = c("chromosome", "genome", "none"),
+                             norm_fun = log2overmedian) {
   norm_to <- match.arg(norm_to)
+  if (norm_to != "none") {
+    if (!is.function(norm_fun)) {
+      stop("Please provide a function as the `norm_fun` argument.",
+           call. = FALSE)
+    }
+  }
+  
   explist <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")
@@ -93,13 +112,12 @@ insulation_score <- function(explist, window = 30, norm_to = c("chromosome", "ge
   if (norm_to == "chromosome") {
     for (i in expnames) {
       xp <- as.symbol(i)
-      insula[, as.character(xp) := log2(eval(xp) / median(eval(xp), na.rm = TRUE)), 
-             by = chrom]
+      insula[, as.character(xp) := norm_fun(eval(xp)), by = chrom]
     }
-  } else {
+  } else if (norm_to == "genome") {
     for (i in expnames) {
       xp <- as.symbol(i)
-      insula[, as.character(xp) := log2(eval(xp) / median(eval(xp), na.rm = TRUE))]
+      insula[, as.character(xp) := norm_fun(eval(xp))]
     }
   }
 
@@ -110,4 +128,14 @@ insulation_score <- function(explist, window = 30, norm_to = c("chromosome", "ge
             class = "IS_discovery",
             resolution = attr(explist[[1]], "resolution"),
             window = window)
+}
+
+#' @export
+log2overmedian <- function(x) {
+  log2(x / median(x, na.rm = TRUE))
+}
+
+#' @export
+log2overmean <- function(x) {
+  log2(x / mean(x, na.rm = TRUE))
 }

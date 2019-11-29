@@ -10,7 +10,7 @@
 #' @param min_strength A \code{numeric} vector of length 1 setting a threshold
 #'   on the boundary strength wherein higher means stronger boundaries.
 #'
-#'   The Crane \emph{et al}. (2015) method calculates a delta vector across the
+#' @details The Crane \emph{et al}. (2015) method calculates a delta vector across the
 #'   insulation score defined by the difference between 100kb to the right and
 #'   left of a central bin. This delta crosses zero at local extrema, of which
 #'   the minima are kept. Subsequently, potential boundaries are filtered on the

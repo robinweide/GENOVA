@@ -1,7 +1,5 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
-#' @inheritParams PESCAn
-#' 
 #' @param IDX The IDX-slot of a \code{contacts} object
 #' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the

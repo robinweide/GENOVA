@@ -207,7 +207,7 @@ anchors_APA <- function(IDX, res, bedpe,
       pmax(newbed$idx1, newbed$idx2)
     )
     rownames(idx) <- rownames(newbed)
-    idx <- idx[order(idx[, 1]), ]
+    idx <- idx[order(idx[, 1]), , drop = FALSE]
     class(idx) <- c("anchors", "matrix")
     attr(idx, "type") <- "APA"
     return(idx)
@@ -239,7 +239,7 @@ anchors_APA <- function(IDX, res, bedpe,
     pmax(newbed$idx1, newbed$idx2)
   )
   rownames(idx) <- rownames(newbed)
-  idx <- idx[order(idx[, 1]), ]
+  idx <- idx[order(idx[, 1]), , drop = FALSE]
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "APA"
   return(idx)
@@ -571,7 +571,7 @@ is_anchors <- function(x) {
 # Need subsetting function to allow attribute inheritance.
 #' @export
 #' @keywords internal
-`[.anchors` <- function(x, i, j, ..., drop = TRUE) {
+`[.anchors` <- function(x, i, j, ..., drop = FALSE) {
   # Treat as matrix
   y <- x
   class(y) <- "matrix"

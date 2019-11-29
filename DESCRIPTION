@@ -13,7 +13,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: ggplot2,
     scales
-RoxygenNote: 7.0.0
+RoxygenNote: 7.0.1
 Suggests: 
     knitr,
     rmarkdown,

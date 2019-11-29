@@ -50,7 +50,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
     # Lookup matrices
     master <- run_engine(explist[[i]]$MAT, anchors, rel_pos)
-    arr <- master[anch_id,,]
+    arr <- master[anch_id,,, drop = FALSE]
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
@@ -268,7 +268,7 @@ summarise_lookup <- function(array, outlier_filter = c(0, 1), keep = NULL) {
   }
 
   # Remove all-NA slices, set other NAs to 0
-  array <- array[keep, , ]
+  array <- array[keep, , , drop = FALSE]
   array[is.na(array)] <- 0
 
   # Do outlier filtering

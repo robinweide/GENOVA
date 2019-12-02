@@ -228,7 +228,8 @@ sign_compartmentscore <- function(CS_discovery,
     split <- lapply(split, function(chrpart) {
       count <- chrpart[["bedcount"]]
       # Per experiment, decide to flip
-      chrpart[, expnames] <- lapply(chrpart[, expnames], function(score) {
+      chrpart[, expnames] <- lapply(chrpart[, expnames, drop = FALSE], 
+                                    function(score) {
         up <- score > 0 & !is.na(score)
         down <- score < 0 & !is.na(score)
         if (sum(up) > 0 & sum(down) > 0) {

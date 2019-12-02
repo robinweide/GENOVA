@@ -167,13 +167,18 @@ anchors_PESCAn <- function(IDX, res, bed,
     dist_thres <- sort(dist_thres)
 
     # Exclude cis combinations based on min/max_dist
-    cis <- idx[is_cis, ]
+    cis <- idx[is_cis, , drop = FALSE]
     dist <- abs(cis[, 1] - cis[, 2])
-    cis <- cis[dist >= dist_thres[1] & dist <= dist_thres[2], ]
+    keep <- dist >= dist_thres[1] & dist <= dist_thres[2]
+    if (sum(keep) < 1) {
+      stop("No pairwise interactions are within the distance threshold",
+           call. = FALSE)
+    }
+    cis <- cis[keep, , drop = FALSE]
 
     # Recombine and order
-    idx <- rbind(idx[!is_cis, ], cis)
-    idx <- idx[order(idx[, 1], idx[, 2]), ]
+    idx <- rbind(idx[!is_cis, , drop = FALSE], cis)
+    idx <- idx[order(idx[, 1], idx[, 2]), , drop = FALSE]
   }
 
   class(idx) <- c("anchors", "matrix")
@@ -495,12 +500,18 @@ anchors_filter_oob <- function(IDX, anchors, rel_pos) {
   }
 
   # Match idx +/- relative position to chrom
-  plus  <- IDX[match(anchors + max(rel_pos), IDX[, 4]), 1]
-  minus <- IDX[match(anchors + min(rel_pos), IDX[, 4]), 1]
+  plus  <- pmax(match(anchors + max(rel_pos), IDX[, 4]), 1, na.rm = TRUE)
+  minus <- pmax(match(anchors + min(rel_pos), IDX[, 4]), 1, na.rm = TRUE)
+  plus  <- IDX[plus, 1]
+  minus <- IDX[minus, 1]
 
   # Check wether chromosomes have changed
   inbounds <- matrix(plus == minus, ncol = 2)
   inbounds <- apply(inbounds, 1, all)
+  if (sum(inbounds) < 1) {
+    stop("No suitable anchors left after out-of-bounds filtering.",
+         call. = FALSE)
+  }
 
   # Return anchors that are not out of bounds
   anchors <- anchors[inbounds, , drop = FALSE]

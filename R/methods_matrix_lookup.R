@@ -55,7 +55,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
       dimnames(arr) <- list(rawnames, rev(dnames), dnames)
-      arr <- arr[mat_mu$keep, , ]
+      arr <- arr[mat_mu$keep, , , drop = FALSE]
     } else {
       arr <- NULL
     }
@@ -63,14 +63,14 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     # Calculate shifted values
     if (shift > 0) {
       # shifted_arr <- run_engine(explist[[i]]$ICE, shift_anchors, rel_pos)
-      shifted_arr <- master[shft_id,,]
+      shifted_arr <- master[shft_id,,, drop = FALSE]
       shifted_mu <- summarise_lookup(shifted_arr,
                                      outlier_filter,
                                      keep = mat_mu$keep
       )$mat
       dimnames(shifted_mu) <- dimnames(mat_mu$mat)
       if (raw) {
-        shifted_arr <- shifted_arr[mat_mu$keep, , ]
+        shifted_arr <- shifted_arr[mat_mu$keep, , , drop = FALSE]
         dimnames(shifted_arr) <- dimnames(arr)
       } else {
         shifted_arr <- NULL

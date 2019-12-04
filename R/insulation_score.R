@@ -130,12 +130,38 @@ insulation_score <- function(explist, window = 30,
             window = window)
 }
 
+#' Log 2 value over its median
+#'
+#' A small convenience function to calculate the log 2 of a value divided by the
+#' median of this set of values.
+#'
+#' @param x A \code{numeric} vector
+#'
+#' @return A \code{numeric} vector with the calculated values.
+#' 
+#' @details Ignores \code{NA} values in calculation of the median.
 #' @export
+#'
+#' @examples
+#' log2overmedian(runif(100))
 log2overmedian <- function(x) {
   log2(x / median(x, na.rm = TRUE))
 }
 
+#' Log 2 value over its mean
+#'
+#' A small convenience function to calculate the log 2 of a value divided by the
+#' mean of this set of values.
+#'
+#' @param x A \code{numeric} vector
+#'
+#' @return A \code{numeric} vector with the calculated values.
+#' 
+#' @details Ignores \code{NA} values in calculation of the mean
 #' @export
+#'
+#' @examples
+#' log2overmean(runif(100))
 log2overmean <- function(x) {
   log2(x / mean(x, na.rm = TRUE))
 }

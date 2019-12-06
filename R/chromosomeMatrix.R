@@ -16,6 +16,7 @@
 #' @return A plot of the chromosome matrix and an assignable list:
 #' @return \item{rawCounts}{the observed chromosome-chromosome matrix}
 #' @return \item{normMat}{the expected chromosome-chromosome matrix}
+#' @section Resolution recommendation: 500kb-1Mb
 #' @examples
 #' \dontrun{
 #' # use chromosomeMatrix without chromosome M and Y.

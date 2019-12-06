@@ -21,6 +21,9 @@
 #'   is necessary to have positive values correspond to more active A
 #'   compartments and negative values to more inactive B compartments.
 #'
+#' @section Resolution recommendation: 100kb-150kb. Data with <20kb resolution
+#'  will return an error due to sparsity.
+#'
 #' @seealso \code{\link[GENOVA]{sign_compartmentscore}} for getting signed
 #'   compartment scores and appropriate '\code{bed}'. and '\code{bedgraph}'
 #'   arguments.
@@ -32,10 +35,10 @@
 #' \dontrun{
 #' # Proper compartment scores
 #' cs <- compartment_score(list(WT_100kb, KO_100kb), bed = H3K4me1_peaks)
-#' 
+#'
 #' # Doing the eigenvector decomposition only yields unsigned scores
 #' cs <- compartment_score(list(WT_100kb, KO_100kb))
-#' 
+#'
 #' # Signing the scores
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
 #' }

@@ -218,6 +218,7 @@ draw.centromere.telomere <- function(m, cut.off = 2) {
 #' @param q.top top quantile of scores that should be left out of the analysis
 #' (because they are outliers)
 #' @param verbose Produces a progress-indication.
+#' @section Resolution recommendation: 40kb
 #' @examples
 #' \dontrun{
 #' # Get a scaled matric of the interchomosomal interactions between 15 and 19

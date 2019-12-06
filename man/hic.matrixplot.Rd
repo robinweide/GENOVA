@@ -124,6 +124,11 @@ Alternatively, if you download the knowngene table from UCSC, you can
 directly use this table (with exons combined per row), by renaming
 exonStarts and exonEnds to exonStart and exonEnd.
 }
+\section{Resolution recommendation}{
+ A resolution in the ballpark of 
+\eqn{(\code{end} - \code{start}) / 500}.
+}
+
 \examples{
 \dontrun{
 # plot two matrices of Hap-1 cells, including their respective loop-calls

@@ -25,6 +25,9 @@
 #'   basepair resolution for the \code{explist} argument compared to the TAD
 #'   calls for accuracy reasons.
 #'
+#' @section Resolution recommendation: The same resolution as whence the TADs
+#'   were called.
+#'
 #' @seealso For calling TADs with insulation scores, see
 #'   \code{\link[GENOVA]{insulation_score}()} and
 #'   \code{\link[GENOVA]{call_TAD_insulation}}. For calling TADs with HiCseg,

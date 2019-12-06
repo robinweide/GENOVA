@@ -36,6 +36,11 @@ The TADs are expected to be consecutive: the 3' border of a TAD is
   basepair resolution for the \code{explist} argument compared to the TAD
   calls for accuracy reasons.
 }
+\section{Resolution recommendation}{
+ The same resolution as whence the TADs
+  were called.
+}
+
 \examples{
 \dontrun{
 # Getting TAD calls

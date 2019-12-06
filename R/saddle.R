@@ -21,19 +21,23 @@
 #'   Flyamer \emph{et al}. (2007), while setting '\code{bins}' to \code{100}
 #'   will produce results similar to Bonev \emph{et al}. (2017)
 #'
+#' @section Resolution recommendation: The resolution of the
+#'   '\code{CS_discovery}' object. Either print the object to see the resolution
+#'   or use \code{attr(CS_discovery, "resolution")} for programmatic access.
+#'
 #' @return A \code{saddle_discovery} object.
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' exps <- list(WT_100kb, KO_100kb)
-#' 
+#'
 #' # Computing signed compartment scores
 #' cs <- comparment_score(exps, bed = H3K4me1_peaks)
-#' 
+#'
 #' # Saddle analysis
 #' sadl <- saddle(exps, cs)
-#' 
+#'
 #' # Visualising results
 #' visualise(sadl)
 #' }

@@ -4,13 +4,16 @@
 \alias{discovery}
 \title{Discovery class}
 \description{
-The discovery class contains the results of the analysis
-  functions within GENOVA.
+The discovery classes contains the results of the analysis
+  functions within GENOVA. Each discovery object is a list with the data as 
+  list-elements and each discovery object has attributes that may be relevant 
+  to downstream functions.
 }
 \details{
 Next to the results, the \code{discovery} objects may also contain
   useful metadata on the analysis that was run, such as which resolution was
-  used.
+  used. For details on a particular \code{discovery} class, please consult 
+  the documentation of the functions that generate the class.
 
   Functions that generate \code{discovery} objects are the following:
   \describe{ \item{\code{\link[GENOVA]{PESCAn}}}{\code{PESCAn_discovery}

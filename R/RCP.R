@@ -10,11 +10,13 @@
 #' @param chromsToUse A vector containing the chromosome-names of interest. 
 #' @param maxDistance The maximal distance to calculate RCPs for.
 #' @param genomeWide Normalise with genome-wide counts or per-chromosome (default).
-
-
+#' 
 #' @return An RCP_discovery object containing:
 #' @return \item{raw}{a per-distance probability}
 #' @return \item{smooth}{a log10-mean smoothed probability}
+#' 
+#' @section Resolution recommendation: 40kb-500kb
+#' 
 #' @examples
 #' # Calculate the RCP of chromosome 1
 #' \dontrun{

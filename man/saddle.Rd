@@ -35,6 +35,12 @@ Per chromosome arm, compartment scores are divided in quantile bins.
   Flyamer \emph{et al}. (2007), while setting '\code{bins}' to \code{100}
   will produce results similar to Bonev \emph{et al}. (2017)
 }
+\section{Resolution recommendation}{
+ The resolution of the
+  '\code{CS_discovery}' object. Either print the object to see the resolution
+  or use \code{attr(CS_discovery, "resolution")} for programmatic access.
+}
+
 \examples{
 \dontrun{
 exps <- list(WT_100kb, KO_100kb)

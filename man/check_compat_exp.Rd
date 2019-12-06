@@ -7,8 +7,8 @@
 check_compat_exp(explist)
 }
 \arguments{
-\item{explist}{Either a single GENOVA experiment or a list of GENOVA
-experiments.}
+\item{explist}{Either a single GENOVA \code{contacts} object or a list of
+GENOVA \code{contacts} objects.}
 }
 \value{
 A \code{list} of GENOVA experiment(s).

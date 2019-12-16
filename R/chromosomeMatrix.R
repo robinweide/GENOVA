@@ -36,8 +36,10 @@ chromosomeMatrix <- function(exp, color.fun = NULL, cut.off = NULL,
     exp$IDX[which(head(exp$IDX[["V1"]], -1) != tail(exp$IDX[["V1"]], -1)) + 1, V1]
   )
 
-  chrA <- factor(exp$IDX[exp$MAT[["V1"]], V1], levels = chrom)
-  chrB <- factor(exp$IDX[exp$MAT[["V2"]], V1], levels = chrom)
+  chrA <- factor(exp$IDX[match(exp$MAT[["V1"]], exp$IDX[["V4"]]), V1], 
+                 levels = chrom)
+  chrB <- factor(exp$IDX[match(exp$MAT[["V2"]], exp$IDX[["V4"]]), V1], 
+                 levels = chrom)
 
   # calculate the number of interactions per/between chromosome(s)
   chrom.count <- aggregate(V3 ~ chrA + chrB, data = exp$MAT, sum)

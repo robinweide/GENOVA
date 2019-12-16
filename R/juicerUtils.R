@@ -19,6 +19,7 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
   juicerList = lapply(seq_len(nrow(expandedChromosomes)), function(eci){
     
     ec = expandedChromosomes[eci,]
+    print(ec)
     
     juicer_in <- tryCatch(
       {
@@ -123,15 +124,16 @@ get_juicer_metadata = function(juicerPath){
     }
   }
   
-  n_chrs = readBin(file2read, integer(), n = 1, size = 4)
+  n_chrs <- readBin(file2read, integer(), n = 1, size = 4)
   
   
-  chrom_name_length = lapply(1:n_chrs, function(x){
-    chrom = readBin(file2read, character(), size = 1)
-    len = readBin(file2read, integer(), n = 1)
-    data.table::data.table(chrom, len)
+  chrom_name_length <- lapply(seq_len(n_chrs), function(x){
+    chrom <- readBin(file2read, character(), size = 1)
+    len <- readBin(file2read, integer(), n = 1)
+    data.frame(chrom = chrom, len = len, stringsAsFactors = FALSE)
   })
-  chrom_name_length = data.table::rbindlist(chrom_name_length)
+  chrom_name_length <- do.call(rbind, chrom_name_length)
+  # chrom_name_length = data.table::rbindlist(chrom_name_length)
   
   n_BP_Res  = readBin(file2read, integer(), n = 1, size = 4)
   

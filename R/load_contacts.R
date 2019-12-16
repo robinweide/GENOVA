@@ -202,7 +202,8 @@ load_contacts = function(signal_path,
   ############################################################# set to upper tri
   ##############################################################################
   if(!all(signal$V1 <= signal$V2)){
-    signal[signal$V1 > signal$V2, ] <- signal[signal$V1 > signal$V2, c(1,3,2)]
+    signal[, c("V1", "V2") := list(pmin(V1, V2), pmax(V1, V2))]
+    setkeyv(signal, c("V1", "V2"))
   }
   
   ##############################################################################

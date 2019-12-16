@@ -21,14 +21,16 @@
 #'   insulation score.
 #'
 #'   To follow the Crane \emph{et al}. (2015) strategy for insulation scores,
-#'   use a 10kb resolution \code{contacts} objects, set the '\code{window}'
+#'   use 10kb resolution \code{contacts} objects, set the '\code{window}'
 #'   argument to 50, set the '\code{norm_to}' argument to \code{"chromosome"}
 #'   and the '\code{norm_fun}' argument to \code{log2overmean}.
 #'
-#' @return An \code{IS_discovery} object containing the follow slot: \describe{
+#' @return An \code{IS_discovery} object containing the following slot: \describe{
 #'   \item{insula_score}{A \code{data.table} with genomic locations and
 #'   insulation scores for each element in the '\code{explist}' argument.}}
 #' @export
+#' 
+#' @section Resolution recommendation: 10kb-40kb
 #'
 #' @seealso For calling TADs from insulation scores, see
 #'   \code{\link[GENOVA]{call_TAD_insulation}}. For plotting a heatmap of
@@ -130,12 +132,38 @@ insulation_score <- function(explist, window = 30,
             window = window)
 }
 
+#' Log 2 value over its median
+#'
+#' A small convenience function to calculate the log 2 of a value divided by the
+#' median of this set of values.
+#'
+#' @param x A \code{numeric} vector
+#'
+#' @return A \code{numeric} vector with the calculated values.
+#' 
+#' @details Ignores \code{NA} values in calculation of the median.
 #' @export
+#'
+#' @examples
+#' log2overmedian(runif(100))
 log2overmedian <- function(x) {
   log2(x / median(x, na.rm = TRUE))
 }
 
+#' Log 2 value over its mean
+#'
+#' A small convenience function to calculate the log 2 of a value divided by the
+#' mean of this set of values.
+#'
+#' @param x A \code{numeric} vector
+#'
+#' @return A \code{numeric} vector with the calculated values.
+#' 
+#' @details Ignores \code{NA} values in calculation of the mean
 #' @export
+#'
+#' @examples
+#' log2overmean(runif(100))
 log2overmean <- function(x) {
   log2(x / mean(x, na.rm = TRUE))
 }

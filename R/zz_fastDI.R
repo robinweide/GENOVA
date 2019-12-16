@@ -33,7 +33,6 @@
 #'      axes = F)
 #' }
 #' @import data.table
-#' @export
 fastDI <- function(experiment, chrom, start, end, max.i = 100) {
   mat <- select_subset(experiment, chrom, start, end)$z
 

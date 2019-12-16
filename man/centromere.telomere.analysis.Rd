@@ -33,6 +33,10 @@ chromosome combinations that need to left out}
 Calculate a scaled matrix of the interchromosomal interactions aligned from
 centromere to telomere
 }
+\section{Resolution recommendation}{
+ 40kb
+}
+
 \examples{
 \dontrun{
 # Get a scaled matric of the interchomosomal interactions between 15 and 19

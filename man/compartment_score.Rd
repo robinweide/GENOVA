@@ -40,6 +40,11 @@ When the '\code{bed}' or '\code{bedgraph}' arguments are both
   is necessary to have positive values correspond to more active A
   compartments and negative values to more inactive B compartments.
 }
+\section{Resolution recommendation}{
+ 100kb-150kb. Data with <20kb resolution
+ will return an error due to sparsity.
+}
+
 \examples{
 \dontrun{
 # Proper compartment scores

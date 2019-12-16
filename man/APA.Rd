@@ -16,11 +16,11 @@ APA(
 )
 }
 \arguments{
-\item{explist}{Either a single GENOVA experiment or a list of GENOVA
-experiments.}
+\item{explist}{Either a single GENOVA \code{contacts} object or a list of
+GENOVA \code{contacts} objects.}
 
 \item{bedpe}{A \code{data.frame} with 6 columns in BEDPE format containing
-the regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
+the locations to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints.}
@@ -38,18 +38,39 @@ performs no outlier correction.}
 
 \item{anchors}{(Optional) A \code{matrix} with two columns containing
 pre-computed anchor indices. If this is set, skips calculation of anchor
-indices and uses these instead.}
+indices and uses this argument instead.}
 
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
-summary matrices be returned in the output?}
+summary matrices be returned in the output? Should be \code{TRUE} if the
+intention is to use the \code{quantify} function.}
 }
 \value{
-An \code{APA_discovery} object with the APA results.
+An \code{APA_discovery} object containing the following slots:
+  \describe{ \item{signal}{An \code{array} with the dimensions
+  \code{size_bin} x \code{size_bin} x \code{length(explist)} containing mean
+  contact values for bins surrounding the anchors} \item{signal_raw}{A
+  \code{list} with \code{length(explist)} elements for each contacts object,
+  wherein an element is an n x \code{size_bin} x \code{size_bin} array with
+  contact values for each anchor. 'n' is the number of non-empty valid
+  anchors.} }
 }
 \description{
 Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
-regions, for example loops.
+locations, for example loops.
 }
+\details{
+For each row in the '\code{bedpe}' or '\code{anchors}' argument, an
+  \code{size_bin} x \code{size_bin} region centered on that location is
+  retrieved. This data is then summarised by taking the mean for every
+  element in these matrices across all locations.
+
+  The '\code{bedpe}' argument is converted internally to an '\code{anchors}'
+  object.
+}
+\section{Resolution recommendation}{
+ 10kb-20kb
+}
+
 \examples{
 \dontrun{
 # Typical usage: APA for loops
@@ -66,6 +87,12 @@ visualise(apa)
 }
 }
 \seealso{
-The \code{\link[GENOVA]{discovery}} class.
-  \code{\link[GENOVA]{visualise}} for visualisation of the results.
+The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+  lookup and summary for the \code{APA} function and others. \cr The
+  \code{\link[GENOVA]{discovery}} class for a general description of
+  \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+  for visualisation of the results. \cr The \code{\link[GENOVA]{quantify}}
+  function for quantification of loop strenghts. \cr The
+  \code{\link[GENOVA]{anchors}} documentation for more information about
+  anchors.
 }

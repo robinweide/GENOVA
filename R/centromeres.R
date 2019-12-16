@@ -57,7 +57,9 @@ find_centromeres <- function(MAT, IDX) {
   })
   
   centros <- rbindlist(centros)
-  setkey(centros, chrom)
+  if (!is.null(centros)) {
+    setkey(centros, chrom)
+  }
   centros
 }
 

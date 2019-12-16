@@ -1,4 +1,4 @@
-#' plot.insulation.single
+#' plot_insulation_single
 #'
 #' Plot a single insulation-score and Hi-C matrix for a region of interest.
 #'
@@ -7,20 +7,26 @@
 #' @param start Start position of the region of interest
 #' @param end End position of the region of interest
 #' @param cut.off The cut.off for Hi-C scores
+#' @param IS_discovery (Optional) Provide pre-calculated insulation scores.
+#' @param colour_fun A function that generates a colour vector of length
+#'   \code{n} when given an integer. Typically the result of a call to
+#'   \code{colorRampPalette()}.
 #' @param window.size The sliding square size
-#' @param local or per-chromosome normalisation?
 #' @examples
 #' # Make a matrix-plot of an experiment and the insulation-score for a region of interest.
 #' \dontrun{
-#' insulation.plot.dual(exp1 = Hap1_WT_10kb, 
-#'                      chrom = 'chr7', 
-#'                      start = 25.5e6, 
-#'                      end = 30e6, 
-#'                      window.size = 21)
+#' insulation.plot.single(exp1 = WT_10kb,
+#'                        chrom = 'chr7',
+#'                        start = 25.5e6,
+#'                        end = 30e6,
+#'                        window.size = 21)
 #' }
 #' @return A plot
 #' @export
-insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, window.size = 21, local = T) {
+insulation_plot_single <- function(exp, chrom, start, end, 
+                                   IS_discovery = NULL,
+                                   colour_fun = NULL,
+                                   cut.off = NULL, window.size = 21) {
   # create a plotting layout
   w <- 6
   lay <- matrix(4, nrow = w, ncol = w)
@@ -31,18 +37,20 @@ insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, windo
   layout(lay)
   par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
   # layout
-
+  
   # get a matrix from the experiment
   mat1 <- select_subset(exp, chrom, start, end)
-
+  
   if (is.null(cut.off)) {
     cut.off <- max(quantile(mat1$z, .99))
     message("No cut.off was given: using 99% percentile: ", round(cut.off), ".")
   }
-
+  
   mat1$z[mat1$z > cut.off] <- cut.off
-  wr <- colorRampPalette(c("white", "red"))
-  image(mat1, col = wr(256), axes = F, ylim = rev(range(mat1$x)))
+  if (is.null(colour_fun)) {
+    colour_fun <- colorRampPalette(c('white', '#f5a623', '#d0021b', 'black'))
+  }
+  image(mat1, col = colour_fun(256), axes = F, ylim = rev(range(mat1$x)))
   box(lwd = 2)
   size.region <- diff(range(mat1$x))
   if (size.region > 2e6) {
@@ -54,19 +62,29 @@ insulation.plot.single <- function(exp, chrom, start, end, cut.off = NULL, windo
     axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
     axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = 1.6)
   }
-
+  
   extend <- attr(exp, "res") * window.size
-  ins.score <- insulation.score_old(exp, window.size, chrom, start - extend, end + extend, local = local)
-  # remove NA elements, because the can generate problems in the plotting
-  # of lines etc.
-  ins.score <- ins.score[is.finite(ins.score[, 2]), ]
-
-  plot(ins.score[, 1], ins.score[, 2], xlim = range(mat1$x), type = "l", axes = F)
-  insulation.polygon(ins.score, rotate = F)
+  if (is.null(IS_discovery) | !inherits(IS_discovery, "IS_discovery")) {
+    subset <- subset(exp, chrom, start - end, end + extend)
+    ins <- insulation_score(subset, window = window.size)
+    ins.score <- as.data.frame(ins$insula_score)
+  } else {
+    ins.score <- as.data.frame(IS_discovery$insula_score)
+    ins.score <- ins.score[ins.score$chrom == chrom, ]
+  }
+  
+  colnames(ins.score)[5] <- "score"
+  
+  ins.score <- ins.score[ins.score$end >= start & ins.score$start <= end,]
+  ins.score <- ins.score[is.finite(ins.score$score), ]
+  
+  plot(ins.score$end, ins.score$score, xlim = range(mat1$x), type = "l", axes = F)
+  insulation.polygon(cbind(ins.score$end, ins.score$score), rotate = F)
   axis(2)
-
-  plot(ins.score[, 2], ins.score[, 1], ylim = rev(range(mat1$x)), xlim = rev(range(ins.score[, 2])), type = "l", axes = F)
-  insulation.polygon(ins.score, rotate = T)
+  
+  plot(ins.score$score, ins.score$end, ylim = rev(range(mat1$x)), 
+       xlim = rev(range(ins.score$score)), type = "l", axes = F)
+  insulation.polygon(cbind(ins.score$end, ins.score$score), rotate = T)
   axis(3)
 }
 

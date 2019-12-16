@@ -41,6 +41,10 @@ Plot a genome-wide overview-matrix: values are log10(observed/expected).
 \note{
 Please use only low-resolution matrices with this (e.g. 1Mb resolution)
 }
+\section{Resolution recommendation}{
+ 500kb-1Mb
+}
+
 \examples{
 \dontrun{
 # use chromosomeMatrix without chromosome M and Y.

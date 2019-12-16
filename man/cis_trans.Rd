@@ -17,3 +17,7 @@ A data.table with the sample, percentage and region.
 \description{
 Get the percentage cis-contacts genome-wide or from a region
 }
+\section{Resolution recommendation}{
+ 500kb-1Mb
+}
+

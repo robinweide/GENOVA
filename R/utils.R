@@ -44,7 +44,7 @@ bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   # Match bed entry to idx
   out <- mapply(function(i, j) {
     j[pmax(findInterval(i, j[, 1]), 1), 2]
-  }, i = bed_chrom, j = IDX_chrom)
+  }, i = bed_chrom, j = IDX_chrom, SIMPLIFY = FALSE)
   unsplit(out, bed_group)
 }
 

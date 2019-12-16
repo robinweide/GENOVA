@@ -34,7 +34,7 @@ print.contacts <- function(x, ...) {
   } else {
     paste0("- CENTROMERES:\tLocations of ", nrow(x$CENTROMERES), " centromeres.\n")
   }
-  bal <- paste0("The orgininal data were loaded in as ", if (attr(x, "balanced")) {
+  bal <- paste0("The original data were loaded in as ", if (attr(x, "balanced")) {
     "balanced"
   } else { "raw" }, " data.")
 

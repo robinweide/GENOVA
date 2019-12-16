@@ -19,8 +19,7 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
   juicerList = lapply(seq_len(nrow(expandedChromosomes)), function(eci){
     
     ec = expandedChromosomes[eci,]
-    print(ec)
-    
+
     juicer_in <- tryCatch(
       {
         try_require("strawr", "loadJuicer", "github")
@@ -151,32 +150,42 @@ get_juicer_metadata = function(juicerPath){
 splitJuicerData = function(juicer_data, resolution){
 
   # get all unique bins
-  bins_x = stats::setNames(unique(juicer_data[, 1:2]), c('V1', 'V2'))
-  bins_y = stats::setNames(unique(juicer_data[, 3:4]), c('V1', 'V2'))
+  bins_x <- juicer_data[, list(min = min(x), max = max(x)), 
+                        by = .(chrom = chrom_x)]
+  bins_y <- juicer_data[, list(min = min(y), max = max(y)), 
+                        by = .(chrom = chrom_y)]
+  
+  # Make abs
+  abs <- rbind(bins_x, bins_y)
+  abs <- abs[, list(min = min(min), max = max(max)), by = "chrom"]
+  abs <- abs[, seq(min, max, by = as.integer(resolution)), by = "chrom"]
+  setnames(abs, c("V1", "V2"))
+  abs[, c("V4") := seq_len(nrow(abs))]
+  
+  # Make signal
+  ## Search for x-index
+  SIG <- juicer_data[abs, on = c(chrom_x = "V1", x = "V2")]
+  setnames(SIG, 6, "V1")
+  ## Search for y-index
+  SIG <- SIG[abs, on = c(chrom_y = "V1", y = "V2")]
+  setnames(SIG, 7, "V2")
+  
+  # Clean up signal
+  SIG[, c("chrom_x", "x", "chrom_y", "y") := NULL]
+  setcolorder(SIG, c(2,3,1))
+  setnames(SIG, c("V1", "V2", "V3"))
+  
+  # Discard NAs (from the join with non-existing bins)
+  SIG <- SIG[!is.na(V3)]
+  # Ensure upper-triangular format
+  SIG[, c("V1", "V2") := list(pmin(V1, V2), pmax(V1, V2))]
+  setkeyv(SIG, c("V1", "V2"))
 
-  # make abs
-  ABS = unique(rbind(bins_x,bins_y))
-  ABS$V3 = ABS$V2 + resolution
-  data.table::setkeyv(ABS, c('V1','V2'))
-  ABS$index = 1:nrow(ABS)
+  # Finishing touches on abs
+  abs[, V3 := V2 + as.integer(resolution)]
+  setcolorder(abs, c("V1", "V2", "V3", "V4"))
 
-  # make sig
-  SIG = stats::setNames(juicer_data, c('V1','V2','Y1','Y2','signal'))
-  data.table::setkeyv(SIG, c('V1','V2'))
-
-  # merge first
-  SIG$index1 <- SIG[ABS, index, nomatch = 0]
-  SIG[,1:2] = NULL
-  colnames(SIG)[1:2] = c('V1','V2')
-  data.table::setkeyv(SIG, c('V1','V2'))
-
-  # second round
-  SIG$index2 <- SIG[ABS, index, nomatch = 0]
-
-  SIG = stats::setNames(SIG[,c(4,5,3)], paste0('V',1:3))
-
-  colnames(ABS) = paste0('V', 1:4)
-  return(list(SIG, ABS))
+  return(list(SIG, abs))
 }
 
 

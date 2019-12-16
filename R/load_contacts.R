@@ -46,12 +46,12 @@ load_contacts = function(signal_path,
                         sample_name,
                         centromeres = NULL,
                         colour = NULL,
-                        z_norm = F,
+                        z_norm = FALSE,
                         scale_bp = 1e9,
-                        scale_cis = F,
-                        balancing = T,
-                        legacy = F,
-                        verbose = T){
+                        scale_cis = FALSE,
+                        balancing = TRUE,
+                        legacy = FALSE,
+                        verbose = TRUE){
   
   # Control data.table threads
   dt.cores <- data.table::getDTthreads()

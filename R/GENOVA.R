@@ -62,6 +62,8 @@ utils::globalVariables(c('.',
                          'region', 
                          'signal',
                          'chrom', 
+                         'chrom_x',
+                         'chrom_y',
                          'chr', 
                          'bin',
                          'binned'))

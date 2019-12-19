@@ -4,10 +4,19 @@
 \alias{chromosomeMatrix}
 \title{chromosomeMatrix}
 \usage{
-chromosomeMatrix(exp, color.fun = NULL, cut.off = NULL,
-  chromsToUse = NULL, remove = NULL)
+chromosomeMatrix(
+  exp,
+  color.fun = NULL,
+  cut.off = NULL,
+  chromsToUse = NULL,
+  remove = NULL,
+  plot = TRUE
+)
 }
 \arguments{
+\item{exp}{The Hi-C experiment object of a sample: produced by
+construct.experiment().}
+
 \item{color.fun}{Optional color-function}
 
 \item{cut.off}{Adjust the maximum value of the color-scale}
@@ -17,8 +26,7 @@ Genome-wide score will not we given!}
 
 \item{remove}{A vector of (partial) names of chromosomes to leave out.}
 
-\item{experiment}{The Hi-C experiment object of a sample: produced by
-construct.experiment().}
+\item{plot}{A \code{logical}: plot the resulting matrix?}
 }
 \value{
 A plot of the chromosome matrix and an assignable list:
@@ -33,9 +41,15 @@ Plot a genome-wide overview-matrix: values are log10(observed/expected).
 \note{
 Please use only low-resolution matrices with this (e.g. 1Mb resolution)
 }
+\section{Resolution recommendation}{
+ 500kb-1Mb
+}
+
 \examples{
+\dontrun{
 # use chromosomeMatrix without chromosome M and Y.
-chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"), cut.off = 2)
+chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM", "chrY"), cut.off = 2)
+}
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

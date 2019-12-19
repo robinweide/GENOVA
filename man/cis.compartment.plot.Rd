@@ -4,9 +4,18 @@
 \alias{cis.compartment.plot}
 \title{cis.compartment.plot}
 \usage{
-cis.compartment.plot(exp1, exp2 = NULL, chrom, arm = "p",
-  cut.off = NULL, obs.exp = F, invert = F, color.scheme = "fall",
-  cs.lim = NULL, chip = NULL, smoothNA = F)
+cis.compartment.plot(
+  exp1,
+  exp2 = NULL,
+  chrom,
+  arm = "p",
+  cut.off = NULL,
+  obs.exp = F,
+  invert = F,
+  color.scheme = "fall",
+  cs.lim = NULL,
+  chip = NULL
+)
 }
 \arguments{
 \item{exp1}{A GENOVA experiment-object}
@@ -28,9 +37,6 @@ cis.compartment.plot(exp1, exp2 = NULL, chrom, arm = "p",
 \item{cs.lim}{y-axis limit for the compart score, if unset (NULL) will default to the maximum absolute value}
 
 \item{chip}{A data.frame, containg ChIP-seq peaks of active histone marks to correctly orient A/B compartments}
-
-\item{smoothNA}{Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.
-Requires fields and is only needed if large white stripes are bothering you.}
 }
 \description{
 Draw intrachromosomal interaction heatmap for a chromosome (arm) with corresponding compartment scores

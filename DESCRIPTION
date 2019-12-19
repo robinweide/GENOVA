@@ -1,24 +1,28 @@
 Package: GENOVA
 Title: GENOVA: expore the Hi-C
-Version: 0.9.98
+Version: 1.0.0
 Authors@R: c(
   person("Robin H.", "van der Weide", email = "r.vd.weide@nki.nl", role = c("aut", "cre")),
   person("Elzo", "de Wit", email = "e.d.wit@nki.nl", role = "aut"))
 Description: GENOVA consist of a set of analysis- and visualisation-functions. These will help to discover valuable information buried deep in your HiC-matrices.
 Depends:
-    R (>= 2.14.1)
-License: MIT
+    R (>= 3.5.0),
+    data.table
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Imports:
-    dplyr,
-    data.table,
-    grid,
-    reshape2,
-    ggplot2
-RoxygenNote: 6.1.1
-Suggests: knitr,
+Imports: ggplot2,
+    scales
+RoxygenNote: 7.0.2
+Suggests: 
+    knitr,
     rmarkdown,
-    bigwrig
+    HiCseg,
+    RhpcBLASctl,
+    RCurl,
+    strawr (>= 0.0.1),
+    rhdf5 (>= 2.30.0)
 VignetteBuilder: knitr
-Remotes: git::https://github.com/rnabioco/RcppLibBigWig.git
+Remotes: rnabioco/RcppLibBigWig,
+   aidenlab/straw/R,
+   bioc::release/rhdf5

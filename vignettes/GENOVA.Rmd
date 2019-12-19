@@ -1,0 +1,72 @@
+---
+title: "GENOVA"
+author:
+- name: Robin H. van der Weide, Teun van den Brand & Elzo de Wit
+  affiliation:
+  - Division of Gene Regulation, the Netherlands Cancer Institute
+
+date: "`r format(Sys.time(), '%d %B %Y')`"
+
+output: rmarkdown::html_vignette
+
+vignette: >
+  %\VignetteIndexEntry{GENOVA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: GENOVA.bib
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.pos = 'h')
+```
+
+# Loading data
+
+```{r setup, echo=T, warning=FALSE, error=F, results='hide'}
+# devtools::install_github("robinweide/GENOVA", ref = 'dev')
+library(GENOVA)
+```
+
+
+## Data structures of input
+GENOVA expects two input files: the signal- and the index-file. Signal-files have three columns (bin1, bin2, contactCount) and index-files have four (chromosome, start, end, bin). These are the default output of the Hi-C mapping pipeline HiC-Pro [@Servant2015], where they are called \*.matrix and \*.bed. The files are expected to be genome-wide and may be corrected with ICE-normalisation.
+
+## Recommended resolutions
+To ensure computational strain and time is kept to a minimum, we recommend different resolutions for different functions (table \@ref(tab:tableRES)). More experienced users are free to deviate, while keeping in mind that these datasets are quite memory-heavy (table \@ref(tab:tableMEM)). 
+
+Function   | Resolution
+---------- | ----------
+APA | 10kb-20kb
+ATA  | 10kb-40kb
+cisTotal.perChrom | 500kb-1Mb
+chromosomeMatrix | 500kb-1Mb
+RCP | 40kb-500kb
+intra.inter.TAD.contacts | 20kb - 40kb 
+PE-SCAn | 20kb-40kb
+hic.matrixplot | $\frac{width\ in\ bp\ of\ window}{500}$ 
+centromere.telomere.analysis | 40kb
+*.compartment.plot | 100kb
+: (\#tab:tableRES) Recommended resolutions. These will provide optimal resource/result tradeoffs.
+
+Experiment            | Contacts |  10kb  |  40kb  |  100kb  |  1Mb 
+----------------------|----------|--------|--------|---------|-------
+Hap1 [@Haarhuis2017]  | 433.5M   | 2.9Gb  | 1.7Gb  |  1.1Gb  | 0.1Gb
+iPSC [@Krijger2016]   | 427.9M   | 3.1Gb  | 1.9Gb  |  1.0Gb  | 53.1MB
+: (\#tab:tableMEM) Memory footprints of objects loaded into R. 
+
+Please post questions, comments and rants on [our github issue tracker](https://github.com/robinweide/GENOVA/issues).
+
+# Session info
+```{r sesh, echo = F}
+sessionInfo()
+````
+
+# References
+

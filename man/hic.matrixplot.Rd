@@ -4,14 +4,36 @@
 \alias{hic.matrixplot}
 \title{hic.matrixplot}
 \usage{
-hic.matrixplot(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
-  chip = list(NULL, NULL, NULL, NULL), inferno = T, cexTicks = 1,
-  chip.color = "black", chip.yMax = NULL, type = rep("triangle", 4),
-  guessType = T, coplot = "dual", genes = NULL, tads = NULL,
-  tads.type = "lower", loops = NULL, loops.type = "lower",
-  tads.color = "#3288bd", loops.radius = NULL,
-  loops.color = "#3288bd", skipAnn = F, symmAnn = F,
-  check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F)
+hic.matrixplot(
+  exp1,
+  exp2 = NULL,
+  chrom,
+  start,
+  end,
+  cut.off = NULL,
+  chip = list(NULL, NULL, NULL, NULL),
+  inferno = T,
+  cexTicks = 1,
+  chip.colour = "black",
+  chip.yMax = NULL,
+  type = rep("triangle", 4),
+  guessType = T,
+  coplot = "dual",
+  genes = NULL,
+  tads = NULL,
+  tads.type = "lower",
+  loops = NULL,
+  loops.type = "lower",
+  tads.colour = "#1faee3",
+  loops.radius = NULL,
+  loops.colour = "#1faee3",
+  skipAnn = F,
+  symmAnn = F,
+  check.genome = T,
+  smoothNA = F,
+  fillNAtreshold = 2,
+  antoni = F
+)
 }
 \arguments{
 \item{exp1}{The Hi-C experiment object: produced by construct.experiment().}
@@ -36,7 +58,10 @@ inner-left.}
 
 \item{cexTicks}{Change size of numbers on the axis}
 
-\item{chip.yMax}{A vector of four, parallel to [chip], of the maximum height of the biwigs. If only one value is given, all be set on this value.}
+\item{chip.colour}{A vector of four, parallel to [chip], of the to use colour.}
+
+\item{chip.yMax}{A vector of four, parallel to [chip], of the maximum 
+height of the biwigs. If only one value is given, all be set on this value.}
 
 \item{type}{Should a rectangle or a triangle be drawn?
 Note that for a triangle a 6th strand column should be included}
@@ -60,9 +85,12 @@ will only be combined with bed structure}
 
 \item{loops.type}{How to show loops: upper, lower and or both}
 
-\item{loops.radius}{Set the size of the loop-circle to X bp. Can help visibility.}
+\item{tads.colour}{Which colour do you want the TADs to have?}
 
-\item{loops.color}{Which color do you want the loops to have?}
+\item{loops.radius}{Set the size of the loop-circle to X bp. Can help 
+visibility.}
+
+\item{loops.colour}{Which colour do you want the loops to have?}
 
 \item{skipAnn}{Do not plot outside-annotation. Can be used to plot other
 things next to the matrix.}
@@ -71,13 +99,14 @@ things next to the matrix.}
 
 \item{check.genome}{Check if reference genomes in exp1 and exp2 are the same}
 
-\item{smoothNA}{Set to TRUE to perform a Nadaraya/Watson normalization. This will try to eliminate white stripes: this is only cosmetic and has no effect on the compartment-scores.}
+\item{smoothNA}{Set to TRUE to perform a Nadaraya/Watson normalization. 
+This will try to eliminate white stripes: this is only cosmetic and has no 
+effect on the compartment-scores.}
 
-\item{fillNAtreshold}{Set the amount strength of out-lier correction for fillNA.}
+\item{fillNAtreshold}{Set the amount strength of out-lier correction for 
+fillNA.}
 
 \item{antoni}{Logical: plot an explorer of the microscopic world}
-
-\item{chip.col}{A vector of four, parallel to [chip], of the to use color.}
 }
 \value{
 A matrix-plot
@@ -95,18 +124,27 @@ Alternatively, if you download the knowngene table from UCSC, you can
 directly use this table (with exons combined per row), by renaming
 exonStarts and exonEnds to exonStart and exonEnd.
 }
+\section{Resolution recommendation}{
+ A resolution in the ballpark of 
+\eqn{(\code{end} - \code{start}) / 500}.
+}
+
 \examples{
+\dontrun{
 # plot two matrices of Hap-1 cells, including their respective loop-calls
-hic.matrixplot(exp1 = Hap1_Haarhuis2017_10kb,
-               exp2 = Hap1_Sanborn2015_10kb,
-               chrom = 'chr7',
-               start = 25e6,
-               end=30e6,
-               loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
-               loops.color = c('blue','green'),
-               loops.type = c('upper','lower'),
-               loops.resize = c(20e3,20e3), # expand for visibility
-               cut.off = 25) # upper limit of contacts
+hic.matrixplot(
+  exp1 = Hap1_Haarhuis2017_10kb,
+  exp2 = Hap1_Sanborn2015_10kb,
+  chrom = "chr7",
+  start = 25e6,
+  end = 30e6,
+  loops = list(Haarhuis2017_Loops, sanborn2015_Loops),
+  loops.colour = c("blue", "green"),
+  loops.type = c("upper", "lower"),
+  loops.resize = c(20e3, 20e3), # expand for visibility
+  cut.off = 25
+) # upper limit of contacts
+}
 }
 \author{
 Robin H. van der Weide, \email{r.vd.weide@nki.nl}

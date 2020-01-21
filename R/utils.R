@@ -165,7 +165,7 @@ check_compat_exp <- function(explist) {
   # Test equality of experiments in list
   if (length(explist) > 1) {
     equal <- vapply(seq_along(explist)[-1], function(i) {
-      all.equal(explist[[1]]$IDX, explist[[i]]$IDX)
+      isTRUE(all.equal(explist[[1]]$IDX, explist[[i]]$IDX))
     }, logical(1))
     
     if (any(!equal)) {

@@ -65,7 +65,10 @@
 #'   \subsection{C-SCAn anchors}{ \code{anchors_CSCan()}, like
 #'   \code{anchors_PESCAn}, takes all pairwise interactions of genomic
 #'   coordinates, but crosswise between unique combinations of BED-like
-#'   \code{data.frame}s in the \code{bedlist} argument.}
+#'   \code{data.frame}s in the \code{bedlist} argument. It is used within the
+#'   \code{\link[GENOVA]{CSCAn}} function. Has a \code{group} attribute to
+#'   keep track from which combination of BED-like \code{data.frame} the anchor
+#'   originated.}
 #'
 #'   \subsection{APA anchors}{ \code{anchors_APA()} takes a BEDPE-formatted
 #'   \code{data.frame} and translates the coordinates in the first 3 and last 3
@@ -536,7 +539,7 @@ anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
     attris$group$lengths <- c(attris$group$lengths, 
                               attr(shift, "group")$lengths)
     attris$group$values <- c(attris$group$values,
-                             attr(shift, "group")$lengths)
+                             attr(shift, "group")$values)
   }
 
   # Make final anchors

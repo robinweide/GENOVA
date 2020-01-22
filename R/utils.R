@@ -165,7 +165,7 @@ check_compat_exp <- function(explist) {
   # Test equality of experiments in list
   if (length(explist) > 1) {
     equal <- vapply(seq_along(explist)[-1], function(i) {
-      all.equal(explist[[1]]$IDX, explist[[i]]$IDX)
+      literalTRUE(all.equal(explist[[1]]$IDX, explist[[i]]$IDX))
     }, logical(1))
     
     if (any(!equal)) {
@@ -180,6 +180,9 @@ check_compat_exp <- function(explist) {
   return(explist)
 }
 
+# Equivalent to isTRUE fron R>3.5
+literalTRUE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
+
 GENOVA_THEME = function(){
   p = ggplot2::theme(panel.background = ggplot2::element_blank(),
                      legend.key =  ggplot2::element_rect(fill = 'white'),
@@ -190,4 +193,3 @@ GENOVA_THEME = function(){
                      strip.text = ggplot2::element_text(colour = 'black') )
   return(p)
 }
-

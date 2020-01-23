@@ -337,6 +337,92 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
 
 #' @rdname visualise
 #' @export
+visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
+                                      raw = FALSE, title = NULL, colour_lim = NULL,
+                                      ...) {
+  mode <- match.arg(mode)
+  hasobsexp <- "obsexp" %in% names(discovery)
+  if (mode == "obsexp" & !hasobsexp) {
+    warning("Mode was set to 'obsexp' but no such result was found")
+  }
+  hasobsexp <- hasobsexp && mode == "obsexp"
+  res <- if (hasobsexp) {
+    setNames(discovery[names(discovery) %in% "obsexp"], "signal")
+  } else {
+    discovery
+  }
+  
+  if (is.null(colour_lim)) {
+    if (hasobsexp) {
+      colour_lim <- centered_limits(1)
+    } else {
+      colour_lim <- c(NA, NA)
+    }
+  }
+  
+  df <- c(lapply(seq_along(dim(res$signal)), function(i) {
+    dnm <- dimnames(res$signal)[[i]]
+    if (is.null(dnm)) {
+      return(as.vector(slice.index(res$signal, i)))
+    } else {
+      return(dnm[as.vector(slice.index(res$signal, i))])
+    }
+  }), list(as.vector(res$signal)))
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  df <- setNames(df, c(paste0("Var", seq_along(dim(res$signal))), "value"))
+  if (ncol(df) == 5) {
+    groups <- strsplit(as.character(df$Var3), "-")
+    df$left  <- vapply(groups, `[`, character(1), 1)
+    df$right <- vapply(groups, `[`, character(1), 2)
+  }
+  df$Var1 <- as.integer(df$Var1)
+  df$Var2 <- as.integer(df$Var2)
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
+    ggplot2::geom_raster() +
+    ggplot2::facet_grid(left ~ Var4 + right, switch = "y")
+  
+  if (raw) {
+    return(g)
+  }
+  
+  pos_breaks <- function(x) {
+    x <- scales::extended_breaks()(x)
+    if (length(x) > 3) head(tail(x, -1), -1) else x
+  }
+  
+  panel_spac <- c(rep(5.5, length(unique(df$right)) - 1L))
+  panel_spac <- c(panel_spac, rep(11, length(unique(df$Var4)) - 1L))
+  panel_spac <- head(rep(panel_spac, length(unique(df$Var4))), -1)
+  panel_spac <- ggplot2::unit(panel_spac, "points")
+
+  g <- g + ggplot2::scale_fill_gradientn(
+    colours =  c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    name = expression(frac("Observed", "Expected")),
+    oob = scales::squish,
+    limits = c(-5, 5)
+  ) + 
+    ggplot2::scale_x_continuous(breaks = pos_breaks, 
+                                labels = function(x) {
+                                  ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+                                }, expand = c(0,0),
+                                name = "") +
+    ggplot2::scale_y_continuous(breaks = pos_breaks,
+                                labels = function(x) {
+                                  ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+                                }, expand = c(0,0), name = "") +
+    GENOVA_THEME() +
+    ggplot2::theme(
+      aspect.ratio = 1,
+      strip.placement = "outside",
+      panel.spacing.x = panel_spac
+    )
+  
+  g
+}
+
+#' @rdname visualise
+#' @export
 visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        metric = c("diff", "lfc"),
                                        mode = c("obsexp", "signal"),

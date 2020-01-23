@@ -4,6 +4,7 @@
 \alias{visualise}
 \alias{visualise.default}
 \alias{visualise.APA_discovery}
+\alias{visualise.CSCAn_discovery}
 \alias{visualise.PESCAn_discovery}
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
@@ -27,6 +28,15 @@ visualise(discovery, ...)
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
+  ...
+)
+
+\method{visualise}{CSCAn_discovery}(
+  discovery,
+  mode = c("obsexp", "signal"),
+  raw = FALSE,
+  title = NULL,
+  colour_lim = NULL,
   ...
 )
 

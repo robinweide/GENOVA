@@ -7,13 +7,13 @@
 engine_default(MAT, anchors, rel_pos)
 }
 \arguments{
+\item{MAT}{The Hi-C matrix slot of a GENOVA experiment object.}
+
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
 anchor indices.}
 
 \item{rel_pos}{An \code{integer} vector indicating relative positions in
 bins, indicating ranges around anchors to lookup.}
-
-\item{ICE}{The Hi-C matrix slot of a GENOVA experiment object.}
 }
 \value{
 A threedimensional \code{array} wherein the first dimension is

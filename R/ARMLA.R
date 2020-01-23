@@ -148,7 +148,7 @@ APA <- function(explist, bedpe,
 #' )
 #'
 #' # Alternative usage with pre-calculated anchors and no permutation
-#' anchors <- anchors_PESCAn(WT_40kb$ABS, WT_40kb$RES,
+#' anchors <- anchors_PESCAn(WT_40kb$IDX, attr(WT_40kb, "resolution"),
 #'   genes_tss,
 #'   dist_thres = c(5e6, 15e6)
 #' )
@@ -159,7 +159,7 @@ APA <- function(explist, bedpe,
 #' )
 #'
 #' # Visualising PE-SCAns
-#' autoplot(pescan)
+#' visualise(pescan)
 #' }
 PESCAn <- function(explist, bed, shift = 1e6L,
                    dist_thres = c(5e6L, Inf),
@@ -345,6 +345,68 @@ ARA <- function(explist, bed, shift = 1e6,
     results$obsexp <- obs / nexp
   }
   structure(results, class = c("ARA_discovery", "ARMLA_discovery"),
+            resolution = res, package = "GENOVA")
+}
+
+
+#' Cross spatial chromatin analysis
+#'
+#' Takes a list of BED-like genomic locations and makes a Hi-C contact analysis
+#' for crosswise pairs between elements of that list.
+#'
+#' @inheritParams PESCAn
+#' @param bedlist A \code{list} of length >= 2 wherein each element is a
+#'   BED-like \code{data.frame} containing three columns for chromosome, start-
+#'   and end-positions.
+#'
+#' @return A \code{CSCAn_discovery} object containing the results of the C-SCAn.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' NULL
+#' }
+CSCAn <- function(explist, bedlist, shift = 1e6L,
+                  dist_thres = c(NA, 1e6),
+                  size_bin = NULL, size_bp = 4e5,
+                  outlier_filter = c(0, 1),
+                  min_compare = 10,
+                  anchors = NULL, raw = FALSE) {
+  explist <- check_compat_exp(explist)
+  
+  if (length(bedlist) < 2 || !inherits(bedlist, "list")) {
+    stop("Less than two 'bedlist' elements found. For self-interaction of a",
+         " single BED-like data.frame, see '?PESCAn'.",
+         call. = FALSE)
+  }
+  
+  # Initialise parameters
+  res <- attr(explist[[1]], "res")
+  rel_pos <- parse_rel_pos(res, size_bin, size_bp)
+  shift <- round(shift / res)
+  
+  # Dynamically set lower limit
+  if (is.na(dist_thres[1])) {
+    dist_thres[1] <- 2 * res
+  }
+  
+  # Calculate anchors
+  if (is.null(anchors)) {
+    anchors <- anchors_CSCAn(
+      explist[[1]]$IDX, attr(explist[[1]], "res"),
+      bedlist, dist_thres,
+      min_compare = min_compare
+    )
+  }
+  
+  results <- rep_mat_lookup(explist, anchors,
+                            rel_pos = rel_pos,
+                            shift = shift,
+                            outlier_filter = outlier_filter,
+                            raw = raw
+  )
+  
+  structure(results, class = c("CSCAn_discovery", "ARMLA_discovery"),
             resolution = res, package = "GENOVA")
 }
 

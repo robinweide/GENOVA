@@ -11,12 +11,12 @@ load_contacts(
   sample_name,
   centromeres = NULL,
   colour = NULL,
-  z_norm = F,
+  z_norm = FALSE,
   scale_bp = 1e+09,
-  scale_cis = F,
-  balancing = T,
-  legacy = F,
-  verbose = T
+  scale_cis = FALSE,
+  balancing = TRUE,
+  legacy = FALSE,
+  verbose = TRUE
 )
 }
 \arguments{

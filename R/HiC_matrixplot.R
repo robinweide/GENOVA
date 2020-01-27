@@ -580,6 +580,8 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param fillNAtreshold Set the amount strength of out-lier correction for 
 #' fillNA.
 #' @param antoni Logical: plot an explorer of the microscopic world
+#' @section Resolution recommendation: A resolution in the ballpark of 
+#' \eqn{(\code{end} - \code{start}) / 500}.
 #' @note
 #' To plot genes, a gene-model data.frame must be made. This can be done via a
 #' multitude of ways (e.g. biomart, UCSC table browser). The resulting

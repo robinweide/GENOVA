@@ -46,12 +46,12 @@ load_contacts = function(signal_path,
                         sample_name,
                         centromeres = NULL,
                         colour = NULL,
-                        z_norm = F,
+                        z_norm = FALSE,
                         scale_bp = 1e9,
-                        scale_cis = F,
-                        balancing = T,
-                        legacy = F,
-                        verbose = T){
+                        scale_cis = FALSE,
+                        balancing = TRUE,
+                        legacy = FALSE,
+                        verbose = TRUE){
   
   # Control data.table threads
   dt.cores <- data.table::getDTthreads()
@@ -202,7 +202,8 @@ load_contacts = function(signal_path,
   ############################################################# set to upper tri
   ##############################################################################
   if(!all(signal$V1 <= signal$V2)){
-    signal[signal$V1 > signal$V2, ] <- signal[signal$V1 > signal$V2, c(1,3,2)]
+    signal[, c("V1", "V2") := list(pmin(V1, V2), pmax(V1, V2))]
+    setkeyv(signal, c("V1", "V2"))
   }
   
   ##############################################################################

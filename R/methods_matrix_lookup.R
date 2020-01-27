@@ -15,6 +15,37 @@
 #'
 #' @return A \code{list} of the same length as \code{explist} wherein list
 #'   elements contain the results of the repeated lookup per experiment.
+#'
+#' @details For each row in the \code{anchors} argument a region of the Hi-C
+#'   matrix is looked up corresponding to that anchor. This data is then
+#'   summarised by taking the mean of each position relative to the anchor
+#'   across all the anchors.
+#'
+#'   Anchors are subject to a filtering step wherein anchors are discarded when
+#'   they are within \code{rel_pos} range of a chromosome start or end. This
+#'   ensures the anchors all report data from the same chromosome in the x- or
+#'   y-direction.
+#'
+#'   For shifted anchors, an attempt is made to shift the anchors in the
+#'   opposite direction before they are discarded.
+#'
+#'   When a region corresponding to a non-shifted anchor is looked up and is
+#'   found to have no contacts within that region, it is discarded. Shifted
+#'   regions are only discarded when the corresponding non-shifted anchor is
+#'   discarded.
+#'
+#'   Anchors typically contain a '\code{type}' attribute which informs
+#'   \code{rep_mat_lookup} how the lookup should occur. The \code{APA},
+#'   \code{PESCAn} and \code{ARA} anchors look up regions of dimensions
+#'   \code{length(rel_pos)} x \code{length(rel_pos)}. The \code{ARA} anchors
+#'   transpose these square regions when given a '\code{-}' direction before
+#'   summary occurs. The \code{ATA} anchors look up \code{anchors[, 2] -
+#'   anchors[, 1]} sized square regions and resizes these to a
+#'   \code{max(rel_pos)} square region through bilinear interpolation before
+#'   summary.
+#'
+#' @section Resolution recommendation: 10kb-40kb
+#'
 #' @export
 #'
 #' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
@@ -50,12 +81,12 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
     # Lookup matrices
     master <- run_engine(explist[[i]]$MAT, anchors, rel_pos)
-    arr <- master[anch_id,,]
+    arr <- master[anch_id,,, drop = FALSE]
     mat_mu <- summarise_lookup(arr, outlier_filter)
     dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
     if (raw) {
       dimnames(arr) <- list(rawnames, rev(dnames), dnames)
-      arr <- arr[mat_mu$keep, , ]
+      arr <- arr[mat_mu$keep, , , drop = FALSE]
     } else {
       arr <- NULL
     }
@@ -63,14 +94,14 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     # Calculate shifted values
     if (shift > 0) {
       # shifted_arr <- run_engine(explist[[i]]$ICE, shift_anchors, rel_pos)
-      shifted_arr <- master[shft_id,,]
+      shifted_arr <- master[shft_id,,, drop = FALSE]
       shifted_mu <- summarise_lookup(shifted_arr,
                                      outlier_filter,
                                      keep = mat_mu$keep
       )$mat
       dimnames(shifted_mu) <- dimnames(mat_mu$mat)
       if (raw) {
-        shifted_arr <- shifted_arr[mat_mu$keep, , ]
+        shifted_arr <- shifted_arr[mat_mu$keep, , , drop = FALSE]
         dimnames(shifted_arr) <- dimnames(arr)
       } else {
         shifted_arr <- NULL
@@ -268,7 +299,7 @@ summarise_lookup <- function(array, outlier_filter = c(0, 1), keep = NULL) {
   }
 
   # Remove all-NA slices, set other NAs to 0
-  array <- array[keep, , ]
+  array <- array[keep, , , drop = FALSE]
   array[is.na(array)] <- 0
 
   # Do outlier filtering

@@ -28,7 +28,7 @@ returns normalised values of equal length. Defaults to calculating the
 \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} value over the median.}
 }
 \value{
-An \code{IS_discovery} object containing the follow slot: \describe{
+An \code{IS_discovery} object containing the following slot: \describe{
   \item{insula_score}{A \code{data.table} with genomic locations and
   insulation scores for each element in the '\code{explist}' argument.}}
 }
@@ -43,10 +43,14 @@ Typically, when the sliding square passes within a TAD, it yields
   insulation score.
 
   To follow the Crane \emph{et al}. (2015) strategy for insulation scores,
-  use a 10kb resolution \code{contacts} objects, set the '\code{window}'
+  use 10kb resolution \code{contacts} objects, set the '\code{window}'
   argument to 50, set the '\code{norm_to}' argument to \code{"chromosome"}
   and the '\code{norm_fun}' argument to \code{log2overmean}.
 }
+\section{Resolution recommendation}{
+ 10kb-40kb
+}
+
 \examples{
 \dontrun{
 iscore <- insulation_score(list(WT_20kb, KO_20kb), window = 20)

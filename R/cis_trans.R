@@ -3,7 +3,9 @@
 #'
 #' @param exp A contacts-objects or a list of them
 #' @param bed A bed-dataframe or a (named) list of them.
-
+#' 
+#' @section Resolution recommendation: 500kb-1Mb
+#'
 #' @return A data.table with the sample, percentage and region.
 #' @export
 cis_trans = function(exp, bed = NULL){

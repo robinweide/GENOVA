@@ -18,8 +18,8 @@ PESCAn(
 )
 }
 \arguments{
-\item{explist}{Either a single GENOVA experiment or a list of GENOVA
-experiments.}
+\item{explist}{Either a single GENOVA \code{contacts} object or a list of
+GENOVA \code{contacts} objects.}
 
 \item{bed}{A \code{data.frame} with 3 columns in BED format, containing the
 regions to anchor in pairwise manner.}
@@ -48,10 +48,11 @@ number of pairwise interactions on a chromosome to consider.}
 
 \item{anchors}{(Optional) A \code{matrix} with two columns containing
 pre-computed anchor indices. If this is set, skips calculation of anchor
-indices and uses these instead.}
+indices and uses this argument instead.}
 
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
-summary matrices be returned in the output?}
+summary matrices be returned in the output? Should be \code{TRUE} if the
+intention is to use the \code{quantify} function.}
 }
 \value{
 A \code{PESCAn_discovery} object with the PE-SCAn results.
@@ -59,6 +60,10 @@ A \code{PESCAn_discovery} object with the PE-SCAn results.
 \description{
 Performs an all-to-all Hi-C contact analysis for specified regions.
 }
+\section{Resolution recommendation}{
+ 20kb-40kb
+}
+
 \examples{
 \dontrun{
 # Typical usage: PESCAn for super enhancers using a 1 MB
@@ -85,6 +90,12 @@ autoplot(pescan)
 }
 }
 \seealso{
-The \code{\link[GENOVA]{discovery}} class.
-  \code{\link[GENOVA]{visualise}} for visualisation of the results.
+The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+  lookup and summary for the \code{PESCAn} function and others. \cr The
+  \code{\link[GENOVA]{discovery}} class for a general description of
+  \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+  for visualisation of the results. \cr The \code{\link[GENOVA]{quantify}}
+  function for quantification of interaction strenghts. \cr The
+  \code{\link[GENOVA]{anchors}} documentation for more information about
+  anchors.
 }

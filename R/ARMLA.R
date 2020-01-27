@@ -5,12 +5,12 @@
 #' Aggregrate Peak Analysis
 #'
 #' Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
-#' regions, for example loops.
+#' locations, for example loops.
 #'
-#' @param explist Either a single GENOVA experiment or a list of GENOVA
-#'   experiments.
+#' @param explist Either a single GENOVA \code{contacts} object or a list of
+#'   GENOVA \code{contacts} objects.
 #' @param bedpe A \code{data.frame} with 6 columns in BEDPE format containing
-#'   the regions to be anchored: chrom1/start1/end1/chrom2/start2/end2.
+#'   the locations to be anchored: chrom1/start1/end1/chrom2/start2/end2.
 #' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
 #'   and maximum distances in basepairs between anchorpoints.
 #' @param size_bin The size of the lookup regions in bins (i.e. a score of 21
@@ -23,14 +23,38 @@
 #'   performs no outlier correction.
 #' @param anchors (Optional) A \code{matrix} with two columns containing
 #'   pre-computed anchor indices. If this is set, skips calculation of anchor
-#'   indices and uses these instead.
+#'   indices and uses this argument instead.
 #' @param raw A \code{logical} of length 1: should the raw array underlying the
-#'   summary matrices be returned in the output?
+#'   summary matrices be returned in the output? Should be \code{TRUE} if the
+#'   intention is to use the \code{quantify} function.
 #'
-#' @return An \code{APA_discovery} object with the APA results.
+#' @return An \code{APA_discovery} object containing the following slots:
+#'   \describe{ \item{signal}{An \code{array} with the dimensions
+#'   \code{size_bin} x \code{size_bin} x \code{length(explist)} containing mean
+#'   contact values for bins surrounding the anchors} \item{signal_raw}{A
+#'   \code{list} with \code{length(explist)} elements for each contacts object,
+#'   wherein an element is an n x \code{size_bin} x \code{size_bin} array with
+#'   contact values for each anchor. 'n' is the number of non-empty valid
+#'   anchors.} }
 #'
-#' @seealso The \code{\link[GENOVA]{discovery}} class.
-#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
+#' @details For each row in the '\code{bedpe}' or '\code{anchors}' argument, an
+#'   \code{size_bin} x \code{size_bin} region centered on that location is
+#'   retrieved. This data is then summarised by taking the mean for every
+#'   element in these matrices across all locations.
+#'
+#'   The '\code{bedpe}' argument is converted internally to an '\code{anchors}'
+#'   object.
+#'
+#' @seealso The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+#'   lookup and summary for the \code{APA} function and others. \cr The
+#'   \code{\link[GENOVA]{discovery}} class for a general description of
+#'   \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+#'   for visualisation of the results. \cr The \code{\link[GENOVA]{quantify}}
+#'   function for quantification of loop strenghts. \cr The
+#'   \code{\link[GENOVA]{anchors}} documentation for more information about
+#'   anchors.
+#'
+#' @section Resolution recommendation: 10kb-20kb
 #'
 #' @export
 #'
@@ -99,10 +123,18 @@ APA <- function(explist, bedpe,
 #'   number of pairwise interactions on a chromosome to consider.
 #'
 #' @return A \code{PESCAn_discovery} object with the PE-SCAn results.
+#' 
+#' @section Resolution recommendation: 20kb-40kb
 #'
-#' @seealso The \code{\link[GENOVA]{discovery}} class.
-#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
-#'
+#' @seealso The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+#'   lookup and summary for the \code{PESCAn} function and others. \cr The
+#'   \code{\link[GENOVA]{discovery}} class for a general description of
+#'   \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+#'   for visualisation of the results. \cr The \code{\link[GENOVA]{quantify}}
+#'   function for quantification of interaction strenghts. \cr The
+#'   \code{\link[GENOVA]{anchors}} documentation for more information about
+#'   anchors.
+#'   
 #' @export
 #'
 #' @examples
@@ -177,8 +209,17 @@ PESCAn <- function(explist, bed, shift = 1e6L,
 #'
 #' @return An \code{ATA_discovery} object with the ATA results.
 #'
-#' @seealso The \code{\link[GENOVA]{discovery}} class.
-#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
+#' @section Resolution recommendation: 10kb-40kb
+#'
+#' @seealso The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+#'   lookup and summary for the \code{ATA} function and others. \cr The
+#'   \code{\link[GENOVA]{discovery}} class for a general description of
+#'   \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+#'   for visualisation of the results. \cr The \code{\link[GENOVA]{quantify}}
+#'   function for quantification of TAD strenghts. \cr The
+#'   \code{\link[GENOVA]{anchors}} documentation for more information about
+#'   anchors.
+#'   
 #' @export
 ATA <- function(explist, bed,
                 dist_thres = c(225000, Inf),
@@ -234,8 +275,16 @@ ATA <- function(explist, bed,
 #'   reverse direction. The reverse sites are flipped during analysis, so the
 #'   orientation is the same as in the forward sites.
 #'
-#' @seealso The \code{\link[GENOVA]{discovery}} class.
-#'   \code{\link[GENOVA]{visualise}} for visualisation of the results.
+#' @section Resolution recommendation: 10kb-40kb
+#'
+#' @seealso The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+#'   lookup and summary for the \code{ARA} function and others. \cr The
+#'   \code{\link[GENOVA]{discovery}} class for a general description of
+#'   \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+#'   for visualisation of the results. \cr The \code{\link[GENOVA]{quantify}}
+#'   function for quantification of ARA results. \cr The
+#'   \code{\link[GENOVA]{anchors}} documentation for more information about
+#'   anchors.
 #'
 #' @export
 #'
@@ -308,6 +357,7 @@ ARA <- function(explist, bed, shift = 1e6,
 #'
 #' @return A \code{integer} vector of relative positions.
 #' @keywords internal
+#' @noRd
 parse_rel_pos <- function(res, size_bin, size_bp) {
   if (!is.null(size_bin) & !is.null(size_bp)) {
     message("Both 'size_bin' and 'size_bp' are set. Continuing with 'size_bin'.")

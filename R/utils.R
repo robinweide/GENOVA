@@ -1,5 +1,6 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
+
 #' @param IDX The IDX-slot of a \code{contacts} object
 #' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the
@@ -11,6 +12,7 @@
 #'
 #' @details Out of bounds values are matched to nearest bin.
 #' @export
+
 bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   if (!inherits(bed, "data.frame") | is.data.table(bed)) {
     bed <- as.data.frame(bed)
@@ -44,7 +46,7 @@ bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   # Match bed entry to idx
   out <- mapply(function(i, j) {
     j[pmax(findInterval(i, j[, 1]), 1), 2]
-  }, i = bed_chrom, j = IDX_chrom)
+  }, i = bed_chrom, j = IDX_chrom, SIMPLIFY = FALSE)
   unsplit(out, bed_group)
 }
 
@@ -129,12 +131,14 @@ try_require <- function(package, fun, source = NULL) {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install from Bioconductor and try again.", call. = FALSE)
   } else   if (source == 'github') {
+
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install from github and try again.", call. = FALSE)
   } else {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install and try again.", call. = FALSE)
   }
+
 }
 
 #' Check compatability of a list of GENOVA experiments
@@ -186,3 +190,4 @@ GENOVA_THEME = function(){
                      strip.text = ggplot2::element_text(colour = 'black') )
   return(p)
 }
+

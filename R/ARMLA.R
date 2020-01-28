@@ -301,9 +301,12 @@ ATA <- function(explist, bed,
 #' visualise(ara)
 #' }
 ARA <- function(explist, bed, shift = 1e6,
-                size_bin = 21, size_bp = NULL,
+                size_bin = NULL, size_bp = NULL,
                 outlier_filter = c(0, 1),
                 anchors = NULL, raw = FALSE) {
+  if( is.null(size_bin) & is.null(size_bp) ){
+    size_bin <- 21  
+  }
   # Verify experiment compatability
   explist <- check_compat_exp(explist)
 

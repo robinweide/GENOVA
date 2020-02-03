@@ -1165,6 +1165,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
   smooth[,1] = NULL
   colnames(smooth) = c("experiment", "signal","mid")
   
+  data$experiment <- factor(data$experiment, levels = expnames)
   p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = signal)) +
     ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size,
                       colour = NA) +

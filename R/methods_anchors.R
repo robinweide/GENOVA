@@ -66,7 +66,7 @@
 #'   \code{anchors_PESCAn}, takes all pairwise interactions of genomic
 #'   coordinates, but crosswise between unique combinations of BED-like
 #'   \code{data.frame}s in the \code{bedlist} argument. It is used within the
-#'   \code{\link[GENOVA]{CSCAn}} function. Has a \code{group} attribute to
+#'   \code{TODO:LINK CSCAN} function. Has a \code{group} attribute to
 #'   keep track from which combination of BED-like \code{data.frame} the anchor
 #'   originated.}
 #'
@@ -197,8 +197,7 @@ anchors_PESCAn <- function(IDX, res, bed,
 }
 
 #' export
-#' rdname anchors
-#' @noRd
+#' @rdname anchors
 anchors_CSCAn <- function(IDX, res, bedlist,
                           dist_thres = c(50e3, 2e6),
                           min_compare = 10L,

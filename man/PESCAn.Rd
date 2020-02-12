@@ -10,7 +10,7 @@ PESCAn(
   shift = 1000000L,
   dist_thres = c(5000000L, Inf),
   size_bin = NULL,
-  size_bp = 4e+05,
+  size_bp = NULL,
   outlier_filter = c(0, 1),
   min_compare = 10,
   anchors = NULL,
@@ -33,7 +33,9 @@ ignored when \code{shift <= 0}.}
 and maximum distances in basepairs between anchorpoints.}
 
 \item{size_bin}{The size of the lookup regions in bins (i.e. a score of 21
-yields an output with 10 Hi-C bins both up- and downstream of the anchor).}
+yields an output with 10 Hi-C bins both up- and downstream of the anchor).
+When \code{NULL} (default), it is internally set to \code{21} when the
+\code{size_bp} is also \code{NULL}.}
 
 \item{size_bp}{Alternative parametrisation for the lookup regions, expressed
 in basepairs. Not used when the argument \code{size_bin} is set.}

@@ -15,6 +15,8 @@
 #'   and maximum distances in basepairs between anchorpoints.
 #' @param size_bin The size of the lookup regions in bins (i.e. a score of 21
 #'   yields an output with 10 Hi-C bins both up- and downstream of the anchor).
+#'   When \code{NULL} (default), it is internally set to \code{21} when the
+#'   \code{size_bp} is also \code{NULL}.
 #' @param size_bp Alternative parametrisation for the lookup regions, expressed
 #'   in basepairs. Not used when the argument \code{size_bin} is set.
 #' @param outlier_filter A \code{numeric} of length 2 between \code{[0-1]}
@@ -74,7 +76,7 @@
 #' }
 APA <- function(explist, bedpe,
                 dist_thres = NULL,
-                size_bin = 21, size_bp = NULL,
+                size_bin = NULL, size_bp = NULL,
                 outlier_filter = c(0, 0.995),
                 anchors = NULL, raw = TRUE) {
   # Verify experiment compatability
@@ -163,7 +165,7 @@ APA <- function(explist, bedpe,
 #' }
 PESCAn <- function(explist, bed, shift = 1e6L,
                    dist_thres = c(5e6L, Inf),
-                   size_bin = NULL, size_bp = 4e5,
+                   size_bin = NULL, size_bp = NULL,
                    outlier_filter = c(0, 1),
                    min_compare = 10,
                    anchors = NULL, raw = FALSE) {
@@ -304,9 +306,7 @@ ARA <- function(explist, bed, shift = 1e6,
                 size_bin = NULL, size_bp = NULL,
                 outlier_filter = c(0, 1),
                 anchors = NULL, raw = FALSE) {
-  if( is.null(size_bin) & is.null(size_bp) ){
-    size_bin <- 21  
-  }
+
   # Verify experiment compatability
   explist <- check_compat_exp(explist)
 
@@ -363,7 +363,8 @@ ARA <- function(explist, bed, shift = 1e6,
 #'   and end-positions.
 #'
 #' @return A \code{CSCAn_discovery} object containing the results of the C-SCAn.
-#' @export
+#' export
+#' @noRd
 #'
 #' @examples
 #' \dontrun{
@@ -371,7 +372,7 @@ ARA <- function(explist, bed, shift = 1e6,
 #' }
 CSCAn <- function(explist, bedlist, shift = 1e6L,
                   dist_thres = c(NA, 1e6),
-                  size_bin = NULL, size_bp = 4e5,
+                  size_bin = NULL, size_bp = NULL,
                   outlier_filter = c(0, 1),
                   min_compare = 10,
                   anchors = NULL, raw = FALSE) {
@@ -436,9 +437,8 @@ parse_rel_pos <- function(res, size_bin, size_bp) {
     rel_pos <- seq.int(size_bin)
     rel_pos <- floor(rel_pos - median(rel_pos))
   } else {
-    stop("Supply either 'size_bin' or 'size_bp'",
-      call. = FALSE
-    )
+    rel_pos <- seq.int(21)
+    rel_pos <- floor(rel_pos - median(rel_pos))
   }
   return(rel_pos)
 }

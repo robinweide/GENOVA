@@ -11,7 +11,7 @@
 #' @return A virtual4C_discovery object.
 #' @export
 virtual_4C <- function(explist, viewpoint, xlim = NULL){
-  # ! someday: allow mulitple samples
+
   explist  <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")
@@ -56,22 +56,23 @@ virtual_4C <- function(explist, viewpoint, xlim = NULL){
   }
   
   signal <- rbind(upstream_signal, downstream_signal, use.names = FALSE)
-  colnames(signal) <- c('idx', 'signal', 'experiment')
+  signal <- dcast(signal, V1 ~ exp, value.var = "V3",
+                  fun.aggregate = function(x){mean.default(x, na.rm = TRUE)})
+  colnames(signal) <- c('idx', expnames)
   signal <- signal[IDX, on = "idx==V4", nomatch = 0]
   
   # set basepairs --------------------------------------------------------------
-  signal$mid = rowMeans(signal[, 5:6])
+  signal$mid <- rowMeans(signal[, tail(seq_len(ncol(signal)), 2), with = FALSE])
   
   if( !is.null(xlim) ){
     signal <- signal[V1 == viewpoint[1,1]]
   }
  
-  
   # output ---------------------------------------------------------------------
-  signal <- unique(signal[, c(4, 7, 2, 3)])
-  colnames(signal) <- c("chromosome", "mid", "signal", "experiment")
-  signal$experiment <- expnames[signal$experiment]
-  signal <- list(data = signal)
+  nexp <- length(expnames)
+  signal <- signal[, c(2 + nexp, 5 + nexp, 2:(nexp + 1)), with = FALSE]
+  colnames(signal)[1] <- "chromosome"
+  signal <- list(data = as.data.frame(signal))
   
   viewpoint <- data.frame(chrom = viewpoint[1, 1],
                           start = viewpoint[1, 2],

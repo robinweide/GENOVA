@@ -122,6 +122,7 @@ insulation_score <- function(explist, window = 30,
       insula[, as.character(xp) := norm_fun(eval(xp))]
     }
   }
+  insula <- as.data.frame(insula)
 
   # Format output
   structure(list(insula_score = insula),

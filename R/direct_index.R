@@ -92,15 +92,17 @@ direct_index <- function(explist, range = 100) {
   calc$exp <- expnames[calc$exp]
   
   # Combine with genomic coordinates
+  calc <- dcast(calc, V1 ~ exp, value.var = "DI")
+  setkeyv(calc, "V1")
   setkey(idx, V4)
   calc <- idx[calc]
   
   # Format output
-  setnames(calc, 1:5, c("chrom", "start", "end", "bin", "experiment"))
+  setnames(calc, 1:4, c("chrom", "start", "end", "bin"))
   
   cols <- vapply(explist, attr, character(1), "colour")
   
-  structure(list(DI = calc),
+  structure(list(DI = as.data.frame(calc)),
             colours = cols,
             class = "DI_discovery",
             package = "GENOVA",

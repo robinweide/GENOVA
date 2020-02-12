@@ -72,7 +72,7 @@
   ...
 )
 
-\method{plot}{domainogram_discovery}(x, colour_fun = NULL, colour_lim = c(-1, 1), ...)
+\method{plot}{domainogram_discovery}(x, colour_fun = NULL, colour_lim = c(-1, 1), minimalist = FALSE, ...)
 
 \method{plot}{RCP_discovery}(x, contrast = 1, metric = c("smooth"), ...)
 
@@ -112,6 +112,10 @@ region to be plotted.}
 
 \item{end}{An \code{integer} of length 1 with the ending basepair of the
 region to be plotted.}
+
+\item{minimalist}{\code{[domainogram]} A \code{logical} of length 1. If
+\code{TRUE}, plot only the first experiment in the discovery and don't plot
+any axis, titles or legends.}
 
 \item{metric}{\code{[RCP]} Currently not in use.}
 

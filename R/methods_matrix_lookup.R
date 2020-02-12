@@ -63,6 +63,12 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
   } else {
     rownames(anchors)
   }
+  
+  group <- if ("group" %in% names(attributes(anchors))) {
+    inverse.rle(attr(anchors, "group"))
+  } else {
+    NULL
+  }
 
   # Set data.table core usage
   dt.cores <- data.table::getDTthreads()
@@ -82,11 +88,15 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
     # Lookup matrices
     master <- run_engine(explist[[i]]$MAT, anchors, rel_pos)
     arr <- master[anch_id,,, drop = FALSE]
-    mat_mu <- summarise_lookup(arr, outlier_filter)
-    dimnames(mat_mu$mat) <- list(rev(dnames), dnames)
+    mat_mu <- summarise_lookup(arr, outlier_filter, 
+                               group = group[anch_id])
+    dimnames(mat_mu$mat) <- list(
+      rev(dnames), dnames, unique(group[anch_id])
+    )[seq_along(dim(mat_mu$mat))]
     if (raw) {
       dimnames(arr) <- list(rawnames, rev(dnames), dnames)
       arr <- arr[mat_mu$keep, , , drop = FALSE]
+      attr(arr, "group") <- group[anch_id][mat_mu$keep]
     } else {
       arr <- NULL
     }
@@ -97,12 +107,14 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
       shifted_arr <- master[shft_id,,, drop = FALSE]
       shifted_mu <- summarise_lookup(shifted_arr,
                                      outlier_filter,
-                                     keep = mat_mu$keep
+                                     keep = mat_mu$keep,
+                                     group = group[shft_id]
       )$mat
       dimnames(shifted_mu) <- dimnames(mat_mu$mat)
       if (raw) {
         shifted_arr <- shifted_arr[mat_mu$keep, , , drop = FALSE]
         dimnames(shifted_arr) <- dimnames(arr)
+        attr(shifted_arr, "group") <- group[shft_id][mat_mu$keep]
       } else {
         shifted_arr <- NULL
       }
@@ -144,9 +156,10 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
   merge_res <- names(results[[1]])
   results <- lapply(merge_res, function(res) {
+    resname <- res
     objects <- lapply(results, `[[`, res)
     # Return array if rawdata
-    if (inherits(objects[[1]], "array")) {
+    if (resname %in% c("shifted_raw", "signal_raw")) {
       return(objects)
     }
     # Simplify matrix to array
@@ -168,7 +181,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 #'
 #' It looks up square parts of equal size in the Hi-C matrix of a single experiment.
 #'
-#' @param ICE The Hi-C matrix slot of a GENOVA experiment object.
+#' @param MAT The Hi-C matrix slot of a GENOVA experiment object.
 #' @inheritParams rep_mat_lookup
 #'
 #' @return A threedimensional \code{array} wherein the first dimension is
@@ -293,10 +306,17 @@ engine_resizing <- function(MAT, anchors, rel_pos) {
 #' @seealso \code{\link[GENOVA]{rep_mat_lookup}}
 #'
 #' @keywords internal
-summarise_lookup <- function(array, outlier_filter = c(0, 1), keep = NULL) {
+summarise_lookup <- function(array, outlier_filter = c(0, 1), 
+                             keep = NULL, group = NULL) {
   if (is.null(keep)) {
     keep <- rowSums(array, na.rm = TRUE) != 0
   }
+  
+  if (is.null(group)) {
+    group <- rep.int(1, dim(array)[1])
+  }
+  group <- group[keep]
+  grouplvls <- unique(group)
 
   # Remove all-NA slices, set other NAs to 0
   array <- array[keep, , , drop = FALSE]
@@ -315,6 +335,14 @@ summarise_lookup <- function(array, outlier_filter = c(0, 1), keep = NULL) {
   }
 
   # Summarise
-  mat <- colMeans(array)
+  mat <- vapply(grouplvls, function(lvl) {
+    colMeans(array[group == lvl, , , drop = FALSE])
+  }, matrix(NA_real_, dim(array)[2], dim(array)[3]))
+  
+  # Drop last dimension if empty
+  if (tail(dim(mat), 1) == 1L) {
+    dim(mat) <- head(dim(mat), -1)
+  }
+
   return(list(mat = mat, keep = keep))
 }

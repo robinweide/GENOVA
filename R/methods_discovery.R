@@ -288,7 +288,7 @@ bundle.virtual4C_discovery <- function(..., collapse = "_") {
   
   xlims <- unique(unlist(lapply(discos, attr, "xlim")))
   expnames <- unlist(lapply(discos, function(disc) {
-    unique(disc$data$experiment)
+    tail(colnames(disc$data), -2)
   }))
 
   datas <- lapply(discos, function(disc){disc$data})
@@ -302,15 +302,20 @@ bundle.virtual4C_discovery <- function(..., collapse = "_") {
   
     datas <- lapply(seq_along(datas), function(i) {
       x <- datas[[i]]
-      x$experiment <- paste0(x$experiment, collapse, i)
+      colnames(x) <- c(head(colnames(x), 2),
+                       paste0(tail(colnames(x), -2), collapse, i))
       x
     })
   }
-  datas <- rbindlist(datas)
-  datas <- datas[order(chromosome, mid)]
-  expnames <- unique(datas$experiment)
   
-  structure(list(data = datas), 
+  out <- datas[[1]]
+  if (length(datas) > 1) {
+    for (i in tail(seq_along(datas), -1)) {
+      out <- merge(out, datas[[i]], by = c("chromosome", "mid"))
+    }
+  }
+  
+  structure(list(data = out), 
             class = "virtual4C_discovery",
             'viewpoint' = vps, 
             'xlim' = xlims,
@@ -664,19 +669,24 @@ unbundle.IS_discovery <- function(discovery, ...) {
 #' @rdname unbundle
 #' @export
 unbundle.virtual4C_discovery <- function(discovery, ...) {
-  attris <- attributes(discovery)
-  newdata <- split(discovery$data, discovery$data$experiment)
-  lapply(setNames(seq_along(newdata), names(newdata)), function(i) {
-    vp <- attris$viewpoint[attris$viewpoint$exp == newdata[[i]]$experiment[1],]
-    rownames(vp) <- NULL
-    structure(list(data = newdata[[i]]), class = "virtual4C_discovery",
-              xlim = attris$xlim,
-              viewpoint = vp,
-              sample = attris$sample[i],
-              resolution = attris$resolution,
-              package = attris$package)
+  exps <- tail(colnames(discovery$data), -2)
+  cols <- lapply(setNames(exps, exps), function(i) {
+    c("chromosome", "mid", i)
+  })
+  vp <- attr(discovery, "viewpoint")
+  
+  out <- lapply(setNames(seq_along(exps), exps), function(i) {
+    thisvp <- vp[vp$exp == tail(cols[[i]], 1),]
+    rownames(thisvp) <- NULL
+    structure(list(data = discovery$data[, cols[[i]]]),
+              package = "GENOVA",
+              colours = attr(discovery, "colours")[i],
+              class = "virtual4C_discovery",
+              resolution = attr(discovery, "resolution"),
+              viewpoint = thisvp)
   })
 }
+
 
 #' @rdname unbundle
 #' @export

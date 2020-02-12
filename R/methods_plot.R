@@ -817,10 +817,12 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 1))
   
-  res <- attr(x, "resolution") / 2
-  vp <- attr(x, "viewpoint")
+  res <- attr(x, "resolution")
+  vp  <- attr(x, "viewpoint")
   
-  data <- x$data
+  data <- as.data.table(x$data)
+  data <- melt(data, id.vars = c("chromosome", "mid"))
+  colnames(data) <- c("chromosome", "mid", "experiment", "signal")
   data <- data[chromosome == vp[1,1, drop = TRUE]]
   
   # fill in empty signal
@@ -828,11 +830,12 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   sdata <- lapply(sdata, function(dat) {
     missing <- seq(min(dat$mid), max(dat$mid), by = res)
     missing <- missing[!(missing %in% dat$mid)]
-    append <- data.table(dat[1, 1], missing, 0, dat[1, 4])
+    append <- data.table(dat[1, 1], missing, dat[1, 3], 0)
     dat <- rbind(dat, append, use.names = FALSE)
     dat[order(mid)]
   })
   data <- rbindlist(sdata)
+  data <- data[is.finite(signal)]
   
   data <- data[, list(chromosome, pos = mid + c(-1, 1) * res, 
               signal, experiment, p = c("s", "e")), by = seq_len(nrow(data))]

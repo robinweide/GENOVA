@@ -1222,10 +1222,10 @@ visualise.RCP_discovery = function(discovery, contrast = 1,
 visualise.virtual4C_discovery <- function(discovery, bins = NULL, 
                                           bedlist = NULL, bed_colours = "black", 
                                           extend_viewpoint = NULL, ...){
-  data <- discovery$data
+  data <- as.data.table(discovery$data)
   VP   <- attr(discovery,"viewpoint")
   data <- data[chromosome == VP[1, 1]]
-  expnames <- unique(data$experiment)
+  expnames <- tail(colnames(data), -2)
   
   if(!is.null(extend_viewpoint)){
     VP[, 2] <- VP[, 2] - extend_viewpoint
@@ -1241,11 +1241,13 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
   blackout_up   <- VP[, 2]
   blackout_down <- VP[, 3]
   
+  data <- melt(data, id.vars = c("chromosome", "mid"))
+  
   data_blackout <- data
   for (i in seq_len(nrow(VP))) {
     if (nrow(VP) > 1) {
-      expcheck1 <- data_blackout$experiment != expnames[i]
-      expcheck2 <- data$experiment != expnames[i]
+      expcheck1 <- data_blackout$variable != expnames[i]
+      expcheck2 <- data$variable != expnames[i]
     } else {
       expcheck1 <- expcheck2 <- FALSE
     }
@@ -1284,13 +1286,14 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
 
   breaks   <- seq(min(data$mid), max(data$mid), length.out = bins)
   bin_size <- median(diff(breaks))
-  smooth   <- data[, mean(signal), 
-                   by = list(findInterval(data$mid, breaks), experiment)]
+  data <- data[is.finite(value)]
+  smooth   <- data[, mean(value), 
+                   by = list(findInterval(data$mid, breaks), variable)]
   smooth$mid = breaks[smooth[[1]]] + (bin_size/2)
   smooth[,1] = NULL
-  colnames(smooth) = c("experiment", "signal","mid")
+  colnames(smooth) = c("variable", "value","mid")
   
-  p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = signal)) +
+  p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = value)) +
     ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size,
                       colour = NA) +
     ggplot2::theme_classic() +
@@ -1300,15 +1303,15 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
                                 breaks = function(x) {
                                   scales::extended_breaks()(pmax(x, 0))
                                 }) +
-    ggplot2::facet_grid(experiment ~ .)
+    ggplot2::facet_grid(variable ~ .)
   
   # draw_blackout ===+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ymax <- ceiling(max(smooth$signal))
-  data_blackout$signal <- ymax
+  ymax <- ceiling(max(smooth$value))
+  data_blackout$value <- ymax
 
   if (nrow(data_blackout) > 0) {
     blackout <- data_blackout[, list(min = min(mid), max = max(mid)), 
-                              by = "experiment"]
+                              by = "variable"]
     blackout[, "mid" := (min + max) / 2]
     p <- p + ggplot2::geom_rect(
       data = blackout, fill = "#D8D8D8", colour = "#D8D8D8",

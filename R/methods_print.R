@@ -315,7 +315,8 @@ print.DI_discovery <- function(x, ...) {
 #' @keywords internal
 print.virtual4C_discovery <- function(x, ...) {
   myclass <- class(x)[[1]]
-  expnames <- unique(x$data$experiment)
+  expnames <- tail(colnames(x$data), -2)
+  # expnames <- unique(x$data$experiment)
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")

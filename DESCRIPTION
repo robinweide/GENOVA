@@ -3,6 +3,7 @@ Title: GENOVA: expore the Hi-C
 Version: 1.0.0
 Authors@R: c(
   person("Robin H.", "van der Weide", email = "r.vd.weide@nki.nl", role = c("aut", "cre")),
+  person("Teun", "van den Brand", email = "t.vd.brand@nki.nl", role = "aut"),
   person("Elzo", "de Wit", email = "e.d.wit@nki.nl", role = "aut"))
 Description: GENOVA consist of a set of analysis- and visualisation-functions. These will help to discover valuable information buried deep in your HiC-matrices.
 Depends:

@@ -1,5 +1,6 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
+
 #' @param IDX The IDX-slot of a \code{contacts} object
 #' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the
@@ -11,6 +12,7 @@
 #'
 #' @details Out of bounds values are matched to nearest bin.
 #' @export
+
 bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   if (!inherits(bed, "data.frame") | is.data.table(bed)) {
     bed <- as.data.frame(bed)
@@ -129,12 +131,14 @@ try_require <- function(package, fun, source = NULL) {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install from Bioconductor and try again.", call. = FALSE)
   } else   if (source == 'github') {
+
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install from github and try again.", call. = FALSE)
   } else {
     stop("Package `", package, "` required for `", fun , "`.\n",
          "Please install and try again.", call. = FALSE)
   }
+
 }
 
 #' Check compatability of a list of GENOVA experiments
@@ -161,7 +165,7 @@ check_compat_exp <- function(explist) {
   # Test equality of experiments in list
   if (length(explist) > 1) {
     equal <- vapply(seq_along(explist)[-1], function(i) {
-      all.equal(explist[[1]]$IDX, explist[[i]]$IDX)
+      literalTRUE(all.equal(explist[[1]]$IDX, explist[[i]]$IDX))
     }, logical(1))
     
     if (any(!equal)) {
@@ -175,6 +179,9 @@ check_compat_exp <- function(explist) {
   
   return(explist)
 }
+
+# Equivalent to isTRUE fron R>3.5
+literalTRUE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
 
 GENOVA_THEME = function(){
   p = ggplot2::theme(panel.background = ggplot2::element_blank(),

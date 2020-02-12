@@ -196,8 +196,9 @@ anchors_PESCAn <- function(IDX, res, bed,
   idx
 }
 
-#' @export
-#' @rdname anchors
+#' export
+#' rdname anchors
+#' @noRd
 anchors_CSCAn <- function(IDX, res, bedlist,
                           dist_thres = c(50e3, 2e6),
                           min_compare = 10L,

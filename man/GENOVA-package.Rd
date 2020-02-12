@@ -13,6 +13,7 @@ GENOVA consist of a set of analysis- and visualisation-functions. These will hel
 
 Authors:
 \itemize{
+  \item Teun van den Brand \email{t.vd.brand@nki.nl}
   \item Elzo de Wit \email{e.d.wit@nki.nl}
 }
 

@@ -3,7 +3,6 @@
 \name{anchors}
 \alias{anchors}
 \alias{anchors_PESCAn}
-\alias{anchors_CSCAn}
 \alias{anchors_APA}
 \alias{anchors_ATA}
 \alias{anchors_ARA}
@@ -15,15 +14,6 @@ anchors_PESCAn(
   res,
   bed,
   dist_thres = c(5000000L, Inf),
-  min_compare = 10L,
-  mode = c("cis", "trans", "both")
-)
-
-anchors_CSCAn(
-  IDX,
-  res,
-  bedlist,
-  dist_thres = c(50000, 2e+06),
   min_compare = 10L,
   mode = c("cis", "trans", "both")
 )

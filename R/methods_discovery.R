@@ -240,6 +240,7 @@ bundle.IS_discovery <- function(..., collapse = "_"){
   
   # Extract insulation scores
   dfs <- lapply(discos, `[[`, "insula_score")
+  dfs <- lapply(dfs, as.data.table)
   expnames <- lapply(lapply(dfs, colnames), tail, -4)
   
   # Merge insulation scores
@@ -257,11 +258,10 @@ bundle.IS_discovery <- function(..., collapse = "_"){
       paste0(expnames[[i]], collapse, i)
     })
     colnames(out)[-c(1:4)] <- unlist(newnames)
-    return(out)
   }
   setkey(out, "chrom", "start")
   
-  structure(list(insula_score = out),
+  structure(list(insula_score = as.data.frame(out)),
             PACKAGE = "GENOVA",
             colours = cols,
             class = "IS_discovery",
@@ -675,8 +675,7 @@ unbundle.IS_discovery <- function(discovery, ...) {
   })
   
   out <- lapply(setNames(seq_along(exps), exps), function(i) {
-    structure(list(insula_score = discovery$insula_score[, cols[[i]], 
-                                                         with = FALSE]),
+    structure(list(insula_score = discovery$insula_score[, cols[[i]]]),
               PACKAGE = "GENOVA",
               colours = attr(discovery, "colours")[i],
               class = "IS_discovery",

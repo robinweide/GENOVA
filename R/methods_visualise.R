@@ -849,7 +849,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
                                    ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- discovery$insula_score
+  df <- as.data.table(discovery$insula_score)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]

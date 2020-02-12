@@ -1100,7 +1100,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
   data <- discovery$data
   VP   <- attr(discovery,"viewpoint")
   data <- data[chromosome == VP[1, 1]]
-  expnames <- unique(data$experiment)
+  expnames <- attributes(discovery)$sample
   
   if(!is.null(extend_viewpoint)){
     VP[, 2] <- VP[, 2] - extend_viewpoint
@@ -1165,6 +1165,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
   smooth[,1] = NULL
   colnames(smooth) = c("experiment", "signal","mid")
   
+  smooth$experiment <- factor(smooth$experiment, levels = expnames)
   data$experiment <- factor(data$experiment, levels = expnames)
   p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = signal)) +
     ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size,

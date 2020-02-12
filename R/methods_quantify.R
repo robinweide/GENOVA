@@ -53,7 +53,7 @@ quantify.saddle_discovery <- function(discovery, ...){
   dat <- discovery$saddle
   
   # get bins
-  MAXbin <- max(dat$q1)
+  MAXbin <- max(dat$q1, na.rm = T)
   binsTOse = floor(MAXbin * .2)
   binsTOse = max(1, binsTOse)
   

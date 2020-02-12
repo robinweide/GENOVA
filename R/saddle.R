@@ -47,7 +47,7 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
   expnames_list <- names(explist)
   expnames_exp <- vapply(explist, attr, character(1), "samplename")
 
-  scores <- copy(CS_discovery$compart_scores)[order(chrom, start)]
+  scores <- as.data.table(copy(CS_discovery$compart_scores))[order(chrom, start)]
   discnames <- utils::tail(colnames(scores), length(explist))
   
   # Check argument compatability

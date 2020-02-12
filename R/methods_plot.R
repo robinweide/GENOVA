@@ -489,7 +489,7 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- x$compart_scores
+  df <- as.data.table(x$compart_scores)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
@@ -509,7 +509,7 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
   
   par(mar = c(5, 4, 4, 6) + 0.1)
 
-  plot(df$mid / 1e6, df$test1, type = 'l', col = cols[1],
+  plot(df$mid / 1e6, df[[expnames[[1]]]], type = 'l', col = cols[1],
        ylim = ylim, ylab = "Compartment Score", 
        xlab = paste0("Location ", chr, " (Mb)"), new = FALSE)
   for(i in tail(seq_len(ncol(dat)), -1)) {

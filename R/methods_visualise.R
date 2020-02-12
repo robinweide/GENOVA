@@ -756,7 +756,7 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
                                    ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- discovery$compart_scores
+  df <- as.data.table(discovery$compart_scores)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]

@@ -364,7 +364,7 @@ bundle.CS_discovery <- function(..., collapse = "_") {
   }
   
   dats <- lapply(discos, function(disc) {
-    dat <- disc$compart_scores
+    dat <- as.data.table(disc$compart_scores)
     setkeyv(dat, c("chrom", "start"))
     dat[, party := inverse.rle(attr(disc, "partitioning"))]
     dat
@@ -396,7 +396,7 @@ bundle.CS_discovery <- function(..., collapse = "_") {
   cols <- lapply(discos, attr, "colours")
   cols <- unname(unlist(cols))
   
-  structure(list(compart_scores = dat),
+  structure(list(compart_scores = as.data.frame(dat)),
             package = "GENOVA",
             colours = cols,
             class = "CS_discovery",
@@ -715,8 +715,7 @@ unbundle.CS_discovery <- function(discovery, ...) {
   })
   
   out <- lapply(setNames(seq_along(exps), exps), function(i) {
-    structure(list(compart_scores = discovery$compart_scores[, cols[[i]], 
-                                                             with = FALSE]),
+    structure(list(compart_scores = discovery$compart_scores[, cols[[i]]]),
               PACKAGE = "GENOVA",
               colours = attr(discovery, "colours")[i],
               class = "CS_discovery",

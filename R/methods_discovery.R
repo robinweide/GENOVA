@@ -465,37 +465,51 @@ bundle.RCP_discovery <- function(..., collapse = "_") {
 
 #' @rdname bundle
 #' @export
-bundle.DI_discovery <- function(..., collapse = "_") {
+bundle.DI_discovery <- function(..., collapse = "_"){
   discos <- list(...)
-  if (length(discos) < 2) {
-    message("Attempting to bundle a single object. Input is returned.")
-    return(discos[[1]])
-  }
   
   # Check for possible errors
   classes <- vapply(lapply(discos, class), `[`, character(1), 1)
   if (length(unique(classes)) > 1) {
     stop("Can only bundle discoveries of the same type.", call. = FALSE)
   }
-  
-  res <- unique(vapply(discos, attr, numeric(1), "resolution"))
-  if (length(res) > 1) {
-    stop("Can only bundle discoveries of the same resolution.",
+  res <- vapply(discos, attr, numeric(1), "resolution")
+  if (length(unique(res)) > 1) {
+    stop("Can only bundle insulation scores of the same resolution.",
          call. = FALSE)
   }
+  # Grab colours
+  cols <- lapply(discos, attr, "colours")
+  cols <- unlist(cols)
   
-  cols <- unname(vapply(discos, attr, character(1), "colours"))
+  # Extract insulation scores
+  dfs <- lapply(discos, `[[`, "DI")
+  expnames <- lapply(lapply(dfs, colnames), tail, -4)
   
-  dats <- lapply(discos, `[[`, "DI")
-  dats <- rbindlist(dats)
-  setkeyv(dats, "bin")
+  # Merge insulation scores
+  out <- dfs[[1]]
+  if (length(dfs) > 1) {
+    for (i in tail(seq_along(dfs), -1)) {
+      out <- merge(out, dfs[[2]], by = c("chrom", "start", "end", "bin"))
+    }
+  }
   
-  structure(list(DI = dats),
+  # Check output column names
+  cnames <- tail(colnames(out), -4)
+  if (!identical(cnames, unlist(expnames))) {
+    newnames <- lapply(seq_along(expnames), function(i) {
+      paste0(expnames[[i]], collapse, i)
+    })
+    colnames(out)[-c(1:4)] <- unlist(newnames)
+  }
+  
+  structure(list(DI = out),
+            PACKAGE = "GENOVA",
+            colours = cols,
             class = "DI_discovery",
-            package = "GENOVA",
-            resolution = res,
-            colours = cols)
+            resolution = attr(discos[[1]], "resolution"))
 }
+
 
 #' @rdname bundle
 #' @export
@@ -722,13 +736,18 @@ unbundle.RCP_discovery <- function(discovery, ...) {
 #' @rdname unbundle
 #' @export
 unbundle.DI_discovery <- function(discovery, ...) {
-  dats <- split(discovery$DI, discovery$DI$experiment)
-  lapply(setNames(seq_along(dats), names(dats)), function(i) {
-    structure(list(DI = dats[[i]]),
-              package = "GENOVA",
+  exps <- tail(colnames(discovery$DI), -4)
+  cols <- lapply(setNames(exps, exps), function(i) {
+    c("chrom", "start", "end", "bin", i)
+  })
+  
+  out <- lapply(setNames(seq_along(exps), exps), function(i) {
+    structure(list(DI = discovery$DI[, cols[[i]]]),
+              PACKAGE = "GENOVA",
               colours = attr(discovery, "colours")[i],
+              class = "DI_discovery",
               resolution = attr(discovery, "resolution"),
-              class = "DI_discovery")
+              window = attr(discovery, "window"))
   })
 }
 

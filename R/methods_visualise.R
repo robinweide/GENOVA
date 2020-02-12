@@ -947,34 +947,38 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
-  expnames <- unique(df$experiment)
+  expnames <- tail(colnames(df), -4)
   
-  df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
-                   exp = df$experiment,
-                   dir_index = df$DI)
+  df <- cbind.data.frame(mid = (df[["start"]] + df[["end"]]/2),
+                         df[, expnames])
+  
+  # df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
+  #                  tail(as.list(df, - 4)))
   
   yname <- "Directionality Index"
   
   showcontrast <- !is.null(contrast) && (length(expnames) > 1L || literalTRUE(show_single_contrast))
   
   if (showcontrast) {
-    cdf <- dcast(as.data.table(df), mid ~ exp, value.var = "dir_index")
-    locs <- cdf[, 1]
-    cdf <- cdf[, tail(seq_len(ncol(cdf)), -1), with = FALSE]
-    contr <- cdf[, contrast, with = FALSE][[1]]
-    cdf <- cdf - contr
-    cdf[, mid := locs]
-    cdf <- melt(cdf, id.vars = "mid")
-    setnames(cdf, 2:3, c("exp", "dir_index"))
+    
+    cdf <- do.call(cbind.data.frame, c(list(mid = df$mid), lapply(df[, -1], function(x){
+      x - df[[contrast + 1]]
+    })))
+    setDT(cdf)
+    cdf <- melt(cdf, value.name = "dir_index", id.vars = "mid")
     cdf[, panel := factor("Difference", levels = c(yname, "Difference"))]
+    setDT(df)
+    df <- melt(df, value.name = "dir_index", id.vars = "mid")
     df$panel <- factor(yname, levels = c(yname, "Difference"))
   } else {
+    setDT(df)
+    df <- melt(df, value.name = "dir_index", id.vars = "mid")
     cdf <- NULL
   }
 
   rownames(df) <- NULL
   
-  g <- ggplot2::ggplot(df, ggplot2::aes(mid, dir_index, colour = exp)) +
+  g <- ggplot2::ggplot(df, ggplot2::aes(mid, dir_index, colour = variable)) +
     ggplot2::geom_line()
   
   if (!is.null(cdf)) {

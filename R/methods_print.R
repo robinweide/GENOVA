@@ -292,7 +292,8 @@ print.domainogram_discovery <- function(x, ...) {
 #' @keywords internal
 print.DI_discovery <- function(x, ...) {
   myclass <- class(x)[1]
-  expnames <- unique(x$DI$experiment)
+  expnames <- tail(colnames(x$DI), -4)
+  # expnames <- unique(x$DI$experiment)
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")

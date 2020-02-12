@@ -565,9 +565,10 @@ plot.DI_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
-  expnames <- unique(df$experiment)
-  df <- dcast(df, chrom + start + end + bin ~ experiment, value.var = "DI")
+  expnames <- tail(colnames(df), -4)
+  # df <- dcast(df, chrom + start + end + bin ~ experiment, value.var = "DI")
   dat <- as.matrix(df[, 5:ncol(df)])
+  setDT(df)
   df[, "mid" := (start + end) / 2]
   
   cols <- attr(x, "colours")

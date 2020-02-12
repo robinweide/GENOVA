@@ -8,10 +8,12 @@
 #'
 #' @param discovery A \code{discovery} object as returned by GENOVA analysis
 #'   functions.
+#'
 #' @param contrast An \code{integer} or \code{character} matching an experiment
 #'   (name) of length 1, specifying which sample should be used to make a
 #'   contrast with all other samples. Alternatively, set to \code{NULL} to not
-#'   plot contrast panels.
+#'   plot contrast panels. See also the \code{show_single_contrast} argument.
+#'
 #' @param metric A \code{character} of length 1:
 #'
 #'   \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
@@ -58,9 +60,14 @@
 #' @param geom \code{[IIT]} A \code{character} vector of length 1; either one of
 #'   \code{"boxplot"}, \code{"violin"}, \code{"jitter"} to get boxplots, violin
 #'   plots or jittered point plots.
+#'
 #' @param censor_contrast \code{[IIT]} A \code{logical} of length 1 deciding
 #'   wether the contrasting experiment itself should be censored (\code{TRUE})
 #'   or included (\code{FALSE}).
+#'
+#' @param show_single_contrast A \code{logical} of length 1; if \code{FALSE}
+#'   (default), does not show contrasts when \code{discovery} describes one
+#'   experiment. If \code{TRUE}, plots empty panel.
 #'
 #' @param title add a title
 #' @param ... further arguments passed to or from other methods.
@@ -136,7 +143,9 @@ visualise.default <- function(discovery, ...) {
 # Common ancestor for aggregate repeated matrix lookup analysis plots
 visualise.ARMLA <- function(discovery, contrast = 1,
                             metric = c("diff", "lfc"),
-                            raw = FALSE, altfillscale, ...) {
+                            raw = FALSE, altfillscale, 
+                            show_single_contrast = FALSE,
+                            ...) {
   metric <- match.arg(metric)
   mats <- discovery$signal
 
@@ -167,12 +176,15 @@ visualise.ARMLA <- function(discovery, contrast = 1,
   df <- do.call(rbind, df)
 
   # Calculate metric if contrast is supplied
-  if (!is.null(contrast)) {
+  showcontrast <- !is.null(contrast) && 
+    (dims[3] > 1L || literalTRUE(show_single_contrast))
+  
+  if (showcontrast) {
     contrast <- as.vector(mats[,,contrast])
     contrast <- switch(
       metric,
       "diff" = as.vector(mats) - rep(contrast, dims[3]),
-      "lfc" = log2(as.vector(mats) / rep(contrast, dims[3]))
+      "lfc"  = log2(as.vector(mats) / rep(contrast, dims[3]))
     )
     dim(contrast) <- dim(mats)
     contrast_name <- switch(metric,
@@ -191,7 +203,7 @@ visualise.ARMLA <- function(discovery, contrast = 1,
   # Setup base of plot
   g <- ggplot2::ggplot(df, ggplot2::aes(x, y))
 
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     # Setup basics of the diff plots
     # Warnings are supressed because ggplot doesn't recognise
     # the altfill aesthetic (YET!)
@@ -267,7 +279,9 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL, ...) {
+                                    colour_lim_contrast = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   metric <- match.arg(metric)
   
   # Decide on limits
@@ -294,7 +308,8 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
     discovery = discovery,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -339,6 +354,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
                                       raw = FALSE, title = NULL, colour_lim = NULL,
+                                      show_single_contrast = FALSE,
                                       ...) {
   mode <- match.arg(mode)
   hasobsexp <- "obsexp" %in% names(discovery)
@@ -428,7 +444,9 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        mode = c("obsexp", "signal"),
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
-                                       colour_lim_contrast = NULL, ...) {
+                                       colour_lim_contrast = NULL, 
+                                       show_single_contrast = FALSE,
+                                       ...) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -476,7 +494,8 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -536,7 +555,9 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL, ...) {
+                                    colour_lim_contrast = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   metric <- match.arg(metric)
   
   # Decide on limits
@@ -560,7 +581,8 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
     discovery = discovery,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -617,7 +639,9 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     mode = c("obsexp", "signal"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL, ...) {
+                                    colour_lim_contrast = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -658,7 +682,8 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -727,7 +752,8 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.CS_discovery <- function(discovery, contrast = NULL,
                                    chr = "chr1", start = NULL, end = NULL,
-                                   raw = FALSE, ...) {
+                                   raw = FALSE, show_single_contrast = FALSE,
+                                   ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- discovery$compart_scores
@@ -739,7 +765,8 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
   df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
                    df[, ..expnames])
   
-  if (!is.null(contrast)) {
+ showcontrast <- !is.null(contrast) && (length(expnames) > 1L || literalTRUE(show_single_contrast))
+  if (showcontrast) {
     cdf <- as.matrix(df[,expnames])
     cdf <- cdf - cdf[, contrast]
     cdf <- cbind.data.frame(mid = df$mid, cdf)
@@ -754,7 +781,7 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
                    score = unlist(df[2:ncol(df)]),
                    exp = rep(expnames, each = nrow(df)))
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     # Melt cdf
     cdf <- data.frame(mid = rep(cdf$mid, length(expnames)),
                       score = unlist(cdf[2:ncol(cdf)]),
@@ -817,7 +844,9 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
 #' @rdname visualise
 #' @export
 visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
-                                   start = NULL, end = NULL, raw = FALSE, ...) {
+                                   start = NULL, end = NULL, raw = FALSE, 
+                                   show_single_contrast = FALSE,
+                                   ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- discovery$insula_score
@@ -828,8 +857,10 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   
   df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
                    df[, ..expnames])
+  showcontrast <- !is.null(contrast) && 
+    (length(expnames) > 1L || literalTRUE(show_single_contrast))
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     cdf <- as.matrix(df[,expnames])
     cdf <- cdf - cdf[, contrast]
     cdf <- cbind.data.frame(mid = df$mid, cdf)
@@ -844,7 +875,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
                    score = unlist(df[2:ncol(df)]),
                    exp = rep(expnames, each = nrow(df)))
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     # Melt cdf
     cdf <- data.frame(mid = rep(cdf$mid, length(expnames)),
                       score = unlist(cdf[2:ncol(cdf)]),
@@ -907,7 +938,9 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
 #' @rdname visualise
 #' @export
 visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
-                                    start = NULL, end = NULL, raw = FALSE, ...) {
+                                    start = NULL, end = NULL, raw = FALSE, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- discovery$DI
@@ -922,7 +955,9 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
   
   yname <- "Directionality Index"
   
-  if (!is.null(contrast)) {
+  showcontrast <- !is.null(contrast) && (length(expnames) > 1L || literalTRUE(show_single_contrast))
+  
+  if (showcontrast) {
     cdf <- dcast(as.data.table(df), mid ~ exp, value.var = "dir_index")
     locs <- cdf[, 1]
     cdf <- cdf[, tail(seq_len(ncol(cdf)), -1), with = FALSE]
@@ -1319,7 +1354,9 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
                                        chr = "all",
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
-                                       colour_lim_contrast = NULL, ...) {
+                                       colour_lim_contrast = NULL, 
+                                       show_single_contrast = FALSE,
+                                       ...) {
   df <- discovery$saddle
   df <- df[!is.na(mean) & !is.na(q1),]
   df$exp <- factor(df$exp, levels = unique(df$exp))
@@ -1355,7 +1392,8 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
     colour_lim_contrast <- centered_limits()
   }
 
-  if (!is.null(contrast)) {
+  showcontrast <- !is.null(contrast) && (length(expnames) > 1L || show_single_contrast)
+  if (showcontrast) {
     contrast <- df[exp == expnames[contrast],]
     m <- matrix(NA_real_, max(contrast$q1), max(contrast$q2))
     i <- as.matrix(contrast[,list(q1, q2)])
@@ -1390,7 +1428,7 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
     g <- g + ggplot2::ggtitle(title)
   }
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     
     suppressWarnings(
       g <- g + ggplot2::geom_raster(data = contrast, 
@@ -1505,7 +1543,9 @@ visualise.domainogram_discovery <- function(discovery,
 #' @export
 visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
                                     geom = c("boxplot", "violin", "jitter"),
-                                    censor_contrast = TRUE, title = NULL, ...) {
+                                    censor_contrast = TRUE, title = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   geom <- match.arg(geom)
   dat <- as.data.table(discovery$results)
   cols <- attr(discovery, "colours")
@@ -1513,8 +1553,10 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
   expnames <- tail(colnames(dat), -2)
   
   if (!is.null(contrast) & length(expnames) < 2) {
-    message("Cannot compute a contrast for one sample. Reverting to ",
-            "visualising plain values.")
+    if (show_single_contrast) {
+      message("Cannot compute a contrast for one sample. Reverting to ",
+              "visualising plain values.")
+    }
     contrast <- NULL
   } else if (!is.null(contrast)){
     contrast <- expnames[contrast]

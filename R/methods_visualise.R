@@ -137,7 +137,6 @@ visualise.default <- function(discovery, ...) {
        "' has been implemented.", call. = FALSE)
 }
 
-
 # Common elements ---------------------------------------------------------
 
 # Common ancestor for aggregate repeated matrix lookup analysis plots
@@ -276,7 +275,7 @@ visualise.ARMLA <- function(discovery, contrast = 1,
 #' @rdname visualise
 #' @export
 visualise.APA_discovery <- function(discovery, contrast = 1,
-                                    metric = c("diff", "lfc"),
+                                    metric = c("lfc", "diff"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
                                     colour_lim_contrast = NULL, 
@@ -350,8 +349,9 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
   g
 }
 
-#' @rdname visualise
-#' @export
+#' rdname visualise
+#' export
+#' @noRd
 visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
                                       raw = FALSE, title = NULL, colour_lim = NULL,
                                       show_single_contrast = FALSE,
@@ -552,7 +552,7 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
 #' @rdname visualise
 #' @export
 visualise.ATA_discovery <- function(discovery, contrast = 1,
-                                    metric = c("diff", "lfc"),
+                                    metric = c("lfc", "diff"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
                                     colour_lim_contrast = NULL, 

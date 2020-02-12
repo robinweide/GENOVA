@@ -4,7 +4,6 @@
 \alias{visualise}
 \alias{visualise.default}
 \alias{visualise.APA_discovery}
-\alias{visualise.CSCAn_discovery}
 \alias{visualise.PESCAn_discovery}
 \alias{visualise.ATA_discovery}
 \alias{visualise.ARA_discovery}
@@ -23,21 +22,11 @@ visualise(discovery, ...)
 \method{visualise}{APA_discovery}(
   discovery,
   contrast = 1,
-  metric = c("diff", "lfc"),
+  metric = c("lfc", "diff"),
   raw = FALSE,
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
-  show_single_contrast = FALSE,
-  ...
-)
-
-\method{visualise}{CSCAn_discovery}(
-  discovery,
-  mode = c("obsexp", "signal"),
-  raw = FALSE,
-  title = NULL,
-  colour_lim = NULL,
   show_single_contrast = FALSE,
   ...
 )
@@ -58,7 +47,7 @@ visualise(discovery, ...)
 \method{visualise}{ATA_discovery}(
   discovery,
   contrast = 1,
-  metric = c("diff", "lfc"),
+  metric = c("lfc", "diff"),
   raw = FALSE,
   title = NULL,
   colour_lim = NULL,

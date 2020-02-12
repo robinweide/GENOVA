@@ -403,7 +403,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 
 ### Genes
 [@Dixon2012] showed that housekeeping-genes are enriched in the vincinity of TAD-borders. Another interesting question could be wheter differentially expressed genes are also found near TAD-borders or binding sites of specific proteins when studying a knockout. These type of questions can be tackled by adding the appropiate gene-models to `hic.matrixplot`. To do this, we make use of the data.fame, where each row is an exon from a gene. There are several ways to get this. One of the easiest is to use biomart to get exon-coordinates. This can be done with the biomaRt-package or via the web-based service. For this example, we downloaded data of all exons from the Ensembl biomart and plotted both the BED-file and the genes (figure \@ref(fig:HMPchipGene)).
-```{r biomart, cache=T}
+```{r biomart}
 # features downloaded:
 ## Gene stable ID & Transcript stable ID & Chromosome/scaffold name &
 ## Transcript start (bp) & Transcript end (bp) & Exon region start (bp) &

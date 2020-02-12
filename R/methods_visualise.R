@@ -1516,6 +1516,9 @@ visualise.domainogram_discovery <- function(discovery,
                                             title = NULL,
                                             raw = FALSE, ...) {
   df <- discovery
+  df <- as.data.table(df)
+  df <- melt(df, id.vars = c("window", "position"), value.name = "insulation")
+  setnames(df, 3, "experiment")
   
   g <- ggplot2::ggplot(df, ggplot2::aes(position, window, fill = insulation)) +
     ggplot2::geom_raster() +

@@ -30,6 +30,9 @@
 #'   or included (\code{FALSE}).
 #' @param geom A \code{character} of length 1 indicating what geometry should be
 #'   plotted. Either \code{"boxplot"} or \code{"point"}.
+#' @param minimalist \code{[domainogram]} A \code{logical} of length 1. If
+#'   \code{TRUE}, plot only the first experiment in the discovery and don't plot
+#'   any axis, titles or legends.
 #' @param metric \code{[RCP]} Currently not in use.
 #' @param ... Not currently used for discovery plots.
 #'
@@ -716,12 +719,23 @@ plot.saddle_discovery <- function(
 #' @rdname plot_discovery
 #' @export
 plot.domainogram_discovery <- function(
-  x, colour_fun = NULL, colour_lim = c(-1, 1), ...
+  x, colour_fun = NULL, colour_lim = c(-1, 1), 
+  minimalist = FALSE,
+  ...
 ) {
-  par(mar = c(1, 1, 1, 1))
-  par(oma = c(4, 4, 1, 3))
+  minimalist <- literalTRUE(minimalist)
+  if (minimalist) {
+    x <- x[, 1:3]
+  } else {
+    par(mar = c(1, 1, 1, 1))
+    par(oma = c(4, 4, 1, 3))
+  }
   
-  mats <- as.data.table(x)
+  x <- as.data.table(x)
+  x <- melt(x, id.vars = c("window", "position"), value.name = "insulation")
+  setnames(x, 3, "experiment")
+  
+  mats <- x
   mats <- split(mats, mats$experiment)
   mats <- lapply(mats, function(mat) {
     casted <- dcast(mat, position ~ window, value.var = "insulation")
@@ -742,8 +756,10 @@ plot.domainogram_discovery <- function(
   
   layout_mat <- matrix(c(seq_len(n_samples), rep(n_samples + 1, n_samples)), 
                        nrow = n_samples, byrow = FALSE)
-  layout(layout_mat, widths = c(1, 0.1),
-         respect = FALSE)
+  if (!minimalist) {
+    layout(layout_mat, widths = c(1, 0.1),
+           respect = FALSE)
+  }
   
   if (is.null(colour_fun)) {
     cols <- rev(c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"))
@@ -761,28 +777,40 @@ plot.domainogram_discovery <- function(
     m <- pmax(m, colour_lim[1])
     m <- pmin(m, colour_lim[2])
     # m[cbind(rev(row(m)[T]), col(m)[T])] <- m
-    image(x = as.numeric(dimnames(m)[[1]]) / 1e6, 
-          y = as.numeric(dimnames(m)[[2]]), 
-          z = m, 
-          col = colour_fun(255),
-          zlim = colour_lim, 
-          xlab = paste0("Location ", attr(x, "chrom"), " (Mb)"),
-          ylab = "Window Size",
-          xaxt = if(i == nrow(layout_mat)) "s" else "n",
-          yaxt = "s")
-    mtext(titles[[i]], side = 3, line = 0.5)
+    if (!minimalist) {
+      image(x = as.numeric(dimnames(m)[[1]]) / 1e6, 
+            y = as.numeric(dimnames(m)[[2]]), 
+            z = m, 
+            col = colour_fun(255),
+            zlim = colour_lim, 
+            xlab = paste0("Location ", attr(x, "chrom"), " (Mb)"),
+            ylab = "Window Size",
+            xaxt = if(i == nrow(layout_mat)) "s" else "n",
+            yaxt = "s")
+      mtext(titles[[i]], side = 3, line = 0.5)
+    } else {
+      image(x = as.numeric(dimnames(m)[[1]]) / 1e6,
+            y = as.numeric(dimnames(m)[[2]]),
+            z = m,
+            col = colour_fun(255),
+            zlim = colour_lim,
+            xlab = "", ylab = "",
+            xaxt = "n", yaxt = "n")
+    }
   }
   
   # A legend
-  m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
-  image(1, m[1, ], m, col = colour_fun(255), 
-        xaxt = "n", yaxt = "n", new = FALSE)
-  axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
-  mtext("Insulation Score", side = 4, line = 2.5)
-  
-  mtext(paste0("Location ", attr(x, "chrom"), " (Mb)"), 
-        side = 1, outer = TRUE, line = 2)
-  mtext("Window Size", side = 2, outer = TRUE, line = 2)
+  if (!minimalist) {
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
+    image(1, m[1, ], m, col = colour_fun(255), 
+          xaxt = "n", yaxt = "n", new = FALSE)
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    mtext("Insulation Score", side = 4, line = 2.5)
+    
+    mtext(paste0("Location ", attr(x, "chrom"), " (Mb)"), 
+          side = 1, outer = TRUE, line = 2)
+    mtext("Window Size", side = 2, outer = TRUE, line = 2)
+  }
 }
 
 #' @rdname plot_discovery

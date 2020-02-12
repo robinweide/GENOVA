@@ -267,7 +267,7 @@ print.domainogram_discovery <- function(x, ...) {
   myclass <- class(x)[1]
   pos <- format(range(x$position), scientific = FALSE)
   chrom <- attr(x, "chr")
-  expnames <- unique(x$experiment)
+  expnames <- tail(colnames(x), -2)
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")

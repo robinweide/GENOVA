@@ -196,15 +196,26 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
   }
   
   # Combine and reorder
-  out <- do.call(rbind, discos)
-  out <- out[order(out$window, out$position, out$experiment), ]
-  
-  # Filter out duplicates
-  dups <- duplicated(out[, c("window", "position", "experiment")])
-  if (sum(dups) > 0) {
-    message("Found duplicated insulation scores which are discarded.")
+  out <- discos[[1]]
+  if (length(discos) > 1L) {
+    for(i in 2:length(discos)) {
+      out <- merge(out, discos[[i]], by = c("window", "position"))
+    }
   }
-  out <- out[!dups,]
+  
+  expnames <- lapply(discos, function(x){tail(colnames(x), -2)})
+  cnames <- tail(colnames(out), -2)
+  if (!identical(cnames, unlist(expnames))) {
+    newnames <- lapply(seq_along(expnames), function(i) {
+      paste0(expnames[[i]], collapse, i)
+    })
+    colnames(out)[-c(1:2)] <- unlist(newnames)
+  }
+  
+  attr(out, "resolution") <- res[[1]]
+  attr(out, 'chrom') <- chroms[[1]]
+  class(out) <- c("domainogram_discovery", "data.frame")
+
   out
 }
 
@@ -644,7 +655,15 @@ unbundle.ARMLA_discovery <- function(discovery, ...) {
 #' @rdname unbundle
 #' @export
 unbundle.domainogram_discovery <- function(discovery, ...) {
-  split(discovery, discovery$experiment)
+  expnames <- tail(colnames(discovery), -2)
+  lapply(setNames(expnames, expnames), function(i) {
+    col <- c("window", "position", i)
+    out <- discovery[, col]
+    attr(out, "resolution") <- attr(discovery, "resolution")
+    attr(out, "chrom") <- attr(discovery, "chrom")
+    attr(out, "package") <- attr(discovery, "package")
+    out
+  })
 }
 
 #' @rdname unbundle

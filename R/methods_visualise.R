@@ -1,6 +1,7 @@
 # Documentation -----------------------------------------------------------
 
 #' @name visualise
+#' @aliases visualise visualize
 #' @title Visualise discoveries
 #'
 #' @description Plot the results of \code{discovery} objects. By default
@@ -349,12 +350,12 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
   g
 }
 
-#' rdname visualise
-#' export
+#' @rdname visualise
+#' @export
 #' @noRd
 visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
-                                      raw = FALSE, title = NULL, colour_lim = NULL,
-                                      show_single_contrast = FALSE,
+                                      raw = FALSE, title = NULL, 
+                                      colour_lim = NULL,
                                       ...) {
   mode <- match.arg(mode)
   hasobsexp <- "obsexp" %in% names(discovery)
@@ -408,16 +409,28 @@ visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
   }
   
   panel_spac <- c(rep(5.5, length(unique(df$right)) - 1L))
-  panel_spac <- c(panel_spac, rep(11, length(unique(df$Var4)) - 1L))
-  panel_spac <- head(rep(panel_spac, length(unique(df$Var4))), -1)
+  panel_spac <- c(panel_spac, rep(c(11, panel_spac), length(unique(df$Var4)) - 1))
   panel_spac <- ggplot2::unit(panel_spac, "points")
+  
+  fillscale <- if (hasobsexp) {
+    ggplot2::scale_fill_gradientn(
+      colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(frac("Observed", "Expected")),
+      oob = scales::squish,
+      limits = colour_lim
+    )
+  } else {
+    ggplot2::scale_fill_gradientn(
+      colours = c('white', '#f5a623', '#d0021b', 'black'),
+      guide = ggplot2::guide_colourbar(order = 1),
+      name = expression(mu*" Contacts"),
+      oob = scales::squish,
+      limits = colour_lim
+    )
+  }
 
-  g <- g + ggplot2::scale_fill_gradientn(
-    colours =  c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
-    name = expression(frac("Observed", "Expected")),
-    oob = scales::squish,
-    limits = c(-5, 5)
-  ) + 
+  g <- g + fillscale + 
     ggplot2::scale_x_continuous(breaks = pos_breaks, 
                                 labels = function(x) {
                                   ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
@@ -433,6 +446,10 @@ visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
       strip.placement = "outside",
       panel.spacing.x = panel_spac
     )
+  
+  if (!is.null(title)) {
+    g <- g + ggplot2::ggtitle(title)
+  }
   
   g
 }

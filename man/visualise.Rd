@@ -3,6 +3,7 @@
 \name{visualise}
 \alias{visualise}
 \alias{visualise.default}
+\alias{visualize}
 \alias{visualise.APA_discovery}
 \alias{visualise.PESCAn_discovery}
 \alias{visualise.ATA_discovery}

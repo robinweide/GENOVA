@@ -133,19 +133,20 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
              call. = FALSE)
       }
       new <- do.call(c, slot)
-      dim(new) <- c(dims[1,1:2], sum(dims[, 3]))
+      dim(new) <- c(head(dims[1, ], -1), sum(dims[, ncol(dims)]))
 
       # Check dimnames
       dnames <- lapply(slot, dimnames)
-      expnames <- do.call(c, lapply(dnames, `[[`, 3))
+      dlen <- lengths(dnames)[1]
+      expnames <- do.call(c, lapply(dnames, `[[`, dlen))
       if (length(unique(expnames)) < length(expnames)) {
         expnames <- unlist(lapply(seq_len(nrow(dims)), function(j) {
-          paste0(dnames[[j]][[3]], collapse, disco_names[[j]])
+          paste0(dnames[[j]][[dlen]], collapse, disco_names[[j]])
         }))
       }
-
+      dnames <- dnames[[1]]
       # Set dimnames
-      dimnames(new) <- list(dnames[[1]][[1]], dnames[[1]][[2]], expnames)
+      dimnames(new) <- c(head(dnames, -1), list(expnames))
     } else if (class(slot[[1]]) == "list") {
 
       # Resolve potential naming conflicts
@@ -218,6 +219,7 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
 
   out
 }
+
 
 #' @rdname bundle
 #' @export
@@ -634,7 +636,7 @@ unbundle.ARMLA_discovery <- function(discovery, ...) {
   expnames <- lapply(slotnames, function(i) {
     thisclass <- class(discovery[[i]])
     if (thisclass == "array") {
-      thesenames <- dimnames(discovery[[i]])[[3]]
+      thesenames <- tail(dimnames(discovery[[i]]), 1)[[1]]
     } else if (thisclass == "list") {
       thesenames <- names(discovery[[i]])
     }
@@ -819,7 +821,11 @@ subset.ARMLA_discovery <- function(x, i, ...) {
   out <- lapply(x, function(slot) {
     thisclass <- class(slot)
     if (thisclass == "array") {
-      return(slot[,,i, drop = FALSE])
+      if (length(dim(slot)) == 3) {
+        return(slot[,, i, drop = FALSE])
+      } else if (length(dim(slot)) == 4) {
+        return(slot[,,, i, drop = FALSE])
+      }
     } else if (thisclass == "list") {
       return(slot[i])
     }

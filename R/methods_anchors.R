@@ -13,10 +13,11 @@
 #' @param IDX The indices slot of a GENOVA \code{contacts} object.
 #' @param res The resolution attribute of a GENOVA \code{contacts} object.\emph{
 #'   Not for ATA}.
-#' @param bed A BED-formatted \code{data.frame} with the following 3 columns:
-#'   \enumerate{ \item A \code{character} giving the chromosome names. \item An
-#'   \code{integer} with start positions. \item An \code{integer} with end
-#'   positions. }
+#' @param bed,bedlist A BED-formatted \code{data.frame} with the following 3
+#'   columns: \enumerate{ \item A \code{character} giving the chromosome names.
+#'   \item An \code{integer} with start positions. \item An \code{integer} with
+#'   end positions. } For the \code{bedlist} variant, a \code{list} of the above
+#'   (\emph{CSCAn only}).
 #' @param bedpe A BEDPE-formatted \code{data.frame} with the following 6
 #'   columns. \emph{APA only}: \enumerate{ \item A \code{character} giving the
 #'   chromosome names of the first coordinate. \item An \code{integer} giving
@@ -27,13 +28,13 @@
 #'   \code{integer} giving the end positions of the second coordinate. }
 #' @param mode A \code{character} vector of length 1 indicating which
 #'   interactions to retain. Possible values: \code{"cis"}, \code{"trans"} or
-#'   \code{"both"}. \emph{PE-SCAn and APA only}.
+#'   \code{"both"}. \emph{PE-SCAn, C-SCAn and APA only}.
 #' @param dist_thres An \code{integer} vector of length 2 indicating the minimum
 #'   and maximum distances in basepairs between anchorpoints. For ATA-type
 #'   anchors, the minimum and maximum sizes of TADs.
 #' @param min_compare An \code{integer} vector of length 1 indicating the
 #'   minimum number of pairwise interactions on a chromosome to consider.
-#'   \emph{PE-SCAn only}.
+#'   \emph{PE-SCAn and C-SCAn only}.
 #' @param padding A \code{numeric} of length 1 to determine the padding around
 #'   TADs, expressed in TAD widths. \emph{ATA only}.
 #'
@@ -61,11 +62,20 @@
 #'   '\code{mode}' argument, which default to \code{"cis"} to only take pairwise
 #'   interactions on the same chromosome.}
 #'
+#'   \subsection{C-SCAn anchors}{ \code{anchors_CSCan()}, like
+#'   \code{anchors_PESCAn}, takes all pairwise interactions of genomic
+#'   coordinates, but crosswise between unique combinations of BED-like
+#'   \code{data.frame}s in the \code{bedlist} argument. It is used within the
+#'   \code{TODO:LINK CSCAN} function. Has a \code{group} attribute to
+#'   keep track from which combination of BED-like \code{data.frame} the anchor
+#'   originated.}
+#'
 #'   \subsection{APA anchors}{ \code{anchors_APA()} takes a BEDPE-formatted
 #'   \code{data.frame} and translates the coordinates in the first 3 and last 3
 #'   columns to indices of the Hi-C matrix. It is used within the
 #'   \code{\link[GENOVA]{APA}} function. The '\code{mode}' argument defaults to
-#'   \code{"both"} but optionally allows for both cis- and trans-interactions. }
+#'   \code{"both"} but optionally allows for either cis- or trans-interactions
+#'   too. }
 #'
 #'   \subsection{Extended loops anchors}{ \code{anchors_extendedloops()} takes
 #'   the same input as \code{anchors_APA()}, but transforms these coordinates to
@@ -102,7 +112,7 @@
 #' # APA
 #' anch <- anchors_APA(WT_20kb$IDX, attr(WT_20kb, "resolution"), loops)
 #' APA(list(WT_20kb, KO_20kb), anchors = anch)
-#' 
+#'
 #' # APA with extended loops
 #' ex_anch <- anchors_extendedloops(WT_20kb$IDX, attr(WT_20kb, "resolution"),
 #'                                  loops)
@@ -183,6 +193,116 @@ anchors_PESCAn <- function(IDX, res, bed,
 
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "PESCAn"
+  idx
+}
+
+#' export
+#' @rdname anchors
+anchors_CSCAn <- function(IDX, res, bedlist,
+                          dist_thres = c(50e3, 2e6),
+                          min_compare = 10L,
+                          mode = c("cis", "trans", "both")) {
+  mode <- match.arg(mode)
+  if (length(bedlist) < 2 || !inherits(bedlist, "list")) {
+    stop("Less than two 'bedlist' elements found. For self-interaction of a",
+         " single BED-like data.frame, see '?anchors_PESCAn'.",
+         call. = FALSE)
+  }
+  
+  chroms <- lapply(lapply(bedlist, `[[`, 1), unique)
+  chroms <- table(unlist(chroms))
+  chroms <- names(chroms)[chroms >= 2]
+  # chroms <- Reduce(intersect, lapply(bedlist, `[[`, 1))
+  # chroms <- intersect(left[, 1], right[, 1])
+  if (length(chroms) == 0) {
+    stop("No common chromosomes found between 'bedlist' argument elements",
+         call. = FALSE)
+  }
+  
+  # Match and clean indices
+  if (is.null(names(bedlist))) {
+    names(bedlist) <- LETTERS[seq_along(bedlist)]
+  }
+  if (length(unique(names(bedlist))) < length(bedlist)) {
+    stop("Please provide unique names for every element in the 'bedlist' argument",
+         call. = FALSE)
+  }
+  
+  beds <- lapply(bedlist, function(x) {
+    newbed <- cbind.data.frame(chrom = x[, 1], 
+                               idx = bed2idx(IDX, x, mode = "centre"))
+    newbed <- newbed[!is.na(newbed$idx), ]
+    newbed <- newbed[order(newbed$idx),]
+  })
+  
+  cbn <- as.data.frame(combn(names(beds), 2), stringsAsFactors = FALSE)
+
+  if (mode == "cis") {
+    # Generate cis combinations
+    splitbeds <- lapply(beds, function(x) {split(x$idx, x$chrom)[chroms]})
+    lens <- lapply(splitbeds, lengths)
+    
+    idx <- rbindlist(lapply(cbn, function(i) {
+      keep <- (lens[[i[1]]] * lens[[i[2]]]) >= max(min_compare, 2)
+      rbindlist(mapply(CJ, 
+                       splitbeds[[i[1]]][keep], 
+                       splitbeds[[i[2]]][keep], 
+                       SIMPLIFY = FALSE))[, combi := paste0(i[1], "-", i[2])]
+    }))
+    is_cis <- TRUE
+  } else {
+    ind <- lapply(lapply(beds, nrow), seq_len)
+    idx <- rbindlist(lapply(cbn, function(i) {
+      # Generate all combinations
+      out <- CJ(ind[[i[1]]], ind[[i[2]]])
+      # Check cis/trans
+      out[, is_cis := beds[[i[1]]][[1]][V1] == beds[[i[2]]][[1]][V2]]
+      # Substitute actual indices, add combination column
+      out[, c("V1", "V2", "combi") := list(beds[[i[1]]][[2]][V1],
+                                           beds[[i[2]]][[2]][V2],
+                                           paste0(i[1], "-", i[2]))]
+    }))
+    if (mode == "trans") {
+      # Exclude cis when trans
+      idx <- idx[!is_cis, ]
+      is_cis <- FALSE
+    } else {
+      is_cis <- idx[["is_cis"]]
+    }
+    idx[, is_cis := NULL]
+    # idx <- as.data.frame(idx)
+  }
+  
+  # Sort start-end
+  idx[, c("V1", "V2") := list(pmin(V1, V2), pmax(V1, V2))]
+  
+  # Filtering distances only makes sense in cis
+  if (mode != "trans") {
+    # Covert dists to resolution space
+    dist_thres <- dist_thres / res
+    dist_thres <- sort(dist_thres)
+    
+    # Exclude cis combinations based on min/max_dist
+    cis <- idx[is_cis, , drop = FALSE]
+    dist <- cis[, abs(V1 - V2)]
+    keep <- dist >= dist_thres[1] & dist <= dist_thres[2]
+    if (sum(keep) < 1) {
+      stop("No pairwise interactions are within the distance threshold",
+           call. = FALSE)
+    }
+    cis <- cis[keep]
+    
+    # Recombine and order
+    idx <- rbind(idx[!is_cis], cis)
+  }
+  combi <- rle(idx[["combi"]])
+  idx[, combi := NULL]
+  idx <- as.matrix(idx)
+  dimnames(idx) <- NULL
+  
+  class(idx) <- c("anchors", "matrix")
+  attr(idx, "type") <- "CSCAn"
+  attr(idx, "group") <- combi
   idx
 }
 
@@ -415,6 +535,12 @@ anchors_finish <- function(IDX, anchors, rel_pos, shift = 0) {
     attris$dir$lengths <- c(attris$dir$lengths, attr(shift, "dir")$lengths)
     attris$dir$values  <- c(attris$dir$values,  attr(shift, "dir")$values)
   }
+  if ("group" %in% names(attris)) {
+    attris$group$lengths <- c(attris$group$lengths, 
+                              attr(shift, "group")$lengths)
+    attris$group$values <- c(attris$group$values,
+                             attr(shift, "group")$values)
+  }
 
   # Make final anchors
   fin <- rbind(anchors, shift)
@@ -601,6 +727,9 @@ is_anchors <- function(x) {
   # Take particular care that direction is subsetted as rows
   if ("dir" %in% names(x_attr)) {
     x_attr[["dir"]] <- rle(inverse.rle(attr(x, "dir"))[i])
+  }
+  if ("group" %in% names(x_attr)) {
+    x_attr[["group"]] <- rle(inverse.rle(attr(x, "group"))[i])
   }
   attributes(y) <- c(attributes(y), x_attr)
   y

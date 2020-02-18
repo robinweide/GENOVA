@@ -22,11 +22,12 @@ visualise(discovery, ...)
 \method{visualise}{APA_discovery}(
   discovery,
   contrast = 1,
-  metric = c("diff", "lfc"),
+  metric = c("lfc", "diff"),
   raw = FALSE,
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -39,17 +40,19 @@ visualise(discovery, ...)
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
+  show_single_contrast = FALSE,
   ...
 )
 
 \method{visualise}{ATA_discovery}(
   discovery,
   contrast = 1,
-  metric = c("diff", "lfc"),
+  metric = c("lfc", "diff"),
   raw = FALSE,
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -62,6 +65,7 @@ visualise(discovery, ...)
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -72,6 +76,7 @@ visualise(discovery, ...)
   start = NULL,
   end = NULL,
   raw = FALSE,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -82,6 +87,7 @@ visualise(discovery, ...)
   start = NULL,
   end = NULL,
   raw = FALSE,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -92,6 +98,7 @@ visualise(discovery, ...)
   start = NULL,
   end = NULL,
   raw = FALSE,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -122,6 +129,7 @@ visualise(discovery, ...)
   title = NULL,
   colour_lim = NULL,
   colour_lim_contrast = NULL,
+  show_single_contrast = FALSE,
   ...
 )
 
@@ -134,6 +142,7 @@ visualise(discovery, ...)
   geom = c("boxplot", "violin", "jitter"),
   censor_contrast = TRUE,
   title = NULL,
+  show_single_contrast = FALSE,
   ...
 )
 }
@@ -146,7 +155,7 @@ functions.}
 \item{contrast}{An \code{integer} or \code{character} matching an experiment
 (name) of length 1, specifying which sample should be used to make a
 contrast with all other samples. Alternatively, set to \code{NULL} to not
-plot contrast panels.}
+plot contrast panels. See also the \code{show_single_contrast} argument.}
 
 \item{metric}{A \code{character} of length 1:
 
@@ -167,6 +176,10 @@ have an educated quess for the scale. \item A \code{numeric} vector of
 length two providing the limits of the scale. Use \code{NA} to refer to
 existing minima or maxima. \item A \code{function} that accepts the
 existing (automatic) limits and returns new limits. }}
+
+\item{show_single_contrast}{A \code{logical} of length 1; if \code{FALSE}
+(default), does not show contrasts when \code{discovery} describes one
+experiment. If \code{TRUE}, plots empty panel.}
 
 \item{mode}{\code{[PESCAn & ARA]} What result slot should be used for
 visualisation? \code{"obsexp"} for the observed over expected metric or

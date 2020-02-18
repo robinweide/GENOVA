@@ -8,7 +8,7 @@ ARA(
   explist,
   bed,
   shift = 1e+06,
-  size_bin = 21,
+  size_bin = NULL,
   size_bp = NULL,
   outlier_filter = c(0, 1),
   anchors = NULL,
@@ -29,7 +29,9 @@ anchors should be shifted. Essentially performs circular permutation of
 ignored when \code{shift <= 0}.}
 
 \item{size_bin}{The size of the lookup regions in bins (i.e. a score of 21
-yields an output with 10 Hi-C bins both up- and downstream of the anchor).}
+yields an output with 10 Hi-C bins both up- and downstream of the anchor).
+When \code{NULL} (default), it is internally set to \code{21} when the
+\code{size_bp} is also \code{NULL}.}
 
 \item{size_bp}{Alternative parametrisation for the lookup regions, expressed
 in basepairs. Not used when the argument \code{size_bin} is set.}

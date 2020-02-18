@@ -70,10 +70,18 @@ print.ARMLA_discovery <- function(x, ...) {
 
   opening <- paste0(
     "A ", attr(x, "package"), " '", myclass, "' object involving the ",
-    "following ", dim(x$signal)[3],' experiments:\n"',
-    paste0(dimnames(x$signal)[[3]], collapse = '", "'),
-    '" at a resolution of ', res, '.\n\n'
+    "following ", tail(dim(x$signal), 1), ' experiment(s):\n"',
+    paste0(tail(dimnames(x$signal), 1)[[1]], collapse = '", "'),
+    '" at a resolution of ', res, '.'
   )
+  
+  if (myclass == "CSCAn_discovery" && length(dim(x$signal) == 4L)) {
+    opening <- paste0(opening, '\nThe following groupings apply: "', 
+                      paste0(dimnames(x$signal)[[3]], collapse = '", "'), 
+                      '".\n\n')
+  } else {
+    opening <- paste0(opening, "\n\n")
+  }
 
   slots0 <- paste0("Contains the following slots:\n")
   slots1 <- paste0("- signal:\tAn ", paste0(dim(x$signal), collapse = " x "),
@@ -259,7 +267,7 @@ print.domainogram_discovery <- function(x, ...) {
   myclass <- class(x)[1]
   pos <- format(range(x$position), scientific = FALSE)
   chrom <- attr(x, "chr")
-  expnames <- unique(x$experiment)
+  expnames <- tail(colnames(x), -2)
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
@@ -284,7 +292,8 @@ print.domainogram_discovery <- function(x, ...) {
 #' @keywords internal
 print.DI_discovery <- function(x, ...) {
   myclass <- class(x)[1]
-  expnames <- unique(x$DI$experiment)
+  expnames <- tail(colnames(x$DI), -4)
+  # expnames <- unique(x$DI$experiment)
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")
@@ -306,7 +315,8 @@ print.DI_discovery <- function(x, ...) {
 #' @keywords internal
 print.virtual4C_discovery <- function(x, ...) {
   myclass <- class(x)[[1]]
-  expnames <- unique(x$data$experiment)
+  expnames <- tail(colnames(x$data), -2)
+  # expnames <- unique(x$data$experiment)
   res <- attr(x, "resolution")
   res <- if (res %% 1e6 == 0) {
     paste0(res / 1e6, " Mb")

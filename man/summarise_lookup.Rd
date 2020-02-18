@@ -4,7 +4,7 @@
 \alias{summarise_lookup}
 \title{Summarise the results of a repeated matrix lookup}
 \usage{
-summarise_lookup(array, outlier_filter = c(0, 1), keep = NULL)
+summarise_lookup(array, outlier_filter = c(0, 1), keep = NULL, group = NULL)
 }
 \arguments{
 \item{array}{A threedimensional \code{array}.}

@@ -8,10 +8,12 @@
 #'
 #' @param discovery A \code{discovery} object as returned by GENOVA analysis
 #'   functions.
+#'
 #' @param contrast An \code{integer} or \code{character} matching an experiment
 #'   (name) of length 1, specifying which sample should be used to make a
 #'   contrast with all other samples. Alternatively, set to \code{NULL} to not
-#'   plot contrast panels.
+#'   plot contrast panels. See also the \code{show_single_contrast} argument.
+#'
 #' @param metric A \code{character} of length 1:
 #'
 #'   \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
@@ -58,9 +60,14 @@
 #' @param geom \code{[IIT]} A \code{character} vector of length 1; either one of
 #'   \code{"boxplot"}, \code{"violin"}, \code{"jitter"} to get boxplots, violin
 #'   plots or jittered point plots.
+#'
 #' @param censor_contrast \code{[IIT]} A \code{logical} of length 1 deciding
 #'   wether the contrasting experiment itself should be censored (\code{TRUE})
 #'   or included (\code{FALSE}).
+#'
+#' @param show_single_contrast A \code{logical} of length 1; if \code{FALSE}
+#'   (default), does not show contrasts when \code{discovery} describes one
+#'   experiment. If \code{TRUE}, plots empty panel.
 #'
 #' @param title add a title
 #' @param ... further arguments passed to or from other methods.
@@ -130,13 +137,14 @@ visualise.default <- function(discovery, ...) {
        "' has been implemented.", call. = FALSE)
 }
 
-
 # Common elements ---------------------------------------------------------
 
 # Common ancestor for aggregate repeated matrix lookup analysis plots
 visualise.ARMLA <- function(discovery, contrast = 1,
                             metric = c("diff", "lfc"),
-                            raw = FALSE, altfillscale, ...) {
+                            raw = FALSE, altfillscale, 
+                            show_single_contrast = FALSE,
+                            ...) {
   metric <- match.arg(metric)
   mats <- discovery$signal
 
@@ -167,12 +175,15 @@ visualise.ARMLA <- function(discovery, contrast = 1,
   df <- do.call(rbind, df)
 
   # Calculate metric if contrast is supplied
-  if (!is.null(contrast)) {
+  showcontrast <- !is.null(contrast) && 
+    (dims[3] > 1L || literalTRUE(show_single_contrast))
+  
+  if (showcontrast) {
     contrast <- as.vector(mats[,,contrast])
     contrast <- switch(
       metric,
       "diff" = as.vector(mats) - rep(contrast, dims[3]),
-      "lfc" = log2(as.vector(mats) / rep(contrast, dims[3]))
+      "lfc"  = log2(as.vector(mats) / rep(contrast, dims[3]))
     )
     dim(contrast) <- dim(mats)
     contrast_name <- switch(metric,
@@ -191,7 +202,7 @@ visualise.ARMLA <- function(discovery, contrast = 1,
   # Setup base of plot
   g <- ggplot2::ggplot(df, ggplot2::aes(x, y))
 
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     # Setup basics of the diff plots
     # Warnings are supressed because ggplot doesn't recognise
     # the altfill aesthetic (YET!)
@@ -264,10 +275,12 @@ visualise.ARMLA <- function(discovery, contrast = 1,
 #' @rdname visualise
 #' @export
 visualise.APA_discovery <- function(discovery, contrast = 1,
-                                    metric = c("diff", "lfc"),
+                                    metric = c("lfc", "diff"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL, ...) {
+                                    colour_lim_contrast = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   metric <- match.arg(metric)
   
   # Decide on limits
@@ -294,7 +307,8 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
     discovery = discovery,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -335,6 +349,94 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
   g
 }
 
+#' rdname visualise
+#' export
+#' @noRd
+visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
+                                      raw = FALSE, title = NULL, colour_lim = NULL,
+                                      show_single_contrast = FALSE,
+                                      ...) {
+  mode <- match.arg(mode)
+  hasobsexp <- "obsexp" %in% names(discovery)
+  if (mode == "obsexp" & !hasobsexp) {
+    warning("Mode was set to 'obsexp' but no such result was found")
+  }
+  hasobsexp <- hasobsexp && mode == "obsexp"
+  res <- if (hasobsexp) {
+    setNames(discovery[names(discovery) %in% "obsexp"], "signal")
+  } else {
+    discovery
+  }
+  
+  if (is.null(colour_lim)) {
+    if (hasobsexp) {
+      colour_lim <- centered_limits(1)
+    } else {
+      colour_lim <- c(NA, NA)
+    }
+  }
+  
+  df <- c(lapply(seq_along(dim(res$signal)), function(i) {
+    dnm <- dimnames(res$signal)[[i]]
+    if (is.null(dnm)) {
+      return(as.vector(slice.index(res$signal, i)))
+    } else {
+      return(dnm[as.vector(slice.index(res$signal, i))])
+    }
+  }), list(as.vector(res$signal)))
+  df <- as.data.frame(df, stringsAsFactors = FALSE)
+  df <- setNames(df, c(paste0("Var", seq_along(dim(res$signal))), "value"))
+  if (ncol(df) == 5) {
+    groups <- strsplit(as.character(df$Var3), "-")
+    df$left  <- vapply(groups, `[`, character(1), 1)
+    df$right <- vapply(groups, `[`, character(1), 2)
+  }
+  df$Var1 <- as.integer(df$Var1)
+  df$Var2 <- as.integer(df$Var2)
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
+    ggplot2::geom_raster() +
+    ggplot2::facet_grid(left ~ Var4 + right, switch = "y")
+  
+  if (raw) {
+    return(g)
+  }
+  
+  pos_breaks <- function(x) {
+    x <- scales::extended_breaks()(x)
+    if (length(x) > 3) head(tail(x, -1), -1) else x
+  }
+  
+  panel_spac <- c(rep(5.5, length(unique(df$right)) - 1L))
+  panel_spac <- c(panel_spac, rep(11, length(unique(df$Var4)) - 1L))
+  panel_spac <- head(rep(panel_spac, length(unique(df$Var4))), -1)
+  panel_spac <- ggplot2::unit(panel_spac, "points")
+
+  g <- g + ggplot2::scale_fill_gradientn(
+    colours =  c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    name = expression(frac("Observed", "Expected")),
+    oob = scales::squish,
+    limits = c(-5, 5)
+  ) + 
+    ggplot2::scale_x_continuous(breaks = pos_breaks, 
+                                labels = function(x) {
+                                  ifelse(x == 0, "3'", paste0(x / 1000, "kb"))
+                                }, expand = c(0,0),
+                                name = "") +
+    ggplot2::scale_y_continuous(breaks = pos_breaks,
+                                labels = function(x) {
+                                  ifelse(x == 0, "5'", paste0(x / 1000, "kb"))
+                                }, expand = c(0,0), name = "") +
+    GENOVA_THEME() +
+    ggplot2::theme(
+      aspect.ratio = 1,
+      strip.placement = "outside",
+      panel.spacing.x = panel_spac
+    )
+  
+  g
+}
+
 #' @rdname visualise
 #' @export
 visualise.PESCAn_discovery <- function(discovery, contrast = 1,
@@ -342,7 +444,9 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        mode = c("obsexp", "signal"),
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
-                                       colour_lim_contrast = NULL, ...) {
+                                       colour_lim_contrast = NULL, 
+                                       show_single_contrast = FALSE,
+                                       ...) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -390,7 +494,8 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -447,10 +552,12 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
 #' @rdname visualise
 #' @export
 visualise.ATA_discovery <- function(discovery, contrast = 1,
-                                    metric = c("diff", "lfc"),
+                                    metric = c("lfc", "diff"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL, ...) {
+                                    colour_lim_contrast = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   metric <- match.arg(metric)
   
   # Decide on limits
@@ -474,7 +581,8 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
     discovery = discovery,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -531,7 +639,9 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     mode = c("obsexp", "signal"),
                                     raw = FALSE, title = NULL,
                                     colour_lim = NULL,
-                                    colour_lim_contrast = NULL, ...) {
+                                    colour_lim_contrast = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   metric <- match.arg(metric)
   # Handle mode settings
   mode <- match.arg(mode)
@@ -572,7 +682,8 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
-    altfillscale = altfillscale
+    altfillscale = altfillscale,
+    show_single_contrast = show_single_contrast
   )
   if (raw) {
     return(g)
@@ -641,10 +752,11 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 #' @export
 visualise.CS_discovery <- function(discovery, contrast = NULL,
                                    chr = "chr1", start = NULL, end = NULL,
-                                   raw = FALSE, ...) {
+                                   raw = FALSE, show_single_contrast = FALSE,
+                                   ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- discovery$compart_scores
+  df <- as.data.table(discovery$compart_scores)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
@@ -653,7 +765,8 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
   df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
                    df[, ..expnames])
   
-  if (!is.null(contrast)) {
+ showcontrast <- !is.null(contrast) && (length(expnames) > 1L || literalTRUE(show_single_contrast))
+  if (showcontrast) {
     cdf <- as.matrix(df[,expnames])
     cdf <- cdf - cdf[, contrast]
     cdf <- cbind.data.frame(mid = df$mid, cdf)
@@ -668,7 +781,7 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
                    score = unlist(df[2:ncol(df)]),
                    exp = rep(expnames, each = nrow(df)))
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     # Melt cdf
     cdf <- data.frame(mid = rep(cdf$mid, length(expnames)),
                       score = unlist(cdf[2:ncol(cdf)]),
@@ -731,10 +844,12 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
 #' @rdname visualise
 #' @export
 visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
-                                   start = NULL, end = NULL, raw = FALSE, ...) {
+                                   start = NULL, end = NULL, raw = FALSE, 
+                                   show_single_contrast = FALSE,
+                                   ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- discovery$insula_score
+  df <- as.data.table(discovery$insula_score)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
@@ -742,8 +857,10 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   
   df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
                    df[, ..expnames])
+  showcontrast <- !is.null(contrast) && 
+    (length(expnames) > 1L || literalTRUE(show_single_contrast))
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     cdf <- as.matrix(df[,expnames])
     cdf <- cdf - cdf[, contrast]
     cdf <- cbind.data.frame(mid = df$mid, cdf)
@@ -758,7 +875,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
                    score = unlist(df[2:ncol(df)]),
                    exp = rep(expnames, each = nrow(df)))
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     # Melt cdf
     cdf <- data.frame(mid = rep(cdf$mid, length(expnames)),
                       score = unlist(cdf[2:ncol(cdf)]),
@@ -821,39 +938,47 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
 #' @rdname visualise
 #' @export
 visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
-                                    start = NULL, end = NULL, raw = FALSE, ...) {
+                                    start = NULL, end = NULL, raw = FALSE, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   df <- discovery$DI
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
-  expnames <- unique(df$experiment)
+  expnames <- tail(colnames(df), -4)
   
-  df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
-                   exp = df$experiment,
-                   dir_index = df$DI)
+  df <- cbind.data.frame(mid = (df[["start"]] + df[["end"]]/2),
+                         df[, expnames])
+  
+  # df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
+  #                  tail(as.list(df, - 4)))
   
   yname <- "Directionality Index"
   
-  if (!is.null(contrast)) {
-    cdf <- dcast(as.data.table(df), mid ~ exp, value.var = "dir_index")
-    locs <- cdf[, 1]
-    cdf <- cdf[, tail(seq_len(ncol(cdf)), -1), with = FALSE]
-    contr <- cdf[, contrast, with = FALSE][[1]]
-    cdf <- cdf - contr
-    cdf[, mid := locs]
-    cdf <- melt(cdf, id.vars = "mid")
-    setnames(cdf, 2:3, c("exp", "dir_index"))
+  showcontrast <- !is.null(contrast) && (length(expnames) > 1L || literalTRUE(show_single_contrast))
+  
+  if (showcontrast) {
+    
+    cdf <- do.call(cbind.data.frame, c(list(mid = df$mid), lapply(df[, -1], function(x){
+      x - df[[contrast + 1]]
+    })))
+    setDT(cdf)
+    cdf <- melt(cdf, value.name = "dir_index", id.vars = "mid")
     cdf[, panel := factor("Difference", levels = c(yname, "Difference"))]
+    setDT(df)
+    df <- melt(df, value.name = "dir_index", id.vars = "mid")
     df$panel <- factor(yname, levels = c(yname, "Difference"))
   } else {
+    setDT(df)
+    df <- melt(df, value.name = "dir_index", id.vars = "mid")
     cdf <- NULL
   }
 
   rownames(df) <- NULL
   
-  g <- ggplot2::ggplot(df, ggplot2::aes(mid, dir_index, colour = exp)) +
+  g <- ggplot2::ggplot(df, ggplot2::aes(mid, dir_index, colour = variable)) +
     ggplot2::geom_line()
   
   if (!is.null(cdf)) {
@@ -1097,10 +1222,11 @@ visualise.RCP_discovery = function(discovery, contrast = 1,
 visualise.virtual4C_discovery <- function(discovery, bins = NULL, 
                                           bedlist = NULL, bed_colours = "black", 
                                           extend_viewpoint = NULL, ...){
-  data <- discovery$data
+  data <- as.data.table(discovery$data)
   VP   <- attr(discovery,"viewpoint")
   data <- data[chromosome == VP[1, 1]]
-  expnames <- attributes(discovery)$sample
+
+  expnames <- tail(colnames(data), -2)
   
   if(!is.null(extend_viewpoint)){
     VP[, 2] <- VP[, 2] - extend_viewpoint
@@ -1116,11 +1242,13 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
   blackout_up   <- VP[, 2]
   blackout_down <- VP[, 3]
   
+  data <- melt(data, id.vars = c("chromosome", "mid"))
+  
   data_blackout <- data
   for (i in seq_len(nrow(VP))) {
     if (nrow(VP) > 1) {
-      expcheck1 <- data_blackout$experiment != expnames[i]
-      expcheck2 <- data$experiment != expnames[i]
+      expcheck1 <- data_blackout$variable != expnames[i]
+      expcheck2 <- data$variable != expnames[i]
     } else {
       expcheck1 <- expcheck2 <- FALSE
     }
@@ -1159,15 +1287,16 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
 
   breaks   <- seq(min(data$mid), max(data$mid), length.out = bins)
   bin_size <- median(diff(breaks))
-  smooth   <- data[, mean(signal), 
-                   by = list(findInterval(data$mid, breaks), experiment)]
+  data <- data[is.finite(value)]
+  smooth   <- data[, mean(value), 
+                   by = list(findInterval(data$mid, breaks), variable)]
   smooth$mid = breaks[smooth[[1]]] + (bin_size/2)
   smooth[,1] = NULL
-  colnames(smooth) = c("experiment", "signal","mid")
+  colnames(smooth) = c("variable", "value","mid")
   
   smooth$experiment <- factor(smooth$experiment, levels = expnames)
   data$experiment <- factor(data$experiment, levels = expnames)
-  p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = signal)) +
+  p = ggplot2::ggplot(data, ggplot2::aes(x= mid, y = value)) +
     ggplot2::geom_col(data = smooth, fill = 'black', width = bin_size,
                       colour = NA) +
     ggplot2::theme_classic() +
@@ -1177,15 +1306,15 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
                                 breaks = function(x) {
                                   scales::extended_breaks()(pmax(x, 0))
                                 }) +
-    ggplot2::facet_grid(experiment ~ .)
+    ggplot2::facet_grid(variable ~ .)
   
   # draw_blackout ===+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  ymax <- ceiling(max(smooth$signal))
-  data_blackout$signal <- ymax
+  ymax <- ceiling(max(smooth$value))
+  data_blackout$value <- ymax
 
   if (nrow(data_blackout) > 0) {
     blackout <- data_blackout[, list(min = min(mid), max = max(mid)), 
-                              by = "experiment"]
+                              by = "variable"]
     blackout[, "mid" := (min + max) / 2]
     p <- p + ggplot2::geom_rect(
       data = blackout, fill = "#D8D8D8", colour = "#D8D8D8",
@@ -1235,7 +1364,9 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
                                        chr = "all",
                                        raw = FALSE, title = NULL,
                                        colour_lim = NULL,
-                                       colour_lim_contrast = NULL, ...) {
+                                       colour_lim_contrast = NULL, 
+                                       show_single_contrast = FALSE,
+                                       ...) {
   df <- discovery$saddle
   df <- df[!is.na(mean) & !is.na(q1),]
   df$exp <- factor(df$exp, levels = unique(df$exp))
@@ -1271,7 +1402,8 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
     colour_lim_contrast <- centered_limits()
   }
 
-  if (!is.null(contrast)) {
+  showcontrast <- !is.null(contrast) && (length(expnames) > 1L || show_single_contrast)
+  if (showcontrast) {
     contrast <- df[exp == expnames[contrast],]
     m <- matrix(NA_real_, max(contrast$q1), max(contrast$q2))
     i <- as.matrix(contrast[,list(q1, q2)])
@@ -1306,7 +1438,7 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
     g <- g + ggplot2::ggtitle(title)
   }
   
-  if (!is.null(contrast)) {
+  if (showcontrast) {
     
     suppressWarnings(
       g <- g + ggplot2::geom_raster(data = contrast, 
@@ -1387,6 +1519,9 @@ visualise.domainogram_discovery <- function(discovery,
                                             title = NULL,
                                             raw = FALSE, ...) {
   df <- discovery
+  df <- as.data.table(df)
+  df <- melt(df, id.vars = c("window", "position"), value.name = "insulation")
+  setnames(df, 3, "experiment")
   
   g <- ggplot2::ggplot(df, ggplot2::aes(position, window, fill = insulation)) +
     ggplot2::geom_raster() +
@@ -1421,7 +1556,9 @@ visualise.domainogram_discovery <- function(discovery,
 #' @export
 visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
                                     geom = c("boxplot", "violin", "jitter"),
-                                    censor_contrast = TRUE, title = NULL, ...) {
+                                    censor_contrast = TRUE, title = NULL, 
+                                    show_single_contrast = FALSE,
+                                    ...) {
   geom <- match.arg(geom)
   dat <- as.data.table(discovery$results)
   cols <- attr(discovery, "colours")
@@ -1429,8 +1566,10 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
   expnames <- tail(colnames(dat), -2)
   
   if (!is.null(contrast) & length(expnames) < 2) {
-    message("Cannot compute a contrast for one sample. Reverting to ",
-            "visualising plain values.")
+    if (show_single_contrast) {
+      message("Cannot compute a contrast for one sample. Reverting to ",
+              "visualising plain values.")
+    }
     contrast <- NULL
   } else if (!is.null(contrast)){
     contrast <- expnames[contrast]

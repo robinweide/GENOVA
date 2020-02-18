@@ -43,7 +43,7 @@
 #' }
 call_TAD_insulation <- function(IS_discovery, method = "crane", 
                                 min_strength = 0.1) {
-  ins <- IS_discovery$insula_score
+  ins <- as.data.table(IS_discovery$insula_score)
   
   # Control data.table threads
   dt.cores <- data.table::getDTthreads()
@@ -52,7 +52,7 @@ call_TAD_insulation <- function(IS_discovery, method = "crane",
   
   expnames <- tail(colnames(ins), -4)
   
-  scooch = 100e3 / attr(IS_discovery, "resolution")
+  scooch = pmax(100e3 / attr(IS_discovery, "resolution"), 2)
   
   m <- melt(ins, id.vars = c("chrom", "start", "end", "bin"),
             measure.vars = expnames)

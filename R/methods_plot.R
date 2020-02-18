@@ -30,6 +30,9 @@
 #'   or included (\code{FALSE}).
 #' @param geom A \code{character} of length 1 indicating what geometry should be
 #'   plotted. Either \code{"boxplot"} or \code{"point"}.
+#' @param minimalist \code{[domainogram]} A \code{logical} of length 1. If
+#'   \code{TRUE}, plot only the first experiment in the discovery and don't plot
+#'   any axis, titles or legends.
 #' @param metric \code{[RCP]} Currently not in use.
 #' @param ... Not currently used for discovery plots.
 #'
@@ -486,7 +489,7 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- x$compart_scores
+  df <- as.data.table(x$compart_scores)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
@@ -506,7 +509,7 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
   
   par(mar = c(5, 4, 4, 6) + 0.1)
 
-  plot(df$mid / 1e6, df$test1, type = 'l', col = cols[1],
+  plot(df$mid / 1e6, df[[expnames[[1]]]], type = 'l', col = cols[1],
        ylim = ylim, ylab = "Compartment Score", 
        xlab = paste0("Location ", chr, " (Mb)"), new = FALSE)
   for(i in tail(seq_len(ncol(dat)), -1)) {
@@ -523,7 +526,7 @@ plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
-  df <- x$insula_score
+  df <- as.data.table(x$insula_score)
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
@@ -544,7 +547,7 @@ plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
   
   
   
-  plot(df$mid / 1e6, df$test1, type = 'l', col = cols[1],
+  plot(df$mid / 1e6, df[[expnames[[1]]]], type = 'l', col = cols[1],
        ylim = ylim, ylab = "Insulation Score", 
        xlab = paste0("Location ", chr, " (Mb)"), new = FALSE)
   for(i in tail(seq_len(ncol(dat)), -1)) {
@@ -565,9 +568,10 @@ plot.DI_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
   ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
                 df[["end"]] <= end)
   df <- df[ii,]
-  expnames <- unique(df$experiment)
-  df <- dcast(df, chrom + start + end + bin ~ experiment, value.var = "DI")
+  expnames <- tail(colnames(df), -4)
+  # df <- dcast(df, chrom + start + end + bin ~ experiment, value.var = "DI")
   dat <- as.matrix(df[, 5:ncol(df)])
+  setDT(df)
   df[, "mid" := (start + end) / 2]
   
   cols <- attr(x, "colours")
@@ -715,12 +719,23 @@ plot.saddle_discovery <- function(
 #' @rdname plot_discovery
 #' @export
 plot.domainogram_discovery <- function(
-  x, colour_fun = NULL, colour_lim = c(-1, 1), ...
+  x, colour_fun = NULL, colour_lim = c(-1, 1), 
+  minimalist = FALSE,
+  ...
 ) {
-  par(mar = c(1, 1, 1, 1))
-  par(oma = c(4, 4, 1, 3))
+  minimalist <- literalTRUE(minimalist)
+  if (minimalist) {
+    x <- x[, 1:3]
+  } else {
+    par(mar = c(1, 1, 1, 1))
+    par(oma = c(4, 4, 1, 3))
+  }
   
-  mats <- as.data.table(x)
+  x <- as.data.table(x)
+  x <- melt(x, id.vars = c("window", "position"), value.name = "insulation")
+  setnames(x, 3, "experiment")
+  
+  mats <- x
   mats <- split(mats, mats$experiment)
   mats <- lapply(mats, function(mat) {
     casted <- dcast(mat, position ~ window, value.var = "insulation")
@@ -741,8 +756,10 @@ plot.domainogram_discovery <- function(
   
   layout_mat <- matrix(c(seq_len(n_samples), rep(n_samples + 1, n_samples)), 
                        nrow = n_samples, byrow = FALSE)
-  layout(layout_mat, widths = c(1, 0.1),
-         respect = FALSE)
+  if (!minimalist) {
+    layout(layout_mat, widths = c(1, 0.1),
+           respect = FALSE)
+  }
   
   if (is.null(colour_fun)) {
     cols <- rev(c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"))
@@ -760,28 +777,40 @@ plot.domainogram_discovery <- function(
     m <- pmax(m, colour_lim[1])
     m <- pmin(m, colour_lim[2])
     # m[cbind(rev(row(m)[T]), col(m)[T])] <- m
-    image(x = as.numeric(dimnames(m)[[1]]) / 1e6, 
-          y = as.numeric(dimnames(m)[[2]]), 
-          z = m, 
-          col = colour_fun(255),
-          zlim = colour_lim, 
-          xlab = paste0("Location ", attr(x, "chrom"), " (Mb)"),
-          ylab = "Window Size",
-          xaxt = if(i == nrow(layout_mat)) "s" else "n",
-          yaxt = "s")
-    mtext(titles[[i]], side = 3, line = 0.5)
+    if (!minimalist) {
+      image(x = as.numeric(dimnames(m)[[1]]) / 1e6, 
+            y = as.numeric(dimnames(m)[[2]]), 
+            z = m, 
+            col = colour_fun(255),
+            zlim = colour_lim, 
+            xlab = paste0("Location ", attr(x, "chrom"), " (Mb)"),
+            ylab = "Window Size",
+            xaxt = if(i == nrow(layout_mat)) "s" else "n",
+            yaxt = "s")
+      mtext(titles[[i]], side = 3, line = 0.5)
+    } else {
+      image(x = as.numeric(dimnames(m)[[1]]) / 1e6,
+            y = as.numeric(dimnames(m)[[2]]),
+            z = m,
+            col = colour_fun(255),
+            zlim = colour_lim,
+            xlab = "", ylab = "",
+            xaxt = "n", yaxt = "n")
+    }
   }
   
   # A legend
-  m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
-  image(1, m[1, ], m, col = colour_fun(255), 
-        xaxt = "n", yaxt = "n", new = FALSE)
-  axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
-  mtext("Insulation Score", side = 4, line = 2.5)
-  
-  mtext(paste0("Location ", attr(x, "chrom"), " (Mb)"), 
-        side = 1, outer = TRUE, line = 2)
-  mtext("Window Size", side = 2, outer = TRUE, line = 2)
+  if (!minimalist) {
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
+    image(1, m[1, ], m, col = colour_fun(255), 
+          xaxt = "n", yaxt = "n", new = FALSE)
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    mtext("Insulation Score", side = 4, line = 2.5)
+    
+    mtext(paste0("Location ", attr(x, "chrom"), " (Mb)"), 
+          side = 1, outer = TRUE, line = 2)
+    mtext("Window Size", side = 2, outer = TRUE, line = 2)
+  }
 }
 
 #' @rdname plot_discovery
@@ -816,10 +845,12 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 1))
   
-  res <- attr(x, "resolution") / 2
-  vp <- attr(x, "viewpoint")
+  res <- attr(x, "resolution")
+  vp  <- attr(x, "viewpoint")
   
-  data <- x$data
+  data <- as.data.table(x$data)
+  data <- melt(data, id.vars = c("chromosome", "mid"))
+  colnames(data) <- c("chromosome", "mid", "experiment", "signal")
   data <- data[chromosome == vp[1,1, drop = TRUE]]
   
   # fill in empty signal
@@ -827,11 +858,12 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   sdata <- lapply(sdata, function(dat) {
     missing <- seq(min(dat$mid), max(dat$mid), by = res)
     missing <- missing[!(missing %in% dat$mid)]
-    append <- data.table(dat[1, 1], missing, 0, dat[1, 4])
+    append <- data.table(dat[1, 1], missing, dat[1, 3], 0)
     dat <- rbind(dat, append, use.names = FALSE)
     dat[order(mid)]
   })
   data <- rbindlist(sdata)
+  data <- data[is.finite(signal)]
   
   data <- data[, list(chromosome, pos = mid + c(-1, 1) * res, 
               signal, experiment, p = c("s", "e")), by = seq_len(nrow(data))]

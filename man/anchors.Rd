@@ -3,6 +3,7 @@
 \name{anchors}
 \alias{anchors}
 \alias{anchors_PESCAn}
+\alias{anchors_CSCAn}
 \alias{anchors_APA}
 \alias{anchors_ATA}
 \alias{anchors_ARA}
@@ -14,6 +15,15 @@ anchors_PESCAn(
   res,
   bed,
   dist_thres = c(5000000L, Inf),
+  min_compare = 10L,
+  mode = c("cis", "trans", "both")
+)
+
+anchors_CSCAn(
+  IDX,
+  res,
+  bedlist,
+  dist_thres = c(50000, 2e+06),
   min_compare = 10L,
   mode = c("cis", "trans", "both")
 )
@@ -38,10 +48,11 @@ anchors_extendedloops(IDX, res, bedpe, dist_thres = c(30000, 3e+06))
 \item{res}{The resolution attribute of a GENOVA \code{contacts} object.\emph{
 Not for ATA}.}
 
-\item{bed}{A BED-formatted \code{data.frame} with the following 3 columns:
-\enumerate{ \item A \code{character} giving the chromosome names. \item An
-\code{integer} with start positions. \item An \code{integer} with end
-positions. }}
+\item{bed, bedlist}{A BED-formatted \code{data.frame} with the following 3
+columns: \enumerate{ \item A \code{character} giving the chromosome names.
+\item An \code{integer} with start positions. \item An \code{integer} with
+end positions. } For the \code{bedlist} variant, a \code{list} of the above
+(\emph{CSCAn only}).}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints. For ATA-type
@@ -49,11 +60,11 @@ anchors, the minimum and maximum sizes of TADs.}
 
 \item{min_compare}{An \code{integer} vector of length 1 indicating the
 minimum number of pairwise interactions on a chromosome to consider.
-\emph{PE-SCAn only}.}
+\emph{PE-SCAn and C-SCAn only}.}
 
 \item{mode}{A \code{character} vector of length 1 indicating which
 interactions to retain. Possible values: \code{"cis"}, \code{"trans"} or
-\code{"both"}. \emph{PE-SCAn and APA only}.}
+\code{"both"}. \emph{PE-SCAn, C-SCAn and APA only}.}
 
 \item{bedpe}{A BEDPE-formatted \code{data.frame} with the following 6
 columns. \emph{APA only}: \enumerate{ \item A \code{character} giving the
@@ -102,11 +113,20 @@ Anchors are calculated within aggregate repeated matrix lookup
   '\code{mode}' argument, which default to \code{"cis"} to only take pairwise
   interactions on the same chromosome.}
 
+  \subsection{C-SCAn anchors}{ \code{anchors_CSCan()}, like
+  \code{anchors_PESCAn}, takes all pairwise interactions of genomic
+  coordinates, but crosswise between unique combinations of BED-like
+  \code{data.frame}s in the \code{bedlist} argument. It is used within the
+  \code{TODO:LINK CSCAN} function. Has a \code{group} attribute to
+  keep track from which combination of BED-like \code{data.frame} the anchor
+  originated.}
+
   \subsection{APA anchors}{ \code{anchors_APA()} takes a BEDPE-formatted
   \code{data.frame} and translates the coordinates in the first 3 and last 3
   columns to indices of the Hi-C matrix. It is used within the
   \code{\link[GENOVA]{APA}} function. The '\code{mode}' argument defaults to
-  \code{"both"} but optionally allows for both cis- and trans-interactions. }
+  \code{"both"} but optionally allows for either cis- or trans-interactions
+  too. }
 
   \subsection{Extended loops anchors}{ \code{anchors_extendedloops()} takes
   the same input as \code{anchors_APA()}, but transforms these coordinates to

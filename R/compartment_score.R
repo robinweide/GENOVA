@@ -134,7 +134,7 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
   cols <- vapply(explist, attr, character(1L), "colour")
   
-  out <- structure(list(compart_scores = out),
+  out <- structure(list(compart_scores = as.data.frame(out)),
                    package = "GENOVA",
                    colours = cols,
                    class = c("CS_discovery"),
@@ -207,7 +207,7 @@ sign_compartmentscore <- function(CS_discovery,
   }
   
   # Setup data
-  CS <- CS_discovery$compart_scores
+  CS <- as.data.table(CS_discovery$compart_scores)
   CS <- CS[order(chrom, start)]
   expnames <- tail(colnames(CS), -4)
   CS[["part"]] <- inverse.rle(attr(CS_discovery, "partitioning"))
@@ -297,7 +297,7 @@ sign_compartmentscore <- function(CS_discovery,
   out <- merge(idx, out, by = "bin", all = TRUE)
   setcolorder(out, neworder = c(2,3,4,1,5:ncol(out)))
   
-  structure(list(compart_scores = out),
+  structure(list(compart_scores = as.data.frame(out)),
             class = "CS_discovery",
             colours = attr(CS_discovery, "colours"),
             package = "GENOVA",

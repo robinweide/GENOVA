@@ -260,7 +260,7 @@ ATA <- function(explist, bed,
 #' Aggregate Region Analysis
 #'
 #' Extracts Hi-C matrices centered around regions and averages the results for
-#' all regions.
+#' all regions. Can take orientations of regions into account.
 #'
 #' @inheritParams PESCAn
 #' @param bed A \code{data.frame} with 3 columns in BED format, containing the
@@ -363,8 +363,14 @@ ARA <- function(explist, bed, shift = 1e6,
 #'   and end-positions.
 #'
 #' @return A \code{CSCAn_discovery} object containing the results of the C-SCAn.
-#' export
-#' @noRd
+#' @export
+#' 
+#' @seealso The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
+#'   lookup and summary for the \code{CSCan} function and others. \cr The
+#'   \code{\link[GENOVA]{discovery}} class for a general description of
+#'   \code{discovery} classes. \cr The \code{\link[GENOVA]{visualise}} function
+#'   for visualisation of the results. \cr The
+#'   \code{\link[GENOVA]{anchors}} documentation for more information about
 #'
 #' @examples
 #' \dontrun{
@@ -391,7 +397,7 @@ CSCAn <- function(explist, bedlist, shift = 1e6L,
   
   # Dynamically set lower limit
   if (is.na(dist_thres[1])) {
-    dist_thres[1] <- 2 * res
+    dist_thres[1] <- length(rel_pos) * res
   }
   
   # Calculate anchors

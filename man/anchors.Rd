@@ -117,7 +117,7 @@ Anchors are calculated within aggregate repeated matrix lookup
   \code{anchors_PESCAn}, takes all pairwise interactions of genomic
   coordinates, but crosswise between unique combinations of BED-like
   \code{data.frame}s in the \code{bedlist} argument. It is used within the
-  \code{TODO:LINK CSCAN} function. Has a \code{group} attribute to
+  \code{\link[GENOVA]{CSCAn}} function. Has a \code{group} attribute to
   keep track from which combination of BED-like \code{data.frame} the anchor
   originated.}
 

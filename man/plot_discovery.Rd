@@ -3,6 +3,7 @@
 \name{plot_discovery}
 \alias{plot_discovery}
 \alias{plot.APA_discovery}
+\alias{plot.CSCAn_discovery}
 \alias{plot.PESCAn_discovery}
 \alias{plot.ATA_discovery}
 \alias{plot.ARA_discovery}
@@ -25,6 +26,8 @@
   colour_lim_contrast = NULL,
   ...
 )
+
+\method{plot}{CSCAn_discovery}(x, colour_fun = NULL, colour_lim = NULL, ...)
 
 \method{plot}{PESCAn_discovery}(
   x,

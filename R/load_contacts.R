@@ -43,7 +43,7 @@
 load_contacts = function(signal_path, 
                         indices_path = NULL,
                         resolution = 10e3,
-                        sample_name,
+                        sample_name = NULL,
                         centromeres = NULL,
                         colour = NULL,
                         z_norm = FALSE,
@@ -58,6 +58,9 @@ load_contacts = function(signal_path,
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
   
+  if(is.null(sample_name)){
+    stop('Please give a valid sample_name.')
+  }
   doJuicer = F
   doCooler = F
   doHiCpro = F

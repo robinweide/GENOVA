@@ -36,15 +36,48 @@ quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
   within_sample_lfc = data.table(as.data.frame(within_sample_lfc),keep.rownames = T)
 
   eg = t(combn(1:nrow(within_sample_lfc), 2))
-  out = cbind(within_sample_lfc[eg[,1],], 
+  out_summarised = cbind(within_sample_lfc[eg[,1],], 
               within_sample_lfc[eg[,2],])
   
-  colnames(out) = c('exp1', 'exp1_lfc', 'exp2', 'exp2_lfc')
-  out$contrast_lfc = log2(out$exp2_lfc/out$exp1_lfc)
+  colnames(out_summarised) = c('exp1', 'exp1_lfc', 'exp2', 'exp2_lfc')
+  out_summarised$contrast_lfc = log2(out_summarised$exp2_lfc/out_summarised$exp1_lfc)
+
+  out_summarised = out_summarised[,c(1,3,2,4,5)]
 
   
-  return(out[,c(1,3,2,4,5)])
   
+  raw_data_melt <- lapply(discovery$signal_raw, function(DIS)reshape2::melt(DIS))
+  raw_data_melt <- data.table::rbindlist(raw_data_melt, idcol = 'sample_name')
+  
+  bp_bins <- unique(raw_data_melt$Var2)
+  pixel_range <- which(bp_bins == 0)
+  pixel_range <- c(pixel_range - 1, pixel_range, pixel_range+1)
+  bp_bins <- bp_bins[pixel_range]
+  
+  median_donuthole_lfc <- raw_data_melt[Var2 %in% bp_bins & Var3 %in% bp_bins, 
+                                        median(value, na.rm = T), 
+                                        by = 'sample_name,Var1']
+  median_donut_lfc <- raw_data_melt[(!Var2 %in% bp_bins) & (!Var3 %in% bp_bins), 
+                                    median(value, na.rm = T), 
+                                    by = 'sample_name,Var1']
+  median_lfc <- data.table::merge.data.table(median_donuthole_lfc,
+                                             median_donut_lfc, 
+                                             by = c('sample_name','Var1'))
+  colnames(median_lfc)[2:4] <- c('loop_ID', 'pixel', 'background')
+  
+  out <- median_lfc[ , list('difference' = pixel/background,
+                            'lfc' = log2(pixel/background)), 
+                     by = 'sample_name,loop_ID']
+  out$sample_name <- factor(out$sample_name, levels = names(discovery$signal_raw))
+ 
+  bed <- reshape2::colsplit(out$loop_ID, pattern = "[:\\-;]", 
+                            names = c('chr_up','start_up', 'end_up', 
+                                      'chr_down', 'start_down','end_down'))
+  bed$sample_name <- out$sample_name
+  bed$difference <- out$difference
+  bed$lfc <- out$lfc
+  
+  return(list('per_sample' = out_summarised, 'per_loop' = bed)) 
 }
 
 #' @rdname quantify

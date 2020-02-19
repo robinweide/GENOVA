@@ -6,5 +6,7 @@ before_install:
 # Use R language
 language: r
 r_check_args: "--no-vignettes"
+bioc_packages:
+  - BiocStyle
 
 warnings_are_errors: false

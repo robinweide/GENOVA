@@ -16,8 +16,8 @@
 #' @param bed,bedlist A BED-formatted \code{data.frame} with the following 3
 #'   columns: \enumerate{ \item A \code{character} giving the chromosome names.
 #'   \item An \code{integer} with start positions. \item An \code{integer} with
-#'   end positions. } For the \code{bedlist} variant, a \code{list} of the above
-#'   (\emph{CSCAn only}).
+#'   end positions. } For the \code{bedlist} variant, a named \code{list} of the 
+#'   above. (\emph{CSCAn only}).
 #' @param bedpe A BEDPE-formatted \code{data.frame} with the following 6
 #'   columns. \emph{APA only}: \enumerate{ \item A \code{character} giving the
 #'   chromosome names of the first coordinate. \item An \code{integer} giving
@@ -37,6 +37,10 @@
 #'   \emph{PE-SCAn and C-SCAn only}.
 #' @param padding A \code{numeric} of length 1 to determine the padding around
 #'   TADs, expressed in TAD widths. \emph{ATA only}.
+#' @param group_direction A \code{logical} of length 1 which when \code{TRUE} 
+#'   will mirror groups for anchors where the left anchor location is larger 
+#'   than the right anchor location. Left and right refer to bedlist elements 
+#'   generating combinations. \emph{CSCAn only}.
 #'
 #' @return A \code{anchors} object with two colums in \code{matrix} format.
 #'
@@ -196,12 +200,13 @@ anchors_PESCAn <- function(IDX, res, bed,
   idx
 }
 
-#' export
+#' @export
 #' @rdname anchors
 anchors_CSCAn <- function(IDX, res, bedlist,
                           dist_thres = c(50e3, 2e6),
                           min_compare = 10L,
-                          mode = c("cis", "trans", "both")) {
+                          mode = c("cis", "trans", "both"),
+                          group_direction = FALSE) {
   mode <- match.arg(mode)
   if (length(bedlist) < 2 || !inherits(bedlist, "list")) {
     stop("Less than two 'bedlist' elements found. For self-interaction of a",
@@ -212,8 +217,7 @@ anchors_CSCAn <- function(IDX, res, bedlist,
   chroms <- lapply(lapply(bedlist, `[[`, 1), unique)
   chroms <- table(unlist(chroms))
   chroms <- names(chroms)[chroms >= 2]
-  # chroms <- Reduce(intersect, lapply(bedlist, `[[`, 1))
-  # chroms <- intersect(left[, 1], right[, 1])
+
   if (length(chroms) == 0) {
     stop("No common chromosomes found between 'bedlist' argument elements",
          call. = FALSE)
@@ -271,6 +275,14 @@ anchors_CSCAn <- function(IDX, res, bedlist,
     }
     idx[, is_cis := NULL]
     # idx <- as.data.frame(idx)
+  }
+  
+  if (group_direction) {
+    str <- lapply(strsplit(idx$combi, ""), rev)
+    str <- as.data.frame(do.call(rbind, str))
+    str <- do.call(paste0, str)
+    flip <- idx[, V2 < V1]
+    idx[flip, combi := str[flip]]
   }
   
   # Sort start-end

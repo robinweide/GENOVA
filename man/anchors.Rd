@@ -25,7 +25,8 @@ anchors_CSCAn(
   bedlist,
   dist_thres = c(50000, 2e+06),
   min_compare = 10L,
-  mode = c("cis", "trans", "both")
+  mode = c("cis", "trans", "both"),
+  group_direction = FALSE
 )
 
 anchors_APA(
@@ -51,8 +52,8 @@ Not for ATA}.}
 \item{bed, bedlist}{A BED-formatted \code{data.frame} with the following 3
 columns: \enumerate{ \item A \code{character} giving the chromosome names.
 \item An \code{integer} with start positions. \item An \code{integer} with
-end positions. } For the \code{bedlist} variant, a \code{list} of the above
-(\emph{CSCAn only}).}
+end positions. } For the \code{bedlist} variant, a named \code{list} of the 
+above. (\emph{CSCAn only}).}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints. For ATA-type
@@ -65,6 +66,11 @@ minimum number of pairwise interactions on a chromosome to consider.
 \item{mode}{A \code{character} vector of length 1 indicating which
 interactions to retain. Possible values: \code{"cis"}, \code{"trans"} or
 \code{"both"}. \emph{PE-SCAn, C-SCAn and APA only}.}
+
+\item{group_direction}{A \code{logical} of length 1 which when \code{TRUE} 
+will mirror groups for anchors where the left anchor location is larger 
+than the right anchor location. Left and right refer to bedlist elements 
+generating combinations. \emph{CSCAn only}.}
 
 \item{bedpe}{A BEDPE-formatted \code{data.frame} with the following 6
 columns. \emph{APA only}: \enumerate{ \item A \code{character} giving the

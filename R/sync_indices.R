@@ -42,10 +42,8 @@ sync_indices <- function(explist) {
     stop("Can only synchronise indices of GENOVA contacts objects.")
   }
   if (nexp == 1L) {
-    if (verbose) {
-      message(paste("Single experiment provided to 'sync_indices()'.",
-                    "No indices to synchronise. Returning input."))
-    }
+    message(paste("Single experiment provided to 'sync_indices()'.",
+                  "No indices to synchronise. Returning input."))
     return(explist)
   }
   

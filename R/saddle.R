@@ -82,15 +82,20 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
   
+  # Assign chromosome arms
   scores[, part := inverse.rle(attr(CS_discovery, "partitioning"))]
+  # Remove centromeres and NAs
   scores <- scores[!endsWith(part, "centro")]
   scores <- scores[!is.na(eval(as.symbol(expnames[1]))), ]
+  # Remove chromosomes with less than #bins scores
   use_chrom <- scores[, length(start), by = part]
   use_chrom <- use_chrom[["part"]][use_chrom[["V1"]] > bins]
   quants <- scores[part %in% use_chrom,]
   
+  # Setup quantile bins
   qbins <- seq(0, 1, length.out = bins + 1)
   
+  # Assign quantiles to scores
   for (i in expnames) {
     i <- as.symbol(i)
     quants[, 

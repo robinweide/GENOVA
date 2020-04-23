@@ -384,11 +384,16 @@ CSCAn <- function(explist, bedlist, shift = 1e6L,
                   anchors = NULL, raw = FALSE) {
   explist <- check_compat_exp(explist)
   
-  if (length(bedlist) < 2 || !inherits(bedlist, "list")) {
-    stop("Less than two 'bedlist' elements found. For self-interaction of a",
-         " single BED-like data.frame, see '?PESCAn'.",
-         call. = FALSE)
+  if (!missing(bedlist)) {
+    if (length(bedlist) < 2 || !inherits(bedlist, "list")) {
+      stop("Less than two 'bedlist' elements found. For self-interaction of a",
+           " single BED-like data.frame, see '?PESCAn'.",
+           call. = FALSE)
+    }
+  } else if (missing(anchors)) {
+    stop("CSCAn either needs precomputed anchors or the 'bedlist' argument.")
   }
+
   
   # Initialise parameters
   res <- attr(explist[[1]], "res")

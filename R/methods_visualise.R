@@ -1673,6 +1673,64 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
   return(g)
 }
 
+#' @rdname visualise
+#' @export
+visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL) {
+  obsexp <- discovery$obs
+  dim <- dim(obsexp)
+  if (attr(discovery, "mode") %in% c("trans", "regress")) {
+    tmp <- obsexp
+    tmp[slice.index(obsexp, 1) == slice.index(obsexp, 2)] <- 0
+  } else {
+    tmp <- obsexp
+  }
+  sums <- apply(tmp, 3, sum)
+  obsexp[] <- log2((obsexp / rep(sums, each = prod(dim[1:2]))) / discovery$exp)
+  
+  df <- data.frame(
+    row = as.vector(slice.index(obsexp, 1)),
+    col = as.vector(slice.index(obsexp, 2)),
+    exp = as.vector(slice.index(obsexp, 3))
+  )
+  df[] <- mapply(function(x, i){x[i]}, x = dimnames(obsexp), i = df)
+  df$value <- as.vector(obsexp)
+  
+  limits <- range(with(df, value[row != col]))
+  limits[1] <- min(limits[1], -1)
+  limits[2] <- max(limits[2], 1)
+  
+  if (utils::packageVersion("ggplot2") > "3.2.1") {
+    guide_x <- ggplot2::guide_axis(check.overlap = TRUE, angle = 90)
+    guide_y <- ggplot2::guide_axis(check.overlap = TRUE)
+  } else {
+    guide_x <- guide_y <- ggplot2::waiver()
+  }
+  
+  g <- ggplot2::ggplot(df, ggplot2::aes(row, col, fill = value)) +
+    ggplot2::geom_raster() +
+    ggplot2::facet_grid(~ exp) +
+    ggplot2::scale_x_discrete(limits = dimnames(obsexp)[[1]], guide = guide_x,
+                              expand = c(0,0), name = "") +
+    ggplot2::scale_y_discrete(limits = dimnames(obsexp)[[2]], guide = guide_y,
+                              expand = c(0,0), name = "")
+  if (!is.null(title)) {
+    g <- g + ggplot2::ggtitle(title)
+  }
+  if (raw) {
+    return(g)
+  }
+  
+  g <- g + ggplot2::scale_fill_gradientn(
+    colours = c("#009bef", "white", "#ff5c49"),
+    name = expression(Log[2]*frac("Observed", "Expected")),
+    limits = limits, oob = scales::squish,
+    values = scales::rescale(c(limits[1], 0, limits[2]), from = limits)
+  ) +
+    ggplot2::coord_equal() +
+    GENOVA:::GENOVA_THEME()
+  g
+}
+
 # Utilities ---------------------------------------------------------------
 
 #' scale_altfill_continuous Makes sure no errors are returned when

@@ -2,17 +2,17 @@ getEmptyCols <- function(mat, Nmad = 2, slop = 0.9, lowDiag = 2, highDiag = 10, 
   if (zeroNA) {
     mat$z[mat$z == 0] <- NA
   }
-
+  
   delta <- row(mat$z) - col(mat$z)
   mat$z[abs(delta) <= lowDiag | abs(delta) >= highDiag] <- NA
-
+  
   tres <- median(mat$z[!is.na(mat$z)]) - (Nmad * mad(mat$z[!is.na(mat$z)]))
-
+  
   possibles <- table(which(mat$z < tres, arr.ind = TRUE)[, 2])
   possiblespossibles <- possibles[possibles >= ceiling(max(colSums(!is.na(mat$z))) * slop)]
-
+  
   foundBins <- as.numeric(names(possiblespossibles))
-
+  
   return(foundBins)
 }
 
@@ -30,31 +30,31 @@ gregor <- function(mat) {
 
 
 fillNAs <- function(mat, MADtreshold = 2) {
-
+  
   # get all NA-locations
   eCols <- getEmptyCols(mat, Nmad = MADtreshold)
-
+  
   # make a smoothed version
   completeSmooth <- gregor(mat$z)
   completeSmooth[completeSmooth == min(completeSmooth, na.rm = T)] <- NA
   CSmean <- apply(completeSmooth, 2, mean, na.rm = T)
   CSmat <- matrix(CSmean, nrow = nrow(mat$z), ncol = ncol(mat$z))
-
+  
   # fill in the blanks
   mat$z[eCols, ] <- CSmat[eCols, ]
   mat$z[, eCols] <- CSmat[eCols, ]
-
+  
   return(mat)
 }
 
 draw_exon <- function(genes, chrom, y.pos, width, rotate = F) {
   genes.chr <- genes[genes$chrom == chrom, ]
-
+  
   es <- as.numeric(unlist(strsplit(as.character(genes.chr$exonStart), ",")))
   ee <- as.numeric(unlist(strsplit(as.character(genes.chr$exonEnd), ",")))
-
+  
   strands <- rep(genes.chr$strand, unlist(lapply(strsplit(as.character(genes.chr$exonStart), ","), length)))
-
+  
   add <- ifelse(strands == "+", 0.025 * width + width, -0.025 * width - width)
   add2 <- ifelse(genes.chr$strand == "+", 0.025 * width + width, -0.025 * width - width)
   if (rotate) {
@@ -69,64 +69,64 @@ draw_exon <- function(genes, chrom, y.pos, width, rotate = F) {
 plot.triangle <- function(bed, chrom, y1, y2, start, end, rotate = F) {
   y.scale <- abs(y1 - y2) / 0.15
   x.wid <- (end - start) * 0.012 * y.scale
-
-
+  
+  
   # first plot positive
   sel.bed <- bed[bed[, 1] == chrom &
-    bed[, 3] < end &
-    bed[, 2] > start &
-    bed[, 6] == "+", ]
+                   bed[, 3] < end &
+                   bed[, 2] > start &
+                   bed[, 6] == "+", ]
   if (nrow(sel.bed) > 0) {
     col <- "red"
     add <- ifelse(sel.bed[, 6] == "+", x.wid, -x.wid)
     add.list <- unique(add)
     if (rotate) {
       triangle <- lapply(sel.bed[, 2], function(x) list(
-          yy = c(x, x, x + add.list),
-          xx = c(y1, y2, (y1 + y2) / 2)
-        ))
+        yy = c(x, x, x + add.list),
+        xx = c(y1, y2, (y1 + y2) / 2)
+      ))
       lapply(triangle, function(x) polygon(x$xx, x$yy, col = col, border = col))
     } else {
       # with polygon
       triangle <- lapply(sel.bed[, 2], function(x) list(
-          xx = c(x, x, x + add.list),
-          yy = c(y1, y2, (y1 + y2) / 2)
-        ))
+        xx = c(x, x, x + add.list),
+        yy = c(y1, y2, (y1 + y2) / 2)
+      ))
       lapply(triangle, function(x) polygon(x$xx, x$yy, col = col, border = col))
     }
   }
-
+  
   # then repeat for negative
   sel.bed <- bed[bed[, 1] == chrom &
-    bed[, 3] < end &
-    bed[, 2] > start &
-    bed[, 6] == "-", ]
+                   bed[, 3] < end &
+                   bed[, 2] > start &
+                   bed[, 6] == "-", ]
   if (nrow(sel.bed) > 0) {
     col <- "blue"
     add <- ifelse(sel.bed[, 6] == "+", x.wid, -x.wid)
     add.list <- unique(add)
     if (rotate) {
       triangle <- lapply(sel.bed[, 2], function(x) list(
-          yy = c(x, x, x + add.list),
-          xx = c(y1, y2, (y1 + y2) / 2)
-        ))
+        yy = c(x, x, x + add.list),
+        xx = c(y1, y2, (y1 + y2) / 2)
+      ))
       lapply(triangle, function(x) polygon(x$xx, x$yy, col = col, border = col))
     } else {
       # with polygon
       triangle <- lapply(sel.bed[, 2], function(x) list(
-          xx = c(x, x, x + add.list),
-          yy = c(y1, y2, (y1 + y2) / 2)
-        ))
+        xx = c(x, x, x + add.list),
+        yy = c(y1, y2, (y1 + y2) / 2)
+      ))
       lapply(triangle, function(x) polygon(x$xx, x$yy, col = col, border = col))
     }
   }
-
+  
   # check if there are any without orientation and plot these as rectangles
   sel.bed <- bed[bed[, 1] == chrom &
-    bed[, 3] < end &
-    bed[, 2] > start &
-    bed[, 6] != "-" &
-    bed[, 6] != "+", ]
+                   bed[, 3] < end &
+                   bed[, 2] > start &
+                   bed[, 6] != "-" &
+                   bed[, 6] != "+", ]
   if (nrow(sel.bed) > 0) {
     col <- "black"
     add <- ifelse(sel.bed[, 6] != "+", 0, 0)
@@ -159,7 +159,7 @@ plot.genes <- function(genes, chrom, start, end, y.pos, rotate = F) {
 features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
                      chip2 = NULL, autoCHIP = T, rotate = F,
                      type = c("triangle", "triangle"), col = NULL) {
-
+  
   # - set bounds for three tracks
   if (is.null(col)) {
     col <- "black"
@@ -213,10 +213,10 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
     gene.pos = gene.pos, chip1.y1 = chip1.y1, chip1.y2 = chip1.y2,
     chip2.y1 = chip2.y1, chip2.y2 = chip2.y2
   )
-
-
+  
+  
   # make chip smaller
-
+  
   if (max(mat1$x) - min(mat1$x) > 2e6) {
     if (typeof(chip1) == "list") {
       newSize <- diff(unlist(y.values[2:3])) * 0.75
@@ -224,7 +224,7 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
       # y.values[[2]] = y.values[[2]] + D/2
       y.values[[3]] <- y.values[[3]] - D
     }
-
+    
     if (typeof(chip2) == "list") {
       newSize <- diff(unlist(y.values[4:5])) * 0.75
       D <- diff(unlist(y.values[4:5])) - newSize
@@ -232,142 +232,142 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
       # y.values[[5]] = y.values[[5]] - D/2
     }
   }
-
-
-
+  
+  
+  
   # - plot an empty canvas c(0,1.3)
-
+  
   if (rotate) {
     plot(0,
-      type = "n", ylim = rev(range(mat1$x)), xlim = c(1.3, 0), axes = F,
-      xlab = "", ylab = ""
+         type = "n", ylim = rev(range(mat1$x)), xlim = c(1.3, 0), axes = F,
+         xlab = "", ylab = ""
     )
   } else {
     plot(0,
-      type = "n", xlim = range(mat1$x), ylim = c(0, 1.3), axes = F,
-      xlab = "", ylab = ""
+         type = "n", xlim = range(mat1$x), ylim = c(0, 1.3), axes = F,
+         xlab = "", ylab = ""
     )
   }
-
-
+  
+  
   # - plot inner track c(0.1,0.4) -> chipInner
-
+  
   if (typeof(chip1) == "list") { # BED!
-
+    
     if (ncol(chip1) < 6) {
       type[1] <- "rectangle"
       # there is no orientation in column 6
     } else if (autoCHIP & !any(c("-", "+") %in% chip1[, 6])) {
       type[1] <- "rectangle"
     }
-
+    
     if (type[1] == "triangle") {
       # +
       tmp_step <- (y.values$chip1.y2 - y.values$chip1.y1) / 2
       tmp_step <- tmp_step * 0.9
       blabla <- plot.triangle(chip1[chip1[, 6] == "+", ],
-        chrom = chrom,
-        y1 = y.values$chip1.y1,
-        y2 = y.values$chip1.y1 + tmp_step,
-        start = min(mat1$x), end = max(mat1$x), rotate = rotate
+                              chrom = chrom,
+                              y1 = y.values$chip1.y1,
+                              y2 = y.values$chip1.y1 + tmp_step,
+                              start = min(mat1$x), end = max(mat1$x), rotate = rotate
       )
       # -
       blabla <- plot.triangle(chip1[chip1[, 6] == "-", ],
-        chrom = chrom,
-        y1 = y.values$chip1.y2 - tmp_step,
-        y2 = y.values$chip1.y2, start = min(mat1$x),
-        end = max(mat1$x), rotate = rotate
+                              chrom = chrom,
+                              y1 = y.values$chip1.y2 - tmp_step,
+                              y2 = y.values$chip1.y2, start = min(mat1$x),
+                              end = max(mat1$x), rotate = rotate
       )
       # # other
       blabla <- plot.rectangle(chip1[chip1[, 6] != "-" & chip1[, 6] != "+", ],
-        chrom = chrom, y1 = y.values$chip1.y1,
-        y2 = y.values$chip1.y2, start = min(mat1$x),
-        end = max(mat1$x), col = col[1], rotate = rotate
+                               chrom = chrom, y1 = y.values$chip1.y1,
+                               y2 = y.values$chip1.y2, start = min(mat1$x),
+                               end = max(mat1$x), col = col[1], rotate = rotate
       )
     } else if (type[1] == "rectangle") {
       blabla <- plot.rectangle(chip1,
-        chrom = chrom, y1 = y.values$chip1.y1,
-        y2 = y.values$chip1.y2, start = min(mat1$x),
-        end = max(mat1$x), col = col[1], rotate = rotate
+                               chrom = chrom, y1 = y.values$chip1.y1,
+                               y2 = y.values$chip1.y2, start = min(mat1$x),
+                               end = max(mat1$x), col = col[1], rotate = rotate
       )
     }
   } else if (typeof(chip1) == "character") { # BW!
-
+    
     blabla <- suppressWarnings(plot.bw(chip1, chrom, min(mat1$x),
-      max(mat1$x), y.values$chip1.y1,
-      y.values$chip1.y2,
-      col = col[1],
-      rotate = rotate, yMax = yMax[1]
+                                       max(mat1$x), y.values$chip1.y1,
+                                       y.values$chip1.y2,
+                                       col = col[1],
+                                       rotate = rotate, yMax = yMax[1]
     ))
   }
-
+  
   # - plot middle track c(0.5,0.8) -> chipOuter
-
+  
   if (typeof(chip2) == "list") { # BED!
-
+    
     if (ncol(chip2) < 6) {
       type[2] <- "rectangle"
       # there is no orientatio in column 6
     } else if (autoCHIP & !any(c("-", "+") %in% chip2[, 6])) {
       type[2] <- "rectangle"
     }
-
+    
     if (type[2] == "triangle") {
       # +
       tmp_step <- (y.values$chip2.y2 - y.values$chip2.y1) / 2
       tmp_step <- tmp_step * 0.9
       blabla <- plot.triangle(chip2[chip2[, 6] == "+", ],
-        chrom = chrom,
-        y1 = y.values$chip2.y1,
-        y2 = y.values$chip2.y1 + tmp_step,
-        start = min(mat1$x), end = max(mat1$x), rotate = rotate
+                              chrom = chrom,
+                              y1 = y.values$chip2.y1,
+                              y2 = y.values$chip2.y1 + tmp_step,
+                              start = min(mat1$x), end = max(mat1$x), rotate = rotate
       )
       # -
       blabla <- plot.triangle(chip2[chip2[, 6] == "-", ],
-        chrom = chrom,
-        y1 = y.values$chip2.y2 - tmp_step,
-        y2 = y.values$chip2.y2, start = min(mat1$x),
-        end = max(mat1$x), rotate = rotate
+                              chrom = chrom,
+                              y1 = y.values$chip2.y2 - tmp_step,
+                              y2 = y.values$chip2.y2, start = min(mat1$x),
+                              end = max(mat1$x), rotate = rotate
       )
       # # other
       blabla <- plot.rectangle(chip2[chip2[, 6] != "-" & chip2[, 6] != "+", ],
-        chrom = chrom, y1 = y.values$chip2.y1,
-        y2 = y.values$chip2.y2, start = min(mat1$x),
-        end = max(mat1$x), col = col[2], rotate = rotate
+                               chrom = chrom, y1 = y.values$chip2.y1,
+                               y2 = y.values$chip2.y2, start = min(mat1$x),
+                               end = max(mat1$x), col = col[2], rotate = rotate
       )
     } else if (type[2] == "rectangle") {
       blabla <- plot.rectangle(chip2,
-        chrom = chrom, y1 = y.values$chip2.y1,
-        y2 = y.values$chip2.y2, start = min(mat1$x),
-        end = max(mat1$x), col = col[2], rotate = rotate
+                               chrom = chrom, y1 = y.values$chip2.y1,
+                               y2 = y.values$chip2.y2, start = min(mat1$x),
+                               end = max(mat1$x), col = col[2], rotate = rotate
       )
     }
   } else if (typeof(chip2) == "character") { # BW!
-
+    
     blabla <- suppressWarnings(plot.bw(chip2, chrom, min(mat1$x), max(mat1$x),
-      y.values$chip2.y1, y.values$chip2.y2,
-      col = col[2], rotate = rotate,
-      yMax = yMax[2]
+                                       y.values$chip2.y1, y.values$chip2.y2,
+                                       col = col[2], rotate = rotate,
+                                       yMax = yMax[2]
     ))
   }
-
-
+  
+  
   # - plot outer track c(0.9,1.2) -> genes
-
-
+  
+  
   if (!is.null(genes)) {
     blabla <- plot.genes(genes, chrom, min(mat1$x), max(mat1$x),
-      y.pos = y.values$gene.pos, rotate = rotate
+                         y.pos = y.values$gene.pos, rotate = rotate
     )
   }
-
-
+  
+  
   # - if rotate, plot an empty canvas for quadrant 4
-
+  
   if (rotate) {
     plot(0,
-      type = "n", xlim = range(mat1$x), ylim = c(0, 1.3), axes = F,
-      xlab = "", ylab = ""
+         type = "n", xlim = range(mat1$x), ylim = c(0, 1.3), axes = F,
+         xlab = "", ylab = ""
     )
   }
 }
@@ -378,34 +378,34 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
 
 plot.bw <- function(file, chrom, start, end, y1, y2, col,
                     yMax = NULL, rotate = F) {
-
+  
   # leave here in case something changes
   # official call but don't need it
   # d <- read_bigwig( file, chrom=chrom, start=start, end=end)
   # d <- as.data.frame(d)
   
   try_require("bigwrig", "plot.bw", "github")
-
+  
   d <- bigwrig::read_bigwig_impl(file, chrom = chrom, start = start, end = end)
-
+  
   # to speed up plotting we are going to collapse the same consecutive
   # values
   i <- which(diff(d[, 4]) != 0) # select points where the consecutive values differ
   # select the middle of a set of consecutive values
   sel <- floor(c(0, head(i, -1)) + i) / 2
   d <- d[sel, ]
-
-
+  
+  
   max.val <- max(d[, 4])
   d[, 4] <- as.numeric(d[, 4])
-
+  
   if (!is.null(yMax)) {
     d[d[, 4] > yMax, ] <- yMax
     max.val <- yMax
   } else {
     message("chip.yMax not given for a .bw-track: yMax is ", max.val)
   }
-
+  
   y.range <- abs(y1 - y2)
   y.val <- y.range * d[, 4] / max.val
   if (rotate) {
@@ -418,7 +418,7 @@ plot.bw <- function(file, chrom, start, end, y1, y2, col,
 # overlay TAD positions with the hi-c data
 draw.tads <- function(tads, chrom, tads.type = "lower", tads.colour = "#006837",
                       lwd = 2) {
-
+  
   # check if tads is a list of dataframes or a data.frame
   if (inherits(tads, "list")) { # this seems to be a tad!
     if (all(unlist(lapply(tads, inherits, "data.frame")))) { # all DFs in list!
@@ -435,46 +435,46 @@ draw.tads <- function(tads, chrom, tads.type = "lower", tads.colour = "#006837",
     stop("tads is not a (list of) data.frame!")
   }
   # if you survived this, you will now have a list of dfs!
-
+  
   # get the tads colour, resize and type
   if (length(tads) != length(tads.type)) {
     tads.type <- rep(tads.type[1], length(tads))
   }
-
+  
   if (length(tads) != length(tads.colour)) {
     tads.colour <- rep(tads.colour[1], length(tads))
   }
-
-
+  
+  
   for (listIDX in 1:length(tads)) {
     tad <- tads[[listIDX]]
-
+    
     # tads has min. 6 cols : 1 and 4 are the chrom. 2 is outer-edge 5' anchor.
     # 6 is outer edge 3' anchor
     tad <- tad[tad[, 1] == chrom, ]
-
+    
     if (tads.type[listIDX] == "both") {
       rect(tad[, 2], tad[, 2], tad[, 3], tad[, 3],
-        border = tads.colour[listIDX],
-        lwd = lwd
+           border = tads.colour[listIDX],
+           lwd = lwd
       )
     } else if (tads.type[listIDX] == "lower") {
       segments(tad[, 2], tad[, 2], tad[, 2], tad[, 3],
-        col = tads.colour[listIDX],
-        lwd = lwd
+               col = tads.colour[listIDX],
+               lwd = lwd
       )
       segments(tad[, 2], tad[, 3], tad[, 3], tad[, 3],
-        col = tads.colour[listIDX],
-        lwd = lwd
+               col = tads.colour[listIDX],
+               lwd = lwd
       )
     } else if (tads.type[listIDX] == "upper") {
       segments(tad[, 2], tad[, 2], tad[, 3], tad[, 2],
-        col = tads.colour[listIDX],
-        lwd = lwd
+               col = tads.colour[listIDX],
+               lwd = lwd
       )
       segments(tad[, 3], tad[, 2], tad[, 3], tad[, 3],
-        col = tads.colour[listIDX],
-        lwd = lwd
+               col = tads.colour[listIDX],
+               lwd = lwd
       )
     } else {
       stop("Wrong option for TAD plot type: upper, lower and both are allowed")
@@ -485,14 +485,14 @@ draw.tads <- function(tads, chrom, tads.type = "lower", tads.colour = "#006837",
 draw1loop <- function(radius, x.midpoint, y.midpoint, lty = 1, col = "black", lwd = 1) {
   x <- seq(x.midpoint - radius, x.midpoint + radius, 1)
   y <- seq(y.midpoint - radius, y.midpoint + radius, 1)
-
+  
   curve((1 * (radius^2 - (x - x.midpoint)^2)^0.5 + y.midpoint),
-    add = TRUE,
-    from = (x.midpoint - radius), to = (x.midpoint + radius), lty = lty, col = col, lwd = lwd
+        add = TRUE,
+        from = (x.midpoint - radius), to = (x.midpoint + radius), lty = lty, col = col, lwd = lwd
   )
   curve((-1 * (radius^2 - (x - x.midpoint)^2)^0.5 + y.midpoint),
-    add = TRUE,
-    from = (x.midpoint - radius), to = (x.midpoint + radius), lty = lty, col = col, lwd = lwd
+        add = TRUE,
+        from = (x.midpoint - radius), to = (x.midpoint + radius), lty = lty, col = col, lwd = lwd
   )
 }
 
@@ -504,22 +504,22 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
   }
   subLoop$xmid <- apply(subLoop[, 2:3], 1, mean)
   subLoop$ymid <- apply(subLoop[, 5:6], 1, mean)
-
+  
   # all to upper
   subLoop[subLoop$xmid < subLoop$ymid, ] <- setNames(subLoop[subLoop$xmid < subLoop$ymid, c(1:6, 8, 7)], colnames(subLoop))
-
+  
   if (type == "lower") {
     subLoop <- setNames(subLoop[, c(1:6, 8, 7)], colnames(subLoop))
   } else if (type == "both") {
     subLoopLower <- setNames(subLoop[, c(1:6, 8, 7)], colnames(subLoop))
     subLoop <- rbind(subLoop, subLoopLower)
   }
-
+  
   for (i in 1:nrow(subLoop)) {
     xmid <- subLoop[i, "xmid"]
-
+    
     ymid <- subLoop[i, "ymid"]
-
+    
     draw1loop(
       radius = radius, x.midpoint = xmid[1],
       y.midpoint = ymid[1], lty = lty, col = col, lwd = lwd
@@ -622,11 +622,11 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   if (is.null(loops.radius)) {
     loops.radius <- attr(exp1, "res") * 5
   }
-
+  
   if (length(chip) < 3) {
     symmAnn <- T
   }
-
+  
   # some error handling
   if (!is.null(exp2)) {
     if (any(attr(exp1, "rmChrom"), attr(exp2, "rmChrom"))) {
@@ -636,7 +636,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     if (attr(exp1, "res") != attr(exp2, "res")) {
       stop("The Hi-C matrices should have the same resolution")
     }
-
+    
     if (check.genome) {
       if (!all(exp1$IDX[["V4"]] == exp2$IDX[["V4"]])) {
         msg <- paste0(
@@ -647,24 +647,24 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       }
     }
   }
-
+  
   # if only one colour is given use it for all feature tracks
   if (length(chip.colour) == 1) {
     chip.colour <- rep(chip.colour, 4)
   }
-
+  
   # fill up empty yMax-elements
   if (length(chip.yMax) < 4) {
     for (i in (length(chip.yMax) + 1):4) {
       chip.yMax[i] <- chip.yMax[1]
     }
   }
-
+  
   # if only one colour is given use it for all feature tracks
   if (length(type) == 1) {
     type <- rep(type, 4)
   }
-
+  
   # create a plotting layout
   w <- 6
   lay <- matrix(4, nrow = w, ncol = w)
@@ -675,33 +675,33 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   layout(lay)
   par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
   # layout
-
+  
   # get a matrix from the experiment
   mat1 <- select_subset(exp1, chrom, start, end)
   if (!is.null(exp2)) {
     mat2 <- select_subset(exp2, chrom, start, end)
   }
-
-
-
+  
+  
+  
   if (smoothNA) {
     mat1 <- fillNAs(mat1, MADtreshold = fillNAtreshold)
-
+    
     if (!is.null(exp2)) {
       mat2 <- fillNAs(mat2, MADtreshold = fillNAtreshold)
     }
   }
-
-
+  
+  
   ZnormScale <- attr(exp1, "znorm")
   if (!is.null(exp2)) {
     if (attr(exp1, "znorm") != attr(exp2, "znorm")) {
       stop("One experiment is Z-normalised and the other is not.")
     }
-
+    
     ZnormScale <- attr(exp1, "znorm") | attr(exp2, "znorm")
   }
-
+  
   ##############################################################################
   # plot AVL for fun
   ##############################################################################
@@ -712,17 +712,17 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       "#bdbdbd", "#969696", "#737373", "#525252",
       "#252525", "#000000"
     ))
-
+    
     image(antoni[, nrow(antoni):1 ],
-      col = rev(CR(10)),
-      axes = F, ylim = rev(range(antoni))
+          col = rev(CR(10)),
+          axes = F, ylim = rev(range(antoni))
     )
-
+    
     ##############################################################################
     # plot only exp2
     ##############################################################################
   } else if (is.null(exp2)) {
-
+    
     # set cutoffs
     if (is.null(cut.off)) {
       cut.off <- max(quantile(abs(mat1$z), .99))
@@ -733,19 +733,18 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     }
     mat1$z[mat1$z > cut.off] <- cut.off
     mat1$z[mat1$z < -cut.off] <- -cut.off
-
-
+    
+    
     if (inferno) {
-      higlassCol <- c("white", "#f5a623", "#d0021b", "black")
-      wr <- colorRampPalette(higlassCol)
+      wr <- colorRampPalette(bezier_corrected_hot)
       if (ZnormScale) {
-        wr <- colorRampPalette(c("#009bef", "white", "#ff5c49"))
+        wr <- colorRampPalette(bezier_corrected_divergent)
       }
       image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
     } else {
-      wr <- colorRampPalette(c("white", "red"))
+      wr <- colorRampPalette(bezier_corrected_whiteRed)
       if (ZnormScale) {
-        wr <- colorRampPalette(c("#009bef", "white", "#ff5c49"))
+        wr <- colorRampPalette(bezier_corrected_divergent)
       }
       image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
     }
@@ -756,7 +755,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   else {
     if (coplot == "dual") {
       mat1$z[upper.tri(mat1$z)] <- mat2$z[upper.tri(mat2$z)]
-
+      
       # set cutoffs
       if (is.null(cut.off)) {
         cut.off <- max(quantile(abs(mat1$z), .99))
@@ -767,19 +766,18 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       }
       mat1$z[mat1$z > cut.off] <- cut.off
       mat1$z[mat1$z < -cut.off] <- -cut.off
-
+      
       if (inferno) {
-        higlassCol <- c("white", "#f5a623", "#d0021b", "black")
-        wr <- colorRampPalette(higlassCol)
+        wr <- colorRampPalette(bezier_corrected_hot)
         if (ZnormScale) {
-          wr <- colorRampPalette(c("#009bef", "white", "#ff5c49"))
+          wr <- colorRampPalette(bezier_corrected_divergent)
         }
         image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
       } else {
-        wr <- colorRampPalette(c("white", "red"))
-
+        wr <- colorRampPalette(bezier_corrected_whiteRed)
+        
         if (ZnormScale) {
-          wr <- colorRampPalette(c("#009bef", "white", "#ff5c49"))
+          wr <- colorRampPalette(bezier_corrected_divergent)
         }
         image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
       }
@@ -795,32 +793,32 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       }
       mat1$z[mat1$z > cut.off] <- cut.off
       mat1$z[mat1$z < -cut.off] <- -cut.off
-
-      bwr <- colorRampPalette(c("#009bef", "white", "#ff5c49"))
+      
+      bwr <- colorRampPalette(bezier_corrected_divergent)
       image(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
     }
   }
-
+  
   # draw pretty axes and boxes
   box(lwd = 2)
   size.region <- diff(range(mat1$x))
   if (size.region > 40e6) {
     axis(2,
-      at = seq(0, 3e9, by = 10e6), labels = seq(0, 3e9, by = 10e6) / 1e6,
-      lwd = 2, cex.axis = cexTicks
+         at = seq(0, 3e9, by = 10e6), labels = seq(0, 3e9, by = 10e6) / 1e6,
+         lwd = 2, cex.axis = cexTicks
     )
     axis(3,
-      at = seq(0, 3e9, by = 10e6), labels = seq(0, 3e9, by = 10e6) / 1e6,
-      lwd = 2, cex.axis = cexTicks
+         at = seq(0, 3e9, by = 10e6), labels = seq(0, 3e9, by = 10e6) / 1e6,
+         lwd = 2, cex.axis = cexTicks
     )
   } else if (size.region > 2e6) {
     axis(2,
-      at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6,
-      lwd = 2, cex.axis = cexTicks
+         at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6,
+         lwd = 2, cex.axis = cexTicks
     )
     axis(3,
-      at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6,
-      lwd = 2, cex.axis = cexTicks
+         at = seq(0, 3e9, by = 1e6), labels = seq(0, 3e9, by = 1e6) / 1e6,
+         lwd = 2, cex.axis = cexTicks
     )
   } else {
     lab <- seq(0, 3e9, by = 500e3) / 1e6
@@ -828,17 +826,17 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     axis(2, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = cexTicks)
     axis(3, at = seq(0, 3e9, by = 500e3), labels = lab, lwd = 2, cex.axis = cexTicks)
   }
-
+  
   # draw tads on the image plot
   if (!is.null(tads)) {
     draw.tads(tads, chrom, tads.type = tads.type, tads.colour = tads.colour)
   }
-
+  
   # draw loops on the image plot
   if (!is.null(loops)) {
     draw.loops(loops, chrom = chrom, start = start, end = end, type = loops.type, radius = loops.radius, col = loops.colour, lwd = 2)
   }
-
+  
   # fill up empty elements
   if (length(chip) < 4) {
     for (i in (length(chip) + 1):4) {
@@ -846,13 +844,13 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     }
   }
   if (!skipAnn) {
-
+    
     # plot the features horizontal
     features(mat1, chrom, genes,
-      chip1 = chip[[1]], chip2 = chip[[2]],
-      autoCHIP = guessType, yMax = chip.yMax[1:2], col = chip.colour[1:2], type = type[1:2]
+             chip1 = chip[[1]], chip2 = chip[[2]],
+             autoCHIP = guessType, yMax = chip.yMax[1:2], col = chip.colour[1:2], type = type[1:2]
     )
-
+    
     # clone 1 and two to feature entries 3 and 4
     if (symmAnn) {
       if (!is.null(chip[[1]])) {
@@ -861,14 +859,14 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       if (!is.null(chip[[2]])) {
         chip[[4]] <- chip[[2]]
       }
-
+      
       chip.yMax[3:4] <- chip.yMax[1:2]
       chip.colour[3:4] <- chip.colour[1:2]
     }
-
+    
     features(mat1, chrom, genes, chip[[3]], chip[[4]],
-      autoCHIP = guessType, yMax = chip.yMax[3:4], col = chip.colour[3:4],
-      type = type[3:4], rotate = T
+             autoCHIP = guessType, yMax = chip.yMax[3:4], col = chip.colour[3:4],
+             type = type[3:4], rotate = T
     )
   }
 }

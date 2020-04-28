@@ -151,7 +151,8 @@ chromosome_matrix <- function(
   dimnames(E)[[3]] <- expnames
   
   structure(list(obs = counts, exp = E),
-            resolution = GENOVA::resolution(explist)[1],
+            resolution = resolution(explist)[1],
+            package = "GENOVA",
             mode = expected,
             class = c("chrommat_discovery", "discovery"))
 }

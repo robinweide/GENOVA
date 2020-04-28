@@ -7,3 +7,6 @@ bezier_corrected_divergent <- c('#0065b2', '#2399de', '#67cdfe',
 bezier_corrected_whiteRed <- c('#ffffff', '#ffeae2', '#ffd5c6', '#ffbea9', 
                          '#ffa78c', 
                          '#ff8e6f', '#ff7251', '#ff4f30', '#ff0000')
+bezier_corrected_greenPink <- c('#38793a','#589b59','#7abd79,#a8dfa6',
+                                '#f5f5f5',
+                                '#fbbffb','#f28bf2','#d364d5','#b23fb6')

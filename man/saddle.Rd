@@ -17,7 +17,19 @@ GENOVA '\code{contacts}' objects.}
 comparment score should be divided into.}
 }
 \value{
-A \code{saddle_discovery} object.
+A \code{saddle_discovery} object with 1 element:
+
+\itemize{\item\strong{\code{saddle}}, a \code{data.table} with the following columns: 
+\describe{
+\item{\code{exp}}{A \code{character} with the sample names from the 
+'\code{explist}' argument.}
+\item{\code{chr}}{A \code{character} with the chromosome names and arms (p or q).}
+\item{\code{q1}}{An \code{integer} giving the first comparment score quantile bin.
+Lower values indicate smaller compartment scores than higher values.}
+\item{\code{q2}}{An \code{integer} giving the second quantile bin.}
+\item{\code{mean}}{A \code{numeric} with the average observed over expected values
+at the indicated quantile bins.}
+}}
 }
 \description{
 Produces a compartment score quantile versus quantile analysis in which

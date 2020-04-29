@@ -25,7 +25,18 @@
 #'   '\code{CS_discovery}' object. Either print the object to see the resolution
 #'   or use \code{attr(CS_discovery, "resolution")} for programmatic access.
 #'
-#' @return A \code{saddle_discovery} object.
+#' @return A \code{saddle_discovery} object with 1 element:
+#' @return \itemize{\item\strong{\code{saddle}}, a \code{data.table} with the following columns: 
+#' \describe{
+#' \item{\code{exp}}{A \code{character} with the sample names from the 
+#' '\code{explist}' argument.}
+#' \item{\code{chr}}{A \code{character} with the chromosome names and arms (p or q).}
+#' \item{\code{q1}}{An \code{integer} giving the first comparment score quantile bin.
+#' Lower values indicate smaller compartment scores than higher values.}
+#' \item{\code{q2}}{An \code{integer} giving the second quantile bin.}
+#' \item{\code{mean}}{A \code{numeric} with the average observed over expected values
+#' at the indicated quantile bins.}
+#' }}
 #' @export
 #'
 #' @examples

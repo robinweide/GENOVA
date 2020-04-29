@@ -11,6 +11,7 @@
 \alias{unbundle.RCP_discovery}
 \alias{unbundle.DI_discovery}
 \alias{unbundle.IIT_discovery}
+\alias{unbundle.chrommat_discovery}
 \title{Split discovery objects}
 \usage{
 unbundle(discovery, ...)
@@ -32,6 +33,8 @@ unbundle(discovery, ...)
 \method{unbundle}{DI_discovery}(discovery, ...)
 
 \method{unbundle}{IIT_discovery}(discovery, ...)
+
+\method{unbundle}{chrommat_discovery}(discovery, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object with more than 1 sample.}

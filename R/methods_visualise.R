@@ -1696,7 +1696,7 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
   df[] <- mapply(function(x, i){x[i]}, x = dimnames(obsexp), i = df)
   df$value <- as.vector(obsexp)
   
-  if (!is.null(colour_lim)) {
+  if (is.null(colour_lim)) {
     colour_lim <- range(with(df, value[row != col]))
     colour_lim[1] <- min(colour_lim[1], -1)
     colour_lim[2] <- max(colour_lim[2], 1) 
@@ -1728,7 +1728,8 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
     colours = c("#009bef", "white", "#ff5c49"),
     name = expression(Log[2]*frac("Observed", "Expected")),
     limits = colour_lim, oob = scales::squish,
-    values = scales::rescale(c(colour_lim[1], 0, colour_lim[2]), from = limits)
+    values = scales::rescale(c(colour_lim[1], 0, colour_lim[2]), 
+                             from = colour_lim)
   ) +
     ggplot2::coord_equal() +
     GENOVA:::GENOVA_THEME()

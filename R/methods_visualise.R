@@ -1675,7 +1675,8 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
 
 #' @rdname visualise
 #' @export
-visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL) {
+visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
+                                         colour_lim = NULL) {
   obsexp <- discovery$obs
   dim <- dim(obsexp)
   if (attr(discovery, "mode") %in% c("trans", "regress")) {
@@ -1695,9 +1696,12 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL) {
   df[] <- mapply(function(x, i){x[i]}, x = dimnames(obsexp), i = df)
   df$value <- as.vector(obsexp)
   
-  limits <- range(with(df, value[row != col]))
-  limits[1] <- min(limits[1], -1)
-  limits[2] <- max(limits[2], 1)
+  if (!is.null(colour_lim)) {
+    colour_lim <- range(with(df, value[row != col]))
+    colour_lim[1] <- min(colour_lim[1], -1)
+    colour_lim[2] <- max(colour_lim[2], 1) 
+  }
+
   
   if (utils::packageVersion("ggplot2") > "3.2.1") {
     guide_x <- ggplot2::guide_axis(check.overlap = TRUE, angle = 90)
@@ -1723,8 +1727,8 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL) {
   g <- g + ggplot2::scale_fill_gradientn(
     colours = c("#009bef", "white", "#ff5c49"),
     name = expression(Log[2]*frac("Observed", "Expected")),
-    limits = limits, oob = scales::squish,
-    values = scales::rescale(c(limits[1], 0, limits[2]), from = limits)
+    limits = colour_lim, oob = scales::squish,
+    values = scales::rescale(c(colour_lim[1], 0, colour_lim[2]), from = limits)
   ) +
     ggplot2::coord_equal() +
     GENOVA:::GENOVA_THEME()

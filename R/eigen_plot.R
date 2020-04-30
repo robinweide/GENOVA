@@ -206,7 +206,7 @@ cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = 
 
   centromere.pos <- data.frame(chrom = c(chrom, chrom), 
                                start = c(min(cent), min(cent)) * attr(exp1, "res"), 
-                               end = c(max(cent), min(cent) * attr(exp1, "res")))
+                               end = c(max(cent), min(cent)) * attr(exp1, "res"))
   if (centromere.pos[1, 2] < 1e6 && arm == "p") {
     print("No p arm. Enter q as arm")
     return(NULL)

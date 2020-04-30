@@ -5,5 +5,10 @@ before_install:
 
 # Use R language
 language: r
+r_build_args: "--no-build-vignettes"
+r_check_args: "--no-vignettes"
+
+bioc_packages:
+  - BiocStyle
 
 warnings_are_errors: false

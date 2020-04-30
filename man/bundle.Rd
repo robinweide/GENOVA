@@ -11,6 +11,7 @@
 \alias{bundle.RCP_discovery}
 \alias{bundle.DI_discovery}
 \alias{bundle.IIT_discovery}
+\alias{bundle.chrommat_discovery}
 \title{Combine discovery objects}
 \usage{
 bundle(..., collapse = "_")
@@ -32,6 +33,8 @@ bundle(..., collapse = "_")
 \method{bundle}{DI_discovery}(..., collapse = "_")
 
 \method{bundle}{IIT_discovery}(..., collapse = "_")
+
+\method{bundle}{chrommat_discovery}(..., collapse = "_")
 }
 \arguments{
 \item{...}{A number of \code{discovery} objects from the same analysis type.}

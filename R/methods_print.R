@@ -356,7 +356,7 @@ print.IIT_discovery <- function(x, ...) {
   }
   string <- paste0("A ", attr(x, "package"), " '", myclass,
                    "' object involving the following ",
-                   length(expnames), " experiments:\n'",
+                   length(expnames), " experiment(s):\n'",
                    paste0(expnames, collapse = "', '"), "' at a ",
                    "resolution of ", res, ".\n\n")
   cat(string)
@@ -371,6 +371,39 @@ print.IIT_discovery <- function(x, ...) {
   cat(slots1)
   cat(slots2)
   
+}
+
+#' @export
+#' @keywords internal
+print.chrommat_discovery <- function(x, ...) {
+  myclass <- class(x)[[1]]
+  expnames <- dimnames(x$obs)[[3]]
+  res <- attr(x, "resolution")
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  string <- paste0("A ", attr(x, "package"), " '", myclass,
+                   "' object involving the following ",
+                   length(expnames), " experiment(s):\n'",
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n\n")
+  cat(string)
+  slots0 <- paste0("Contains the following slots:\n")
+  slots1 <- paste0(" - obs:\tAn ", paste0(dim(x$obs), collapse = " x "),
+                   " array containing summed contacts.\n")
+  slots2 <- paste0(" - exp:\tAn ", paste0(dim(x$exp), collapse = " x "),
+                   " array containing expected proportions,\n")
+  slots3 <- paste0("\tcalculated with the '", attr(x, "mode"), 
+                   "' mode.")
+  
+  cat(slots0)
+  cat(slots1)
+  cat(slots2)
+  cat(slots3)
 }
 
 # Other classes -----------------------------------------------------------

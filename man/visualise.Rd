@@ -16,6 +16,7 @@
 \alias{visualise.saddle_discovery}
 \alias{visualise.domainogram_discovery}
 \alias{visualise.IIT_discovery}
+\alias{visualise.chrommat_discovery}
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
@@ -146,6 +147,8 @@ visualise(discovery, ...)
   show_single_contrast = FALSE,
   ...
 )
+
+\method{visualise}{chrommat_discovery}(discovery, raw = FALSE, title = NULL, colour_lim = NULL)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

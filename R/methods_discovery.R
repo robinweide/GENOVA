@@ -1,3 +1,6 @@
+# As a rule of thumb, for any discovery the following is ideally true:
+# identical(discovery, do.call(bundle, unbundle(discovery)))
+
 # Class Documentation -----------------------------------------------------------
 
 #' @title Discovery class
@@ -592,6 +595,46 @@ bundle.IIT_discovery <- function(..., collapse = "_") {
   )
 }
 
+#' @rdname bundle
+#' @export
+bundle.chrommat_discovery <- function(..., collapse = "_") {
+  discos <- list(...)
+  disco_names <- names(discos)
+  if (is.null(disco_names)) {
+    disco_names <- seq_along(discos)
+  }
+  
+  # Perform checks
+  .check_disco_classes(discos)
+  .check_disco_resolutions(discos)
+  mode  <- .check_disco_attr(discos, "mode")
+  slots <- .check_disco_slots(discos)
+  
+  # Merge discos
+  out <- lapply(slots, function(i) {
+    slot <- lapply(discos, `[[`, i)
+    # Check is array and not matrix
+    if (inherits(slot[[1]], "array") && length(dim(slot[[1]])) != 2) {
+      new <- .merge_array_slot(arrays = slot, 
+                               exp_dim = 3L, 
+                               names = disco_names, 
+                               slotname = i, 
+                               collapse = collapse)
+    } else {
+      stop("Unrecognised slot type: '", i, "'.", call. = FALSE)
+    }
+    return(new)
+  })
+  
+  # Set attributes
+  names(out) <- slots
+  extra_attr <- setdiff(names(attributes(discos[[1]])),
+                        names(attributes(out)))
+  attributes(out) <- c(attributes(discos[[1]])[extra_attr],
+                       attributes(out))
+  out
+}
+
 # Unbundle documentation --------------------------------------------------
 
 #' @title Split discovery objects
@@ -802,6 +845,23 @@ unbundle.IIT_discovery <- function(discovery, ...) {
   })
 }
 
+#' @rdname unbundle
+#' @export
+unbundle.chrommat_discovery <- function(discovery, ...) {
+  expnames <- dimnames(discovery$obs)[[3]]
+  
+  lapply(setNames(seq_along(expnames), expnames), function(i) {
+    structure(list(
+      obs = discovery$obs[, , i, drop = FALSE],
+      exp = discovery$exp[, , i, drop = FALSE]
+    ), 
+    class = c("chrommat_discovery", "discovery"), 
+    mode = attr(discovery, "mode"),
+    package = attr(discovery, "package"),
+    resolution = attr(discovery, "resolution"))
+  })
+}
+
 # Utilities ---------------------------------------------------------------
 
 #' @export
@@ -835,3 +895,100 @@ subset.ARMLA_discovery <- function(x, i, ...) {
   out
 }
 
+# TODO: refactor the (un)bundle methods to use these general 
+# checkers/constructors to reduce code duplication, increase consistency and
+# improve maintainability.
+
+# Checks if a list of objects have the same first classes
+.check_disco_classes <- function(discos) {
+  classes <- vapply(discos, function(x){class(x)[1]}, character(1))
+  if (multiclass <- length(unique(classes)) > 1) {
+    warning(paste0("It is not recommended to bundle discoveries from", 
+                   " different classes"), call. = FALSE)
+  }
+  invisible(multiclass)
+}
+
+# Checks if a list of objects have the same resolution attributes
+.check_disco_resolutions <- function(discos) {
+  res <- unique(vapply(discos, attr, numeric(1), "resolution"))
+  if (length(res) > 1) {
+    stop("Can only bundle discoveries of the same resolution.",
+         call. = FALSE)
+  } else {
+    return(invisible(TRUE))
+  }
+}
+
+# Checks if a list of objects have the same list element names
+.check_disco_slots <- function(discos) {
+  allslots <- unlist(lapply(discos, names))
+  allslots <- table(allslots)[unique(allslots)]
+  # slots are 'valid' if they are in every disco
+  validslots <- names(allslots)[allslots == max(allslots)]
+  if (length(validslots) == 0) {
+    stop("No shared slots found between discovery objects", call. = FALSE)
+  }
+  if (!all(names(allslots) %in% validslots)) {
+    dropslots <- setdiff(names(allslots), validslots)
+    warning(paste0("'", paste0(dropslots, collapse = "', '"),
+                   "' slots have been dropped."))
+  }
+  invisible(validslots)
+}
+
+# Used to check attributes are the same
+.check_disco_attr <- function(discos, attr_name) {
+  attrs <- lapply(discos, attr, attr_name)
+  ref <- attrs[[1]]
+  ident <- vapply(tail(attrs, -1), identical, logical(1), y = ref)
+  if (any(!ident)) {
+    stop(paste0("Attribute '", attr_name, "' not identical among discoveries"),
+         call. = FALSE)
+  }
+  return(invisible(ref))
+}
+
+# Merges an array with equal dimensions, except for 'exp_dim' which can be 1:n
+.merge_array_slot <- 
+  function(arrays, 
+           exp_dim = 3, 
+           names = character(),
+           slotname = character(),
+           collapse = "_") {
+    
+    # Check dimensions
+    dims <- lapply(arrays, dim)
+    dims <- do.call(rbind, dims)
+    uni_dims <- apply(dims, 2, function(x){length(unique(x))})
+    if (length(table(uni_dims[-exp_dim])) > 1) {
+      stop(paste0("Slot '", slotname, "' has incompatible dimensions,",
+                  " have you ran the analysis at different resolutions or",
+                  " with different size arguments?"),
+           call. = FALSE)
+    }
+    
+    # Formulate new array
+    new <- do.call(c, arrays)
+    new_dim <- dims[1,]
+    new_dim[exp_dim] <- sum(dims[, exp_dim])
+    dim(new) <- new_dim
+    
+    # Check dimnames
+    dnames <- lapply(arrays, dimnames)
+    expnames <- do.call(c, lapply(dnames, `[[`, exp_dim))
+    # Resolve non-unique expnames
+    if (length(unique(expnames)) < length(expnames)) {
+      expnames <- mapply(function(first, second) {
+        browser()
+        paste0(first[[exp_dim]], collapse, second)
+      }, first = dnames, second = names)
+    }
+    
+    # Set dimnames
+    dnames <- dnames[[1]]
+    dnames[[exp_dim]] <- unname(expnames)
+    dimnames(new) <- dnames
+    
+    return(new)
+  }

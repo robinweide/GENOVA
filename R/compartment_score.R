@@ -28,7 +28,23 @@
 #'   compartment scores and appropriate '\code{bed}'. and '\code{bedgraph}'
 #'   arguments.
 #'
-#' @return A \code{CS_discovery} object.
+#' @return A \code{CS_discovery} object with 1 element.
+#' @return \itemize{\item\strong{\code{compart_scores}}, a \code{data.frame} 
+#' with the following columns:
+#' \describe{
+#' \item{\code{chrom}}{A \code{character} with chromosome names.}
+#' \item{\code{start}}{An \code{integer} with start positions in the 
+#' chromosome.}
+#' \item{\code{end}}{An \code{integer} with end positions in the chromosome.}
+#' \item{\code{bin}}{An \code{integer} giving the index of the genomic 
+#' position.}
+#' \item{\emph{samplename_1}}{A \code{numeric}, the calculated compartment score 
+#' for the first '\code{explist}' entry. Column name is eponymous with entries 
+#' in '\code{explist}'.}
+#' \item{\emph{samplename_n} (Optional)}{A \code{numeric}, the calculated 
+#' compartment scores for subsequent '\code{explist}' entries.}
+#' }
+#' }
 #' @export
 #'
 #' @examples

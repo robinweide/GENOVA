@@ -1,2 +1,4 @@
 *.html
 *.R
+GENOVA_cache
+GENOVA_files

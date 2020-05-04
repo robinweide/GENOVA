@@ -113,11 +113,22 @@ select_subset <- function(exp, chrom, start, end) {
   i <- exp$IDX[idx, V4]
   min <- i[1] - 1
   len <- length(i)
-  list(x = pos,
-       y = pos,
-       z = exp$MAT[CJ(V1 = i, V2 = i),
-                   dt_matrix(V3, V1, V2, len, min),
-                   nomatch = NULL])
+  structure(list(
+    x = pos,
+    y = pos,
+    z = exp$MAT[CJ(V1 = i, V2 = i),
+                dt_matrix(V3, V1, V2, len, min),
+                nomatch = NULL]
+  ), class = c("contacts_matrix", "list"), 
+  chrom = chrom, resolution = resolution(exp))
+}
+
+#' @export
+#' @noRd
+as.matrix.contacts_matrix <- function(x, ...) {
+  out <- x$z
+  dimnames(out) <- list(x$x, x$y)
+  out
 }
 
 # taken from ggplot
@@ -216,6 +227,13 @@ resolution <- function(x) {
 #' @export
 #' @method resolution default
 resolution.default <- function(x) {
+  attr(x, "resolution", exact = TRUE)
+}
+
+# Contact matrix is a list, so we bypass the default resolution method
+#' @export
+#' @method resolution contact_matrix
+resolution.contact_matrix <- function(x) {
   attr(x, "resolution", exact = TRUE)
 }
 

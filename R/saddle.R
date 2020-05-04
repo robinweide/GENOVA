@@ -10,6 +10,9 @@
 #'   \code{compartment_score} function.
 #' @param bins An \code{integer} of length 1 setting the number of quantiles the
 #'   comparment score should be divided into.
+#' @param dist_thres A \code{numeric} of length two noting the lower and upper 
+#'   limit of distances in basepairs to consider. Defaults to 
+#'   \code{c(-Inf, Inf)} to include all distances.
 #'
 #' @details Per chromosome arm, compartment scores are divided in quantile bins.
 #'   Subsequently, the average observed over expected score is calculated for
@@ -52,7 +55,8 @@
 #' # Visualising results
 #' visualise(sadl)
 #' }
-saddle <- function(explist, CS_discovery, bins = 10L) {
+saddle <- function(explist, CS_discovery, bins = 10L, 
+                   dist_thres = c(-Inf, Inf)) {
 
   explist <- check_compat_exp(explist)
   expnames_list <- names(explist)
@@ -87,6 +91,10 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
       }
     }
   }
+  
+  # Check if distances need to be filtered
+  dist_thres <- sort(dist_thres) / resolution(explist[[1]])
+  filter_dist <- dist_thres[1] > 0 | dist_thres[2] < Inf
   
   # Control data.table threads
   dt.cores <- data.table::getDTthreads()
@@ -139,6 +147,10 @@ saddle <- function(explist, CS_discovery, bins = 10L) {
     
     # Calculate distances
     dat[["D"]] <- dat[, abs(V1 - V2)]
+    if (filter_dist) {
+      dat <- dat[D >= dist_thres[1] & D <= dist_thres[2]]
+    }
+    
     
     # Calculate observed / expected
     dat[, V3 := (V3 / mean(V3)), by = c("chr", "D")]

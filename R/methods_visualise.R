@@ -982,14 +982,14 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
       x - df[[contrast + 1]]
     })))
     setDT(cdf)
-    cdf <- melt(cdf, value.name = "dir_index", id.vars = "mid")
+    cdf <- melt.data.table(cdf, value.name = "dir_index", id.vars = "mid")
     cdf[, panel := factor("Difference", levels = c(yname, "Difference"))]
     setDT(df)
-    df <- melt(df, value.name = "dir_index", id.vars = "mid")
+    df <- melt.data.table(df, value.name = "dir_index", id.vars = "mid")
     df$panel <- factor(yname, levels = c(yname, "Difference"))
   } else {
     setDT(df)
-    df <- melt(df, value.name = "dir_index", id.vars = "mid")
+    df <- melt.data.table(df, value.name = "dir_index", id.vars = "mid")
     cdf <- NULL
   }
 
@@ -1259,7 +1259,7 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
   blackout_up   <- VP[, 2]
   blackout_down <- VP[, 3]
   
-  data <- melt(data, id.vars = c("chromosome", "mid"))
+  data <- melt.data.table(data, id.vars = c("chromosome", "mid"))
   
   data_blackout <- data
   for (i in seq_len(nrow(VP))) {
@@ -1537,7 +1537,8 @@ visualise.domainogram_discovery <- function(discovery,
                                             raw = FALSE, ...) {
   df <- discovery
   df <- as.data.table(df)
-  df <- melt(df, id.vars = c("window", "position"), value.name = "insulation")
+  df <- melt.data.table(df, id.vars = c("window", "position"), 
+                        value.name = "insulation")
   setnames(df, 3, "experiment")
   
   g <- ggplot2::ggplot(df, ggplot2::aes(position, window, fill = insulation)) +
@@ -1679,7 +1680,7 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
 #' @rdname visualise
 #' @export
 visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
-                                         colour_lim = NULL) {
+                                         colour_lim = NULL, ...) {
   obsexp <- discovery$obs
   dim <- dim(obsexp)
   if (attr(discovery, "mode") %in% c("trans", "regress")) {
@@ -1735,7 +1736,7 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
                              from = colour_lim)
   ) +
     ggplot2::coord_equal() +
-    GENOVA:::GENOVA_THEME()
+    GENOVA_THEME()
   g
 }
 

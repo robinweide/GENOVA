@@ -54,8 +54,8 @@ call_TAD_insulation <- function(IS_discovery, method = "crane",
   
   scooch = pmax(100e3 / attr(IS_discovery, "resolution"), 2)
   
-  m <- melt(ins, id.vars = c("chrom", "start", "end", "bin"),
-            measure.vars = expnames)
+  m <- melt.data.table(ins, id.vars = c("chrom", "start", "end", "bin"),
+                       measure.vars = expnames)
   m <- m[order(variable, chrom, bin)]
   setnames(m, 5, "exp")
   grouping <- c("chrom", "exp")

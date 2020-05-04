@@ -832,7 +832,8 @@ plot.domainogram_discovery <- function(
   }
   
   x <- as.data.table(x)
-  x <- melt(x, id.vars = c("window", "position"), value.name = "insulation")
+  x <- melt.data.table(x, id.vars = c("window", "position"), 
+                       value.name = "insulation")
   setnames(x, 3, "experiment")
   
   mats <- x
@@ -949,7 +950,7 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   vp  <- attr(x, "viewpoint")
   
   data <- as.data.table(x$data)
-  data <- melt(data, id.vars = c("chromosome", "mid"))
+  data <- melt.data.table(data, id.vars = c("chromosome", "mid"))
   colnames(data) <- c("chromosome", "mid", "experiment", "signal")
   data <- data[chromosome == vp[1,1, drop = TRUE]]
   

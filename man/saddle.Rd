@@ -4,7 +4,7 @@
 \alias{saddle}
 \title{Compartment versus compartment scores}
 \usage{
-saddle(explist, CS_discovery, bins = 10L)
+saddle(explist, CS_discovery, bins = 10L, dist_thres = c(-Inf, Inf))
 }
 \arguments{
 \item{explist}{Either a single GENOVA '\code{contacts}' object or a list of
@@ -15,6 +15,10 @@ GENOVA '\code{contacts}' objects.}
 
 \item{bins}{An \code{integer} of length 1 setting the number of quantiles the
 comparment score should be divided into.}
+
+\item{dist_thres}{A \code{numeric} of length two noting the lower and upper 
+limit of distances in basepairs to consider. Defaults to 
+\code{c(-Inf, Inf)} to include all distances.}
 }
 \value{
 A \code{saddle_discovery} object with 1 element:

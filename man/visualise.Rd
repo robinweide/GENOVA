@@ -148,7 +148,7 @@ visualise(discovery, ...)
   ...
 )
 
-\method{visualise}{chrommat_discovery}(discovery, raw = FALSE, title = NULL, colour_lim = NULL)
+\method{visualise}{chrommat_discovery}(discovery, raw = FALSE, title = NULL, colour_lim = NULL, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

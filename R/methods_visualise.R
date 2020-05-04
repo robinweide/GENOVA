@@ -1679,7 +1679,7 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
 #' @rdname visualise
 #' @export
 visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
-                                         colour_lim = NULL) {
+                                         colour_lim = NULL, ...) {
   obsexp <- discovery$obs
   dim <- dim(obsexp)
   if (attr(discovery, "mode") %in% c("trans", "regress")) {
@@ -1735,7 +1735,7 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
                              from = colour_lim)
   ) +
     ggplot2::coord_equal() +
-    GENOVA:::GENOVA_THEME()
+    GENOVA_THEME()
   g
 }
 

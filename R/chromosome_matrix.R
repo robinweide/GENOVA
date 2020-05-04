@@ -62,7 +62,7 @@ chromosome_matrix <- function(
   data.table::setDTthreads(1)
   
   # Set experiment parameters
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   expnames <- expnames(explist)
   n_exp <- length(explist)
   

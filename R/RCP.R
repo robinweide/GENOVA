@@ -344,7 +344,9 @@ RCPlfc = function(dt, contrast, breaks){
   
   out$distance <- SPREAD$cut
   
-  out = melt(out, id.vars = 'distance')
+  setDT(out)
+  out <- melt.data.table(out, id.vars = 'distance')
+  setDF(out)
   colnames(out)[2:3] = c('samplename','P')
   out
 }

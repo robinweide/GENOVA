@@ -129,7 +129,7 @@ quantify.saddle_discovery <- function(discovery, ...){
 #' @export
 quantify.IIT_discovery <- function(discovery, ...) {
   data <- discovery$results
-  data <- melt(data, id.vars = c("x", "y"))
+  data <- melt.data.table(data, id.vars = c("x", "y"))
   data$distance <- data$y - data$x
   
   summ <- data[, as.list(summary(value)), by = c("distance", "variable")]

@@ -96,7 +96,7 @@ heatmap_insulation <- function(IS_discovery,
   
   # Grab that region
   dat <- ins[idx, on = c("bin" = "bin")]
-  dat <- melt(dat, id.vars = c("i", "x"), measure.vars = expnames)
+  dat <- melt.data.table(dat, id.vars = c("i", "x"), measure.vars = expnames)
 
   # Censor missing data
   missing <- dat[, mean(is.na(value) | !is.finite(value)), by = i]

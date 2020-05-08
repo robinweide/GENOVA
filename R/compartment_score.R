@@ -153,7 +153,7 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   out <- structure(list(compart_scores = as.data.frame(out)),
                    package = "GENOVA",
                    colours = cols,
-                   class = c("CS_discovery"),
+                   class = c("CS_discovery", "genomescore_discovery"),
                    resolution = attr(explist[[1]], "resolution"),
                    partitioning = partitioning,
                    signed = FALSE)
@@ -314,7 +314,7 @@ sign_compartmentscore <- function(CS_discovery,
   setcolorder(out, neworder = c(2,3,4,1,5:ncol(out)))
   
   structure(list(compart_scores = as.data.frame(out)),
-            class = "CS_discovery",
+            class = c("CS_discovery", "genomescore_discovery"),
             colours = attr(CS_discovery, "colours"),
             package = "GENOVA",
             resolution = attr(CS_discovery, "resolution"),

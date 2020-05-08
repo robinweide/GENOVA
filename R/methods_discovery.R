@@ -218,7 +218,8 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
   
   attr(out, "resolution") <- res[[1]]
   attr(out, 'chrom') <- chroms[[1]]
-  class(out) <- c("domainogram_discovery", "data.frame")
+  class(out) <- c("domainogram_discovery", "genomescore_discovery", 
+                  "data.frame")
 
   out
 }
@@ -269,7 +270,7 @@ bundle.IS_discovery <- function(..., collapse = "_"){
   structure(list(insula_score = as.data.frame(out)),
             PACKAGE = "GENOVA",
             colours = cols,
-            class = "IS_discovery",
+            class = c("IS_discovery", "genomescore_discovery"),
             resolution = attr(discos[[1]], "resolution"),
             window = attr(discos[[1]], "window"))
 }
@@ -332,7 +333,7 @@ bundle.virtual4C_discovery <- function(..., collapse = "_") {
   }
   
   structure(list(data = out), 
-            class = "virtual4C_discovery",
+            class = c("virtual4C_discovery", "genomescore_discovery"),
             'viewpoint' = vps, 
             'xlim' = xlims,
             'sample' = expnames,
@@ -404,7 +405,7 @@ bundle.CS_discovery <- function(..., collapse = "_") {
   structure(list(compart_scores = as.data.frame(dat)),
             package = "GENOVA",
             colours = cols,
-            class = "CS_discovery",
+            class = c("CS_discovery", "genomescore_discovery"),
             resolution = unique(res),
             partitioning = party,
             signed = signage)
@@ -527,7 +528,7 @@ bundle.DI_discovery <- function(..., collapse = "_"){
   structure(list(DI = out),
             PACKAGE = "GENOVA",
             colours = cols,
-            class = "DI_discovery",
+            class = c("DI_discovery", "genomescore_discovery"),
             resolution = attr(discos[[1]], "resolution"))
 }
 
@@ -723,7 +724,7 @@ unbundle.IS_discovery <- function(discovery, ...) {
     structure(list(insula_score = discovery$insula_score[, cols[[i]]]),
               PACKAGE = "GENOVA",
               colours = attr(discovery, "colours")[i],
-              class = "IS_discovery",
+              class = c("IS_discovery", "genomescore_discovery"),
               resolution = attr(discovery, "resolution"),
               window = attr(discovery, "window"))
   })
@@ -744,7 +745,7 @@ unbundle.virtual4C_discovery <- function(discovery, ...) {
     structure(list(data = discovery$data[, cols[[i]]]),
               package = "GENOVA",
               colours = attr(discovery, "colours")[i],
-              class = "virtual4C_discovery",
+              class = c("virtual4C_discovery", "genomescore_discovery"),
               resolution = attr(discovery, "resolution"),
               viewpoint = thisvp)
   })
@@ -763,7 +764,7 @@ unbundle.CS_discovery <- function(discovery, ...) {
     structure(list(compart_scores = discovery$compart_scores[, cols[[i]]]),
               PACKAGE = "GENOVA",
               colours = attr(discovery, "colours")[i],
-              class = "CS_discovery",
+              class = c("CS_discovery", "genomescore_discovery"),
               resolution = attr(discovery, "resolution"),
               signed = attr(discovery, "signed"),
               partitioning = attr(discovery, "partitioning"))
@@ -817,7 +818,7 @@ unbundle.DI_discovery <- function(discovery, ...) {
     structure(list(DI = discovery$DI[, cols[[i]]]),
               PACKAGE = "GENOVA",
               colours = attr(discovery, "colours")[i],
-              class = "DI_discovery",
+              class = c("DI_discovery", "genomescore_discovery"),
               resolution = attr(discovery, "resolution"),
               window = attr(discovery, "window"))
   })

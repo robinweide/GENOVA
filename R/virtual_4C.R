@@ -80,7 +80,7 @@ virtual_4C <- function(explist, viewpoint, xlim = NULL){
                           exp = expnames)
   
   signal <- structure(signal, 
-                      class = "virtual4C_discovery",
+                      class = c("virtual4C_discovery", "genomescore_discovery"),
                       'viewpoint' = viewpoint, 
                       'xlim' = xlim,
                       'sample' = expnames,

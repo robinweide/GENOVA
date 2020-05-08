@@ -104,7 +104,7 @@ direct_index <- function(explist, range = 100) {
   
   structure(list(DI = as.data.frame(calc)),
             colours = cols,
-            class = "DI_discovery",
+            class = c("DI_discovery", "genomescore_discovery"),
             package = "GENOVA",
             resolution = attr(explist[[1]], "resolution"))
 }

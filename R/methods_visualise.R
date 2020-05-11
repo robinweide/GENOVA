@@ -284,19 +284,15 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
   if (is.null(colour_lim)) {
     colour_lim <- c(NA, NA)
   }
-  if (is.null(colour_lim_contrast)) {
-    colour_lim_contrast <- centered_limits()
-  }
 
-  altfillscale <- ggplot2::scale_fill_gradientn(
-    colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+  altfillscale <- scale_fill_GENOVA_div(
     aesthetics = "altfill",
     name = switch (metric,
       "diff" = "Difference",
       "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
     oob = scales::squish,
-    limits = colour_lim_contrast
+    midpoint = 0
   )
 
   # Get a default plot
@@ -311,8 +307,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
     return(g)
   }
 
-  g <- g + ggplot2::scale_fill_gradientn(
-    colours = c('white', '#f5a623', '#d0021b', 'black'),
+  g <- g + scale_fill_GENOVA(
     guide = ggplot2::guide_colourbar(order = 1),
     name = expression(mu*" Contacts"),
     limits = colour_lim,
@@ -356,14 +351,6 @@ visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
     discovery
   }
   
-  if (is.null(colour_lim)) {
-    if (hasobsexp) {
-      colour_lim <- centered_limits(1)
-    } else {
-      colour_lim <- c(NA, NA)
-    }
-  }
-  
   df <- c(lapply(seq_along(dim(res$signal)), function(i) {
     dnm <- dimnames(res$signal)[[i]]
     if (is.null(dnm)) {
@@ -395,16 +382,15 @@ visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
   panel_spac <- ggplot2::unit(panel_spac, "points")
   
   fillscale <- if (hasobsexp) {
-    ggplot2::scale_fill_gradientn(
-      colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    scale_fill_GENOVA_div(
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(frac("Observed", "Expected")),
       oob = scales::squish,
+      midpoint = 1,
       limits = colour_lim
     )
   } else {
-    ggplot2::scale_fill_gradientn(
-      colours = c('white', '#f5a623', '#d0021b', 'black'),
+    scale_fill_GENOVA(
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(mu*" Contacts"),
       oob = scales::squish,
@@ -459,29 +445,27 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
   }
   
   # Decide on limits
-  if (is.null(colour_lim)) {
-    if (hasobsexp) {
-      colour_lim <- centered_limits(1)
-    } else {
-      colour_lim <- c(NA, NA)
-    }
+  # if (is.null(colour_lim)) {
+  if (hasobsexp) {
+    midpoint <- 1
+  } else {
+    midpoint <- NA
   }
-  if (is.null(colour_lim_contrast)) {
-    colour_lim_contrast <- centered_limits()
-  }
+  # }
 
   altcols <- if (hasobsexp) {
-    c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+    "greenpink"
   } else {
-    c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    "divergent"
   }
-  altfillscale <- ggplot2::scale_fill_gradientn(
-    colours = altcols,
+  altfillscale <- scale_fill_GENOVA_div(
+    palette = altcols,
     aesthetics = "altfill",
     name = switch (metric,
                    "diff" = "Difference",
                    "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
+    midpoint = 0,
     limits = colour_lim_contrast,
     oob = scales::squish
   )
@@ -499,16 +483,16 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
   }
 
   fillscale <- if (hasobsexp) {
-    ggplot2::scale_fill_gradientn(
-      colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    scale_fill_GENOVA_div(
+      palette = "divergent",
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(frac("Observed", "Expected")),
       oob = scales::squish,
-      limits = colour_lim
+      limits = colour_lim,
+      midpoint = 1
     )
   } else {
-    ggplot2::scale_fill_gradientn(
-      colours = c('white', '#f5a623', '#d0021b', 'black'),
+    scale_fill_GENOVA(
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(mu*" Contacts"),
       oob = scales::squish,
@@ -549,18 +533,18 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
   metric <- match.arg(metric)
   
   # Decide on limits
-  if (is.null(colour_lim_contrast)) {
-    colour_lim_contrast <- centered_limits()
-  }
+  # if (is.null(colour_lim_contrast)) {
+  #   colour_lim_contrast <- centered_limits()
+  # }
 
-  altfillscale <- ggplot2::scale_fill_gradientn(
-    colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+  altfillscale <- scale_fill_GENOVA_div(
     aesthetics = "altfill",
     name = switch (metric,
                    "diff" = "Difference",
                    "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
     oob = scales::squish,
+    midpoint = 0,
     limits = colour_lim_contrast
   )
 
@@ -593,8 +577,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
   }
 
   g <- g +
-    ggplot2::scale_fill_gradientn(
-      colours = c('white', '#f5a623', '#d0021b', 'black'),
+    scale_fill_GENOVA(
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(mu*" Contacts"),
       limits = colour_lim,
@@ -643,25 +626,21 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
   } else {
     discovery
   }
-  
-  # Decide on limits
-  if (is.null(colour_lim_contrast)) {
-    colour_lim_contrast <- centered_limits()
-  }
 
   altcols <- if (hasobsexp) {
-    c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+    pal <- "greenpink"
   } else {
-    c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    pal <- "divergent"
   }
-  altfillscale <- ggplot2::scale_fill_gradientn(
-    colours = altcols,
+  altfillscale <- scale_fill_GENOVA_div(
+    palette = pal,
     aesthetics = "altfill",
     name = switch (metric,
                    "diff" = "Difference",
                    "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
     limits = colour_lim_contrast,
+    midpoint = 0,
     oob = scales::squish
   )
 
@@ -684,24 +663,22 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
   
   # Decide on limits
   if (is.null(colour_lim)) {
-    if (hasobsexp) {
-      colour_lim <- centered_limits(1)
-    } else {
+    if (!hasobsexp) {
       colour_lim <- c(NA, quantile(discovery$signal, 0.95))
     }
   }
 
   fillscale <- if (hasobsexp) {
-    ggplot2::scale_fill_gradientn(
-      colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+    scale_fill_GENOVA_div(
+      palette = "divergent",
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(frac("Observed", "Expected")),
       oob = scales::squish,
-      limits = colour_lim
+      limits = colour_lim,
+      midpoint = 1
     )
   } else {
-    ggplot2::scale_fill_gradientn(
-      colours = c('white', '#f5a623', '#d0021b', 'black'),
+    scale_fill_GENOVA(
       guide = ggplot2::guide_colourbar(order = 1),
       name = expression(mu*" Contacts"),
       limits = colour_lim,
@@ -1374,14 +1351,6 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
   comp <- df[q1 != q2, ]
   setnames(comp, 2:3, names(comp)[3:2])
   df <- rbindlist(list(df, comp), use.names = TRUE)
-  
-  # Decide on limits
-  if (is.null(colour_lim)) {
-    colour_lim <- centered_limits(1)
-  }
-  if (is.null(colour_lim_contrast)) {
-    colour_lim_contrast <- centered_limits()
-  }
 
   showcontrast <- !is.null(contrast) && (length(expnames) > 1L || show_single_contrast)
   if (showcontrast) {
@@ -1430,12 +1399,13 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
     )
     
     if (!raw) {
-      g <- g + ggplot2::scale_fill_gradientn(
-        colours = c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC"),
+      g <- g + scale_fill_GENOVA_div(
+        palette = "greenpink",
         aesthetics = "altfill",
         oob = scales::squish,
         name = "Difference",
-        limits = colour_lim_contrast
+        limits = colour_lim_contrast,
+        midpoint = 0
       )
       g$scales$scales[[1]]$guide <- ggplot2::guide_colourbar()
       g$scales$scales[[1]]$guide$available_aes[[3]] <- "altfill"
@@ -1482,8 +1452,9 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
                                   breaks = c(0, 1), labels = c("B", "A")) +
       ggplot2::scale_y_continuous(name = "Quantile", expand = c(0,0),
                                   breaks = c(0, 1), labels = c("B", "A")) +
-      ggplot2::scale_fill_gradientn(
-        colours = c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"),
+      scale_fill_GENOVA_div(
+        palette = "divergent",
+        midpoint = 1,
         limits = colour_lim,
         oob = scales::squish,
         name = expression(frac("Observed", "Expected")),
@@ -1520,15 +1491,17 @@ visualise.domainogram_discovery <- function(discovery,
                                   labels = scales::label_number(scale = 1e-6),
                                   expand = c(0,0)) +
       ggplot2::scale_y_continuous(name = "Window Size", expand = c(0, 0)) +
-      ggplot2::scale_fill_gradient2(low = "#ff5c49", high = "#009bef",
-                                    limits = colour_lim, oob = scales::squish,
-                                    name = "Insulation\nScore") +
+      scale_fill_GENOVA_div(midpoint = 0,
+                            trans = "reverse",
+                            limits = rev(colour_lim), 
+                            oob = scales::squish,
+                            name = "Insulation\nScore") +
       ggplot2::theme(axis.text = ggplot2::element_text(colour = "black"),
-                    strip.background = ggplot2::element_blank(),
-                    axis.ticks = ggplot2::element_line(colour = "black"),
-                    axis.line  = ggplot2::element_line(colour = "black"),
-                    panel.grid = ggplot2::element_blank(),
-                    panel.background = ggplot2::element_blank())
+                     strip.background = ggplot2::element_blank(),
+                     axis.ticks = ggplot2::element_line(colour = "black"),
+                     axis.line  = ggplot2::element_line(colour = "black"),
+                     panel.grid = ggplot2::element_blank(),
+                     panel.background = ggplot2::element_blank())
   }
   
   g
@@ -1694,12 +1667,10 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
     return(g)
   }
   
-  g <- g + ggplot2::scale_fill_gradientn(
-    colours = c("#009bef", "white", "#ff5c49"),
+  g <- g + scale_fill_GENOVA_div(
     name = expression(Log[2]*frac("Observed", "Expected")),
     limits = colour_lim, oob = scales::squish,
-    values = scales::rescale(c(colour_lim[1], 0, colour_lim[2]), 
-                             from = colour_lim)
+    midpoint = 0
   ) +
     ggplot2::coord_equal() +
     GENOVA_THEME()
@@ -1753,5 +1724,7 @@ datafilter <- function(expr = NULL) {
   if (is.null(expr)) {
     expr <- substitute(TRUE)
   }
-  function(x) subset.data.frame(x, eval(expr))
+  f <- function(x) subset.data.frame(x, eval(expr))
+  parent.env(environment(f)) <- parent.frame()
+  f
 }

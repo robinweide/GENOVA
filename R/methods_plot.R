@@ -77,7 +77,7 @@ plot.APA_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c('white', '#f5a623', '#d0021b', 'black')
+    cols <- bezier_corrected_hot
     colour_fun <- colorRampPalette(cols)
   }
 
@@ -114,7 +114,7 @@ plot.APA_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+      cols <- bezier_corrected_divergent
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -179,7 +179,7 @@ plot.CSCAn_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -281,7 +281,7 @@ plot.PESCAn_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -291,7 +291,7 @@ plot.PESCAn_discovery <- function(
   replace <- which(is.na(colour_lim))
   colour_lim[replace] <- range(obj)[replace]
   
-  for (i in seq_len(ncol)) {
+  for (i in seq_len(n_samples)) {
     m <- obj[, , i]
     m <- pmax(m, colour_lim[1])
     m <- pmin(m, colour_lim[2])
@@ -318,7 +318,7 @@ plot.PESCAn_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+      cols <- bezier_corrected_greenPink
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -385,7 +385,7 @@ plot.ATA_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c('white', '#f5a623', '#d0021b', 'black')
+    cols <- bezier_corrected_hot
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -433,7 +433,7 @@ plot.ATA_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+      cols <- bezier_corrected_divergent
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -507,7 +507,7 @@ plot.ARA_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -545,7 +545,7 @@ plot.ARA_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+      cols <- bezier_corrected_greenPink
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -743,7 +743,7 @@ plot.saddle_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -781,7 +781,7 @@ plot.saddle_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+      cols <- bezier_corrected_greenPink
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -863,7 +863,7 @@ plot.domainogram_discovery <- function(
   }
   
   if (is.null(colour_fun)) {
-    cols <- rev(c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"))
+    cols <- rev(bezier_corrected_divergent)
     colour_fun <- colorRampPalette(cols)
   }
   

@@ -309,6 +309,18 @@ expnames.list <- function(x, simplify = TRUE) {
   ans
 }
 
+#' @export
+#' @method expnames genomescore_discovery
+expnames.genomescore_discovery <- function(x, simplify = TRUE) {
+  if (!inherits(x, "data.frame")) {
+    x <- names(x[[1]])
+  } else {
+    x <- names(x)
+  }
+  setdiff(x, c("window", "position", "mid", "bin",
+               "chrom", "start", "end"))
+}
+
 # Setters
 
 #' @export
@@ -357,4 +369,26 @@ expnames.list <- function(x, simplify = TRUE) {
     return(y)
   })
   x
+}
+
+#' @export
+#' @method `expnames<-` genomescore_discovery
+`expnames<-.genomescore_discovery` <- function(x, value) {
+  if (inherits(x, "data.frame")) {
+    i <- names(x)
+  } else {
+    i <- names(x[[1]])
+  }
+  i <- which(!(i %in% c("window", "position", "mid", "bin",
+                        "chrom", "start", "end")))
+  if (length(value) != length(i)) {
+    stop("The new expnames should be of the same length", 
+         " as the existing expnames", call. = FALSE)
+  }
+  if (inherits(x, "data.frame")) {
+    names(x)[i] <- value
+  } else {
+    names(x[[1]])[i] <- value
+  }
+  return(x)
 }

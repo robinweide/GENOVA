@@ -14,7 +14,7 @@ CSCAn(
   outlier_filter = c(0, 1),
   min_compare = 10,
   anchors = NULL,
-  raw = FALSE
+  raw = TRUE
 )
 }
 \arguments{

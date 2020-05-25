@@ -12,7 +12,7 @@ ARA(
   size_bp = NULL,
   outlier_filter = c(0, 1),
   anchors = NULL,
-  raw = FALSE
+  raw = TRUE
 )
 }
 \arguments{

@@ -34,7 +34,6 @@
 #'   allData = T
 #' )
 #' }
-#' @export
 #'
 differential.TAD.scatterplot <- function(exp1, exp2, line = T, allData = T,
                                          color.fun = NULL, xlab = NULL,

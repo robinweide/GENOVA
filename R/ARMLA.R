@@ -168,7 +168,7 @@ PESCAn <- function(explist, bed, shift = 1e6L,
                    size_bin = NULL, size_bp = NULL,
                    outlier_filter = c(0, 1),
                    min_compare = 10,
-                   anchors = NULL, raw = FALSE) {
+                   anchors = NULL, raw = TRUE) {
   explist <- check_compat_exp(explist)
 
   # Initialise parameters
@@ -305,7 +305,7 @@ ATA <- function(explist, bed,
 ARA <- function(explist, bed, shift = 1e6,
                 size_bin = NULL, size_bp = NULL,
                 outlier_filter = c(0, 1),
-                anchors = NULL, raw = FALSE) {
+                anchors = NULL, raw = TRUE) {
 
   # Verify experiment compatability
   explist <- check_compat_exp(explist)
@@ -381,7 +381,7 @@ CSCAn <- function(explist, bedlist, shift = 1e6L,
                   size_bin = NULL, size_bp = NULL,
                   outlier_filter = c(0, 1),
                   min_compare = 10,
-                  anchors = NULL, raw = FALSE) {
+                  anchors = NULL, raw = TRUE) {
   explist <- check_compat_exp(explist)
   
   if (!missing(bedlist)) {

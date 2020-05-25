@@ -291,6 +291,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
       "diff" = "Difference",
       "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
+    limits = colour_lim_contrast,
     oob = scales::squish,
     midpoint = 0
   )

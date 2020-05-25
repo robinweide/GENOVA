@@ -16,6 +16,9 @@ bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   if (!inherits(bed, "data.frame") | is.data.table(bed)) {
     bed <- as.data.frame(bed)
   }
+  if (anyNA(bed[1:3])) {
+    stop("Cannot match `NA`s to indices.", call. = FALSE)
+  }
 
   # American/British spelling
   mode <- gsub("center", "centre", mode)
@@ -391,4 +394,18 @@ expnames.genomescore_discovery <- function(x, simplify = TRUE) {
     names(x[[1]])[i] <- value
   }
   return(x)
+}
+
+cache_chroms <- function(exp) {
+  first <- exp$IDX[, list(V4 = min(V4)), by = V1][order(V4)]
+  
+  chrom <- findInterval(exp$MAT$V1, first$V4)
+  cis <- findInterval(exp$MAT$V2, first$V4) == chrom
+  rle <- rle(paste0(chrom, "-", cis))
+  x <- as.data.table(tstrsplit(rle$values, "-"))
+  x <- x[, list(chrom = first$V1[as.integer(V1)],
+                cis = as.logical(V2),
+                lengths = rle$lengths)]
+  x[, ends := cumsum(x$lengths)]
+  x[, starts := x$ends - x$lengths + 1]
 }

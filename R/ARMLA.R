@@ -106,7 +106,7 @@ APA <- function(explist, bedpe,
     raw = raw
   )
 
-  structure(results, class = c("APA_discovery", "ARMLA_discovery"),
+  structure(results, class = c("APA_discovery", "ARMLA_discovery", "discovery"),
             resolution = res, package = "GENOVA")
 }
 
@@ -192,7 +192,8 @@ PESCAn <- function(explist, bed, shift = 1e6L,
     raw = raw
   )
 
-  structure(results, class = c("PESCAn_discovery", "ARMLA_discovery"),
+  structure(results, 
+            class = c("PESCAn_discovery", "ARMLA_discovery", "discovery"),
             resolution = res, package = "GENOVA")
 }
 
@@ -252,7 +253,8 @@ ATA <- function(explist, bed,
                             shift = 0, outlier_filter = outlier_filter,
                             raw = raw)
 
-  structure(results, class = c("ATA_discovery", "ARMLA_discovery"),
+  structure(results, 
+            class = c("ATA_discovery", "ARMLA_discovery", "discovery"),
             package = "GENOVA", resolution = res, padding = pad)
 }
 
@@ -347,7 +349,8 @@ ARA <- function(explist, bed, shift = 1e6,
     dim(nexp) <- dim(obs)
     results$obsexp <- obs / nexp
   }
-  structure(results, class = c("ARA_discovery", "ARMLA_discovery"),
+  structure(results, 
+            class = c("ARA_discovery", "ARMLA_discovery", "discovery"),
             resolution = res, package = "GENOVA")
 }
 
@@ -421,7 +424,8 @@ CSCAn <- function(explist, bedlist, shift = 1e6L,
                             raw = raw
   )
   
-  structure(results, class = c("CSCAn_discovery", "ARMLA_discovery"),
+  structure(results, 
+            class = c("CSCAn_discovery", "ARMLA_discovery", "discovery"),
             resolution = res, package = "GENOVA")
 }
 

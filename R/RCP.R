@@ -120,7 +120,7 @@ RCP = function(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL, 
   ##############################################################################
   
   RCP_out = structure(list('raw' = RCP_out, smooth = smthd),
-                      class = c("RCP_discovery"), 
+                      class = c("RCP_discovery", "discovery"), 
                       package = "GENOVA")
   
   if(!is.null(bedlist)){

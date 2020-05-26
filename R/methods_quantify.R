@@ -8,6 +8,12 @@
 #' @param signal_size The width/height of the signal (e.g. a value of 3 will 
 #' @param ... further arguments passed to or from other methods.
 #' take the middle 3x3 matrix of the APA).
+#' @export
+#' @examples 
+#' NULL
+quantify <- function(discovery, ...) {
+  UseMethod("quantify", discovery)
+}
 
 # Functions ---------------------------------------------------------------
 

@@ -91,6 +91,8 @@
 #'   the upper limit for the contacts fill scale is set to the 95th percentile
 #'   of the data to increase the dynamic range of colours. The same is true for
 #'   \code{ARA_discovery}, when '\code{mode = "signal"}'.
+#'   
+#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -125,6 +127,9 @@
 #' visualise(pescan, raw = TRUE) +
 #'   ggplot2::scale_fill_gradient(aesthetics = "altfill")
 #' }
+visualise <- function(discovery, ...) {
+  UseMethod("visualise", discovery)
+}
 
 # Default -----------------------------------------------------------------
 

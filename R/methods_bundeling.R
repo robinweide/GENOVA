@@ -75,6 +75,7 @@ NULL
 #'   \code{\link[GENOVA]{unbundle}} for splitting \code{discovery} objects.
 #'
 #' @return A \code{discovery}-class object of the same type.
+#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -88,7 +89,9 @@ NULL
 #' # Visualising the combined results
 #' visualise(cata)
 #' }
-NULL
+bundle <- function(..., collapse = "_") {
+  UseMethod("bundle", list(...)[[1]])
+}
 
 # Bundle functions --------------------------------------------------------
 
@@ -651,6 +654,7 @@ bundle.chrommat_discovery <- function(..., collapse = "_") {
 #'
 #' @return A \code{list} wherein each element is a \code{discovery} object for a
 #'   single sample.
+#' @export
 #'
 #' @details In case the \code{discovery} contains incomplete samples with
 #'   missing slots, \code{NULL} is returned.
@@ -669,7 +673,9 @@ bundle.chrommat_discovery <- function(..., collapse = "_") {
 #' # Plotting the first result only
 #' visualise(split[[1]])
 #' }
-NULL
+unbundle <- function(discovery, ...) {
+  UseMethod("unbundle", discovery)
+}
 
 # Unbundle functions ------------------------------------------------------
 

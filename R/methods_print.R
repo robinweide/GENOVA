@@ -56,53 +56,43 @@ print.contacts <- function(x, ...) {
 #' @export
 #' @keywords internal
 print.ARMLA_discovery <- function(x, ...) {
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
 
   myclass <- class(x)[[1]]
   miniclass <- strsplit(myclass, "_")[[1]][[1]]
 
-  opening <- paste0(
-    "A ", attr(x, "package"), " '", myclass, "' object involving the ",
-    "following ", tail(dim(x$signal), 1), ' experiment(s):\n"',
-    paste0(tail(dimnames(x$signal), 1)[[1]], collapse = '", "'),
-    '" at a resolution of ', res, '.'
-  )
+  opening <- describe(x)
   
   if (myclass == "CSCAn_discovery" && length(dim(x$signal) == 4L)) {
+    opening <- substr(opening, 1, nchar(opening) - 5) # strip newlines
     opening <- paste0(opening, '\nThe following groupings apply: "', 
                       paste0(dimnames(x$signal)[[3]], collapse = '", "'), 
                       '".\n\n')
-  } else {
-    opening <- paste0(opening, "\n\n")
   }
+  
+  descriptions <- c(
+    signal = paste0("with summarised ", miniclass, " results at anchor", 
+                    " positions"),
+    obsexp = paste0("with summarised and normalised ", miniclass, " results"),
+    shifted = paste0("with summarised ", miniclass, " results at shifted",
+                     " anchor positions"),
+    signal_raw = "containing raw results for each sample at anchor positions",
+    shifted_raw = paste0("containing raw results for each sample at shifted",
+                         " anchor positions")
+  )
 
   slots0 <- paste0("Contains the following slots:\n")
-  slots1 <- paste0("- signal:\tAn ", paste0(dim(x$signal), collapse = " x "),
-                   " array with summarised ", miniclass, " results at",
-                   " anchor positions.\n")
+  slots1 <- describe(x$signal, descriptions["signal"])
   slots2 <- if ("obsexp" %in% names(x)) {
-    paste0("- obsexp:\tAn ", paste0(dim(x$obsexp), collapse = " x "),
-           " array with summarised and normalised ", miniclass, " results.\n")
+    describe(x$obsexp, descriptions["obsexp"])
   } else ""
   slots3 <- if ("shifted" %in% names(x)) {
-    paste0("- shifted:\tAn ", paste0(dim(x$shifted), collapse = " x "),
-           " array with summarised ", miniclass, " results at shifted ",
-           "anchor positions.\n")
+    describe(x$shifted, descriptions["shifted"])
   } else ""
   slots4 <- if ("signal_raw" %in% names(x)) {
-    paste0("- signal_raw:\tA list of length ", length(x$signal_raw),
-          " containing raw results at each anchor position.\n")
+    describe(x$signal_raw, descriptions["signal_raw"])
   } else ""
   slots5 <- if("shifted_raw" %in% names(x)) {
-    paste0("- shifted_raw:\tA list of length ", length(x$shifted_raw),
-           " containing raw results at each shifted anchor position.\n")
+    describe(x$shifted_raw, descriptions["shifted_raw"])
   } else ""
 
   cat(opening)
@@ -117,24 +107,26 @@ print.ARMLA_discovery <- function(x, ...) {
 #' @export
 #' @keywords internal
 print.RCP_discovery <- function(x, ...) {
+
+  string <- describe(x)
   
-  string <- paste0("A ", attr(x, "package"), " ", 
-                   'RCP_discovery',  " object with the following details:\n")
   
-  smpls = unique(x$raw$samplename)
-  smpls = paste(paste0(smpls[-length(smpls)], collapse = ', '), 
-                smpls[length(smpls)], sep = ' & ')
-  print_samples = paste0("- samples: ", smpls,"\n")
+  slot0 <- "Contains the following slots:\n"
   
-  regs = unique(x$raw$region)
-  regs = paste(paste0(regs[-length(regs)], collapse = ', '), 
-               regs[length(regs)], sep = ' & ')
-  print_regions = paste0("- regions: ",regs,"\n")
+  slot1 <- describe(x$raw, "with raw relative contact probabilities")
+  slot2 <- describe(x$smooth, "containing smoothened RCPs")
+
+  regs <- toString(unique(x$raw$region))
+
+  print_regions = paste0("Computed on the following regions: ", regs, ". ")
   
-  print_norm = paste0("- normalisation: ", attr(x, 'norm'),"\n")
+  print_norm = paste0("Normalised in a ", attr(x, 'norm')," manner.\n")
   
   cat(string)
-  cat(print_samples)
+  cat(slot0)
+  cat(slot1)
+  cat(slot2)
+  cat("\n")
   cat(print_regions)
   cat(print_norm)
   
@@ -144,85 +136,41 @@ print.RCP_discovery <- function(x, ...) {
 #' @keywords internal
 print.CS_discovery <- function(x, ...) {
   
-  myclass <- class(x)[1]
-  cols <- colnames(x$compart_scores)
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  part <- attr(x, "partitioning")
+  string <- describe(x)
   
-  string <- paste0("A ", attr(x, "PACKAGE"), " '", myclass, 
-                   "' object involving the following ", 
-                   length(cols) - 4, " experiments:\n'", 
-                   paste0(cols[5:length(cols)], collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n")
-  slot0 <- "Contains the following slots:\n\n"
+  slot0 <- "Contains the following slots:\n"
   
   slot1 <- if (attr(x, "signed")) {
-    paste0("- compart_scores:\tA data.frame containing ",
-           sum(!is.na(x$compart_scores[[5]])),
-           " compartment scores.\n\n")
+    describe(x$compart_scores, "containing signed compartment scores")
   } else {
-    paste0("- compart_scores:\tA data.frame containing ",
-           sum(!is.na(x$compart_scores[[5]])),
-           " scores.\n\n")
+    describe(x$compart_scores, "containing unsigned compartment scores")
   }
-
+  
+  part <- attr(x, "partitioning")
   ncentro <- sum(grepl("centro$", part$values))
   centrobins <- sum(part$lengths[grepl("centro$", part$values)])
   
-  details1 <- paste0(ncentro, " centromeres spanning a total of ", centrobins, 
-                     " bins have been ignored.\n")
-  signed <- paste0("The scores are signed.")
-  unsigned <- paste0("The scores are unsigned.")
+  details1 <- paste0("\n", ncentro, " centromeres spanning a total of ", 
+                     centrobins, " bins have been ignored.\n")
   
   cat(string)
   cat(slot0)
   cat(slot1)
   cat(details1)
-  if (attr(x, "signed")) {
-    cat(signed)
-  } else {
-    cat(unsigned)
-  }
 }
 
 #' @export
 #' @keywords internal
 print.IS_discovery <- function(x, ...) {
   
-  myclass <- class(x)[1]
-  cols <- colnames(x$insula_score)
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  part <- attr(x, "partitioning")
+  string <- describe(x)
+  slot0 <- "Contains the following slots:\n"
   
-  string <- paste0("A ", attr(x, "PACKAGE"), " '", myclass, 
-                   "' object involving the following ", 
-                   length(cols) - 4, " experiments:\n'", 
-                   paste0(cols[5:length(cols)], collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n")
-  slot0 <- "Contains the following slots:\n\n"
-  
-  slot1 <- paste0("- insula_score:\tA data.frame containing ",
-                  sum(!is.na(x$insula_score[[5]])),
-                  " insulation scores.\n\n")
-  
-  details1 <- paste0("The scores have been called using a ", attr(x, "window"),
+  slot1 <- describe(x$insula_score, "containing insulation scores")
+
+  details1 <- paste0("\nThe scores have been called using a ", attr(x, "window"),
                      " x ", attr(x, "window"), " sliding square.")
 
-  
   cat(string)
   cat(slot0)
   cat(slot1)
@@ -232,29 +180,12 @@ print.IS_discovery <- function(x, ...) {
 #' @export
 #' @keywords internal
 print.saddle_discovery <- function(x, ...) {
-  myclass <- class(x)
-  n_bins <- max(c(x$saddle$q1, x$saddle$q2), na.rm = TRUE)
-  expnames <- unique(x$saddle$exp)
-  
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  
   n_arms <- length(unique(x$saddle$chr))
   
-  string <- paste0("A ", attr(x, "package"), " '", myclass, 
-                   "' object involving the following ", 
-                   length(expnames), " experiments:\n'", 
-                   paste0(expnames, collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n")
-  slot0 <- "Contains the following slots:\n\n"
-  slot1 <- paste0("- saddle:\tA data.frame containing quantile-quantile ",
-                  "scores for ", n_arms, " chromosome arms.")
+  string <- describe(x)
+  slot0 <- "Contains the following slots:\n"
+  slot1 <- describe(x$saddle, paste0("containing quantile-quantile scores for ",
+                                     n_arms, " chromosome arms"))
   
   cat(string)
   cat(slot0)
@@ -264,49 +195,29 @@ print.saddle_discovery <- function(x, ...) {
 #' @export
 #' @keywords internal
 print.domainogram_discovery <- function(x, ...) {
-  myclass <- class(x)[1]
-  pos <- format(range(x$position), scientific = FALSE)
+
+  pos <- format(range(x$scores$position), scientific = FALSE, trim = TRUE)
   chrom <- attr(x, "chr")
-  expnames <- tail(colnames(x), -2)
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
+  locus <- paste0(chrom, ":", paste0(pos, collapse = "-"))
+  wrange <- range(x$scores$window)
+  locus <- paste0("Spans the locus ", locus, " at a window range from ",
+                  wrange[1], " to ", wrange[2], ".\n")
   
-  string <- paste0("A ", attr(x, "package"), " '", myclass,
-                   "' object involving the following ",
-                   length(expnames), " experiments:\n'",
-                   paste0(expnames, collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\nPosition ",
-                   chrom, ":", pos[1], "-", pos[2]," spanning ",
-                  diff(range(x$window)), " window sizes.\n")
+  slot0 <- "Contains the following slot:\n"
+  slot1 <- describe(x$scores, "with insulation scores at various window sizes")
+
+  string <- describe(x)
   cat(string)
-  print(as.data.table(x))
+  cat(slot0)
+  cat(slot1)
+  cat("\n")
+  cat(locus)
 }
 
 #' @export
 #' @keywords internal
 print.DI_discovery <- function(x, ...) {
-  myclass <- class(x)[1]
-  expnames <- tail(colnames(x$DI), -4)
-  # expnames <- unique(x$DI$experiment)
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  string <- paste0("A ", attr(x, "package"), " '", myclass,
-                   "' object involving the following ",
-                   length(expnames), " experiments:\n'",
-                   paste0(expnames, collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n")
+  string <- describe(x)
   cat(string)
   print(as.data.table(x$DI))
 }
@@ -314,25 +225,9 @@ print.DI_discovery <- function(x, ...) {
 #' @export
 #' @keywords internal
 print.virtual4C_discovery <- function(x, ...) {
-  myclass <- class(x)[[1]]
-  expnames <- tail(colnames(x$data), -2)
-  # expnames <- unique(x$data$experiment)
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  
   vp <- attr(x, "viewpoint")
 
-  string <- paste0("A ", attr(x, "package"), " '", myclass,
-                   "' object involving the following ",
-                   length(expnames), " experiments:\n'",
-                   paste0(expnames, collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n")
+  string <- describe(x)
   string1 <- paste0("The viewpoint of this virtual 4C is located at ",
                     vp[1, 1], ":", format(vp[1, 2], scientific = FALSE), "-",
                     format(vp[1, 3], scientific = FALSE), ".")
@@ -344,66 +239,33 @@ print.virtual4C_discovery <- function(x, ...) {
 #' @export
 #' @keywords internal
 print.IIT_discovery <- function(x, ...) {
-  myclass <- class(x)[[1]]
-  expnames <- tail(colnames(x$results), -2)
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  string <- paste0("A ", attr(x, "package"), " '", myclass,
-                   "' object involving the following ",
-                   length(expnames), " experiment(s):\n'",
-                   paste0(expnames, collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n\n")
+  string <- describe(x)
   cat(string)
   
   slots0 <- paste0("Contains the following slots:\n")
-  slots1 <- paste0("- results:\tA ", paste0(dim(x$results), collapse = " x "),
-                   " data.table with TAD IDs and scores.\n")
-  slots2 <- paste0("- tads:\t\tA ", paste0(dim(x$tads), collapse = " x "),
-                   " data.frame with TAD positions and IDs.\n")
+  slots1 <- describe(x$results, "with TAD IDs and scores")
+  slots2 <- describe(x$tads, "with TAD positions and IDs")
   
   cat(slots0)
   cat(slots1)
   cat(slots2)
-  
 }
 
 #' @export
 #' @keywords internal
 print.chrommat_discovery <- function(x, ...) {
-  myclass <- class(x)[[1]]
-  expnames <- dimnames(x$obs)[[3]]
-  res <- attr(x, "resolution")
-  res <- if (res %% 1e6 == 0) {
-    paste0(res / 1e6, " Mb")
-  } else if (res %% 1e3 == 0) {
-    paste0(res / 1e3, " kb")
-  } else {
-    paste0(res, " bp")
-  }
-  string <- paste0("A ", attr(x, "package"), " '", myclass,
-                   "' object involving the following ",
-                   length(expnames), " experiment(s):\n'",
-                   paste0(expnames, collapse = "', '"), "' at a ",
-                   "resolution of ", res, ".\n\n")
+  string <- describe(x)
   cat(string)
   slots0 <- paste0("Contains the following slots:\n")
-  slots1 <- paste0(" - obs:\tAn ", paste0(dim(x$obs), collapse = " x "),
-                   " array containing summed contacts.\n")
-  slots2 <- paste0(" - exp:\tAn ", paste0(dim(x$exp), collapse = " x "),
-                   " array containing expected proportions,\n")
-  slots3 <- paste0("\tcalculated with the '", attr(x, "mode"), 
-                   "' mode.")
+  slots1 <- describe(x$obs, "containing summed contacts")
+  slots2 <- describe(x$exp, paste0(
+    "containing expected proportions,\n\tcalculated with the '", 
+    attr(x, "mode"), "' mode"
+  ))
   
   cat(slots0)
   cat(slots1)
   cat(slots2)
-  cat(slots3)
 }
 
 # Other classes -----------------------------------------------------------
@@ -440,3 +302,63 @@ print.anchors <- function(x, ...) {
   }
 }
 
+
+# Helpers -----------------------------------------------------------------
+
+describe <- function(x, text = "", name = NULL) {
+  if (is.null(name)) {
+    name <- deparse(substitute(x))
+    name <- strsplit(name, "\\$")[[1]]
+    name <- tail(name, 1)
+  }
+  describe_(x, text = text, name = name)
+}
+
+describe_ <- function(x, text = "", name = NULL) {
+  UseMethod("describe_")
+}
+
+describe_.array <- function(x, text = "", name = NULL) {
+ paste0(" - ", name, ":\tAn ", paste0(dim(x), collapse = " x "), 
+                 " array ", text, ".\n")
+}
+
+describe_.matrix <- function(x, text = "", name = NULL) {
+  paste0(" - ", name, ":\tA ", paste0(dim(x), collapse = " x "),
+         " matrix ", text, ".\n")
+}
+
+describe_.list <- function(x, text = "", name = NULL) {
+  paste0(" - ", name, ":\tA list of length ", length(x), " ", text, ".\n")
+}
+
+describe_.data.frame <- function(x, text = "", name = NULL) {
+  paste0(" - ", name, ":\tA ", paste0(dim(x), collapse = " x "),
+         " data.frame ", text, ".\n")
+}
+
+describe_.data.table <- function(x, text = "", name = NULL) {
+  paste0(" - ", name, ":\tA ", paste0(dim(x), collapse = " x "),
+         " data.table ", text, ".\n")
+}
+
+describe_.discovery <- function(x, text = "", name = NULL) {
+  myclass <- class(x)[[1]]
+  expnames <- expnames(x)
+  res <- resolution(x)
+  res <- if (res %% 1e6 == 0) {
+    paste0(res / 1e6, " Mb")
+  } else if (res %% 1e3 == 0) {
+    paste0(res / 1e3, " kb")
+  } else {
+    paste0(res, " bp")
+  }
+  pkg <- attr(x, "package")
+  pkg <- if (is.null(pkg)) attr(x, "PACKAGE") else pkg
+  pkg <- paste0(pkg, " ")
+  string <- paste0("A ", pkg, "'", myclass,
+                   "' object involving the following ",
+                   length(expnames), " experiment(s):\n'",
+                   paste0(expnames, collapse = "', '"), "' at a ",
+                   "resolution of ", res, ".\n\n")
+}

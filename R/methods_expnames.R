@@ -4,8 +4,7 @@
 # way to prevent naming inconsistencies between functions such as in Github
 # issue #175 and #153
 
-# Getters
-
+# Getters -----------------------------------------------------------------
 
 #' @name expnames
 #' @title Sample names for an object
@@ -58,16 +57,36 @@ expnames.list <- function(x, simplify = TRUE) {
 #' @export
 #' @method expnames genomescore_discovery
 expnames.genomescore_discovery <- function(x, simplify = TRUE) {
-  if (!inherits(x, "data.frame")) {
-    x <- names(x[[1]])
-  } else {
-    x <- names(x)
-  }
+  x <- names(x[[1]])
   setdiff(x, c("window", "position", "mid", "bin",
-               "chrom", "start", "end"))
+               "chrom", "start", "end", "chromosome"))
 }
 
-# Setters
+#' @export
+#' @method expnames saddle_discovery
+expnames.saddle_discovery <- function(x, simplify = TRUE) {
+  unique(x$saddle$exp)
+}
+
+#' @export
+#' @method expnames RCP_discovery
+expnames.RCP_discovery <- function(x, simplify = TRUE) {
+  levels(x$raw$samplename)
+}
+
+#' @export
+#' @method expnames IIT_discovery
+expnames.IIT_discovery <- function(x, simplify = TRUE) {
+  tail(colnames(x$results), -2)
+}
+
+#' @export
+#' @method expnames chrommat_discovery
+expnames.chrommat_discovery <- function(x, simplify = TRUE) {
+  dimnames(x$obs)[[3]]
+}
+
+# Setters -----------------------------------------------------------------
 
 #' @export
 #' @rdname expnames
@@ -120,13 +139,9 @@ expnames.genomescore_discovery <- function(x, simplify = TRUE) {
 #' @export
 #' @method `expnames<-` genomescore_discovery
 `expnames<-.genomescore_discovery` <- function(x, value) {
-  if (inherits(x, "data.frame")) {
-    i <- names(x)
-  } else {
-    i <- names(x[[1]])
-  }
+  i <- names(x[[1]])
   i <- which(!(i %in% c("window", "position", "mid", "bin",
-                        "chrom", "start", "end")))
+                        "chrom", "start", "end", "chromosome")))
   if (length(value) != length(i)) {
     stop("The new expnames should be of the same length", 
          " as the existing expnames", call. = FALSE)
@@ -136,5 +151,46 @@ expnames.genomescore_discovery <- function(x, simplify = TRUE) {
   } else {
     names(x[[1]])[i] <- value
   }
+  return(x)
+}
+
+#' @export
+#' @method `expnames<-` saddle_discovery
+`expnames<-.saddle_discovery` <- function(x, value) {
+  oldnames <- expnames(x)
+  if (length(value) != length(oldnames)) {
+    stop("The new expnames should be of the same length",
+         " as the existing expnames", call. = FALSE)
+  }
+  value <- setNames(value, oldnames)
+  x$saddle$exp <- value[x$saddle$exp]
+  return(x)
+}
+
+#' @export
+#' @method `expnames<-` RCP_discovery
+`expnames<-.RCP_discovery` <- function(x, value) {
+  oldnames <- expnames(x)
+  if (length(value) != length(oldnames)) {
+    stop("The new expnames should be of the same length",
+         " as the existing expnames", call. = FALSE)
+  }
+  levels(x$raw$samplename) <- value
+  if ("smooth" %in% names(x)) {
+    levels(x$smooth$samplename) <- value
+  }
+  return(x)
+}
+
+#' @export
+#' @method `expnames<-` chrommat_discovery
+`expnames<-.chrommat_discovery` <- function(x, value) {
+  oldnames <- expnames(x)
+  if (length(value) != length(oldnames)) {
+    stop("The new expnames should be of the same length",
+         " as the existing expnames", call. = FALSE)
+  }
+  dimnames(x$obs)[[3]] <- value
+  dimnames(x$exp)[[3]] <- value
   return(x)
 }

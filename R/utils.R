@@ -230,6 +230,18 @@ resolution <- function(x) {
 #' @export
 #' @method resolution default
 resolution.default <- function(x) {
+  ggplot2::resolution(x)
+}
+
+#' @export
+#' @method resolution discovery
+resolution.discovery <- function(x) {
+  attr(x, "resolution", exact = TRUE)
+}
+
+#' @export
+#' @method resolution contacts
+resolution.contacts <- function(x) {
   attr(x, "resolution", exact = TRUE)
 }
 
@@ -243,12 +255,12 @@ resolution.contact_matrix <- function(x) {
 #' @export
 #' @method resolution list
 resolution.list <- function(x) {
-  ans <- lapply(x, attr, which = "resolution", exact = TRUE)
+  ans <- lapply(x, resolution)
   ans <- lapply(ans, function(y) {
     if(is.null(y)) {
       return(NA_integer_)
     } else {
-      as.numeric(y)
+      as.integer(y)
     }
   })
   ans <- unlist(ans)

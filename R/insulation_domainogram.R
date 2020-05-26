@@ -101,9 +101,9 @@ insulation_domainogram <- function(
   scores <- dcast(scores, window + id ~ exp, value.var = "ins")
   scores <- as.data.frame(scores)
   colnames(scores) <- c("window", "position", expnames)
-  structure(scores, 
+  structure(list(scores = scores), 
             class = c("domainogram_discovery", "genomescore_discovery", 
-                      "discovery", "data.frame"),
+                      "discovery"),
             package = "GENOVA",
             chrom = chrom, resolution = res)
 }

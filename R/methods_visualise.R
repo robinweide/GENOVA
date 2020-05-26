@@ -1476,7 +1476,7 @@ visualise.domainogram_discovery <- function(discovery,
                                             colour_lim = c(-1, 1),
                                             title = NULL,
                                             raw = FALSE, ...) {
-  df <- discovery
+  df <- discovery$scores
   df <- as.data.table(df)
   df <- melt.data.table(df, id.vars = c("window", "position"), 
                         value.name = "insulation")

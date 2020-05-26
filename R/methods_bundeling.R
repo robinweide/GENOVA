@@ -203,14 +203,14 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
   }
   
   # Combine and reorder
-  out <- discos[[1]]
+  out <- discos[[1]]$scores
   if (length(discos) > 1L) {
     for(i in 2:length(discos)) {
-      out <- merge(out, discos[[i]], by = c("window", "position"))
+      out <- merge(out, discos[[i]]$scores, by = c("window", "position"))
     }
   }
   
-  expnames <- lapply(discos, function(x){tail(colnames(x), -2)})
+  expnames <- lapply(discos, expnames)
   cnames <- tail(colnames(out), -2)
   if (!identical(cnames, unlist(expnames))) {
     newnames <- lapply(seq_along(expnames), function(i) {
@@ -218,13 +218,14 @@ bundle.domainogram_discovery <- function(..., collapse = "_"){
     })
     colnames(out)[-c(1:2)] <- unlist(newnames)
   }
-  
-  attr(out, "resolution") <- res[[1]]
-  attr(out, 'chrom') <- chroms[[1]]
-  class(out) <- c("domainogram_discovery", "genomescore_discovery", 
-                  "discovery", "data.frame")
 
-  out
+  structure(
+    list(scores = out),
+    class = c("domainogram_discovery", "genomescore_discovery", "discovery"),
+    package = attr(discos[[1]], "package"),
+    chrom = chroms[[1]],
+    resolution = res[[1]]
+  )
 }
 
 
@@ -709,10 +710,11 @@ unbundle.ARMLA_discovery <- function(discovery, ...) {
 #' @rdname unbundle
 #' @export
 unbundle.domainogram_discovery <- function(discovery, ...) {
-  expnames <- tail(colnames(discovery), -2)
+  expnames <- expnames(discovery)
   lapply(setNames(expnames, expnames), function(i) {
     col <- c("window", "position", i)
-    out <- discovery[, col]
+    out <- discovery
+    out$scores <- out$scores[, col]
     attr(out, "resolution") <- attr(discovery, "resolution")
     attr(out, "chrom") <- attr(discovery, "chrom")
     attr(out, "package") <- attr(discovery, "package")

@@ -63,7 +63,7 @@ pyramid.contacts <- function(exp, chrom = "chr1", start = 0, end = 25e6, ...) {
   if (attr(exp, "znorm")) {
     pyramid(y, colour_scale = scale_fill_GENOVA_div(
       name = "Z-score",
-      midpoint = 0)
+      midpoint = 0, limits = c(NA, NA))
     )
   } else {
     pyramid(y, ...)

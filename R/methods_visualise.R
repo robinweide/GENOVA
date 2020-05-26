@@ -91,6 +91,8 @@
 #'   the upper limit for the contacts fill scale is set to the 95th percentile
 #'   of the data to increase the dynamic range of colours. The same is true for
 #'   \code{ARA_discovery}, when '\code{mode = "signal"}'.
+#'   
+#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -125,6 +127,9 @@
 #' visualise(pescan, raw = TRUE) +
 #'   ggplot2::scale_fill_gradient(aesthetics = "altfill")
 #' }
+visualise <- function(discovery, ...) {
+  UseMethod("visualise", discovery)
+}
 
 # Default -----------------------------------------------------------------
 
@@ -291,6 +296,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
       "diff" = "Difference",
       "lfc" = expression(atop("Log"[2]*" Fold", "Change"))
     ),
+    limits = colour_lim_contrast,
     oob = scales::squish,
     midpoint = 0
   )
@@ -1470,7 +1476,7 @@ visualise.domainogram_discovery <- function(discovery,
                                             colour_lim = c(-1, 1),
                                             title = NULL,
                                             raw = FALSE, ...) {
-  df <- discovery
+  df <- discovery$scores
   df <- as.data.table(df)
   df <- melt.data.table(df, id.vars = c("window", "position"), 
                         value.name = "insulation")

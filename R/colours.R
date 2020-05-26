@@ -13,6 +13,27 @@ bezier_corrected_greenPink <- c('#38793a','#589b59','#7abd79','#a8dfa6',
                                 '#f5f5f5',
                                 '#fbbffb','#f28bf2','#d364d5','#b23fb6')
 
+# Colour choices now controlled by global options, e.g.
+#
+# options("GENOVA.colour.palette" = "hot")
+# options("GENOVA.colour.palette" = "whitered")
+#
+# Should propagate to downstream functions
+.choose_palette <- function(x = NULL) {
+  if (is.null(x)) {
+    x <- getOption("GENOVA.colour.palette", default = "hot")
+  }
+  if (length(x) == 1L && is.character(x)) {
+    x <- match.arg(x, c("hot", "whitered"))
+    x <- switch(x,
+                hot = bezier_corrected_hot,
+                whitered = bezier_corrected_whiteRed
+                # Reserved room for future palettes
+    )
+  }
+  x
+}
+
 # ggplot scale functions --------------------------------------------------
 
 #' @name GENOVA_colour_scales
@@ -39,14 +60,12 @@ NULL
 #' @rdname GENOVA_colour_scales
 #' @export
 scale_colour_GENOVA <- 
-  function(..., palette = "hot", na.value = "grey50", guide = "colourbar",
+  function(..., palette = NULL, na.value = "grey50", guide = "colourbar",
            aesthetics = "colour") 
   {
-    palette <- match.arg(palette, c("hot", "whitered"))
-    if (palette == "hot") {
-      palette <- scales::gradient_n_pal(bezier_corrected_hot)
-    } else {
-      palette <- scales::gradient_n_pal(bezier_corrected_whiteRed)
+    if (!is.function(palette)) {
+      palette <- .choose_palette(palette)
+      palette <- scales::gradient_n_pal(palette)
     }
     ggplot2::continuous_scale(
       aesthetics, "colour", palette,

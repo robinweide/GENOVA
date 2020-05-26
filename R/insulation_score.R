@@ -126,9 +126,9 @@ insulation_score <- function(explist, window = 30,
 
   # Format output
   structure(list(insula_score = insula),
-            PACKAGE = "GENOVA",
+            package = "GENOVA",
             colours = cols,
-            class = c("IS_discovery", "genomescore_discovery"),
+            class = c("IS_discovery", "genomescore_discovery", "discovery"),
             resolution = attr(explist[[1]], "resolution"),
             window = window)
 }

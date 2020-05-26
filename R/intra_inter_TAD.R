@@ -105,7 +105,8 @@ intra_inter_TAD <- function(explist, tad_bed, max_neighbour = 5) {
       results = res,
       tads = cbind(tad_bed, id = seq_len(nrow(tad_bed)))
     ),
-    class = "IIT_discovery", package = "GENOVA",
+    class = c("IIT_discovery", "discovery"), 
+    package = "GENOVA",
     colours = cols,
     resolution = attr(explist[[1]], "resolution")
   )

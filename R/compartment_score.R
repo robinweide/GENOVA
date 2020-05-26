@@ -150,13 +150,15 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
   
   cols <- vapply(explist, attr, character(1L), "colour")
   
-  out <- structure(list(compart_scores = as.data.frame(out)),
-                   package = "GENOVA",
-                   colours = cols,
-                   class = c("CS_discovery", "genomescore_discovery"),
-                   resolution = attr(explist[[1]], "resolution"),
-                   partitioning = partitioning,
-                   signed = FALSE)
+  out <- structure(
+    list(compart_scores = as.data.frame(out)),
+    package = "GENOVA",
+    colours = cols,
+    class = c("CS_discovery", "genomescore_discovery", "discovery"),
+    resolution = attr(explist[[1]], "resolution"),
+    partitioning = partitioning,
+    signed = FALSE
+  )
   
   if (!is.null(bedgraph) | !is.null(bed)) {
     out <- sign_compartmentscore(out, bed = bed, bedgraph = bedgraph)
@@ -314,7 +316,7 @@ sign_compartmentscore <- function(CS_discovery,
   setcolorder(out, neworder = c(2,3,4,1,5:ncol(out)))
   
   structure(list(compart_scores = as.data.frame(out)),
-            class = c("CS_discovery", "genomescore_discovery"),
+            class = c("CS_discovery", "genomescore_discovery", "discovery"),
             colours = attr(CS_discovery, "colours"),
             package = "GENOVA",
             resolution = attr(CS_discovery, "resolution"),

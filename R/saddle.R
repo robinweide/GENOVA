@@ -179,5 +179,5 @@ saddle <- function(explist, CS_discovery, bins = 10L,
   structure(list(saddle = out),
             package = "GENOVA",
             resolution = attr(explist[[1]], "resolution"),
-            class = "saddle_discovery")
+            class = c("saddle_discovery", "discovery"))
 }

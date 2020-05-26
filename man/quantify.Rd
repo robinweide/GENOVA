@@ -8,6 +8,8 @@
 \alias{quantify.IIT_discovery}
 \title{Quantification of results}
 \usage{
+quantify(discovery, ...)
+
 \method{quantify}{APA_discovery}(discovery, signal_size = 3, ...)
 
 \method{quantify}{saddle_discovery}(discovery, ...)
@@ -24,4 +26,7 @@ take the middle 3x3 matrix of the APA).}
 }
 \description{
 Here be a placholder description
+}
+\examples{
+NULL
 }

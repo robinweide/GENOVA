@@ -76,8 +76,8 @@ plot.APA_discovery <- function(
   layout(layout_mat, widths = c(rep.int(1, n_samples), 0.2),
          respect = TRUE)
   
-  if (is.null(colour_fun)) {
-    cols <- bezier_corrected_hot
+  if (!is.function(colour_fun)) {
+    cols <- .choose_palette(colour_fun)
     colour_fun <- colorRampPalette(cols)
   }
 
@@ -384,8 +384,8 @@ plot.ATA_discovery <- function(
   layout(layout_mat, widths = c(rep.int(1, n_samples), 0.2),
          respect = TRUE)
   
-  if (is.null(colour_fun)) {
-    cols <- bezier_corrected_hot
+  if (!is.function(colour_fun)) {
+    cols <- .choose_palette(colour_fun)
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -824,6 +824,7 @@ plot.domainogram_discovery <- function(
   ...
 ) {
   minimalist <- literalTRUE(minimalist)
+  x <- x$scores
   if (minimalist) {
     x <- x[, 1:3]
   } else {

@@ -10,7 +10,7 @@
 \usage{
 scale_colour_GENOVA(
   ...,
-  palette = "hot",
+  palette = NULL,
   na.value = "grey50",
   guide = "colourbar",
   aesthetics = "colour"

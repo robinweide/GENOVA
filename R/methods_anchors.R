@@ -430,6 +430,7 @@ anchors_ATA <- function(IDX, bed,
     stop("There are no TADs large enough to pass the distance thresholds.",
          call. = FALSE)
   }
+  rnames <- names_from_bed(bed[keep,])
 
   # Resize regions
   bed <- data.frame(bed[,1],
@@ -446,7 +447,7 @@ anchors_ATA <- function(IDX, bed,
     pmin(idx[, 1], idx[, 2]),
     pmax(idx[, 1], idx[, 2])
   )
-  rownames(idx) <- names_from_bed(bed[keep,])
+  rownames(idx) <- rnames
   idx <- idx[order(idx[, 1]), , drop = FALSE]
   idx <- idx[idx[, 1] < idx[, 2], , drop = FALSE]
   

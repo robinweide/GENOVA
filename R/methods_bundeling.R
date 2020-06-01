@@ -767,7 +767,7 @@ unbundle.virtual4C_discovery <- function(discovery, ...) {
 #' @rdname unbundle
 #' @export
 unbundle.CS_discovery <- function(discovery, ...) {
-  exps <- tail(colnames(discovery$compart_scores), -4)
+  exps <- expnames(discovery)
   cols <- lapply(setNames(exps, exps), function(i) {
     c("chrom", "start", "end", "bin", i)
   })

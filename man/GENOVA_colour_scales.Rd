@@ -118,7 +118,9 @@ transformation with \code{\link[scales:trans_new]{scales::trans_new()}}.}
 
 \item{palette}{A \code{character} vector of length 1 for palette options.
 Either \code{"hot"} or \code{"whitered"} for sequential scales, or
-\code{"divergent"} or \code{"greenpink"} for divergent scales.}
+\code{"divergent"} or \code{"greenpink"} for divergent scales. In 
+sequential scales, if \code{palette = NULL} an attempt will be made to find
+\code{"GENOVA.colour.palette"} in the global options.}
 
 \item{na.value}{Missing values will be replaced with this value.}
 
@@ -139,5 +141,15 @@ These scale functions create colour gradients that have been
   perceptually triangular for the divergent scales.
 }
 \examples{
-NULL
+\dontrun{
+require(ggplot2)
+p <- ggplot(faithfuld, 
+            aes(waiting, eruptions, fill = density)) +
+  geom_tile()
+p + scale_fill_GENOVA()
+p + scale_fill_GENOVA_div()
+}
+}
+\seealso{
+The \code{\link[GENOVA:GENOVA_colours]{GENOVA colours}} description.
 }

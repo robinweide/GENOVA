@@ -11,13 +11,13 @@
 #' @param xlab,ylab each a character string giving the labels for the x and y
 #'   axis. Default is to use the chromosome name as axis title.
 #' @inheritDotParams graphics::image.default -y -z
-#'
-#' @return
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' x <- select_subset(exp, "chr1", 50e6, 60e6)
 #' image(x)
+#' }
 image.contacts_matrix <- function(
   x,
   col = NULL, zlim = NULL,

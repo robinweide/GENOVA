@@ -48,13 +48,12 @@ axis. Default is to use the chromosome name as axis title.}
     not specified, see \sQuote{Details}.}
   }}
 }
-\value{
-
-}
 \description{
 Display a part of a Hi-C matrix
 }
 \examples{
+\dontrun{
 x <- select_subset(exp, "chr1", 50e6, 60e6)
 image(x)
+}
 }

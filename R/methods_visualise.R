@@ -15,63 +15,21 @@
 #'   contrast with all other samples. Alternatively, set to \code{NULL} to not
 #'   plot contrast panels. See also the \code{show_single_contrast} argument.
 #'
-#' @param metric A \code{character} of length 1:
-#'
-#'   \describe{ \item{A*A}{\code{"diff"} for difference by subtraction or
-#'   \code{"lfc"} for \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold
-#'   changes.} \item{RCP}{\code{"smooth"} for a
-#'   \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line,
-#'   \code{both} for adding the raw distance-bins as points and \code{lfc} for
-#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.} }
-#'
-#' @param colour_lim,colour_lim_contrast One of: \itemize{ \item \code{NULL} to
-#'   have an educated quess for the scale. \item A \code{numeric} vector of
-#'   length two providing the limits of the scale. Use \code{NA} to refer to
-#'   existing minima or maxima. \item A \code{function} that accepts the
-#'   existing (automatic) limits and returns new limits. }
+#' @param colour_lim,colour_lim_contrast
+#'   Indication of limits for the primary and secondary continuous colour scales 
+#'   respectively. One of: \itemize{ 
+#'   \item \code{NULL} to have an educated quess for the scale. 
+#'   \item A \code{numeric} vector of length two providing the limits of the 
+#'   scale. Use \code{NA} to refer to existing minima or maxima. 
+#'   \item A \code{function} that accepts the existing (automatic) limits and 
+#'   returns new limits.}}
 #'
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
 #'
-#' @param bins \code{[virtual4C]} Set the number of histogram-bins
-#'
-#' @param bedlist \code{[virtual4C]} Either a BED-formatted \code{data.frame} or
-#'   list thereof to plot underneath the tracks.
-#'
-#' @param bed_colours \code{[virtual4C]} A \code{character} vector with colours
-#'   parallel to the number of list-elements in the \code{bedlist} argument.
-#'   Last colour is repeated if \code{bedlist} is longer than
-#'   \code{bed_colours}.
-#'
-#' @param extend_viewpoint \code{[virtual4C]} Add a set bp to both sides of the
-#'   viewpoint. Makes the viewpoint-box broader.
-#'
-#' @param mode \code{[PESCAn & ARA]} What result slot should be used for
-#'   visualisation? \code{"obsexp"} for the observed over expected metric or
-#'   \code{"signal"} for mean contacts at unshifted anchors.
-#'
-#' @param flipFacet \code{[RCP]} Do you want to have RCP's of different regions
-#'   in one plot, instead of facets? (default : \code{FALSE})
-#' @param chr \code{[CS, saddle & IS & DI]} A \code{character} of length 1
-#'   indicating a chromosome name.
-#' @param start,end \code{[CS & IS & DI]} A \code{numeric} of length 1 with
-#'   start- and end-positions for the region to plot. If \code{NULL}, is set to
-#'   \code{-Inf} and \code{Inf} respectively.
-#'
-#' @param geom \code{[IIT]} A \code{character} vector of length 1; either one of
-#'   \code{"boxplot"}, \code{"violin"}, \code{"jitter"} to get boxplots, violin
-#'   plots or jittered point plots.
-#'
-#' @param censor_contrast \code{[IIT]} A \code{logical} of length 1 deciding
-#'   wether the contrasting experiment itself should be censored (\code{TRUE})
-#'   or included (\code{FALSE}).
-#'
-#' @param show_single_contrast A \code{logical} of length 1; if \code{FALSE}
-#'   (default), does not show contrasts when \code{discovery} describes one
-#'   experiment. If \code{TRUE}, plots empty panel.
-#'
 #' @param title add a title
-#' @param ... further arguments passed to or from other methods.
+#' @param ... Further arguments specific to the discovery class. See the section 
+#' extended arguments below.
 #'
 #' @details The \code{"diff"} \code{metric} value creates contrast panels by
 #'   subtracting the values of each sample by the values of the sample indicated
@@ -86,6 +44,8 @@
 #'   '\code{raw = TRUE}' and '\code{subtract}' is not \code{NULL}, the fill
 #'   scale of the contrast panels can be manipulated by setting the
 #'   '\code{aesthetics = "altfill"}' inside ggplot2's fill scale functions.
+#'   
+#' @section Extended arguments:
 #'
 #' @note For \code{ATA_discovery} objects which include the matrix's diagonal,
 #'   the upper limit for the contacts fill scale is set to the 95th percentile
@@ -130,6 +90,8 @@
 visualise <- function(discovery, ...) {
   UseMethod("visualise", discovery)
 }
+
+
 
 # Default -----------------------------------------------------------------
 
@@ -275,7 +237,29 @@ visualise.ARMLA <- function(discovery, contrast = 1,
 # Aggregate matrices ------------------------------------------------------
 
 #' @rdname visualise
+#' @section Extended arguments:\subsection{APA, PE-SCAn, ATA, ARA & C-SCAn}{
+#' \describe{
+#'  \item{\code{metric}}{A \code{character} of length one: \code{"diff"} for 
+#'   difference by subtraction or \code{"lfc"} for 
+#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold changes.}
+#'  \item{\code{colour_lim}, \code{colour_lim_contrast}}{
+#'   Indication of limits for the primary and secondary colour scale 
+#'   respectively. One of: \itemize{ 
+#'   \item \code{NULL} to have an educated quess for the scale. 
+#'   \item A \code{numeric} vector of length two providing the limits of the 
+#'   scale. Use \code{NA} to refer to existing minima or maxima. 
+#'   \item A \code{function} that accepts the existing (automatic) limits and 
+#'   returns new limits.}}
+#'  \item{\code{mode}}{A \code{character} of length one indicating what type of
+#'  result to plot. Either \code{"signal"} or \code{"obsexp"}, referring to the
+#'  slot in the discovery object. Applicatble to PE-SCAn, C-SCAn and ARA.}
+#'  \item{\code{show_single_contrast}}{A \code{logical} of length 1; 
+#'   if \code{FALSE} (default), does not show contrasts when \code{discovery} 
+#'   describes one experiment. If \code{TRUE}, plots empty panel.}
+#' }
+#' }
 #' @export
+#' @usage NULL
 visualise.APA_discovery <- function(discovery, contrast = 1,
                                     metric = c("lfc", "diff"),
                                     raw = FALSE, title = NULL,
@@ -340,7 +324,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
 
 #' @rdname visualise
 #' @export
-#' @noRd
+#' @usage NULL
 visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
                                       raw = FALSE, title = NULL, 
                                       colour_lim = NULL,
@@ -428,6 +412,7 @@ visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
 
 #' @rdname visualise
 #' @export
+#' @usage NULL
 visualise.PESCAn_discovery <- function(discovery, contrast = 1,
                                        metric = c("diff", "lfc"),
                                        mode = c("obsexp", "signal"),
@@ -529,6 +514,7 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
 
 #' @rdname visualise
 #' @export
+#' @usage NULL
 visualise.ATA_discovery <- function(discovery, contrast = 1,
                                     metric = c("lfc", "diff"),
                                     raw = FALSE, title = NULL,
@@ -611,6 +597,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
 
 #' @rdname visualise
 #' @export
+#' @usage NULL
 visualise.ARA_discovery <- function(discovery, contrast = 1,
                                     metric = c("diff", "lfc"),
                                     mode = c("obsexp", "signal"),
@@ -716,7 +703,18 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
 # Genome wide scores ------------------------------------------------------
 
 #' @rdname visualise
+#' @section Extended arguments:\subsection{Compartment-, Insulation score & 
+#' Directionality Index}{
+#' \describe{
+#'  \item{\code{chr}}{A \code{character} of length one with the chromosome 
+#'  name. Defaults to \code{"chr1"}.}
+#'  \item{\code{start}, \code{end}}{An \code{integer} of length one setting the 
+#'  start or end of the region to plot. If \code{NULL} (default), is set to 
+#'  \code{-Inf} and \code{Inf} respectively}
+#' }
+#' }
 #' @export
+#' @usage NULL
 visualise.CS_discovery <- function(discovery, contrast = NULL,
                                    chr = "chr1", start = NULL, end = NULL,
                                    raw = FALSE, show_single_contrast = FALSE,
@@ -810,6 +808,7 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
 
 #' @rdname visualise
 #' @export
+#' @usage NULL
 visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
                                    start = NULL, end = NULL, raw = FALSE, 
                                    show_single_contrast = FALSE,
@@ -903,6 +902,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
 
 #' @rdname visualise
 #' @export
+#' @usage NULL
 visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
                                     start = NULL, end = NULL, raw = FALSE, 
                                     show_single_contrast = FALSE,
@@ -995,10 +995,29 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
 # Miscellaneous discoveries ----------------------------------------------------
 
 #' @rdname visualise
+#' @section Extended arguments:\subsection{Relative Contact Probability}{
+#' \describe{
+#'  \item{\code{metric}}{A \code{character} of length one. The choices are:
+#'  \describe{
+#'   \item{\code{"smooth"}}{A 
+#'   \ifelse{html}{\out{log<sub>10</sub>}}{\eqn{log_10}}-smoothed line 
+#'   (default)}
+#'   \item{\code{"both"}}{Like \code{"smooth"}, but also adds the raw binned 
+#'   distances as points.}
+#'   \item{\code{"lfc"}}{Displays 
+#'   \ifelse{html}{\out{log<sub>2</sub>}}{\eqn{log_2}} fold change compared to 
+#'   the sample specified in the \code{contrast} argument.}
+#'  }}
+#'  \item{\code{flipFacet}}{A \code{logical} of length one. If the 
+#'  \code{bedlist} argument was provided to \code{RCP()}, combine all regions 
+#'   in one panel? Defaults to \code{FALSE}.}
+#' }
+#' }
 #' @export
+#' @usage NULL
 visualise.RCP_discovery = function(discovery, contrast = 1, 
-                                   metric = c("smooth","both","lfc"), raw = F, 
-                                   title = NULL, flipFacet = F, ...){
+                                   metric = c("smooth","both","lfc"), raw = FALSE, 
+                                   title = NULL, flipFacet = FALSE, ...){
   
   metric <- match.arg(metric)
   
@@ -1182,7 +1201,21 @@ visualise.RCP_discovery = function(discovery, contrast = 1,
 }
 
 #' @rdname visualise
+#' @section Extended arguments: \subsection{Virtual 4C}{
+#' \describe{
+#'  \item{\code{bins}}{An \code{integer} of length 1 with the number of bins to
+#'   aggregate signal in. If \code{NULL} (the default), this is set to the 
+#'   number of Hi-C bins in the viewpoint's chromosome.}
+#'  \item{\code{bedlist}}{Either a BED-formatted \code{data.frame} or a 
+#'  \code{list} thereof, indicating genomic intervals to annotate in the bottom 
+#'  margin of the plot.}
+#'  \item{\code{extend_viewpoint}}{An \code{integer} of length one in basepairs
+#'  indicating by how much to widen the viewpoint censor-box. Affects the 
+#'  scaling of the y-axis.}
+#' }
+#' }
 #' @export
+#' @usage NULL
 visualise.virtual4C_discovery <- function(discovery, bins = NULL, 
                                           bedlist = NULL, bed_colours = "black", 
                                           extend_viewpoint = NULL, ...){
@@ -1323,7 +1356,17 @@ visualise.virtual4C_discovery <- function(discovery, bins = NULL,
 }
 
 #' @rdname visualise
+#' @section Extended arguments:\subsection{Saddle}{
+#' \describe{
+#'  \item{\code{chr}}{A \code{character} of length one with the chromosome 
+#'   name. Defaults to \code{"all"}.}
+#'  \item{\code{show_single_contrast}}{A \code{logical} of length 1; 
+#'   if \code{FALSE} (default), does not show contrasts when \code{discovery} 
+#'   describes one experiment. If \code{TRUE}, plots empty panel.}
+#' }
+#' }
 #' @export
+#' @usage NULL
 visualise.saddle_discovery <- function(discovery, contrast = 1,
                                        chr = "all",
                                        raw = FALSE, title = NULL,
@@ -1471,6 +1514,7 @@ visualise.saddle_discovery <- function(discovery, contrast = 1,
 }
 
 #' @rdname visualise
+#' @usage NULL
 #' @export
 visualise.domainogram_discovery <- function(discovery, 
                                             colour_lim = c(-1, 1),
@@ -1514,7 +1558,22 @@ visualise.domainogram_discovery <- function(discovery,
 }
 
 #' @rdname visualise
+#' @section Extended arguments:\subsection{Intra-inter TAD}{
+#' \describe{
+#'  \item{\code{geom}}{One of the following length one \code{character}s:
+#'    \describe{
+#'      \item{\code{"boxplot"}}{Display as boxplots.}
+#'      \item{\code{"violin"}}{Display as violin plots.}
+#'      \item{\code{"jitter"}}{Display as jittered points plot.}
+#'    }
+#'  }
+#'  \item{\code{censor_contrast}}{A \code{logical} of length 1 deciding whether 
+#'  the contrasting experiment itself should be censored (\code{TRUE}) or
+#'  included (\code{FALSE}).}
+#' }
+#' }
 #' @export
+#' @usage NULL
 visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
                                     geom = c("boxplot", "violin", "jitter"),
                                     censor_contrast = TRUE, title = NULL, 
@@ -1623,6 +1682,7 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
 }
 
 #' @rdname visualise
+#' @usage NULL
 #' @export
 visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
                                          colour_lim = NULL, ...) {
@@ -1693,7 +1753,10 @@ visualise.chrommat_discovery <- function(discovery, raw = FALSE, title = NULL,
 #'
 #' @export
 scale_altfill_continuous <- function(...) {
-  ggplot2::scale_fill_gradient2(..., aesthetics = "altfill")
+  guide <- ggplot2::guide_colourbar()
+  guide$available_aes <- "altfill"
+  ggplot2::scale_fill_gradient2(..., guide = guide,
+                                aesthetics = "altfill")
 }
 
 # Function factory for centering limits around a value

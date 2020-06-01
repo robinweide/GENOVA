@@ -21,8 +21,8 @@
 #'   typically results in a trapezoid.
 #' @param colour_scale A continuous ggplot2 
 #'   \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
-#'   Defaults to \code{\link[GENOVA]{scale_fill_GENOVA()}} for single 
-#'   experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div()}} for 
+#'   Defaults to \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
+#'   experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
 #'   \code{pyramid_difference()} or z-score normalised experiments.
 #' @param display_yaxis A \code{logical} of length 1: should the y-axis be
 #'   displayed?
@@ -715,19 +715,19 @@ add_ctcf_sites <- function(bed, strand, height = 0.05, name = "CTCF",
   ))
   plus <- ggplot2::geom_text(
     ggplot2::aes(x, 1), colour = "#E41A1C", label = "\u25B6",
-    data = df[df$colour == "+",])
+    data = df[df$colour == "+",], ...)
   minus <- ggplot2::geom_text(
     ggplot2::aes(x, 0), colour = "#377EB8", label = "\u25C0",
-    data = df[df$colour == "-",])
+    data = df[df$colour == "-",], ...)
   
   if (is.null(scale_y)) {
-    scale_y <- ggplot2:::scale_y_continuous(breaks = NULL, 
-                                            limits = c(-1, 2))
+    scale_y <- ggplot2::scale_y_continuous(breaks = NULL, 
+                                           limits = c(-1, 2))
   }
   
   list(
     as_track(plus, height = height, name = name, scale_y = scale_y),
-    as_track(minus, height = height, name = name, scale_y = scale_y)
+    as_track(minus, height = NULL, name = name, scale_y = scale_y)
   )
   
 }
@@ -813,7 +813,7 @@ as_track.CS_discovery <- function(x, height = 0.1,
                                   ..., geom = "area") {
   if (is.null(scale_y)) {
     scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, 
-                                           limits = GENOVA:::centered_limits())
+                                           limits = centered_limits())
   }
   cscale <- ggplot2::scale_colour_manual(
     aesthetics = "exp",
@@ -835,7 +835,7 @@ as_track.IS_discovery <- function(x, height = 0.1,
                                   ..., geom = "area") {
   if (is.null(scale_y)) {
     scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, 
-                                           limits = GENOVA:::centered_limits())
+                                           limits = centered_limits())
   }
   cscale <- ggplot2::scale_colour_manual(
     aesthetics = "exp",
@@ -857,7 +857,7 @@ as_track.DI_discovery <- function(x, height = 0.1,
                                   ..., geom = "area") {
   if (is.null(scale_y)) {
     scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, 
-                                           limits = GENOVA:::centered_limits())
+                                           limits = centered_limits())
   }
   cscale <- ggplot2::scale_colour_manual(
     aesthetics = "exp",
@@ -874,11 +874,18 @@ as_track.DI_discovery <- function(x, height = 0.1,
 #' @export
 #' @rdname pyramidtracks
 as_track.domainogram_discovery <- function(x, height = 0.1, 
-                                           name = "Domainogram", 
+                                           name = NULL, 
                                            scale_y = NULL, 
                                            ...) {
   df <- copy(x$scores)
   expnames <- expnames(x)
+  if (is.null(name)) {
+    if (length(expnames) == 1L) {
+      name <- "Domainogram"
+    } else {
+      name <- ""
+    }
+  }
   
   setDT(df)
   df <- melt.data.table(df, measure.vars = expnames)
@@ -887,8 +894,8 @@ as_track.domainogram_discovery <- function(x, height = 0.1,
     chrom = attr(x, "chrom"),
     x = df$position,
     y = df$window,
-    exp = df$variable,
-    fill = df$value,
+    exp = factor(df$variable),
+    fill = df$value
   ), nrow = nrow(df))
   
   if (is.null(scale_y)) {
@@ -897,7 +904,7 @@ as_track.domainogram_discovery <- function(x, height = 0.1,
   cscale <- scale_fill_GENOVA_div(midpoint = 0, name = "Insulation\nScore")
   
   layer <- ggplot2::geom_raster(
-    ggplot2::aes(x = x, y = y, fill = fill),
+    ggplot2::aes_string(x = "x", y = "y", fill = "fill"),
     data = df, na.rm = TRUE, # Midpoint parametrisation, some values can go oob.
     ...,
   )
@@ -911,7 +918,8 @@ as_track.domainogram_discovery <- function(x, height = 0.1,
     lapply(expnames, function(i) {
       sublayer <- ggplot2::ggproto(NULL, layer)
       sublayer$data <- sublayer$data[sublayer$data$exp == i, ]
-      out <- as_track(sublayer, size = size, name = paste0(name, i, ".domaino"), 
+      out <- as_track(sublayer, height = height, 
+                      name = paste0(name, i, ".domaino"), 
                       scale_y = scale_y)
       attr(out, "colourscale") <- cscale
       out
@@ -944,6 +952,13 @@ as_track.virtual4C_discovery <- function(x,
   
   df <- copy(x$data)
   expnames <- expnames(x)
+  if (is.null(name)) {
+    if (length(expnames) == 1L) {
+      name <- "Virtual 4C"
+    } else {
+      name <- ""
+    }
+  }
   
   setDT(df)
   df <- melt.data.table(df, measure.vars = expnames)
@@ -982,35 +997,39 @@ as_track.virtual4C_discovery <- function(x,
   
   if (length(expnames) > 1) {
     lapply(expnames, function(i) {
-      name <- paste0(i, ".v4C") # 0-width space to separate from domainogram
+      if (!nzchar(name)) {
+        name <- paste0(name, " ")
+      }
+      name <- paste0(name, i, ".v4C")
       sublayer <- ggplot2::ggproto(NULL, layer)
       sublayer$data <- sublayer$data[sublayer$data$exp == i, ]
       as_track(sublayer, height = height, name = name, scale_y = scale_y)
     })
   } else {
-    as_track(layer, height = height, name = "Virtual 4C", scale_y = scale_y)
+    as_track(layer, height = height, name = name, scale_y = scale_y)
   }
 }
 
 #' @export
-#' @noRd
+#' @rdname pyramidtracks
+#' @usage NULL
 ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
-  if (inherits(object, c("CS_discovery", "IS_discovery", "DI_discovery"))) {
-    cscale <- ggplot2::scale_colour_manual(
-      aesthetics = "exp",
-      name = "Sample",
-      values = setNames(attr(object, "colours"), expnames(object)),
-      guide = ggplot2::guide_legend()
-    )
-  } else if (inherits(object, c("domainogram_discovery"))) {
-    cscale <- scale_fill_GENOVA_div(midpoint = 0, name = "Insulation\nScore")
-  } else {
-    cscale <- NULL
-  }
+  # if (inherits(object, c("CS_discovery", "IS_discovery", "DI_discovery"))) {
+  #   cscale <- ggplot2::scale_colour_manual(
+  #     aesthetics = "exp",
+  #     name = "Sample",
+  #     values = setNames(attr(object, "colours"), expnames(object)),
+  #     guide = ggplot2::guide_legend()
+  #   )
+  # } else if (inherits(object, c("domainogram_discovery"))) {
+  #   cscale <- scale_fill_GENOVA_div(midpoint = 0, name = "Insulation\nScore")
+  # } else {
+  #   cscale <- NULL
+  # }
   
   if (inherits(plot, "ggpyramid")) {
     plot <- plot + as_track(object)
-    plot <- .update_manual_scale(plot, cscale)
+    # plot <- .update_manual_scale(plot, cscale)
     plot
   } else {
     NextMethod()
@@ -1021,7 +1040,7 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
 
 .set_facet_factorlevel <- function(plot) {
   all_levels <- lapply(plot$layers, function(layer) {
-    levels(layer$data$facet)
+    as.character(unique(layer$data$facet))
   })
   all_levels <- Reduce(union, all_levels)
   plot$layers <- lapply(plot$layers, function(layer) {
@@ -1208,7 +1227,7 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
   } else {
     return(NULL)
   }
-  names(gp) <- ggplot2:::standardise_aes_names(names(gp))
+  names(gp) <- ggplot2::standardise_aes_names(names(gp))
   
   edge <- .transform_xy_coords(
     x = c(location[[2]], location[[2]], location[[3]]),
@@ -1266,7 +1285,8 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
     
     environment(pal_fun)$values <- pal
 
-    plot$scales$scales[[i]] <- ggproto(NULL, old_scale, palette = pal_fun)
+    plot$scales$scales[[i]] <- ggplot2::ggproto(NULL, old_scale, 
+                                                palette = pal_fun)
   } else {
     plot <- plot + new_scale
   }

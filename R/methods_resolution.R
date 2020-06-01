@@ -28,19 +28,19 @@ resolution.default <- function(x, ...) {
 
 #' @export
 #' @method resolution discovery
-resolution.discovery <- function(x) {
+resolution.discovery <- function(x, ...) {
   attr(x, "resolution", exact = TRUE)
 }
 
 #' @export
 #' @method resolution contacts
-resolution.contacts <- function(x) {
+resolution.contacts <- function(x, ...) {
   attr(x, "resolution", exact = TRUE)
 }
 
 #' @export
 #' @method resolution list
-resolution.list <- function(x) {
+resolution.list <- function(x, ...) {
   ans <- lapply(x, resolution)
   ans <- lapply(ans, function(y) {
     if(is.null(y) || !is.finite(y)) {
@@ -56,7 +56,7 @@ resolution.list <- function(x) {
 # Contact matrix is a list, so we bypass the list resolution method
 #' @export
 #' @method resolution contact_matrix
-resolution.contact_matrix <- function(x) {
+resolution.contact_matrix <- function(x, ...) {
   attr(x, "resolution", exact = TRUE)
 }
 
@@ -67,7 +67,7 @@ resolution.contact_matrix <- function(x) {
 #' @export
 #' @noRd
 #' @method as.double contacts
-as.double.contacts <- function(x) {
+as.double.contacts <- function(x, ...) {
   warning("Cannot coerce a 'contacts' object to numeric.", call. = FALSE)
   return(c(0, GENOVA::resolution(x)))
 }
@@ -83,7 +83,7 @@ range.contacts <- function(x, ...) {
 #' @export
 #' @noRd
 #' @method as.double discovery
-as.double.discovery <- function(x) {
+as.double.discovery <- function(x, ...) {
   warning("Cannot coerce a 'discovery' object to numeric.", call. = FALSE)
   return(c(0, GENOVA::resolution(x)))
 }

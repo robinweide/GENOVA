@@ -37,8 +37,8 @@ typically results in a trapezoid.}
 
 \item{colour_scale}{A continuous ggplot2 
 \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
-Defaults to \code{\link[GENOVA]{scale_fill_GENOVA()}} for single 
-experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div()}} for 
+Defaults to \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
+experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
 \code{pyramid_difference()} or z-score normalised experiments.}
 
 \item{display_yaxis}{A \code{logical} of length 1: should the y-axis be

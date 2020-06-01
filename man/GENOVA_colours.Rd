@@ -55,12 +55,12 @@ oneanother.
 The colours in ggplot based visualisations, such as
 \code{\link[GENOVA]{visualise}()} and \code{\link[GENOVA]{pyramid}()}, are
 based on the
-\code{\link[GENOVA:GENOVA_colour_scales]{scale_(colour|fill)_GENOVA()}} and
-\code{\link[GENOVA:GENOVA_colour_scales]{scale_(colour|fill)_GENOVA_div()}}
+\code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA}()} and
+\code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA_div}()}
 functions.
 
 For visualisations in base R, such as \code{\link[GENOVA]{hic.matrixplot}()}
-and \code{\link[GENOVA]{image.contacts_matrix()}},
+and \code{\link[GENOVA:GENOVA_image]{image()}},
 the \code{\link[grDevices]{colorRampPalette}()}
 function is used.
 }

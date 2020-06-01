@@ -21,6 +21,8 @@
 \title{Visualise discoveries}
 \usage{
 visualise(discovery, ...)
+
+\method{visualise}{default}(discovery, contrast, raw, title, ...)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

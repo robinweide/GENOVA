@@ -22,7 +22,7 @@
 #'   \item A \code{numeric} vector of length two providing the limits of the 
 #'   scale. Use \code{NA} to refer to existing minima or maxima. 
 #'   \item A \code{function} that accepts the existing (automatic) limits and 
-#'   returns new limits.}}
+#'   returns new limits.}
 #'
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned?
@@ -99,8 +99,7 @@ visualise <- function(discovery, ...) {
 
 #' @export
 #' @rdname visualise
-#' @usage NULL
-visualise.default <- function(discovery, ...) {
+visualise.default <- function(discovery, contrast, raw, title, ...) {
   stop("No visualise method for class '", class(discovery),
        "' has been implemented.", call. = FALSE)
 }

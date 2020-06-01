@@ -13,6 +13,7 @@
 \alias{as_track.DI_discovery}
 \alias{as_track.domainogram_discovery}
 \alias{as_track.virtual4C_discovery}
+\alias{ggplot_add.genomescore_discovery}
 \title{Adding tracks to a pyramid plot.}
 \usage{
 as_track(x, height = 0.1, name, scale_y, ...)
@@ -52,7 +53,7 @@ add_ctcf_sites(bed, strand, height = 0.05, name = "CTCF", scale_y = NULL, ...)
   geom = "area"
 )
 
-\method{as_track}{domainogram_discovery}(x, height = 0.1, name = "Domainogram", scale_y = NULL, ...)
+\method{as_track}{domainogram_discovery}(x, height = 0.1, name = NULL, scale_y = NULL, ...)
 
 \method{as_track}{virtual4C_discovery}(x, height = 0.1, name = NULL, scale_y = NULL, ..., geom = "area")
 }

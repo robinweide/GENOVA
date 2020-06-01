@@ -19,19 +19,24 @@ APA(
 \item{explist}{Either a single GENOVA \code{contacts} object or a list of
 GENOVA \code{contacts} objects.}
 
-\item{bedpe}{A \code{data.frame} with 6 columns in BEDPE format containing
-the locations to be anchored: chrom1/start1/end1/chrom2/start2/end2.}
+\item{bedpe}{A BEDPE-formatted \code{data.frame} with the following 6
+columns: \enumerate{ \item A \code{character} giving the
+chromosome names of the first coordinate. \item An \code{integer} giving
+the start positions of the first coordinate. \item An \code{integer} giving
+the end positions of the first coordinate. \item A \code{character} giving
+the chromosome names of the second coordinate. \item An \code{integer}
+giving the start positions of the second coordinate. \item An
+\code{integer} giving the end positions of the second coordinate. }}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints.}
 
-\item{size_bin}{The size of the lookup regions in bins (i.e. a score of 21
-yields an output with 10 Hi-C bins both up- and downstream of the anchor).
-When \code{NULL} (default), it is internally set to \code{21} when the
-\code{size_bp} is also \code{NULL}.}
-
-\item{size_bp}{Alternative parametrisation for the lookup regions, expressed
-in basepairs. Not used when the argument \code{size_bin} is set.}
+\item{size_bin, size_bp}{The size of the lookup regions in bins (i.e. a score
+of 21 yields an output with 10 Hi-C bins both up- and downstream of the
+anchor). When \code{NULL} (default), it is internally set to \code{21} when
+the \code{size_bp} is also \code{NULL}. \code{size_bp} is an alternative
+parametrisation for the lookup regions, expressed in basepairs.
+\code{size_bp} is not used when the argument \code{size_bin} is set.}
 
 \item{outlier_filter}{A \code{numeric} of length 2 between \code{[0-1]}
 indicating quantiles of data to be used as thresholds. Data outside these
@@ -40,7 +45,8 @@ performs no outlier correction.}
 
 \item{anchors}{(Optional) A \code{matrix} with two columns containing
 pre-computed anchor indices. If this is set, skips calculation of anchor
-indices and uses this argument instead.}
+indices and uses this argument instead. See 
+\code{\link[GENOVA:anchors]{anchors_APA()}}.}
 
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
 summary matrices be returned in the output? Should be \code{TRUE} if the
@@ -50,11 +56,11 @@ intention is to use the \code{quantify} function.}
 An \code{APA_discovery} object containing the following slots:
   \describe{ \item{signal}{An \code{array} with the dimensions
   \code{size_bin} x \code{size_bin} x \code{length(explist)} containing mean
-  contact values for bins surrounding the anchors} \item{signal_raw}{A
+  contact values for bins surrounding the anchors.} \item{signal_raw}{A
   \code{list} with \code{length(explist)} elements for each contacts object,
   wherein an element is an n x \code{size_bin} x \code{size_bin} array with
   contact values for each anchor. 'n' is the number of non-empty valid
-  anchors.} }
+  anchors.}}
 }
 \description{
 Perform multiple matrix lookup in Hi-C matrices for a twodimensional set of
@@ -79,7 +85,7 @@ For each row in the '\code{bedpe}' or '\code{anchors}' argument, an
 apa <- APA(list(WT = WT_10kb, KO = KO_10kb), bedpe = WT_loops)
 
 # Alternative usage with pre-calculated anchors
-anchors <- anchors_APA(WT_10kb$ABS, WT_10kb$RES,
+anchors <- anchors_APA(WT_10kb$ABS, resolution(WT_10kb),
   bedpe = WT_loops
 )
 apa <- APA(list(WT = WT_10kb, KO = KO_10kb), anchors = anchors)
@@ -97,4 +103,12 @@ The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
   function for quantification of loop strenghts. \cr The
   \code{\link[GENOVA]{anchors}} documentation for more information about
   anchors.
+
+Other aggregate repeated matrix lookup analyses: 
+\code{\link{ARA}()},
+\code{\link{ATA}()},
+\code{\link{CSCAn}()},
+\code{\link{PESCAn}()},
+\code{\link{rep_mat_lookup}()}
 }
+\concept{aggregate repeated matrix lookup analyses}

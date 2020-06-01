@@ -18,8 +18,11 @@ ATA(
 \item{explist}{Either a single GENOVA \code{contacts} object or a list of
 GENOVA \code{contacts} objects.}
 
-\item{bed}{A \code{data.frame} with 3 columns in BED format, containing the
-TAD boundary positions per row.}
+\item{bed}{A \code{data.frame} with in BED format, containing the
+a TAD region per row with the following three columns:
+\enumerate{ \item A \code{character} giving the chromosome names. \item An
+\code{integer} with start positions. \item An \code{integer} with end
+positions. }}
 
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum sizes of TADs to include in basepairs.}
@@ -34,14 +37,22 @@ performs no outlier correction.}
 
 \item{anchors}{(Optional) A \code{matrix} with two columns containing
 pre-computed anchor indices. If this is set, skips calculation of anchor
-indices and uses this argument instead.}
+indices and uses this argument instead. See
+\code{\link[GENOVA:anchors]{anchors_ATA()}}.}
 
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
 summary matrices be returned in the output? Should be \code{TRUE} if the
 intention is to use the \code{quantify} function.}
 }
 \value{
-An \code{ATA_discovery} object with the ATA results.
+An \code{ATA_discovery} object containing the following slots:
+  \describe{ \item{signal}{An \code{array} with the dimensions
+  \code{size} x \code{size} x \code{length(explist)} containing mean
+  bilinearly interpolated values across TADs.} \item{signal_raw}{A
+  \code{list} with \code{length(explist)} elements for each contacts object,
+  wherein an element is an n x \code{size} x \code{size} array with
+  bilinearly interpolated contact values for each TAD. 'n' is the number of 
+  non-empty valid TADs.}}
 }
 \description{
 Extracts Hi-C matrices around TADs, resizes these to a uniform size and
@@ -60,4 +71,12 @@ The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
   function for quantification of TAD strenghts. \cr The
   \code{\link[GENOVA]{anchors}} documentation for more information about
   anchors.
+
+Other aggregate repeated matrix lookup analyses: 
+\code{\link{APA}()},
+\code{\link{ARA}()},
+\code{\link{CSCAn}()},
+\code{\link{PESCAn}()},
+\code{\link{rep_mat_lookup}()}
 }
+\concept{aggregate repeated matrix lookup analyses}

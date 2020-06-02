@@ -340,6 +340,9 @@ facet_pyramid <-
 FacetPyramid <- ggplot2::ggproto(
   "FacetPyramid", ggplot2::FacetGrid,
   add_scale = function(scale, facet_name, self) {
+    if (is.null(scale)) {
+      return(invisible())
+    }
     current <- self$y_scales
     if (facet_name %in% names(current)) {
       current[[facet_name]] <- scale

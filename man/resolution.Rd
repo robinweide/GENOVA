@@ -4,16 +4,22 @@
 \alias{resolution}
 \title{Get the resolution of GENOVA objects}
 \usage{
-resolution(x)
+resolution(x, ...)
 }
 \arguments{
 \item{x}{An object from the GENOVA package}
+
+\item{...}{Optional arguments (not used).}
 }
 \value{
 A \code{integer} with the resolution
 }
 \description{
 Get the resolution of GENOVA objects
+}
+\note{
+If the \code{ggplot2} namespace is loaded after GENOVA, use 
+\code{GENOVA::resolution()} on GENOVA objects.
 }
 \examples{
 \dontrun{

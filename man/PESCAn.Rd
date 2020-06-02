@@ -21,8 +21,10 @@ PESCAn(
 \item{explist}{Either a single GENOVA \code{contacts} object or a list of
 GENOVA \code{contacts} objects.}
 
-\item{bed}{A \code{data.frame} with 3 columns in BED format, containing the
-regions to anchor in pairwise manner.}
+\item{bed}{A BED-formatted \code{data.frame} with the following 3 columns:
+\enumerate{ \item A \code{character} giving the chromosome names. \item An
+\code{integer} with start positions. \item An \code{integer} with end
+positions. }}
 
 \item{shift}{An \code{integer} of length 1 indicating how many basepairs the
 anchors should be shifted. Essentially performs circular permutation of
@@ -32,13 +34,12 @@ ignored when \code{shift <= 0}.}
 \item{dist_thres}{An \code{integer} vector of length 2 indicating the minimum
 and maximum distances in basepairs between anchorpoints.}
 
-\item{size_bin}{The size of the lookup regions in bins (i.e. a score of 21
-yields an output with 10 Hi-C bins both up- and downstream of the anchor).
-When \code{NULL} (default), it is internally set to \code{21} when the
-\code{size_bp} is also \code{NULL}.}
-
-\item{size_bp}{Alternative parametrisation for the lookup regions, expressed
-in basepairs. Not used when the argument \code{size_bin} is set.}
+\item{size_bin, size_bp}{The size of the lookup regions in bins (i.e. a score
+of 21 yields an output with 10 Hi-C bins both up- and downstream of the
+anchor). When \code{NULL} (default), it is internally set to \code{21} when
+the \code{size_bp} is also \code{NULL}. \code{size_bp} is an alternative
+parametrisation for the lookup regions, expressed in basepairs.
+\code{size_bp} is not used when the argument \code{size_bin} is set.}
 
 \item{outlier_filter}{A \code{numeric} of length 2 between \code{[0-1]}
 indicating quantiles of data to be used as thresholds. Data outside these
@@ -50,14 +51,31 @@ number of pairwise interactions on a chromosome to consider.}
 
 \item{anchors}{(Optional) A \code{matrix} with two columns containing
 pre-computed anchor indices. If this is set, skips calculation of anchor
-indices and uses this argument instead.}
+indices and uses this argument instead. See
+\code{\link[GENOVA:anchors]{anchors_PESCAn()}}.}
 
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
 summary matrices be returned in the output? Should be \code{TRUE} if the
 intention is to use the \code{quantify} function.}
 }
 \value{
-A \code{PESCAn_discovery} object with the PE-SCAn results.
+An \code{PESCAn_discovery} object containing the following slots:
+  \describe{ \item{obsexp}{An \code{array} with the dimensions
+  \code{size_bin} x \code{size_bin} x \code{length(explist)} containing fold
+  change values for the signal over the median shifted values.}
+  \item{signal}{An \code{array} with the dimensions \code{size_bin} x
+  \code{size_bin} x \code{length(explist)} containing mean contact values for
+  bins surrounding the anchors.} \item{signal_raw}{A \code{list} with
+  \code{length(explist)} elements for each contacts object, wherein an
+  element is an n x \code{size_bin} x \code{size_bin} array with contact
+  values for each anchor. 'n' is the number of non-empty valid anchors.}
+  \item{shifted}{An \code{array} with the dimensions \code{size_bin} x
+  \code{size_bin} x \code{length(explist)} containing mean contact values for
+  bins that are \code{shift} basepairs away from the anchors.}
+  \item{shifted_raw}{A \code{list} with \code{length(explist)} elements for
+  each contacts object, wherein an alemeent is an n x \code{size_bin} x
+  \code{size_bin} array with contact values for each shifted anchors. 'n' is 
+  the number of non-empty valid (unshifted) anchors.}}
 }
 \description{
 Performs an all-to-all Hi-C contact analysis for specified regions.
@@ -77,7 +95,7 @@ pescan <- PESCAn(
 )
 
 # Alternative usage with pre-calculated anchors and no permutation
-anchors <- anchors_PESCAn(WT_40kb$IDX, attr(WT_40kb, "resolution"),
+anchors <- anchors_PESCAn(WT_40kb$IDX, resolution(WT_40kb),
   genes_tss,
   dist_thres = c(5e6, 15e6)
 )
@@ -100,4 +118,12 @@ The \code{\link[GENOVA]{rep_mat_lookup}} function that performs the
   function for quantification of interaction strenghts. \cr The
   \code{\link[GENOVA]{anchors}} documentation for more information about
   anchors.
+
+Other aggregate repeated matrix lookup analyses: 
+\code{\link{APA}()},
+\code{\link{ARA}()},
+\code{\link{ATA}()},
+\code{\link{CSCAn}()},
+\code{\link{rep_mat_lookup}()}
 }
+\concept{aggregate repeated matrix lookup analyses}

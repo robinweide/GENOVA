@@ -5,24 +5,34 @@
 #'
 #' @description Plots a region of the Hi-C map with a 45 degree rotation. The
 #'   rotation makes it such that the diagonal coincides with the x-axis and the
-#'   y-axis indicates distance. \code{pyramid_difference} does the same, but
+#'   y-axis indicates distance. \code{pyramid_difference()} does the same, but
 #'   first subtracts one sample from the other.
 #'
 #' @param exp A GENOVA \code{contacts} or \code{contacts_matrix} object.
 #' @param exp1,exp2 Like \code{exp} but only used in
 #'   \code{pyramid_difference()}.
 #' @param chrom A \code{character} of length one indicating a chromosome name.
-#' @param start A \code{numeric} of length one for the start position in
+#' @param start,end A \code{numeric} of length one for the start and end positions in
 #'   basepairs.
-#' @param end A \code{numeric} of length one for the end position in basepairs.
-#' @param crop_x A \code{numeric} of length two indicating positions in
-#'   basepairs of where to crop the x-axis.
-#' @param crop_y A \code{numeric} of length two indicating distances in
-#'   basepairs of where to crop the y-axis.
-#' @param colour_scale A continuous ggplot2 scale with the \code{"fill"}
-#'   aesthetic.
+#' @param crop_x,crop_y A \code{numeric} of length two indicating positions in
+#'   basepairs of where to crop the x- and y-axis respectively. For the y-axis, this
+#'   means the distance from the diagonal in basepairs. Cropping the
+#'   x-axis typically results in a house-shaped pentagon. Cropping the y-axis 
+#'   typically results in a trapezoid.
+#' @param colour_scale A continuous ggplot2 
+#'   \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
+#'   Defaults to \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
+#'   experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
+#'   \code{pyramid_difference()} or z-score normalised experiments.
 #' @param display_yaxis A \code{logical} of length 1: should the y-axis be
 #'   displayed?
+#' @param edge Draw an edge around the pyramid data region. One of the 
+#' following: \itemize{
+#'   \item{A \code{character} of length 1 with a colour(name).}
+#'   \item{A \code{\link[grid]{gpar}}} object describing graphical parameters
+#'   for a line.
+#'   \item{\code{NULL} to not draw an edge.}
+#' }
 #' @param raw A \code{logical} of length 1: should a bare bones plot be
 #'   returned? When \code{TRUE}, no position- or colour-scales or theme elements
 #'   are added.
@@ -31,8 +41,8 @@
 #' @details Some \code{colour_scale} settings are adjusted. If no \code{limits}
 #'   were set, new limits are set as \code{c(0, quantile(x, 0.975))}, wherein
 #'   \code{x} are the Hi-C values. Also, the \code{oob} parameter is replaced by
-#'   \code{scales::squish()} and the name is set by default to
-#'   \code{"Contacts"}.
+#'   \code{scales::squish()}, the name is set by default to
+#'   \code{"Contacts"} and the \code{aesthetics} are ignored.
 #'
 #' @return A \code{ggplot} object
 #' @export
@@ -46,7 +56,7 @@
 #' pyramid(exp, "chr2", 25e6, 30e6)
 #' }
 pyramid <- function(exp, chrom, start, end, crop_x, crop_y, 
-                    colour_scale, display_yaxis, raw, ...) {
+                    colour_scale, display_yaxis, edge = "black", raw, ...) {
   UseMethod("pyramid", exp)
 }
 
@@ -126,6 +136,7 @@ pyramid_difference <- function(exp1, exp2, chrom,
                          location,
                          resolution,
                          colour_scale = scale_fill_GENOVA(),
+                         edge = "black",
                          display_yaxis = FALSE,
                          raw = FALSE) {
   # Build data
@@ -145,13 +156,18 @@ pyramid_difference <- function(exp1, exp2, chrom,
   # Trim sawtooth
   df <- df[y > -1]
   
-  # Apply cropping
+  # Build edge
+  edge <- .build_triangle_edge(edge, location, crop_x, crop_y)
+  
+  # Apply cropping in x-direction
   if (!is.null(crop_x) && length(crop_x) == 2L) {
     crop_x <- sort(crop_x)
     location[[2]] <- max(crop_x[[1]], location[[2]])
     location[[3]] <- min(crop_x[[2]], location[[3]])
     df <- df[x >= crop_x[1] & x <= crop_x[2]]
   }
+  
+  # Apply cropping in y-direction
   if (!is.null(crop_y) && length(crop_y) == 2L) {
     crop_y <- sort(crop_y)
     df <- df[y >= crop_y[1] & y <= crop_y[2]]
@@ -164,11 +180,14 @@ pyramid_difference <- function(exp1, exp2, chrom,
   asp_ratio <- diff(range(df$x)) / diff(range(df$y))
   
   # Make layer
-  triangle <- ggplot2::geom_polygon(
-    data = as.data.frame(df),
-    ggplot2::aes(x, y, group = id, fill = contacts)
+  suppressWarnings(
+    triangle <- ggplot2::geom_polygon(
+      data = as.data.frame(df),
+      ggplot2::aes(x, y, group = id, altfill = contacts)
+    )
   )
-  
+  triangle <- .remap_layer_aes(triangle, "fill", "altfill")
+
   # Setup main plot
   p <- structure(
     list(
@@ -177,17 +196,40 @@ pyramid_difference <- function(exp1, exp2, chrom,
       scales = ggplot2::ggplot()$scales,
       mapping = ggplot2::aes(),
       theme = list(),
-      coordinates = ggplot2::coord_cartesian(default = TRUE),
+      coordinates = ggplot2::coord_cartesian(default = TRUE, clip = "off"),
       facet = facet_pyramid(ggplot2::vars(facet), col_size = 2 * asp_ratio),
       plot_env = parent.frame(),
       location = location,
       labels = list(x = location[[1]], y = "distance", fill = "contacts")
     ), class = c("ggpyramid", "gg", "ggplot")
   )
+  p <- p + edge
   
   # Tweak plot
   if (!raw) {
     # Setup colour scale
+    colour_scale$aesthetics <- "altfill"
+    
+    # Setup guide
+    guide <- colour_scale$guide
+    if (is.character(guide)) {
+      guide <- paste0("guide_", guide)
+      # Search parent frame first
+      if (exists(guide, envir = parent.frame(), mode = "function")) {
+        guide <- get(guide, envir = parent.frame(), mode = "function")()
+      } else {
+        # If that fails, search ggplot2 namespace
+        ns <- asNamespace("ggplot2")
+        if (exists(guide, envir = ns, mode = "function")) {
+          guide <- get(guide, envir = ns, mode = "function")()
+        } else {
+          guide <- ggplot2::guide_colourbar()
+        } 
+      }
+    }
+    guide$available_aes <- c("altfill", "fill")
+    colour_scale$guide <- guide
+    
     # Always replace `oob`
     colour_scale$oob <- scales::squish
     # Only set limits when none are given
@@ -269,7 +311,8 @@ facet_pyramid <-
     }
     
     # Don't print the pyramid facet label
-    labfun <- function(x){ifelse(x == ".pyramid", "", as.character(x))}
+    # labfun <- function(x){ifelse(x == ".pyramid", "", as.character(x))}
+    labfun <- function(x) {gsub(".pyramid|.domaino|.v4C", "", x)}
     labfun <- ggplot2::as_labeller(labfun)
     
     names(rows) <- "facets"
@@ -297,6 +340,9 @@ facet_pyramid <-
 FacetPyramid <- ggplot2::ggproto(
   "FacetPyramid", ggplot2::FacetGrid,
   add_scale = function(scale, facet_name, self) {
+    if (is.null(scale)) {
+      return(invisible())
+    }
     current <- self$y_scales
     if (facet_name %in% names(current)) {
       current[[facet_name]] <- scale
@@ -413,140 +459,6 @@ FacetPyramid <- ggplot2::ggproto(
   }
 )
 
-# Adding tracks -----------------------------------------------------------
-
-#' @name pyramidtracks
-#' @title Adding tracks to a pyramid plot.
-#'
-#' @description These functions add new facets to a pyramid plot with additional
-#'   annotations.
-#'
-#' @param layer A ggplot layer instance
-#' @param size A \code{numeric} of length one noting the relative size to the
-#'   main facet panel.
-#' @param name A \code{character} of length one title to display as facet strip
-#'   label.
-#' @param scale_y A ggplot position scale with the y-aesthetic to control
-#'   parameters of the track's y-scale.
-#'
-#' @details Currently, \code{as_track()} only accepts layers wherein the
-#'   \code{data} argument is explicitly defined before evaluation. For example,
-#'   \code{geom_point(aes(x = 1, y = 1))} is not an appropriate track, while
-#'   \code{geom_point(aes(x + 1, y = y), data = data.frame(x = 1, y = 1))} is an
-#'   appropriate track.
-#'
-#' @return A \code{track_layer} object.
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Initialising a pyramid
-#' p <- pyramid(exp, "chr2", 25e6, 30e6)
-#'
-#' # Adding a bed annotation
-#' p + add_bed_track(bed, fill = "blue", name = "bed")
-#'
-#' # Adding a bedgraph annotation
-#' p <- p + add_bed_graph(bedgraph, linetype = 2, name = "Some statistic")
-#' p
-#'
-#' # Adding custom annotation
-#' # Use the name to display in the same panel as previous annotation
-#' p + as_track(ggplot2::geom_vline(xintercept = 27.5e6),
-#'              name = "Some statistic")
-#' }
-as_track <- function(layer, 
-                     size = 0.1, 
-                     name,
-                     scale_y = NULL) {
-  if (is.null(layer$data$facet)) {
-    layer$data$facet <- factor(name)
-  }
-  name <- force(name)
-  if (is.null(scale_y)) {
-    scale_y <- ggplot2::scale_y_continuous(n.breaks = 3)
-  }
-  structure(
-    list(
-      layer = layer,
-      scale = scale_y,
-      size = size
-    ),
-    class = "track_layer"
-  )
-}
-
-#' @export
-#' @rdname pyramidtracks
-#' @param ... Additional arguments to pass to \code{ggplot2::layer()}.
-#' @inheritParams pyramidannotations
-add_bed_track <- function(bed, size = 0.1, name, ...) {
-  name <- force(name)
-  df <- as.data.frame(bed[,1:3])
-  names(df)[1:3] <- c("chrom", "xmin", "xmax")
-  df$facet <- factor(name)
-  
-  rct <- ggplot2::geom_rect(ggplot2::aes(xmin = xmin, ymin = 0,
-                                         xmax = xmax, ymax = 1),
-                            data = df, ...)
-  scale <- ggplot2::scale_y_continuous(breaks = NULL)
-  as_track(rct, size = size, name = name, scale_y = scale)
-}
-
-#' @export
-#' @rdname pyramidtracks
-#' @param bedgraph A \code{data.frame} with four columns noting the chromosome
-#'   name, start- and end-positions of genomic intervals, and a value to
-#'   display.
-add_bed_graph <- function(bedgraph, size = 0.1, name, ...) {
-  name <- force(name)
-  df <- data.table(bedgraph[,1:4])
-  setnames(df, 1:4, c("chrom", "start", "end", "y"))
-  df <- df[, list(chrom, x = (start + end)/2, y)]
-  setDF(df)
-  df$facet <- factor(name)
-  pth <- ggplot2::geom_path(ggplot2::aes(x, y), data = df, ...)
-  as_track(pth, size = size, name = name)
-}
-
-#' @export
-#' @rdname pyramidtracks
-#' @usage NULL
-#' @keywords internal
-ggplot_add.track_layer <- function(object, plot, object_name) {
-  lay <- object$layer
-  if (inherits(plot, "ggpyramid")) {
-    layerdata <- lay$data
-    loca <- plot$location
-    if ("chrom" %in% names(layerdata)) {
-      layerdata <- layerdata[layerdata$chrom == loca[[1]],]
-    }
-    # variable names from ggplot2:::ggplot_global$x_aes
-    xvar <- intersect(names(layerdata), 
-                      c("x", "xmin", "xmax", "xend", "xintercept",
-                        "xmin_final", "xmax_final", "xlower", "xmiddle",
-                        "xupper", "x0"))
-    validpos <- lapply(layerdata[xvar], function(x) {
-      x >= loca[[2]] & x <= loca[[3]]
-    })
-    validpos <- rowSums(do.call(cbind, validpos)) >= 1
-    lay$data <- layerdata[validpos,]
-  }
-  if (NROW(lay$data) == 0) {
-    warning("No appropriate data was found for this position.", call. = FALSE)
-  }
-  plot <- ggplot2::ggplot_add(lay, plot = plot, 
-                              object_name = object_name)
-  if (inherits(plot$facet, 'FacetPyramid')) {
-    plot$facet <- plot$facet$clone()
-    plot$facet$add_scale(object$scale, object$layer$data$facet[[1]])
-    plot$facet$ratios$rows <- c(plot$facet$ratios$rows, object$size)
-    plot <- .set_facet_factorlevel(plot)
-  }
-  plot
-}
-
 # Adding marks ------------------------------------------------------------
 
 # Main difference with tracks is that info would need to be rotated
@@ -585,7 +497,7 @@ NULL
 
 #' @export
 #' @rdname pyramidannotations
-add_tads <- function(bed, colour = "limegreen", ...) {
+add_tads <- function(bed, colour = "#1faee3", ...) {
   df <- as.data.frame(bed[, 1:3])
   n <- NROW(df)
   seq <- rep(seq_len(n), each = 2)
@@ -603,7 +515,7 @@ add_tads <- function(bed, colour = "limegreen", ...) {
 
 #' @export
 #' @rdname pyramidannotations
-add_loops <- function(bedpe, colour = "limegreen", shape = 1, ...) {
+add_loops <- function(bedpe, colour = "#1faee3", shape = 1, ...) {
   bedpe <- bedpe[bedpe[[1]] == bedpe[[4]],] # drop trans
   x = (bedpe[[2]] + bedpe[[3]]) / 2
   y = (bedpe[[5]] + bedpe[[6]]) / 2
@@ -650,39 +562,478 @@ ggplot_add.mark_layer <- function(object, plot, object_name) {
   plot
 }
 
+# Adding tracks -----------------------------------------------------------
+
+# Merging tracks with the main plot happens in the `+` operation.
+
+#' @name pyramidtracks
+#' @title Adding tracks to a pyramid plot.
+#'
+#' @description These functions add new facets to a pyramid plot with additional
+#'   annotations. You can add annotations to the pyramid plot with BED regions,
+#'   bedgraphs, CTCF sites, discoveries that run along the genome and ggplot 
+#'   layers.
+#'
+#' @param x A ggplot layer instance
+#' @param height A \code{numeric} of length one noting the relative size to the
+#'   main facet panel.
+#' @param name A \code{character} of length one title to display as facet strip
+#'   label.
+#' @param scale_y A ggplot position scale with the y-aesthetic to control
+#'   parameters of the track's y-scale.
+#' @param strand [\code{add_ctcf_sites()} only] A \code{character} vector of the
+#' same length as \code{bed} with either \code{"+"} or \code{"-"} values that
+#' determine the orientation of triangles.
+#' @param geom [discovery only] A \code{character} of length one. One of the 
+#' following: \itemize{
+#'   \item{\code{"area"} for a filled polygon plot.}
+#'   \item{\code{"line"} for a line plot.}
+#'   \item{\code{"point"} for a point plot.}
+#' } Does not apply to \code{domainogram_discovery} class discoveries.
+#'
+#' @details Currently, \code{as_track()} only accepts layers wherein the
+#'   \code{data} argument is explicitly defined before evaluation. For example,
+#'   \code{geom_point(aes(x = 1, y = 1))} is not an appropriate track, while
+#'   \code{geom_point(aes(x + 1, y = y), data = data.frame(x = 1, y = 1))} is an
+#'   appropriate track.
+#'   
+#'   An attempt is made to subset the input based on the x-coordinates of the
+#'   main \code{pyramid()} plot, but this requires the layer-data to have 
+#'   column-names that match x-position names, e.g. \code{"x"}, \code{"xend"}, 
+#'   \code{"xmax"} etc. Likewise, when the layer-data contains a 
+#'   \code{"chrom"}-column, this is also subsetted to match the location of the
+#'   main \code{pyramid()} plot.
+#'   
+#'
+#' @return A \code{track_layer} object.
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Initialising a pyramid
+#' p <- pyramid(exp, "chr2", 25e6, 30e6)
+#'
+#' # Adding a bed annotation
+#' p + add_bed_track(bed, fill = "blue", name = "bed")
+#'
+#' # Adding a bedgraph annotation
+#' p <- p + add_bed_graph(bedgraph, linetype = 2, name = "Some statistic")
+#' p
+#'
+#' # Adding custom annotation
+#' # Use the name to display in the same panel as previous annotation
+#' p + as_track(ggplot2::geom_vline(xintercept = 27.5e6),
+#'              name = "Some statistic")
+#' 
+#' # Adding discovery annotation
+#' insula <- insulation_score(exp)
+#' p + insula
+#' 
+#' # Using `as_track()` gives more control over the appearance of discoveries
+#' p + as_track(insula, geom = "line", linetype = 2)
+#' 
+#' # When a discovery contains multiple samples, all are added
+#' compart <- compartment_score(list(exp1, exp2), bed = H3K4me1_peaks)
+#' p + compart
+#' 
+#' # To seperate discoveries as individual tracks, they have to be unbundled and
+#' # named differently
+#' compart <- unbundle(compart)
+#'p + as_track(compart[[1]], name = "exp1") + 
+#'  as_track(compart[[2]], name = "exp2")
+#' }
+as_track <- function(x, height = 0.1, name, scale_y, ...) {
+  UseMethod("as_track")
+}
+
+#' @export
+#' @rdname pyramidtracks
+as_track.LayerInstance <- 
+  function(x, 
+           height = 0.1, 
+           name,
+           scale_y = NULL, ...) {
+    if (is.null(x$data$facet)) {
+      x$data$facet <- factor(name)
+    }
+    name <- force(name)
+    if (is.null(scale_y)) {
+      scale_y <- ggplot2::scale_y_continuous(n.breaks = 3)
+    }
+    structure(
+      list(
+        layer = x,
+        scale = scale_y,
+        size = height
+      ),
+      class = "track_layer"
+    )
+  }
+
+#' @export
+#' @rdname pyramidtracks
+#' @param ... Additional arguments to pass to \code{ggplot2::layer()}.
+#' @inheritParams pyramidannotations
+add_bed_track <- function(bed, height = 0.1, name, ...) {
+  name <- force(name)
+  df <- as.data.frame(bed[,1:3])
+  names(df)[1:3] <- c("chrom", "xmin", "xmax")
+  df$facet <- factor(name)
+  
+  rct <- ggplot2::geom_rect(ggplot2::aes(xmin = xmin, ymin = 0,
+                                         xmax = xmax, ymax = 1),
+                            data = df, ...)
+  scale <- ggplot2::scale_y_continuous(breaks = NULL)
+  as_track(rct, height = height, name = name, scale_y = scale)
+}
+
+#' @export
+#' @rdname pyramidtracks
+#' @param bedgraph A \code{data.frame} with four columns wherein the first three
+#' columns are as in the \code{bed} argument and the fourth a score for the 
+#' region.
+add_bed_graph <- function(bedgraph, height = 0.1, name, ...) {
+  name <- force(name)
+  df <- data.table(bedgraph[,1:4])
+  setnames(df, 1:4, c("chrom", "start", "end", "y"))
+  df <- df[, list(chrom, x = (start + end)/2, y)]
+  setDF(df)
+  df$facet <- factor(name)
+  pth <- ggplot2::geom_path(ggplot2::aes(x, y), data = df, ...)
+  as_track(pth, height = height, name = name)
+}
+
+#' @export
+#' @rdname pyramidtracks
+add_ctcf_sites <- function(bed, strand, height = 0.05, name = "CTCF", 
+                           scale_y = NULL, ...) {
+  bed <- as.data.frame(bed)
+  strand <- as.vector(strand)
+  df <- .list_as_df(list(
+    chrom = bed[[1]],
+    x = (bed[[2]] + bed[[3]]) /2,
+    
+    colour = strand
+  ))
+  plus <- ggplot2::geom_text(
+    ggplot2::aes(x, 1), colour = "#E41A1C", label = "\u25B6",
+    data = df[df$colour == "+",], ...)
+  minus <- ggplot2::geom_text(
+    ggplot2::aes(x, 0), colour = "#377EB8", label = "\u25C0",
+    data = df[df$colour == "-",], ...)
+  
+  if (is.null(scale_y)) {
+    scale_y <- ggplot2::scale_y_continuous(breaks = NULL, 
+                                           limits = c(-1, 2))
+  }
+  
+  list(
+    as_track(plus, height = height, name = name, scale_y = scale_y),
+    as_track(minus, height = NULL, name = name, scale_y = scale_y)
+  )
+  
+}
+
+#' @export
+#' @rdname pyramidtracks
+#' @usage NULL
+#' @keywords internal
+ggplot_add.track_layer <- function(object, plot, object_name) {
+  lay <- object$layer
+  plot <- .update_manual_scale(plot, attr(object, "colourscale"))
+  
+  if (inherits(plot, "ggpyramid")) {
+    lay <- .slice_layer(lay, plot$location)
+  }
+  plot <- ggplot2::ggplot_add(lay, plot = plot, 
+                              object_name = object_name)
+  
+  if (inherits(plot$facet, 'FacetPyramid')) {
+    plot$facet <- plot$facet$clone()
+    plot$facet$add_scale(object$scale, object$layer$data$facet[[1]])
+    plot$facet$ratios$rows <- c(plot$facet$ratios$rows, object$size)
+    plot <- .set_facet_factorlevel(plot)
+  }
+  plot
+}
 
 # Adding discoveries ------------------------------------------------------
 
-# Not satisfied nor finished with this yet
+# Variant of adding tracks
 
-discovery_as_layer <- function(discovery, location, ...) {
-  UseMethod("discovery_as_layer")
+genomescore_as_layer <- function(x, geom = "area", name, ...) {
+  geom <- match.arg(geom, c("area", "line", "point"))
+  exp_aes <- if (geom == "area") "fill" else "colour"
+  geom <- switch(
+    geom,
+    area = ggplot2::geom_area,
+    line = ggplot2::geom_line,
+    point = ggplot2::geom_point,
+    stop("Could not find geom.", call. = FALSE)
+  )
+  
+  df <- copy(x[[1]])
+  expnames <- expnames(x)
+  
+  setDT(df)
+  df <- melt.data.table(df, measure.vars = expnames)
+  df <- .list_as_df(list(
+    chrom = df$chrom,
+    x = (df$start + df$end) / 2,
+    y = df$value,
+    exp = df$variable,
+    facet = factor(name)
+  ), nrow = nrow(df))
+  
+  
+  if (!("alpha" %in% names(list(...)))) {
+    if (length(expnames) > 1) {
+      alpha <- 0.5
+    } else {
+      alpha <- 1
+    }
+  } else {
+    alpha <- list(...)$alpha
+  }
+
+  suppressWarnings( # ggplot doesn't like custom aesthetics
+    layer <- geom(
+      ggplot2::aes(x = x, y = y, exp = exp),
+      data = df, alpha = alpha,
+      position = "identity",
+      ...
+    )
+  )
+  .remap_layer_aes(layer, old_aes = exp_aes, new_aes = "exp")
 }
 
-discovery_as_layer.genomescore_discovery <- function(discovery, location, ...) {
-  df <- .main_data(discovery)
-  expnames <- expnames(discovery)
+#' @export
+#' @rdname pyramidtracks
+as_track.CS_discovery <- function(x, height = 0.1, 
+                                  name = "Compartment\nScore", 
+                                  scale_y = NULL, 
+                                  ..., geom = "area") {
+  if (is.null(scale_y)) {
+    scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, 
+                                           limits = centered_limits())
+  }
+  cscale <- ggplot2::scale_colour_manual(
+    aesthetics = "exp",
+    name = "Sample",
+    values = setNames(attr(x, "colours"), expnames(x)),
+    guide = ggplot2::guide_legend()
+  )
+  layer <- genomescore_as_layer(x, geom, name = name, ...)
+  out <- as_track(layer, name = name, scale_y = scale_y, height = height)
+  attr(out, "colourscale") <- cscale
+  out
+}
+
+#' @export
+#' @rdname pyramidtracks
+as_track.IS_discovery <- function(x, height = 0.1, 
+                                  name = "Insulation\nScore", 
+                                  scale_y = NULL, 
+                                  ..., geom = "area") {
+  if (is.null(scale_y)) {
+    scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, 
+                                           limits = centered_limits())
+  }
+  cscale <- ggplot2::scale_colour_manual(
+    aesthetics = "exp",
+    name = "Sample",
+    values = setNames(attr(x, "colours"), expnames(x)),
+    guide = ggplot2::guide_legend()
+  )
+  layer <- genomescore_as_layer(x, geom, name = name, ...)
+  out <- as_track(layer, name = name, scale_y = scale_y, height = height)
+  attr(out, "colourscale") <- cscale
+  out
+}
+
+#' @export
+#' @rdname pyramidtracks
+as_track.DI_discovery <- function(x, height = 0.1, 
+                                  name = "Directionality\nIndex", 
+                                  scale_y = NULL, 
+                                  ..., geom = "area") {
+  if (is.null(scale_y)) {
+    scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, 
+                                           limits = centered_limits())
+  }
+  cscale <- ggplot2::scale_colour_manual(
+    aesthetics = "exp",
+    name = "Sample",
+    values = setNames(attr(x, "colours"), expnames(x)),
+    guide = ggplot2::guide_legend()
+  )
+  layer <- genomescore_as_layer(x, geom, name = name, ...)
+  out <- as_track(layer, name = name, scale_y = scale_y, height = height)
+  attr(out, "colourscale") <- cscale
+  out
+}
+
+#' @export
+#' @rdname pyramidtracks
+as_track.domainogram_discovery <- function(x, height = 0.1, 
+                                           name = NULL, 
+                                           scale_y = NULL, 
+                                           ...) {
+  df <- copy(x$scores)
+  expnames <- expnames(x)
+  if (is.null(name)) {
+    if (length(expnames) == 1L) {
+      name <- "Domainogram"
+    } else {
+      name <- ""
+    }
+  }
+  
   setDT(df)
-  df <- df[chrom == location[[1]] & start >= location[[2]] &
-             end <= location[[3]]]
+  df <- melt.data.table(df, measure.vars = expnames)
   
   df <- .list_as_df(list(
-    mid = (df[["start"]] + df[["end"]])/2,df[, ..expnames])
+    chrom = attr(x, "chrom"),
+    x = df$position,
+    y = df$window,
+    exp = factor(df$variable),
+    fill = df$value
+  ), nrow = nrow(df))
+  
+  if (is.null(scale_y)) {
+    scale_y <- ggplot2::scale_y_continuous(n.breaks = 3, expand = c(0,0))
+  }
+  cscale <- scale_fill_GENOVA_div(midpoint = 0, name = "Insulation\nScore")
+  
+  layer <- ggplot2::geom_raster(
+    ggplot2::aes_string(x = "x", y = "y", fill = "fill"),
+    data = df, na.rm = TRUE, # Midpoint parametrisation, some values can go oob.
+    ...,
   )
-  df <-  .list_as_df(
-    list(x = rep(df$mid, length(expnames)),
-         y = unlist(df[2:ncol(df)]),
-         colour = factor(rep(expnames, each = nrow(df)), 
-                         levels = expnames),
-         facet = factor("Compartment\nScore"))
-  )
-  layer <- ggplot2::geom_line(ggplot2::aes(x, y, colour = colour), data = df, ...)
-  as_track(layer, name = gsub(" ", "\n", .metric_name(discovery)))
+  
+  if (length(expnames) > 1) {
+    if (is.null(name)) {
+      name <- ""
+    } else {
+      name <- paste0(name, " ")
+    }
+    lapply(expnames, function(i) {
+      sublayer <- ggplot2::ggproto(NULL, layer)
+      sublayer$data <- sublayer$data[sublayer$data$exp == i, ]
+      out <- as_track(sublayer, height = height, 
+                      name = paste0(name, i, ".domaino"), 
+                      scale_y = scale_y)
+      attr(out, "colourscale") <- cscale
+      out
+    })
+  } else {
+    if (is.null(name)) {
+      name <- "Domainogram"
+    }
+    out <- as_track(layer, height = height, name = name, scale_y = scale_y)
+    attr(out, "colourscale") <- cscale
+    out
+  }
 }
 
+#' @export
+#' @rdname pyramidtracks
+as_track.virtual4C_discovery <- function(x,
+                                         height = 0.1, 
+                                         name = NULL, 
+                                         scale_y = NULL, 
+                                         ..., geom = "area") {
+  geom <- match.arg(geom, c("area", "line", "point"))
+  geom <- switch(
+    geom,
+    area = ggplot2::geom_area,
+    line = ggplot2::geom_line,
+    point = ggplot2::geom_point,
+    stop("Could not find geom.", call. = FALSE)
+  )
+  
+  df <- copy(x$data)
+  expnames <- expnames(x)
+  if (is.null(name)) {
+    if (length(expnames) == 1L) {
+      name <- "Virtual 4C"
+    } else {
+      name <- ""
+    }
+  }
+  
+  setDT(df)
+  df <- melt.data.table(df, measure.vars = expnames)
+  
+  df <- .list_as_df(list(
+    chrom = df$chromosome,
+    x = df$mid,
+    y = df$value,
+    exp = df$variable
+  ), nrow = nrow(df))
+  
+  if (is.null(scale_y)) {
+    vp <- attr(x, "viewpoint")
+    limit <- max(df$y[df$x < vp$start[1] | df$x > vp$end[1] & is.finite(df$y)], 
+                 na.rm = TRUE)
+    scale_y <- ggplot2::scale_y_continuous(
+      n.breaks = 3, expand = c(0,0), limits = c(0, limit)
+    )
+  }
+  
+  # Pre-squeeze data
+  limits <- scale_y$limits
+  if (!is.null(limits) && is.finite(limits[2])) {
+    if (!inherits(scale_y$expand, "waiver")) {
+      limits <- scale_y$dimension(expand = scale_y$expand, limits = limits)
+    }
+    df$y <- pmin(df$y, limits[2])
+  }
+  
+  layer <- geom(
+    ggplot2::aes(x = x, y = y),
+    data = df, na.rm = TRUE, # Midpoint parametrisation, some values can go oob.
+    position = "identity",
+    ...,
+  )
+  
+  if (length(expnames) > 1) {
+    lapply(expnames, function(i) {
+      if (!nzchar(name)) {
+        name <- paste0(name, " ")
+      }
+      name <- paste0(name, i, ".v4C")
+      sublayer <- ggplot2::ggproto(NULL, layer)
+      sublayer$data <- sublayer$data[sublayer$data$exp == i, ]
+      as_track(sublayer, height = height, name = name, scale_y = scale_y)
+    })
+  } else {
+    as_track(layer, height = height, name = name, scale_y = scale_y)
+  }
+}
+
+#' @export
+#' @rdname pyramidtracks
+#' @usage NULL
 ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
+  # if (inherits(object, c("CS_discovery", "IS_discovery", "DI_discovery"))) {
+  #   cscale <- ggplot2::scale_colour_manual(
+  #     aesthetics = "exp",
+  #     name = "Sample",
+  #     values = setNames(attr(object, "colours"), expnames(object)),
+  #     guide = ggplot2::guide_legend()
+  #   )
+  # } else if (inherits(object, c("domainogram_discovery"))) {
+  #   cscale <- scale_fill_GENOVA_div(midpoint = 0, name = "Insulation\nScore")
+  # } else {
+  #   cscale <- NULL
+  # }
+  
   if (inherits(plot, "ggpyramid")) {
-    plot + discovery_as_layer(object, plot$location)
+    plot <- plot + as_track(object)
+    # plot <- .update_manual_scale(plot, cscale)
+    plot
   } else {
     NextMethod()
   }
@@ -692,7 +1043,7 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
 
 .set_facet_factorlevel <- function(plot) {
   all_levels <- lapply(plot$layers, function(layer) {
-    levels(layer$data$facet)
+    as.character(unique(layer$data$facet))
   })
   all_levels <- Reduce(union, all_levels)
   plot$layers <- lapply(plot$layers, function(layer) {
@@ -763,6 +1114,9 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
 # Wrapper for .clip_edge for clipping polygons/tads
 .clip_poly <- function(x, y, id = 1, 
                        xrange = c(-Inf, Inf), yrange = c(-Inf, Inf)) {
+  if (is.null(x) | is.null(y)) {
+    return(list(x = NULL, y = NULL))
+  }
   # Clip right
   xy <- .clip_edge(x, y, xrange[2])
   # Clip left, flip x as edge is clipped on the right
@@ -778,10 +1132,10 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
 # Only clips right edges, transform data prior to calling .clip_edge to make
 # it seem like you've clipped a different edge
 .clip_edge <- function(x, y, clip) {
-  # Reparameterise as stretches of out of boundness
+  # Reparameterise as stretches of out of boundnessas  9  
   rle <- rle(x > clip)
   # If nothing is out of bounds, skip clipping
-  if (any(rle$values)) {
+  if (any(rle$values) & is.finite(clip)) {
     # Get runlength parameters
     starts <- {ends <-  cumsum(rle$lengths)} - rle$lengths + 1
     is_outside <- which(rle$values)
@@ -833,3 +1187,153 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
   }
   return(list(x = x, y = y))
 } 
+
+.slice_layer <- function(layer, location) {
+  layerdata <- layer$data
+  
+  # Subset chromosome
+  if ("chrom" %in% names(layerdata)) {
+    layerdata <- layerdata[layerdata$chrom == location[[1]],]
+  }
+  
+  # Set valid x-positions
+  # variable names from ggplot2:::ggplot_global$x_aes
+  xvar <- intersect(names(layerdata), 
+                    c("x", "xmin", "xmax", "xend", "xintercept",
+                      "xmin_final", "xmax_final", "xlower", "xmiddle",
+                      "xupper", "x0"))
+  validpos <- lapply(layerdata[xvar], function(x) {
+    x >= location[[2]] & x <= location[[3]]
+  })
+  
+  # At least 1 x position should be valid
+  validpos <- rowSums(do.call(cbind, validpos)) >= 1
+  layer$data <- layerdata[validpos,]
+  
+  if (NROW(layer$data) == 0) {
+    warning("No appropriate data was found for this position.", call. = FALSE)
+  }
+  
+  layer
+}
+
+.build_triangle_edge <- function(edge, location, crop_x, crop_y) {
+  if (is.null(edge)) {
+    return(edge)
+  }
+  # Setup edge
+  if (is.character(edge) && length(edge) == 1) {
+    # Use grid::gpar to check for valid colour
+    gp <- unclass(grid::gpar(col = edge))
+  } else if (inherits(edge, "gpar")) {
+    gp <- unclass(edge)
+  } else {
+    return(NULL)
+  }
+  names(gp) <- ggplot2::standardise_aes_names(names(gp))
+  
+  edge <- .transform_xy_coords(
+    x = c(location[[2]], location[[2]], location[[3]]),
+    y = c(location[[2]], location[[3]], location[[3]])
+  )
+  
+  # Apply cropping in x-direction
+  if (!is.null(crop_x) && length(crop_x) == 2L) {
+    crop_x <- sort(crop_x)
+    edge <- .clip_poly(edge$x, edge$y, xrange = crop_x)
+    # Replace lost vertices
+    if (head(edge$y, 1) != 0) {
+      edge$x <- c(edge$x[1], edge$x)
+      edge$y <- c(0, edge$y)
+    }
+    if (tail(edge$y, 1) != 0) {
+      edge$x <- c(edge$x, tail(edge$x, 1))
+      edge$y <- c(edge$y, 0)
+    }
+  }
+  
+  # Apply cropping in y-direction
+  if (!is.null(crop_y) && length(crop_y) == 2L) {
+    crop_y <- sort(crop_y)
+    edge <- .clip_poly(edge$x, edge$y, yrange = crop_y)
+    # Note: the y cropping shouldn't lose important vertices
+  }
+  edge[["facet"]] <- ".pyramid"
+  
+  args <- c(list(data = .list_as_df(edge), mapping = ggplot2::aes(x, y)), gp)
+  do.call(ggplot2::geom_path, args)
+}
+
+.update_manual_scale <- function(plot, new_scale) {
+  if (is.null(new_scale)) {
+    return(plot)
+  }
+  aes <- new_scale$aesthetics
+  match <- vapply(plot$scales$scales, function(scale) {
+    aes %in% scale$aesthetics
+  }, logical(1))
+  if (any(match)) {
+    # Get scale
+    i <- which(match)[[1]]
+    old_scale <- plot$scales$scales[[i]]
+    
+    pal_fun <- environment(old_scale$palette)$f
+    
+    new_pal <- environment(environment(new_scale$palette)$f)$values
+    old_pal <- environment(pal_fun)$values
+    
+    both <- c(old_pal, new_pal)
+    j <- match(unique(names(both)), names(both))
+    pal <- both[j]
+    
+    environment(pal_fun)$values <- pal
+
+    plot$scales$scales[[i]] <- ggplot2::ggproto(NULL, old_scale, 
+                                                palette = pal_fun)
+  } else {
+    plot <- plot + new_scale
+  }
+  return(plot)
+}
+
+# Dirty hack based on ggh4x scale_listed()
+.remap_layer_aes <- function(layer, old_aes, new_aes) {
+  if (!any(names(layer$mapping) == new_aes)) {
+    return(layer)
+  }
+  new_pattern <- paste0("^", new_aes, "$")
+  old_pattern <- paste0("^", old_aes, "$")
+  
+  old_geom <- layer$geom
+  
+  # Replace NA handler
+  old_nahandle <- old_geom$handle_na
+  new_nahandle <- function(self, data, params) {
+    colnames(data) <- eval(gsub(new_pattern, old_aes, colnames(data)))
+    old_nahandle(data, params)
+  }
+  
+  # Replace key drawer
+  old_drawkey <- old_geom$draw_key
+  new_drawkey <- function(data, params, size) {
+    colnames(data) <- eval(gsub(new_pattern, old_aes, colnames(data)))
+    old_drawkey(data, params, size)
+  }
+  
+  new_geom <- ggplot2::ggproto(
+    NULL,
+    old_geom,
+    handle_na = new_nahandle,
+    draw_key = new_drawkey,
+    default_aes = setNames(
+      old_geom$default_aes,
+      gsub(old_pattern, new_aes, names(old_geom$default_aes))
+    ),
+    non_missing_aes = gsub(old_pattern, new_aes, old_geom$non_missing_aes),
+    optional_aes = gsub(old_pattern, new_aes, old_geom$optional_aes),
+    required_aes = gsub(old_pattern, new_aes, old_geom$required_aes)
+  )
+  
+  layer$geom <- new_geom
+  return(layer)
+}

@@ -14,6 +14,7 @@ pyramid(
   crop_y,
   colour_scale,
   display_yaxis,
+  edge = "black",
   raw,
   ...
 )
@@ -25,22 +26,31 @@ pyramid_difference(exp1, exp2, chrom, start, end, ...)
 
 \item{chrom}{A \code{character} of length one indicating a chromosome name.}
 
-\item{start}{A \code{numeric} of length one for the start position in
+\item{start, end}{A \code{numeric} of length one for the start and end positions in
 basepairs.}
 
-\item{end}{A \code{numeric} of length one for the end position in basepairs.}
+\item{crop_x, crop_y}{A \code{numeric} of length two indicating positions in
+basepairs of where to crop the x- and y-axis respectively. For the y-axis, this
+means the distance from the diagonal in basepairs. Cropping the
+x-axis typically results in a house-shaped pentagon. Cropping the y-axis 
+typically results in a trapezoid.}
 
-\item{crop_x}{A \code{numeric} of length two indicating positions in
-basepairs of where to crop the x-axis.}
-
-\item{crop_y}{A \code{numeric} of length two indicating distances in
-basepairs of where to crop the y-axis.}
-
-\item{colour_scale}{A continuous ggplot2 scale with the \code{"fill"}
-aesthetic.}
+\item{colour_scale}{A continuous ggplot2 
+\link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
+Defaults to \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
+experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
+\code{pyramid_difference()} or z-score normalised experiments.}
 
 \item{display_yaxis}{A \code{logical} of length 1: should the y-axis be
 displayed?}
+
+\item{edge}{Draw an edge around the pyramid data region. One of the 
+following: \itemize{
+  \item{A \code{character} of length 1 with a colour(name).}
+  \item{A \code{\link[grid]{gpar}}} object describing graphical parameters
+  for a line.
+  \item{\code{NULL} to not draw an edge.}
+}}
 
 \item{raw}{A \code{logical} of length 1: should a bare bones plot be
 returned? When \code{TRUE}, no position- or colour-scales or theme elements
@@ -57,15 +67,15 @@ A \code{ggplot} object
 \description{
 Plots a region of the Hi-C map with a 45 degree rotation. The
   rotation makes it such that the diagonal coincides with the x-axis and the
-  y-axis indicates distance. \code{pyramid_difference} does the same, but
+  y-axis indicates distance. \code{pyramid_difference()} does the same, but
   first subtracts one sample from the other.
 }
 \details{
 Some \code{colour_scale} settings are adjusted. If no \code{limits}
   were set, new limits are set as \code{c(0, quantile(x, 0.975))}, wherein
   \code{x} are the Hi-C values. Also, the \code{oob} parameter is replaced by
-  \code{scales::squish()} and the name is set by default to
-  \code{"Contacts"}.
+  \code{scales::squish()}, the name is set by default to
+  \code{"Contacts"} and the \code{aesthetics} are ignored.
 }
 \section{Annotations}{
  For annotations along the linear genome, see

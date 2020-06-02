@@ -1,5 +1,93 @@
 # Robin's colours ---------------------------------------------------------
 
+#' @name GENOVA_colours
+#' @title Colours in GENOVA
+#' 
+#' @description GENOVA comes with a few built-in colour palettes. The gradients
+#' in GENOVA's palettes have been carefully chosen to be perceptually linear,
+#' which is great for Hi-C visualisations.
+#' 
+#' @section Sequential palettes:
+#' 
+#' The sequential palettes are used for displaying absolute values, such as the
+#' (normalised) contacts values in Hi-C matrices, or the average of aggregates.
+#' The default palette is the 'Hot' palette. The default sequential palette can 
+#' be changed by setting the global options.
+#' 
+#' \preformatted{
+#' 
+#' options("GENOVA.colour.palette" = "whitered")
+#' 
+#' options("GENOVA.colour.palette" = "hot")
+#' 
+#' }
+#' 
+#' \subsection{Hot}{
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{colour-hot.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{colour-hot.png}\out{\end{center}}
+#'   }
+#' }
+#' 
+#' \subsection{White-Red}{
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{colour-whitered.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{colour-whitered.png}\out{\end{center}}
+#'   }
+#' }
+#' 
+#' @section Diverent palettes:
+#' 
+#' The divergent palettes are used for displaying relative values, such as
+#' Z-score normalised contacts, differences and fold changes.
+#' 
+#' \subsection{Divergent}{
+#' 
+#' The default divergent palette is called \code{"divergent"} and goes from a blue
+#' at low values, to a light grey at the midpoint to red at high values.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{colour-divergent.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{colour-divergent.png}\out{\end{center}}
+#'   }
+#' }
+#' 
+#' \subsection{Green-Pink}{
+#' 
+#' A secondary divergent palette, \code{"greenpink"} is only used when two objects in
+#' a plot require divergent palettes, but need to be discriminated from 
+#' oneanother. 
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{colour-greenpink.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{colour-greenpink.png}\out{\end{center}}
+#'   }
+#' }
+#' 
+#' @section Details: 
+#' The colours in ggplot based visualisations, such as 
+#' \code{\link[GENOVA]{visualise}()} and \code{\link[GENOVA]{pyramid}()}, are 
+#' based on the 
+#' \code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA}()} and 
+#' \code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA_div}()}
+#' functions.
+#' 
+#' For visualisations in base R, such as \code{\link[GENOVA]{hic.matrixplot}()} 
+#' and \code{\link[GENOVA:GENOVA_image]{image()}},
+#' the \code{\link[grDevices]{colorRampPalette}()} 
+#' function is used.
+NULL
+
 bezier_corrected_hot <- c("#ffffff","#ffd4aa","#f4a86e","#db8047",
                               "#bb5c2e",
                               "#943e1f","#682616","#3a160e","#000000")
@@ -47,14 +135,25 @@ bezier_corrected_greenPink <- c('#38793a','#589b59','#7abd79','#a8dfa6',
 #' @inheritDotParams ggplot2::continuous_scale
 #' @param palette A \code{character} vector of length 1 for palette options.
 #'   Either \code{"hot"} or \code{"whitered"} for sequential scales, or
-#'   \code{"divergent"} or \code{"greenpink"} for divergent scales.
+#'   \code{"divergent"} or \code{"greenpink"} for divergent scales. In 
+#'   sequential scales, if \code{palette = NULL} an attempt will be made to find
+#'   \code{"GENOVA.colour.palette"} in the global options.
 #' @param midpoint A \code{numeric} indicating where the midpoint in the
 #'   divergent scale should occur.
+#'   
+#' @seealso The \code{\link[GENOVA:GENOVA_colours]{GENOVA colours}} description.
 #'
 #' @return A \code{ScaleContinuous} gg-object.
 #'
 #' @examples
-#' NULL
+#' \dontrun{
+#' require(ggplot2)
+#' p <- ggplot(faithfuld, 
+#'             aes(waiting, eruptions, fill = density)) +
+#'   geom_tile()
+#' p + scale_fill_GENOVA()
+#' p + scale_fill_GENOVA_div()
+#' }
 NULL
 
 #' @rdname GENOVA_colour_scales

@@ -10,7 +10,7 @@ anchors_filter_oob(IDX, anchors, rel_pos)
 \item{IDX}{The indices slot of a GENOVA \code{contacts} object.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
-anchor indices.}
+anchor indices. See the \code{\link[GENOVA]{anchors}} documentation.}
 
 \item{rel_pos}{An \code{integer} vector indicating relative positions in
 bins, indicating ranges around anchors to lookup.}

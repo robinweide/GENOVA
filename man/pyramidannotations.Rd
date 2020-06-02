@@ -7,9 +7,9 @@
 \alias{ggplot_add.mark_layer}
 \title{Rotated pyramid annotations}
 \usage{
-add_tads(bed, colour = "limegreen", ...)
+add_tads(bed, colour = "#1faee3", ...)
 
-add_loops(bedpe, colour = "limegreen", shape = 1, ...)
+add_loops(bedpe, colour = "#1faee3", shape = 1, ...)
 }
 \arguments{
 \item{bed}{A BED-formatted \code{data.frame} with the following 3 columns:

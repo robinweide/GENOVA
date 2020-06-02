@@ -10,7 +10,7 @@ engine_default(MAT, anchors, rel_pos)
 \item{MAT}{The Hi-C matrix slot of a GENOVA experiment object.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
-anchor indices.}
+anchor indices. See the \code{\link[GENOVA]{anchors}} documentation.}
 
 \item{rel_pos}{An \code{integer} vector indicating relative positions in
 bins, indicating ranges around anchors to lookup.}

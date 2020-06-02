@@ -27,20 +27,20 @@ options("GENOVA.colour.palette" = "hot")
 \subsection{Hot}{
 
 \if{html}{
-  \out{<div style="text-align: center">}\figure{colour_hot.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  \out{<div style="text-align: center">}\figure{colour-hot.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
   }
 \if{latex}{
-  \out{\begin{center}}\figure{colour_hot.png}\out{\end{center}}
+  \out{\begin{center}}\figure{colour-hot.png}\out{\end{center}}
   }
 }
 
 \subsection{White-Red}{
 
 \if{html}{
-  \out{<div style="text-align: center">}\figure{colour_whitered.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  \out{<div style="text-align: center">}\figure{colour-whitered.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
   }
 \if{latex}{
-  \out{\begin{center}}\figure{colour_whitered.png}\out{\end{center}}
+  \out{\begin{center}}\figure{colour-whitered.png}\out{\end{center}}
   }
 }
 }
@@ -57,10 +57,10 @@ The default divergent palette is called \code{"divergent"} and goes from a blue
 at low values, to a light grey at the midpoint to red at high values.
 
 \if{html}{
-  \out{<div style="text-align: center">}\figure{colour_divergent.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  \out{<div style="text-align: center">}\figure{colour-divergent.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
   }
 \if{latex}{
-  \out{\begin{center}}\figure{colour_divergent.png}\out{\end{center}}
+  \out{\begin{center}}\figure{colour-divergent.png}\out{\end{center}}
   }
 }
 
@@ -71,10 +71,10 @@ a plot require divergent palettes, but need to be discriminated from
 oneanother. 
 
 \if{html}{
-  \out{<div style="text-align: center">}\figure{colour_greenpink.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  \out{<div style="text-align: center">}\figure{colour-greenpink.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
   }
 \if{latex}{
-  \out{\begin{center}}\figure{colour_greenpink.png}\out{\end{center}}
+  \out{\begin{center}}\figure{colour-greenpink.png}\out{\end{center}}
   }
 }
 }

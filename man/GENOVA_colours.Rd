@@ -9,59 +9,88 @@ in GENOVA's palettes have been carefully chosen to be perceptually linear,
 which is great for Hi-C visualisations.
 }
 \section{Sequential palettes}{
+
+
 The sequential palettes are used for displaying absolute values, such as the
 (normalised) contacts values in Hi-C matrices, or the average of aggregates.
-The default palette is the 'Hot' palette. The default sequential palette can
-be changed by setting the global options.\if{html}{\out{<div class="r">}}\preformatted{
+The default palette is the 'Hot' palette. The default sequential palette can 
+be changed by setting the global options.
+
+\preformatted{
 
 options("GENOVA.colour.palette" = "whitered")
 
 options("GENOVA.colour.palette" = "hot")
 
-}\if{html}{\out{</div>}}
+}
+
 \subsection{Hot}{
 
-\figure{colour_hot.png}{Hot}
+\if{html}{
+  \out{<div style="text-align: center">}\figure{colour_hot.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  }
+\if{latex}{
+  \out{\begin{center}}\figure{colour_hot.png}\out{\end{center}}
+  }
 }
 
 \subsection{White-Red}{
 
-\figure{colour_whitered.png}{White-Red}
+\if{html}{
+  \out{<div style="text-align: center">}\figure{colour_whitered.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  }
+\if{latex}{
+  \out{\begin{center}}\figure{colour_whitered.png}\out{\end{center}}
+  }
 }
 }
 
 \section{Diverent palettes}{
+
+
 The divergent palettes are used for displaying relative values, such as
 Z-score normalised contacts, differences and fold changes.
+
 \subsection{Divergent}{
 
 The default divergent palette is called \code{"divergent"} and goes from a blue
 at low values, to a light grey at the midpoint to red at high values.
 
-\figure{colour_divergent.png}{Divergent}
+\if{html}{
+  \out{<div style="text-align: center">}\figure{colour_divergent.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  }
+\if{latex}{
+  \out{\begin{center}}\figure{colour_divergent.png}\out{\end{center}}
+  }
 }
 
 \subsection{Green-Pink}{
 
 A secondary divergent palette, \code{"greenpink"} is only used when two objects in
-a plot require divergent palettes, but need to be discriminated from
-oneanother.
+a plot require divergent palettes, but need to be discriminated from 
+oneanother. 
 
-\figure{colour_greenpink.png}{Green-Pink}
+\if{html}{
+  \out{<div style="text-align: center">}\figure{colour_greenpink.png}{options: style="width:255px;max-width:100\%;"}\out{</div>}
+  }
+\if{latex}{
+  \out{\begin{center}}\figure{colour_greenpink.png}\out{\end{center}}
+  }
 }
 }
 
 \section{Details}{
-The colours in ggplot based visualisations, such as
-\code{\link[GENOVA]{visualise}()} and \code{\link[GENOVA]{pyramid}()}, are
-based on the
-\code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA}()} and
+ 
+The colours in ggplot based visualisations, such as 
+\code{\link[GENOVA]{visualise}()} and \code{\link[GENOVA]{pyramid}()}, are 
+based on the 
+\code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA}()} and 
 \code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA_div}()}
 functions.
 
-For visualisations in base R, such as \code{\link[GENOVA]{hic.matrixplot}()}
+For visualisations in base R, such as \code{\link[GENOVA]{hic.matrixplot}()} 
 and \code{\link[GENOVA:GENOVA_image]{image()}},
-the \code{\link[grDevices]{colorRampPalette}()}
+the \code{\link[grDevices]{colorRampPalette}()} 
 function is used.
 }
 

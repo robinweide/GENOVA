@@ -40,6 +40,14 @@ plot contrast panels. See also the \code{show_single_contrast} argument.}
 returned?}
 
 \item{title}{add a title}
+
+\item{colour_lim, colour_lim_contrast}{Indication of limits for the primary and secondary continuous colour scales 
+respectively. One of: \itemize{ 
+\item \code{NULL} to have an educated quess for the scale. 
+\item A \code{numeric} vector of length two providing the limits of the 
+scale. Use \code{NA} to refer to existing minima or maxima. 
+\item A \code{function} that accepts the existing (automatic) limits and 
+returns new limits.}}
 }
 \description{
 Plot the results of \code{discovery} objects. By default

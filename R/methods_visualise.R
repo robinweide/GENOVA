@@ -1650,7 +1650,8 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
   
   g <- g + ggplot2::scale_x_discrete(
     name = "TAD Distance",
-    labels = scales::label_number(prefix = "n +")
+    labels = scales::math_format(n + .x)
+    # labels = scales::label_number(prefix = "n +")
   )
   
   if (is.null(contrast)) {

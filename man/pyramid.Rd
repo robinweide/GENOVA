@@ -10,9 +10,9 @@ pyramid(
   chrom,
   start,
   end,
+  colour,
   crop_x,
   crop_y,
-  colour,
   display_yaxis,
   edge = "black",
   raw,
@@ -29,12 +29,6 @@ pyramid_difference(exp1, exp2, chrom, start, end, colour = NULL, ...)
 \item{start, end}{A \code{numeric} of length one for the start and end positions in
 basepairs.}
 
-\item{crop_x, crop_y}{A \code{numeric} of length two indicating positions in
-basepairs of where to crop the x- and y-axis respectively. For the y-axis, this
-means the distance from the diagonal in basepairs. Cropping the
-x-axis typically results in a house-shaped pentagon. Cropping the y-axis 
-typically results in a trapezoid.}
-
 \item{colour}{One of the following: \itemize{
   \item {A \code{numeric} of length two giving the limits of the colour 
   scale.}
@@ -49,6 +43,12 @@ typically results in a trapezoid.}
   }
 }  
   Defaults to}
+
+\item{crop_x, crop_y}{A \code{numeric} of length two indicating positions in
+basepairs of where to crop the x- and y-axis respectively. For the y-axis, this
+means the distance from the diagonal in basepairs. Cropping the
+x-axis typically results in a house-shaped pentagon. Cropping the y-axis 
+typically results in a trapezoid.}
 
 \item{display_yaxis}{A \code{logical} of length 1: should the y-axis be
 displayed?}

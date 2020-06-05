@@ -62,8 +62,8 @@
 #' \dontrun{
 #' pyramid(exp, "chr2", 25e6, 30e6)
 #' }
-pyramid <- function(exp, chrom, start, end, crop_x, crop_y, 
-                    colour, display_yaxis, edge = "black", raw, ...) {
+pyramid <- function(exp, chrom, start, end, colour, crop_x, crop_y, 
+                     display_yaxis, edge = "black", raw, ...) {
   UseMethod("pyramid", exp)
 }
 

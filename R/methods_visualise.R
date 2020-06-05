@@ -99,7 +99,8 @@ visualise <- function(discovery, ...) {
 
 #' @export
 #' @rdname visualise
-visualise.default <- function(discovery, contrast, raw, title, ...) {
+visualise.default <- function(discovery, contrast, raw, title, 
+                              colour_lim, colour_lim_contrast, ...) {
   stop("No visualise method for class '", class(discovery),
        "' has been implemented.", call. = FALSE)
 }

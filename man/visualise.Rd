@@ -22,7 +22,15 @@
 \usage{
 visualise(discovery, ...)
 
-\method{visualise}{default}(discovery, contrast, raw, title, ...)
+\method{visualise}{default}(
+  discovery,
+  contrast,
+  raw,
+  title,
+  colour_lim,
+  colour_lim_contrast,
+  ...
+)
 }
 \arguments{
 \item{discovery}{A \code{discovery} object as returned by GENOVA analysis

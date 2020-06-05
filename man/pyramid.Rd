@@ -36,7 +36,8 @@ x-axis typically results in a house-shaped pentagon. Cropping the y-axis
 typically results in a trapezoid.}
 
 \item{colour}{One of the following: \itemize{
-  \item {A \code{numeric} of length two giving the limits of the colour scale}
+  \item {A \code{numeric} of length two giving the limits of the colour 
+  scale.}
   \item {
     A continuous ggplot2 
     \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.

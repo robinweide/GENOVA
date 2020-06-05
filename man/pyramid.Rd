@@ -12,17 +12,17 @@ pyramid(
   end,
   crop_x,
   crop_y,
-  colour_scale,
+  colour,
   display_yaxis,
   edge = "black",
   raw,
   ...
 )
 
-pyramid_difference(exp1, exp2, chrom, start, end, colour_scale = NULL, ...)
+pyramid_difference(exp1, exp2, chrom, start, end, colour = NULL, ...)
 }
 \arguments{
-\item{exp}{A GENOVA \code{contacts} or \code{contacts_matrix} object.}
+\item{exp, exp1, exp2}{A GENOVA \code{contacts} or \code{contacts_matrix} object.}
 
 \item{chrom}{A \code{character} of length one indicating a chromosome name.}
 
@@ -35,11 +35,19 @@ means the distance from the diagonal in basepairs. Cropping the
 x-axis typically results in a house-shaped pentagon. Cropping the y-axis 
 typically results in a trapezoid.}
 
-\item{colour_scale}{A continuous ggplot2 
-\link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
-Defaults to \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
-experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
-\code{pyramid_difference()} or z-score normalised experiments.}
+\item{colour}{One of the following: \itemize{
+  \item {A \code{numeric} of length two giving the limits of the colour scale}
+  \item {
+    A continuous ggplot2 
+    \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
+  }
+  \item{\code{NULL} for default scales, which is 
+  \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
+  experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
+  \code{pyramid_difference()} or z-score normalised experiments.
+  }
+}  
+  Defaults to}
 
 \item{display_yaxis}{A \code{logical} of length 1: should the y-axis be
 displayed?}
@@ -57,9 +65,6 @@ returned? When \code{TRUE}, no position- or colour-scales or theme elements
 are added.}
 
 \item{...}{Arguments passed to downstream functions.}
-
-\item{exp1, exp2}{Like \code{exp} but only used in
-\code{pyramid_difference()}.}
 }
 \value{
 A \code{ggplot} object

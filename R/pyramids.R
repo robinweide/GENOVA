@@ -8,9 +8,7 @@
 #'   y-axis indicates distance. \code{pyramid_difference()} does the same, but
 #'   first subtracts one sample from the other.
 #'
-#' @param exp A GENOVA \code{contacts} or \code{contacts_matrix} object.
-#' @param exp1,exp2 Like \code{exp} but only used in
-#'   \code{pyramid_difference()}.
+#' @param exp,exp1,exp2 A GENOVA \code{contacts} or \code{contacts_matrix} object.
 #' @param chrom A \code{character} of length one indicating a chromosome name.
 #' @param start,end A \code{numeric} of length one for the start and end positions in
 #'   basepairs.
@@ -19,11 +17,20 @@
 #'   means the distance from the diagonal in basepairs. Cropping the
 #'   x-axis typically results in a house-shaped pentagon. Cropping the y-axis 
 #'   typically results in a trapezoid.
-#' @param colour_scale A continuous ggplot2 
-#'   \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
-#'   Defaults to \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
+#' @param colour One of the following: \itemize{
+#'   \item {A \code{numeric} of length two giving the limits of the colour 
+#'   scale.}
+#'   \item {
+#'     A continuous ggplot2 
+#'     \link[ggplot2:scale_colour_continuous]{scale} with a colour palette.
+#'   }
+#'   \item{\code{NULL} for default scales, which is 
+#'   \code{\link[GENOVA]{scale_fill_GENOVA}()} for single 
 #'   experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
 #'   \code{pyramid_difference()} or z-score normalised experiments.
+#'   }
+#' }  
+#'   Defaults to 
 #' @param display_yaxis A \code{logical} of length 1: should the y-axis be
 #'   displayed?
 #' @param edge Draw an edge around the pyramid data region. One of the 
@@ -56,7 +63,7 @@
 #' pyramid(exp, "chr2", 25e6, 30e6)
 #' }
 pyramid <- function(exp, chrom, start, end, crop_x, crop_y, 
-                    colour_scale, display_yaxis, edge = "black", raw, ...) {
+                    colour, display_yaxis, edge = "black", raw, ...) {
   UseMethod("pyramid", exp)
 }
 
@@ -69,17 +76,14 @@ pyramid.default <- function(exp, ...) {
 #' @method pyramid contacts
 #' @export
 pyramid.contacts <- function(exp, chrom = "chr1", start = 0, end = 25e6, 
-                             colour_scale = NULL, ...) {
+                             colour = NULL, ...) {
   y <- select_subset(exp, chrom, start, end)
   if (attr(exp, "znorm")) {
-    if (is.null(colour_scale)) {
-      colour_scale <- scale_fill_GENOVA_div(
-        name = "Z-score", midpoint = 0, limits = c(NA, NA)
-      )
-    }
-    pyramid(y, colour_scale = colour_scale, ...)
+    colour_scale <- .resolve_colour(colour, scale_fill_GENOVA_div,
+                                    name = "Z-score", midpoint = 0)
+    pyramid(y, colour = colour_scale, ...)
   } else {
-    pyramid(y, ...)
+    pyramid(y, colour = colour, ...)
   }
 }
 
@@ -118,21 +122,21 @@ pyramid.matrix <- function(exp, ...) {
   )
 }
 
+# Core function -----------------------------------------------------------
+
 #' @export
 #' @rdname pyramid
 pyramid_difference <- function(exp1, exp2, chrom, 
-                               start, end, colour_scale = NULL, ...) {
+                               start, end, colour = NULL, ...) {
   a <- select_subset(exp1, chrom, start, end)
   b <- select_subset(exp2, chrom, start, end)
   a$z <- a$z - b$z
   
-  if (is.null(colour_scale)) {
-    colour_scale <- scale_fill_GENOVA_div(
-      name = "Difference", midpoint = 0, limits = quantile(a$z, c(0.05, 0.95))
-    )
-  }
+  colour_scale <- .resolve_colour(colour, scale_fill_GENOVA_div,
+                                  name = "Difference", midpoint =  0,
+                                  limits = quantile(a$z, c(0.05, 0.95)))
   
-  pyramid(a, colour_scale = colour_scale, ...)
+  pyramid(a, colour = colour_scale, ...)
 }
 
 .core_pyramid <- function(x, y, z, 
@@ -140,7 +144,7 @@ pyramid_difference <- function(exp1, exp2, chrom,
                          crop_y = c(-Inf, Inf), 
                          location,
                          resolution,
-                         colour_scale = scale_fill_GENOVA(),
+                         colour = NULL,
                          edge = "black",
                          display_yaxis = FALSE,
                          raw = FALSE) {
@@ -212,43 +216,12 @@ pyramid_difference <- function(exp1, exp2, chrom,
   
   # Tweak plot
   if (!raw) {
-    # Setup colour scale
-    colour_scale$aesthetics <- "altfill"
     
-    # Setup guide
-    guide <- colour_scale$guide
-    if (is.character(guide)) {
-      guide <- paste0("guide_", guide)
-      # Search parent frame first
-      if (exists(guide, envir = parent.frame(), mode = "function")) {
-        guide <- get(guide, envir = parent.frame(), mode = "function")()
-      } else {
-        # If that fails, search ggplot2 namespace
-        ns <- asNamespace("ggplot2")
-        if (exists(guide, envir = ns, mode = "function")) {
-          guide <- get(guide, envir = ns, mode = "function")()
-        } else {
-          guide <- ggplot2::guide_colourbar()
-        } 
-      }
-    }
-    guide$available_aes <- c("altfill", "fill")
-    colour_scale$guide <- guide
-    
-    # Always replace `oob`
-    colour_scale$oob <- scales::squish
-    # Only set limits when none are given
-    if (is.null(colour_scale$limits)) {
-      colour_scale$limits <- c(0, quantile(df$contacts, 0.975))
-    }
-    # Only set name when none is given
-    if (inherits(colour_scale$name, "waiver")) {
-      if (!is.null(location[[1]])) {
-        colour_scale$name <- "Contacts"
-      } else {
-        colour_scale$name <- "Value"
-      }
-    }
+    colour_scale <- .resolve_colour(
+      colour, scale_fill_GENOVA, 
+      limits = c(0, quantile(df$contacts, 0.975)),
+      name = if (!is.null(location[[1]])) "Contacts" else "Value"
+    )
     
     # Add y-scale
     if (display_yaxis) {
@@ -259,7 +232,6 @@ pyramid_difference <- function(exp1, exp2, chrom,
       )
     } else {
       yscale <- ggplot2::scale_y_continuous(
-        # breaks = NULL,
         guide = ggplot2::guide_none(),
         name = "", expand = c(0, 0),
         limits = crop_y
@@ -277,7 +249,8 @@ pyramid_difference <- function(exp1, exp2, chrom,
       p <- p + ggplot2::scale_x_continuous(
         expand = c(0, 0),
         limits = c(location[[2]], location[[3]]),
-        labels = scales::label_number(1, scale = 1e-6, suffix = " Mb")
+        breaks = scales::breaks_extended(5, Q = c(1,5,2,4,3)),
+        labels = scales::label_number(scale = 1e-6, suffix = " Mb")
       )
     } else {
       p <- p + ggplot2::scale_x_continuous(
@@ -1022,19 +995,7 @@ as_track.virtual4C_discovery <- function(x,
 #' @rdname pyramidtracks
 #' @usage NULL
 ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
-  # if (inherits(object, c("CS_discovery", "IS_discovery", "DI_discovery"))) {
-  #   cscale <- ggplot2::scale_colour_manual(
-  #     aesthetics = "exp",
-  #     name = "Sample",
-  #     values = setNames(attr(object, "colours"), expnames(object)),
-  #     guide = ggplot2::guide_legend()
-  #   )
-  # } else if (inherits(object, c("domainogram_discovery"))) {
-  #   cscale <- scale_fill_GENOVA_div(midpoint = 0, name = "Insulation\nScore")
-  # } else {
-  #   cscale <- NULL
-  # }
-  
+
   if (inherits(plot, "ggpyramid")) {
     plot <- plot + as_track(object)
     # plot <- .update_manual_scale(plot, cscale)
@@ -1299,6 +1260,54 @@ ggplot_add.genomescore_discovery <- function(object, plot, object_name) {
     plot <- plot + new_scale
   }
   return(plot)
+}
+
+.resolve_colour <- function(obj, fun = scale_fill_GENOVA, ...) {
+  if (inherits(obj, "ScaleContinuous")) {
+    scale <- obj
+  } else if (is.null(obj)) {
+    scale <- fun(...)
+  } else if (is.numeric(obj)) {
+    if (length(obj) == 2L) {
+      args <- list(...)
+      args$limits <- obj
+      scale <- do.call(fun, args)
+    } else {
+      stop("Please give colour limits as a length 2 numeric vector.", 
+           call. = FALSE)
+    }
+  } else {
+    stop("Invalid colour specification.",
+         call. = FALSE)
+  }
+  
+  # Resolve aesthetics
+  scale$aesthetics <- "altfill"
+  
+  # Always replace `oob`
+  scale$oob <- scales::squish
+  
+  # Resolve guide
+  guide <- scale$guide
+  if (is.character(guide)) {
+    guide <- paste0("guide_", guide)
+    # Search parent frame first
+    if (exists(guide, envir = parent.frame(), mode = "function")) {
+      guide <- get(guide, envir = parent.frame(), mode = "function")()
+    } else {
+      # If that fails, search ggplot2 namespace
+      ns <- asNamespace("ggplot2")
+      if (exists(guide, envir = ns, mode = "function")) {
+        guide <- get(guide, envir = ns, mode = "function")()
+      } else {
+        guide <- ggplot2::guide_colourbar()
+      } 
+    }
+  }
+  guide$available_aes <- c("altfill", "fill")
+  scale$guide <- guide
+  
+  return(scale)
 }
 
 # Dirty hack based on ggh4x scale_listed()

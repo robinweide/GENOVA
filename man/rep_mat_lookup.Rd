@@ -18,7 +18,7 @@ rep_mat_lookup(
 GENOVA \code{contacts} objects.}
 
 \item{anchors}{A \code{matrix} with two columns containing pre-computed
-anchor indices.}
+anchor indices. See the \code{\link[GENOVA]{anchors}} documentation.}
 
 \item{rel_pos}{An \code{integer} vector indicating relative positions in
 bins, indicating ranges around anchors to lookup.}
@@ -81,5 +81,11 @@ For each row in the \code{anchors} argument a region of the Hi-C
 }
 
 \seealso{
-\code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
+Other aggregate repeated matrix lookup analyses: 
+\code{\link{APA}()},
+\code{\link{ARA}()},
+\code{\link{ATA}()},
+\code{\link{CSCAn}()},
+\code{\link{PESCAn}()}
 }
+\concept{aggregate repeated matrix lookup analyses}

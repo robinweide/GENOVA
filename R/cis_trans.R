@@ -50,13 +50,19 @@ cis_trans = function(exp, bed = NULL){
     if(!is.null(bed)){
       thisExpOut = lapply(bed, function(bd){
         
-        bedI = bed2idx(IDX = x$IDX, bd[,1:3])
-        bedMAT = x$MAT[bedI]
+        start <- bed2idx(IDX = x$IDX, bd[,1:3], "start")
+        end <- bed2idx(IDX = x$IDX, bd[,1:3], "end")
+        seqs <- mapply(seq.int, from = start, to = end, SIMPLIFY = FALSE)
+        seqs <- SJ(do.call(c, seqs))
+        
+        left = x$MAT[seqs, on = "V1"]
+        right = x$MAT[seqs, on = c(V2 = "V1")]
+        bedMAT = rbind(left, right)
         
         F1 = findInterval(bedMAT$V1, chromRange$first)
         F2 = findInterval(bedMAT$V2, chromRange$first)
         
-        cisMat = bedMAT[ , sum(V3), by = ifelse(F1 == F2, T, F) ]
+        cisMat = bedMAT[ , sum(V3, na.rm = TRUE), by = ifelse(F1 == F2, T, F) ]
         cis = data.table::data.table(sample = attr(x, 'samplename'), cis = cisMat[cisMat$ifelse == TRUE, 2] / sum(cisMat$V1))
         cis$region = unique(bd$naam)
         colnames(cis)[2] = 'cis'

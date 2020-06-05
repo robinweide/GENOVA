@@ -79,13 +79,15 @@ virtual_4C <- function(explist, viewpoint, xlim = NULL){
                           end   = viewpoint[1, 3],
                           exp = expnames)
   
-  signal <- structure(signal, 
-                      class = "virtual4C_discovery",
-                      'viewpoint' = viewpoint, 
-                      'xlim' = xlim,
-                      'sample' = expnames,
-                      'resolution' = attr(explist[[1]], 'resolution'),
-                      package = "GENOVA")
+  signal <- structure(
+    signal, 
+    class = c("virtual4C_discovery", "genomescore_discovery", "discovery"),
+    'viewpoint' = viewpoint, 
+    'xlim' = xlim,
+    'sample' = expnames,
+    'resolution' = attr(explist[[1]], 'resolution'),
+    package = "GENOVA"
+  )
   
   signal
 }

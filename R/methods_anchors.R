@@ -16,8 +16,8 @@
 #' @param bed,bedlist A BED-formatted \code{data.frame} with the following 3
 #'   columns: \enumerate{ \item A \code{character} giving the chromosome names.
 #'   \item An \code{integer} with start positions. \item An \code{integer} with
-#'   end positions. } For the \code{bedlist} variant, a \code{list} of the above
-#'   (\emph{CSCAn only}).
+#'   end positions. } For the \code{bedlist} variant, a named \code{list} of the 
+#'   above. (\emph{CSCAn only}).
 #' @param bedpe A BEDPE-formatted \code{data.frame} with the following 6
 #'   columns. \emph{APA only}: \enumerate{ \item A \code{character} giving the
 #'   chromosome names of the first coordinate. \item An \code{integer} giving
@@ -37,6 +37,10 @@
 #'   \emph{PE-SCAn and C-SCAn only}.
 #' @param padding A \code{numeric} of length 1 to determine the padding around
 #'   TADs, expressed in TAD widths. \emph{ATA only}.
+#' @param group_direction A \code{logical} of length 1 which when \code{TRUE} 
+#'   will mirror groups for anchors where the left anchor location is larger 
+#'   than the right anchor location. Left and right refer to bedlist elements 
+#'   generating combinations. \emph{CSCAn only}.
 #'
 #' @return A \code{anchors} object with two colums in \code{matrix} format.
 #'
@@ -66,7 +70,7 @@
 #'   \code{anchors_PESCAn}, takes all pairwise interactions of genomic
 #'   coordinates, but crosswise between unique combinations of BED-like
 #'   \code{data.frame}s in the \code{bedlist} argument. It is used within the
-#'   \code{TODO:LINK CSCAN} function. Has a \code{group} attribute to
+#'   \code{\link[GENOVA]{CSCAn}} function. Has a \code{group} attribute to
 #'   keep track from which combination of BED-like \code{data.frame} the anchor
 #'   originated.}
 #'
@@ -143,10 +147,12 @@ anchors_PESCAn <- function(IDX, res, bed,
   newbed <- newbed[!is.na(newbed$idx), ]
   newbed <- newbed[order(newbed$idx), ]
 
+  proxy <- seq_len(nrow(newbed))
   if (mode == "cis") {
 
     # Generate cis combinations
-    idx <- split(newbed$idx, newbed[, 1])
+    # idx <- split(newbed$idx, newbed[, 1])
+    idx <- split(proxy, newbed[, 1])
     idx <- idx[lengths(idx) >= max(min_compare, 2)]
     if (length(idx) == 0) {
       stop("Too few comparable positions per chromosome.", call. = FALSE)
@@ -157,8 +163,10 @@ anchors_PESCAn <- function(IDX, res, bed,
   } else {
 
     # Generate all combinations
-    idx <- t(utils::combn(newbed$idx, 2))
-    is_cis <- newbed[match(idx, newbed$idx), 1]
+    # idx <- t(utils::combn(newbed$idx, 2))
+    idx <- t(utils::combn(proxy, 2))
+    is_cis <- newbed[c(idx), 1]
+    # is_cis <- newbed[match(idx, newbed$idx), 1]
     is_cis <- matrix(is_cis, ncol = 2)
     is_cis <- is_cis[, 1] == is_cis[, 2]
 
@@ -169,6 +177,12 @@ anchors_PESCAn <- function(IDX, res, bed,
       is_cis <- FALSE
     }
   }
+  
+  faux_bedpe <- cbind(newbed[idx[, 1], 1:3], newbed[idx[, 2], 1:3])
+  rownames(idx) <- names_from_bedpe(faux_bedpe)
+  # Replace proxy by true indices
+  idx[] <- newbed[c(idx), "idx"]
+  
 
   # Filtering distances only makes sense in cis
   if (mode != "trans") {
@@ -196,12 +210,13 @@ anchors_PESCAn <- function(IDX, res, bed,
   idx
 }
 
-#' export
+#' @export
 #' @rdname anchors
 anchors_CSCAn <- function(IDX, res, bedlist,
                           dist_thres = c(50e3, 2e6),
                           min_compare = 10L,
-                          mode = c("cis", "trans", "both")) {
+                          mode = c("cis", "trans", "both"),
+                          group_direction = FALSE) {
   mode <- match.arg(mode)
   if (length(bedlist) < 2 || !inherits(bedlist, "list")) {
     stop("Less than two 'bedlist' elements found. For self-interaction of a",
@@ -212,8 +227,7 @@ anchors_CSCAn <- function(IDX, res, bedlist,
   chroms <- lapply(lapply(bedlist, `[[`, 1), unique)
   chroms <- table(unlist(chroms))
   chroms <- names(chroms)[chroms >= 2]
-  # chroms <- Reduce(intersect, lapply(bedlist, `[[`, 1))
-  # chroms <- intersect(left[, 1], right[, 1])
+
   if (length(chroms) == 0) {
     stop("No common chromosomes found between 'bedlist' argument elements",
          call. = FALSE)
@@ -229,34 +243,52 @@ anchors_CSCAn <- function(IDX, res, bedlist,
   }
   
   beds <- lapply(bedlist, function(x) {
+    x <- x[!duplicated(x),]
     newbed <- cbind.data.frame(chrom = x[, 1], 
                                idx = bed2idx(IDX, x, mode = "centre"))
+    rownames(newbed) <- names_from_bed(x)
     newbed <- newbed[!is.na(newbed$idx), ]
     newbed <- newbed[order(newbed$idx),]
   })
   
   cbn <- as.data.frame(combn(names(beds), 2), stringsAsFactors = FALSE)
-
   if (mode == "cis") {
     # Generate cis combinations
-    splitbeds <- lapply(beds, function(x) {split(x$idx, x$chrom)[chroms]})
+    splitbeds <- lapply(beds, function(x) {split(seq_len(nrow(x)), x$chrom)[chroms]})
     lens <- lapply(splitbeds, lengths)
-    
-    idx <- rbindlist(lapply(cbn, function(i) {
-      keep <- (lens[[i[1]]] * lens[[i[2]]]) >= max(min_compare, 2)
-      rbindlist(mapply(CJ, 
-                       splitbeds[[i[1]]][keep], 
-                       splitbeds[[i[2]]][keep], 
-                       SIMPLIFY = FALSE))[, combi := paste0(i[1], "-", i[2])]
-    }))
+
+    idx <- lapply(cbn, function(i) {
+      left <- i[[1]]; right <- i[[2]]
+      keep <- (lens[[left]] * lens[[right]]) >= max(min_compare, 2)
+      proto_idx <- rbindlist(
+        mapply(CJ, 
+               splitbeds[[left]][keep], 
+               splitbeds[[right]][keep], 
+               SIMPLIFY = FALSE)
+      )[, combi := paste0(i[1], "-", i[2])]
+      proto_idx[, rnames := paste0(
+        rownames(beds[[left]])[V1], ";",
+        rownames(beds[[right]])[V2]
+      )]
+      # Substitute proxy for real idx
+      proto_idx[, V1 := beds[[left]][V1, "idx"]]
+      proto_idx[, V2 := beds[[right]][V2, "idx"]]
+      return(proto_idx)
+    })
+    idx <- rbindlist(idx)
     is_cis <- TRUE
   } else {
     ind <- lapply(lapply(beds, nrow), seq_len)
     idx <- rbindlist(lapply(cbn, function(i) {
+      left <- i[[1]]; right <- i[[2]]
       # Generate all combinations
-      out <- CJ(ind[[i[1]]], ind[[i[2]]])
+      out <- CJ(ind[[left]], ind[[right]])
       # Check cis/trans
-      out[, is_cis := beds[[i[1]]][[1]][V1] == beds[[i[2]]][[1]][V2]]
+      out[, is_cis := beds[[left]][[1]][V1] == beds[[right]][[1]][V2]]
+      # Attach rownames
+      out[, rnames := paste0(rownames(beds[[left]])[V1], ";",
+                             rownames(beds[[right]])[V2])]
+      
       # Substitute actual indices, add combination column
       out[, c("V1", "V2", "combi") := list(beds[[i[1]]][[2]][V1],
                                            beds[[i[2]]][[2]][V2],
@@ -264,13 +296,21 @@ anchors_CSCAn <- function(IDX, res, bedlist,
     }))
     if (mode == "trans") {
       # Exclude cis when trans
-      idx <- idx[!is_cis, ]
+      idx <- idx[is_cis == FALSE, ]
       is_cis <- FALSE
     } else {
       is_cis <- idx[["is_cis"]]
     }
     idx[, is_cis := NULL]
     # idx <- as.data.frame(idx)
+  }
+  
+  if (group_direction) {
+    str <- lapply(strsplit(idx$combi, ""), rev)
+    str <- as.data.frame(do.call(rbind, str))
+    str <- do.call(paste0, str)
+    flip <- idx[, V2 < V1]
+    idx[flip, combi := str[flip]]
   }
   
   # Sort start-end
@@ -295,10 +335,13 @@ anchors_CSCAn <- function(IDX, res, bedlist,
     # Recombine and order
     idx <- rbind(idx[!is_cis], cis)
   }
+  rnames <- idx$rnames
   combi <- rle(idx[["combi"]])
   idx[, combi := NULL]
+  idx[, rnames := NULL]
   idx <- as.matrix(idx)
   dimnames(idx) <- NULL
+  rownames(idx) <- rnames
   
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "CSCAn"
@@ -387,6 +430,7 @@ anchors_ATA <- function(IDX, bed,
     stop("There are no TADs large enough to pass the distance thresholds.",
          call. = FALSE)
   }
+  rnames <- names_from_bed(bed[keep,])
 
   # Resize regions
   bed <- data.frame(bed[,1],
@@ -403,9 +447,10 @@ anchors_ATA <- function(IDX, bed,
     pmin(idx[, 1], idx[, 2]),
     pmax(idx[, 1], idx[, 2])
   )
+  rownames(idx) <- rnames
   idx <- idx[order(idx[, 1]), , drop = FALSE]
   idx <- idx[idx[, 1] < idx[, 2], , drop = FALSE]
-
+  
   # Attribute to let matrix lookup methods know it is performing ATA
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "TADs"
@@ -424,6 +469,7 @@ anchors_ARA <- function(IDX, bed) {
   is_dup <- duplicated(idx)
   idx <- idx[!is_dup]
   idx <- unname(cbind(idx, idx))
+  rownames(idx) <- names_from_bed(bed[!is_dup,])
 
   # Attach direction if necessary
   f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "+", "-"))
@@ -736,10 +782,12 @@ is_anchors <- function(x) {
 }
 
 names_from_bedpe <- function(bedpe) {
-  paste0(bedpe[, 1], ":", 
-         format(bedpe[, 2], scientific = FALSE, trim = TRUE), "-", 
-         format(bedpe[, 3], scientific = FALSE, trim = TRUE), ";",
-         bedpe[, 4], ":", 
-         format(bedpe[, 5], scientific = FALSE, trim = TRUE), "-", 
-         format(bedpe[, 6], scientific = FALSE, trim = TRUE))
+  paste0(names_from_bed(bedpe[, 1:3]), ";",
+         names_from_bed(bedpe[, 4:6]))
+}
+
+names_from_bed <- function(bed) {
+  paste0(bed[,1], ":",
+         format(bed[, 2], scientific = FALSE, trim = TRUE), "-",
+         format(bed[, 3], scientific = FALSE, trim = TRUE))
 }

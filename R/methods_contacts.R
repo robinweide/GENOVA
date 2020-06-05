@@ -1,3 +1,5 @@
+# Subsetting --------------------------------------------------------------
+
 #' @title subset
 #' @param x A \code{contacts}-object
 #' @param chrom A vector of chromosomes to subset
@@ -52,4 +54,3 @@ subset.contacts <- function(x, chrom = NULL, start = 0, end = Inf, ...){
   
   out
 }
-

@@ -1,6 +1,5 @@
 #' Match bed-like entries to Hi-C bin indices
 #'
-
 #' @param IDX The IDX-slot of a \code{contacts} object
 #' @param bed A 3-column data.frame
 #' @param mode A \code{character} of length 1 indicating what position of the
@@ -16,6 +15,9 @@
 bed2idx <- function(IDX, bed, mode = c("centre", "start", "end")) {
   if (!inherits(bed, "data.frame") | is.data.table(bed)) {
     bed <- as.data.frame(bed)
+  }
+  if (anyNA(bed[1:3])) {
+    stop("Cannot match `NA`s to indices.", call. = FALSE)
   }
 
   # American/British spelling
@@ -114,11 +116,22 @@ select_subset <- function(exp, chrom, start, end) {
   i <- exp$IDX[idx, V4]
   min <- i[1] - 1
   len <- length(i)
-  list(x = pos,
-       y = pos,
-       z = exp$MAT[CJ(V1 = i, V2 = i),
-                   dt_matrix(V3, V1, V2, len, min),
-                   nomatch = NULL])
+  structure(list(
+    x = pos,
+    y = pos,
+    z = exp$MAT[CJ(V1 = i, V2 = i),
+                dt_matrix(V3, V1, V2, len, min),
+                nomatch = NULL]
+  ), class = c("contacts_matrix", "list"), 
+  chrom = chrom, resolution = resolution(exp))
+}
+
+#' @export
+#' @noRd
+as.matrix.contacts_matrix <- function(x, ...) {
+  out <- x$z
+  dimnames(out) <- list(x$x, x$y)
+  out
 }
 
 # taken from ggplot
@@ -183,7 +196,7 @@ check_compat_exp <- function(explist) {
 # Equivalent to isTRUE fron R>3.5
 literalTRUE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
 
-GENOVA_THEME = function(){
+GENOVA_THEME <- function() {
   p = ggplot2::theme(panel.background = ggplot2::element_blank(),
                      legend.key =  ggplot2::element_rect(fill = 'white'),
                      strip.background = ggplot2::element_rect(fill = NA, colour = NA),
@@ -192,4 +205,18 @@ GENOVA_THEME = function(){
                      axis.text = ggplot2::element_text(colour = 'black'),
                      strip.text = ggplot2::element_text(colour = 'black') )
   return(p)
+}
+
+cache_chroms <- function(exp) {
+  first <- exp$IDX[, list(V4 = min(V4)), by = V1][order(V4)]
+  
+  chrom <- findInterval(exp$MAT$V1, first$V4)
+  cis <- findInterval(exp$MAT$V2, first$V4) == chrom
+  rle <- rle(paste0(chrom, "-", cis))
+  x <- as.data.table(tstrsplit(rle$values, "-"))
+  x <- x[, list(chrom = first$V1[as.integer(V1)],
+                cis = as.logical(V2),
+                lengths = rle$lengths)]
+  x[, ends := cumsum(x$lengths)]
+  x[, starts := x$ends - x$lengths + 1]
 }

@@ -8,7 +8,7 @@ load_contacts(
   signal_path,
   indices_path = NULL,
   resolution = 10000,
-  sample_name,
+  sample_name = NULL,
   centromeres = NULL,
   colour = NULL,
   z_norm = FALSE,

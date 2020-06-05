@@ -119,9 +119,12 @@ RCP = function(explist, bedlist = NULL, chromsToUse = NULL, maxDistance = NULL, 
   ########################################################################## out
   ##############################################################################
   
-  RCP_out = structure(list('raw' = RCP_out, smooth = smthd),
-                      class = c("RCP_discovery"), 
-                      package = "GENOVA")
+  RCP_out = structure(
+    list('raw' = RCP_out, smooth = smthd),
+    class = c("RCP_discovery", "discovery"), 
+    package = "GENOVA",
+    resolution = resolution(explist)[[1]]
+  )
   
   if(!is.null(bedlist)){
     attr(RCP_out, 'norm') = 'local'
@@ -344,7 +347,9 @@ RCPlfc = function(dt, contrast, breaks){
   
   out$distance <- SPREAD$cut
   
-  out = melt(out, id.vars = 'distance')
+  setDT(out)
+  out <- melt.data.table(out, id.vars = 'distance')
+  setDF(out)
   colnames(out)[2:3] = c('samplename','P')
   out
 }

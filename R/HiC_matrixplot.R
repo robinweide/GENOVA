@@ -610,7 +610,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @return A matrix-plot
 #' @export
 hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
-                           chip = list(NULL, NULL, NULL, NULL), inferno = T,
+                           chip = list(NULL, NULL, NULL, NULL), inferno = NULL,
                            cexTicks = 1, chip.colour = "black", chip.yMax = NULL,
                            type = rep("triangle", 4), guessType = T,
                            coplot = "dual", genes = NULL,
@@ -735,19 +735,18 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     mat1$z[mat1$z < -cut.off] <- -cut.off
     
     
-    if (inferno) {
-      wr <- colorRampPalette(bezier_corrected_hot)
-      if (ZnormScale) {
-        wr <- colorRampPalette(bezier_corrected_divergent)
-      }
-      image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
+    wr <- if (ZnormScale) {
+      bezier_corrected_divergent
+    } else if (is.null(inferno)) {
+      .choose_palette()
+    } else if (inferno) {
+      bezier_corrected_hot
     } else {
-      wr <- colorRampPalette(bezier_corrected_whiteRed)
-      if (ZnormScale) {
-        wr <- colorRampPalette(bezier_corrected_divergent)
-      }
-      image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
+      bezier_corrected_whiteRed
     }
+    wr <- colorRampPalette(wr)
+    image(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
+          zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
   }
   ##############################################################################
   # plot exp1 and exp2
@@ -759,7 +758,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       # set cutoffs
       if (is.null(cut.off)) {
         cut.off <- max(quantile(abs(mat1$z), .99))
-        warning(
+        message(
           "No cut.off was given: using 99% percentile: ",
           round(cut.off), "."
         )
@@ -767,26 +766,24 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       mat1$z[mat1$z > cut.off] <- cut.off
       mat1$z[mat1$z < -cut.off] <- -cut.off
       
-      if (inferno) {
-        wr <- colorRampPalette(bezier_corrected_hot)
-        if (ZnormScale) {
-          wr <- colorRampPalette(bezier_corrected_divergent)
-        }
-        image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
+      wr <- if (ZnormScale) {
+        bezier_corrected_divergent
+      } else if (is.null(inferno)) {
+        .choose_palette()
+      } else if (inferno) {
+        bezier_corrected_hot
       } else {
-        wr <- colorRampPalette(bezier_corrected_whiteRed)
-        
-        if (ZnormScale) {
-          wr <- colorRampPalette(bezier_corrected_divergent)
-        }
-        image(mat1, col = wr(1e4), axes = F, ylim = rev(range(mat1$x)), zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
+        bezier_corrected_whiteRed
       }
+      wr <- colorRampPalette(wr)
+      image(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
+            zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
     } else {
       mat1$z <- mat2$z - mat1$z
       # set cutoffs
       if (is.null(cut.off)) {
         cut.off <- max(quantile(abs(mat1$z), .99))
-        warning(
+        message(
           "No cut.off was given: using 99% percentile: ",
           round(cut.off), "."
         )

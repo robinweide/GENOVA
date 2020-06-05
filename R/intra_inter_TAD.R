@@ -96,7 +96,7 @@ intra_inter_TAD <- function(explist, tad_bed, max_neighbour = 5) {
   res[, c("x", "y") := list(tidx[x, id], tidx[y, id])]
   
   # Exclude trans-interTADs
-  res <- res[tad_bed[x, 1] == tad_bed[y, 1]]
+  res <- res[tad_bed[x, 1, drop = TRUE] == tad_bed[y, 1, drop = TRUE]]
   res <- res[order(x, y)]
   
   # Construct output
@@ -105,7 +105,8 @@ intra_inter_TAD <- function(explist, tad_bed, max_neighbour = 5) {
       results = res,
       tads = cbind(tad_bed, id = seq_len(nrow(tad_bed)))
     ),
-    class = "IIT_discovery", package = "GENOVA",
+    class = c("IIT_discovery", "discovery"), 
+    package = "GENOVA",
     colours = cols,
     resolution = attr(explist[[1]], "resolution")
   )

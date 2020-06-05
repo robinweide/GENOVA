@@ -426,7 +426,6 @@ chromosome.wide.insulation <- function(exp, window.size, chrom) {
 #' Hap1_WT_10kb$INSULATION <- genome.wide.insulation(hic = Hap1_WT_10kb, 
 #'                                                   window.size = 25)
 #' }
-#' @export
 genome.wide.insulation <- function(exp, window.size, normalize.genome = F, verbose = F) {
   chrom.vec <- c(exp$IDX[1, V1], exp$IDX[which(head(exp$IDX[, V1], -1) != tail(exp$IDX[, V1], -1)) + 1, V1])
   chrom.save <- c()

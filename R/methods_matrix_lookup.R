@@ -9,7 +9,7 @@
 #'
 #' @inheritParams PESCAn
 #' @param anchors A \code{matrix} with two columns containing pre-computed
-#'   anchor indices.
+#'   anchor indices. See the \code{\link[GENOVA]{anchors}} documentation.
 #' @param rel_pos An \code{integer} vector indicating relative positions in
 #'   bins, indicating ranges around anchors to lookup.
 #'
@@ -48,7 +48,7 @@
 #'
 #' @export
 #'
-#' @seealso \code{\link[GENOVA]{APA}} and \code{\link[GENOVA]{PESCAn}}
+#' @family aggregate repeated matrix lookup analyses
 rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
                            outlier_filter = c(0, 1), raw = FALSE) {
 
@@ -94,7 +94,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
       rev(dnames), dnames, unique(group[anch_id])
     )[seq_along(dim(mat_mu$mat))]
     if (raw) {
-      dimnames(arr) <- list(rawnames, rev(dnames), dnames)
+      dimnames(arr) <- list(rawnames[anch_id], rev(dnames), dnames)
       arr <- arr[mat_mu$keep, , , drop = FALSE]
       attr(arr, "group") <- group[anch_id][mat_mu$keep]
     } else {

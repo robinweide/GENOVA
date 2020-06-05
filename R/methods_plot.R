@@ -76,8 +76,8 @@ plot.APA_discovery <- function(
   layout(layout_mat, widths = c(rep.int(1, n_samples), 0.2),
          respect = TRUE)
   
-  if (is.null(colour_fun)) {
-    cols <- c('white', '#f5a623', '#d0021b', 'black')
+  if (!is.function(colour_fun)) {
+    cols <- .choose_palette(colour_fun)
     colour_fun <- colorRampPalette(cols)
   }
 
@@ -114,7 +114,7 @@ plot.APA_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+      cols <- bezier_corrected_divergent
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -151,6 +151,107 @@ plot.APA_discovery <- function(
 
 #' @rdname plot_discovery
 #' @export
+plot.CSCAn_discovery <- function(
+  x,
+  colour_fun = NULL,
+  colour_lim = NULL,
+  ...
+) {
+  par(mar = c(1, 1, 1, 1))
+  par(oma = c(4, 4, 1, 3))
+  
+  obj <- x$obsexp
+  
+  titles_1 = dimnames(obj)[[3]]
+  titles_2 = dimnames(obj)[[4]]
+  
+  xbreaks <- rev(as.numeric(dimnames(obj)[[1]])) / 1000
+  ybreaks <- as.numeric(dimnames(obj)[[2]]) / 1000
+  
+  n_samples <- dim(obj)[4]
+  n_rows <- dim(obj)[3] - 1
+  n_cols <- n_rows * n_samples
+  
+  layout_mat <- matrix(seq_len((n_cols + 1) * n_rows),
+                       nrow = n_rows, byrow = 2)
+  layout_mat[, ncol(layout_mat)] <- layout_mat[1, ncol(layout_mat)]
+  layout(layout_mat, widths = c(rep.int(1, n_cols), 0.2),
+         respect = TRUE)
+  
+  if (is.null(colour_fun)) {
+    cols <- bezier_corrected_divergent
+    colour_fun <- colorRampPalette(cols)
+  }
+  
+  if (is.null(colour_lim)) {
+    colour_lim <- c(-1, 1) * max(abs(range(obj) - 1)) + 1
+  }
+  replace <- which(is.na(colour_lim))
+  colour_lim[replace] <- range(obj)[replace]
+  
+  grps <- strsplit(as.character(dimnames(obj)[[3]]), "-")
+  left  <- vapply(grps, `[`, character(1), 1)
+  right <- vapply(grps, `[`, character(1), 2)
+  com <- expand.grid(left = unique(left), right = unique(right),
+                     exp = seq_len(n_samples))
+  com$col <- as.numeric(interaction(com$right, com$exp))
+  com$row <- as.numeric(com$left)
+  com$grp <- match(with(com, paste0(left, "-", right)), dimnames(obj)[[3]])
+  com <- com[order(com$row, com$col),]
+
+  col <- 0
+  for (i in seq_len(nrow(com))) {
+    entry <- com[i, ]
+    if (col > entry[["col"]]) {
+      m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
+      image(1, m[1, ], m, col = colour_fun(255), 
+            xaxt = "n", yaxt = "n", new = FALSE)
+      axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+      mtext("Observed / Expected", side = 4, line = 2.5)
+      # plot.new()
+      col <- entry[["col"]]
+    }
+    row <- entry[["row"]]
+    col <- entry[["col"]]
+    j <- entry[["grp"]]
+    k <- entry[["exp"]]
+    xaxt <- if (entry[["row"]] == max(com$row)) "s" else "n"
+    yaxt <- if (entry[["col"]] == 1) "s" else "n"
+    if (is.na(j)) {
+      image(x = xbreaks, y = ybreaks, 
+            z = matrix(0, length(xbreaks), length(ybreaks)), 
+            col = "white", xaxt = xaxt, yaxt = yaxt)
+      if (col == 1) {
+        mtext(entry[["left"]], side = 2, line = 2)
+      }
+      next()
+    }
+    m <- obj[, , j, k]
+    m <- pmax(m, colour_lim[1])
+    m <- pmin(m, colour_lim[2])
+    m[cbind(rev(row(m)[T]), col(m)[T])] <- m
+    image(x = xbreaks, y = ybreaks, z = m,
+          col = colour_fun(255),
+          zlim = colour_lim,
+          xlab = c("Distance 3' (kb)"),
+          ylab = c("Distance 5' (kb)"),
+          xaxt = xaxt, yaxt = yaxt)
+    if (row == 1) {
+      mtext(paste0(titles_2[entry[["exp"]]], "\n",
+                   entry[["right"]]), side = 3, line = 0.5)
+    }
+    if (col == 1) {
+      mtext(entry[["left"]], side = 2, line = 2)
+    }
+  }
+  
+  mtext("Distance (kb)", side = 1, outer = TRUE, line = 2)
+  mtext("Distance (kb)", side = 2, outer = TRUE, line = 2)
+}
+
+
+#' @rdname plot_discovery
+#' @export
 plot.PESCAn_discovery <- function(
   x, 
   contrast = 1,
@@ -180,18 +281,17 @@ plot.PESCAn_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
   if (is.null(colour_lim)) {
     colour_lim <- c(-1, 1) * max(abs(range(obj) - 1)) + 1
-    # colour_lim <- range(obj)
   }
   replace <- which(is.na(colour_lim))
   colour_lim[replace] <- range(obj)[replace]
   
-  for (i in seq_len(dim(obj)[3])) {
+  for (i in seq_len(n_samples)) {
     m <- obj[, , i]
     m <- pmax(m, colour_lim[1])
     m <- pmin(m, colour_lim[2])
@@ -218,7 +318,7 @@ plot.PESCAn_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+      cols <- bezier_corrected_greenPink
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -284,8 +384,8 @@ plot.ATA_discovery <- function(
   layout(layout_mat, widths = c(rep.int(1, n_samples), 0.2),
          respect = TRUE)
   
-  if (is.null(colour_fun)) {
-    cols <- c('white', '#f5a623', '#d0021b', 'black')
+  if (!is.function(colour_fun)) {
+    cols <- .choose_palette(colour_fun)
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -333,7 +433,7 @@ plot.ATA_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+      cols <- bezier_corrected_divergent
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -407,7 +507,7 @@ plot.ARA_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -445,7 +545,7 @@ plot.ARA_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+      cols <- bezier_corrected_greenPink
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -643,7 +743,7 @@ plot.saddle_discovery <- function(
          respect = TRUE)
   
   if (is.null(colour_fun)) {
-    cols <- c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49")
+    cols <- bezier_corrected_divergent
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -681,7 +781,7 @@ plot.saddle_discovery <- function(
     diff[] <- diff - rep(as.vector(obj[, , contrast]), dim(diff)[3])
     
     if (is.null(colour_fun_contrast)) {
-      cols <- c("#23AA17", "#90D48E", "#FFFFFF", "#F0A9F1", "#DA64DC")
+      cols <- bezier_corrected_greenPink
       colour_fun_contrast <- colorRampPalette(cols)
     }
     
@@ -724,6 +824,7 @@ plot.domainogram_discovery <- function(
   ...
 ) {
   minimalist <- literalTRUE(minimalist)
+  x <- x$scores
   if (minimalist) {
     x <- x[, 1:3]
   } else {
@@ -732,7 +833,8 @@ plot.domainogram_discovery <- function(
   }
   
   x <- as.data.table(x)
-  x <- melt(x, id.vars = c("window", "position"), value.name = "insulation")
+  x <- melt.data.table(x, id.vars = c("window", "position"), 
+                       value.name = "insulation")
   setnames(x, 3, "experiment")
   
   mats <- x
@@ -762,7 +864,7 @@ plot.domainogram_discovery <- function(
   }
   
   if (is.null(colour_fun)) {
-    cols <- rev(c("#009BEF", "#7FCDF7", "#FFFFFF", "#FFADA3", "#FF5C49"))
+    cols <- rev(bezier_corrected_divergent)
     colour_fun <- colorRampPalette(cols)
   }
   
@@ -849,7 +951,7 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
   vp  <- attr(x, "viewpoint")
   
   data <- as.data.table(x$data)
-  data <- melt(data, id.vars = c("chromosome", "mid"))
+  data <- melt.data.table(data, id.vars = c("chromosome", "mid"))
   colnames(data) <- c("chromosome", "mid", "experiment", "signal")
   data <- data[chromosome == vp[1,1, drop = TRUE]]
   

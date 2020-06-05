@@ -22,7 +22,6 @@
 #' # use chromosomeMatrix without chromosome M and Y.
 #' chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM", "chrY"), cut.off = 2)
 #' }
-#' @export
 chromosomeMatrix <- function(exp, color.fun = NULL, cut.off = NULL,
                              chromsToUse = NULL, remove = NULL, plot = TRUE) {
   # Restrict data.table core usage

@@ -8,6 +8,12 @@
 #' @param signal_size The width/height of the signal (e.g. a value of 3 will 
 #' @param ... further arguments passed to or from other methods.
 #' take the middle 3x3 matrix of the APA).
+#' @export
+#' @examples 
+#' NULL
+quantify <- function(discovery, ...) {
+  UseMethod("quantify", discovery)
+}
 
 # Functions ---------------------------------------------------------------
 
@@ -44,9 +50,15 @@ quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
 
   out_summarised = out_summarised[,c(1,3,2,4,5)]
 
-  
-  
-  raw_data_melt <- lapply(discovery$signal_raw, function(DIS)reshape2::melt(DIS))
+  raw_data_melt <- lapply(discovery$signal_raw, function(dat) {
+    idx <- seq_along(dim(dat))
+    idx <- setNames(idx, paste0("Var", idx))
+    idx <- lapply(idx, function(i) {
+      dimnames(dat)[[i]][as.vector(slice.index(dat, i))]
+    })
+    idx[c(2,3)] <- lapply(idx[c(2,3)], as.numeric)
+    as.data.table(idx)[, value := as.vector(dat)]
+  })
   raw_data_melt <- data.table::rbindlist(raw_data_melt, idcol = 'sample_name')
   
   bp_bins <- unique(raw_data_melt$Var2)
@@ -60,19 +72,21 @@ quantify.APA_discovery <- function(discovery, signal_size = 3, ...) {
   median_donut_lfc <- raw_data_melt[(!Var2 %in% bp_bins) & (!Var3 %in% bp_bins), 
                                     median(value, na.rm = T), 
                                     by = 'sample_name,Var1']
-  median_lfc <- data.table::merge.data.table(median_donuthole_lfc,
-                                             median_donut_lfc, 
-                                             by = c('sample_name','Var1'))
+  median_lfc <- merge.data.table(median_donuthole_lfc,
+                                 median_donut_lfc, 
+                                 by = c('sample_name','Var1'))
   colnames(median_lfc)[2:4] <- c('loop_ID', 'pixel', 'background')
   
   out <- median_lfc[ , list('difference' = pixel/background,
                             'lfc' = log2(pixel/background)), 
                      by = 'sample_name,loop_ID']
   out$sample_name <- factor(out$sample_name, levels = names(discovery$signal_raw))
- 
-  bed <- reshape2::colsplit(out$loop_ID, pattern = "[:\\-;]", 
-                            names = c('chr_up','start_up', 'end_up', 
-                                      'chr_down', 'start_down','end_down'))
+  
+  bed <- as.data.table(tstrsplit(out$loop_ID, "\\:|\\-|;"))
+  bed <- bed[, list("chr_up" = V1, "start_up" = as.numeric(V2), 
+                    "end_up" = as.numeric(V3),
+                    "chr_down" = V4, "start_down" = as.numeric(V5), 
+                    "end_down" = as.numeric(V6))]
   bed$sample_name <- out$sample_name
   bed$difference <- out$difference
   bed$lfc <- out$lfc
@@ -129,11 +143,12 @@ quantify.saddle_discovery <- function(discovery, ...){
 #' @export
 quantify.IIT_discovery <- function(discovery, ...) {
   data <- discovery$results
-  data <- melt(data, id.vars = c("x", "y"))
+  data <- melt.data.table(data, id.vars = c("x", "y"))
   data$distance <- data$y - data$x
   
   summ <- data[, as.list(summary(value)), by = c("distance", "variable")]
   setnames(summ, 2, "sample")
   as.data.frame(summ)
 }
+
 

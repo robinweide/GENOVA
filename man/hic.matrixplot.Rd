@@ -12,7 +12,7 @@ hic.matrixplot(
   end,
   cut.off = NULL,
   chip = list(NULL, NULL, NULL, NULL),
-  inferno = T,
+  inferno = NULL,
   cexTicks = 1,
   chip.colour = "black",
   chip.yMax = NULL,

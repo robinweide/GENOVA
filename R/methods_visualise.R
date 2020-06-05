@@ -99,7 +99,8 @@ visualise <- function(discovery, ...) {
 
 #' @export
 #' @rdname visualise
-visualise.default <- function(discovery, contrast, raw, title, ...) {
+visualise.default <- function(discovery, contrast, raw, title, 
+                              colour_lim, colour_lim_contrast, ...) {
   stop("No visualise method for class '", class(discovery),
        "' has been implemented.", call. = FALSE)
 }
@@ -1650,7 +1651,8 @@ visualise.IIT_discovery <- function(discovery, contrast = 1, raw = FALSE,
   
   g <- g + ggplot2::scale_x_discrete(
     name = "TAD Distance",
-    labels = scales::label_number(prefix = "n +")
+    labels = scales::math_format(n + .x)
+    # labels = scales::label_number(prefix = "n +")
   )
   
   if (is.null(contrast)) {

@@ -63,10 +63,12 @@ sync_indices <- function(explist) {
     jointhis <- idxs[[i]]
     setnames(jointhis, 4, paste0("exp", i))
     # Join on chrom/start
-    template <- template[idxs[[i]]]
+    template <- merge.data.table(template, idxs[[i]], 
+                                 on = c("V1", "V2"), all = TRUE)
     # Adopt missing ends from next exp
-    template$V3 <- ifelse(is.na(template$V3), template$i.V3, template$V3)
-    template[, i.V3 := NULL]
+    template$V3 <- ifelse(is.na(template$V3.x), template$V3.y, template$V3.x)
+    template[, V3.x := NULL]
+    template[, V3.y := NULL]
   }
   template[, newbin := seq_len(NROW(template))]
   final <- template[, list(V1, V2, V3, V4 = newbin)]

@@ -68,13 +68,16 @@ pyramid.default <- function(exp, ...) {
 
 #' @method pyramid contacts
 #' @export
-pyramid.contacts <- function(exp, chrom = "chr1", start = 0, end = 25e6, ...) {
+pyramid.contacts <- function(exp, chrom = "chr1", start = 0, end = 25e6, 
+                             colour_scale = NULL, ...) {
   y <- select_subset(exp, chrom, start, end)
   if (attr(exp, "znorm")) {
-    pyramid(y, colour_scale = scale_fill_GENOVA_div(
-      name = "Z-score",
-      midpoint = 0, limits = c(NA, NA))
-    )
+    if (is.null(colour_scale)) {
+      colour_scale <- scale_fill_GENOVA_div(
+        name = "Z-score", midpoint = 0, limits = c(NA, NA)
+      )
+    }
+    pyramid(y, colour_scale = colour_scale, ...)
   } else {
     pyramid(y, ...)
   }
@@ -118,16 +121,18 @@ pyramid.matrix <- function(exp, ...) {
 #' @export
 #' @rdname pyramid
 pyramid_difference <- function(exp1, exp2, chrom, 
-                               start, end, ...) {
+                               start, end, colour_scale = NULL, ...) {
   a <- select_subset(exp1, chrom, start, end)
   b <- select_subset(exp2, chrom, start, end)
   a$z <- a$z - b$z
   
-  pyramid(a, colour_scale = scale_fill_GENOVA_div(
-    name = "Difference",
-    midpoint = 0,
-    limits = quantile(a$z, c(0.05, 0.95)))
-  )
+  if (is.null(colour_scale)) {
+    colour_scale <- scale_fill_GENOVA_div(
+      name = "Difference", midpoint = 0, limits = quantile(a$z, c(0.05, 0.95))
+    )
+  }
+  
+  pyramid(a, colour_scale = colour_scale, ...)
 }
 
 .core_pyramid <- function(x, y, z, 

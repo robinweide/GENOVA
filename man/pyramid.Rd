@@ -19,7 +19,7 @@ pyramid(
   ...
 )
 
-pyramid_difference(exp1, exp2, chrom, start, end, ...)
+pyramid_difference(exp1, exp2, chrom, start, end, colour_scale = NULL, ...)
 }
 \arguments{
 \item{exp}{A GENOVA \code{contacts} or \code{contacts_matrix} object.}

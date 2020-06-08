@@ -477,17 +477,11 @@ NULL
 #' @rdname pyramidannotations
 add_tads <- function(bed, colour = "#1faee3", ...) {
   df <- as.data.frame(bed[, 1:3])
-  n <- NROW(df)
-  seq <- rep(seq_len(n), each = 2)
-  df <- .list_as_df(list(
-    chrom = df[[1]],
-    x = c(df[[2]][[1]], df[[2]][tail(seq, -1)], df[[3]][[n]]),
-    y = c(df[[2]][[1]], df[[3]][head(seq, -1)], df[[3]][[n]])
-  ))
-  layer <- ggplot2::geom_path(data = df, 
-                              ggplot2::aes(x = x, y = y), 
-                              colour = colour, ...)
-  
+  df$id <- seq_len(NROW(df))
+  names(df)[1:3] <- c("chrom", "x", "y")
+  layer <- ggplot2::geom_path(data = df,
+                              ggplot2::aes(x=  x, y = y, group = id),
+                               colour = colour, ...)
   structure(list(layer = layer), class = "mark_layer")
 }
 
@@ -519,17 +513,26 @@ ggplot_add.mark_layer <- function(object, plot, object_name) {
     data <- lay$data
     loca <- plot[["location"]]
     data <- subset(data, chrom == loca[[1]])
-    if (inherits(lay$geom, "GeomPoint")) {
+    if (inherits(lay$geom, "GeomPoint")) { # Loops
       validpos <- data$x >= loca[[2]] & data$x <= loca[[3]] &
         data$y >= loca[[2]] & data$y <= loca[[3]]
       data <- data[validpos, ]
-    } else {
-      validpos <- with(data, (x > loca[[2]] & x < loca[[3]]) | 
-                         (y >= loca[[2]] & y <= loca[[3]]))
+    } else { # TADs
+      validpos <- with(data, (x <= loca[[3]] & y >= loca[[2]]))
       data <- data[validpos, ]
-      data <- .list_as_df(.clip_poly(data$x, data$y,
-                                     xrange = c(loca[[2]], loca[[3]]),
-                                     yrange = c(loca[[2]], loca[[3]])))
+      setDT(data)
+      data <- data[, .SD[, list(chrom = chrom,
+                                x = c(x, x, y),
+                                y = c(x, y, y))], 
+                   by = id]
+      setDF(data)
+      validpos <- with(data, (x <= loca[[3]] & y >= loca[[2]]))
+      data <- data[validpos, ]
+
+      data <- .list_as_df(c(.clip_poly(data$x, data$y,
+                                       xrange = c(loca[[2]], loca[[3]]),
+                                       yrange = c(loca[[2]], loca[[3]])),
+                            list(id = data$id)))
     }
     data$facet <- plot$layers[[1]]$data$facet[1]
     data[c("x", "y")] <- .transform_xy_coords(data$x, data$y)

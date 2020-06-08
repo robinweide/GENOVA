@@ -745,7 +745,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       bezier_corrected_whiteRed
     }
     wr <- colorRampPalette(wr)
-    image(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
+    image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
           zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
   }
   ##############################################################################
@@ -776,7 +776,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
         bezier_corrected_whiteRed
       }
       wr <- colorRampPalette(wr)
-      image(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
+      image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
             zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
     } else {
       mat1$z <- mat2$z - mat1$z
@@ -792,7 +792,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       mat1$z[mat1$z < -cut.off] <- -cut.off
       
       bwr <- colorRampPalette(bezier_corrected_divergent)
-      image(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
+      image.default(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
     }
   }
   

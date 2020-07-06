@@ -193,6 +193,56 @@ check_compat_exp <- function(explist) {
   return(explist)
 }
 
+standardise_location <- function(chrom, start, end, 
+                                 check = TRUE, singular = TRUE) {
+  if (is.atomic(chrom)) {
+    # chrom-start-end branch
+    out <- data.frame(chrom = chrom, start = start, end = end)
+  } else {
+    # bed branch
+    if (!inherits(chrom, "data.frame") | is.data.table(chrom)) {
+      out <- as.data.frame(chrom)[1:3]
+    } else {
+      out <- as.data.frame(chrom[1:3]) # To convert tibbles, see #188
+    }
+    if (!missing(start) | !missing(end)) {
+      message("The input in `chrom` has been prioritised over ",
+              "`start` and `end`.")
+    }
+    setnames(out, 1:3, c("chrom", "start", "end"))
+  }
+  
+  if (check) {
+    # Check for NAs
+    if (anyNA(out)) {
+      stop("Location cannot contain `NA`s.", call. = FALSE)
+    }
+    # Check chromosome
+    if (!is.character(out[[1]])) {
+      if (is.factor(out[[1]])) {
+        out[[1]] <- as.character(out[[1]])
+      } else {
+        stop("The chromosome name must be a character.", call. = FALSE)
+      }
+    }
+    # Check start-end
+    # Shouldn't check for integers specifically, since -Inf and Inf are
+    # special values part of the doubles universe, and mean take the entire
+    # chromosome.
+    if (!is.numeric(out[[2]]) | !is.numeric(out[[3]])) {
+      stop("The starts and ends of the location must be numeric.")
+    }
+  }
+  
+  if (singular) {
+    if (NROW(out) > 1L) {
+      stop("A single location is expected, while multiple were detected.", 
+           call. = FALSE)
+    }
+  }
+  return(out)
+}
+
 # Equivalent to isTRUE fron R>3.5
 literalTRUE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
 

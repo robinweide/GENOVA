@@ -32,6 +32,7 @@ hic.matrixplot(
   check.genome = T,
   smoothNA = F,
   fillNAtreshold = 2,
+  rasterise = FALSE,
   antoni = F
 )
 }
@@ -105,6 +106,8 @@ effect on the compartment-scores.}
 
 \item{fillNAtreshold}{Set the amount strength of out-lier correction for 
 fillNA.}
+
+\item{rasterise}{Set to true to use a bitmap raster instead of polygons.}
 
 \item{antoni}{Logical: plot an explorer of the microscopic world}
 }

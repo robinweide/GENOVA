@@ -227,7 +227,7 @@ check_input <- function(x) {
   cl <- sys.call(-1)
   today <- format(Sys.Date(), "%d-%m") == "01-04"
   if (today & !("antoni" %in% names(cl))) {
-    image(antoni, col = grDevices::grey.colors(255))
+    image(GENOVA::antoni, col = grDevices::grey.colors(255))
   }
   return(invisible(!today))
 }

@@ -3,9 +3,18 @@
 
 #' @title Quantification of results
 #' @name quantify
-#' @description Here be a placholder description
+#' 
+#' @description A good amount of \code{discovery} objects can be quantified.
+#' What exactly is to be quantified differs per \code{discovery} type.
+#' \describe{
+#'   \item{saddle disoveries}{can be used to compute compartment strengths.}
+#'   \item{ARMLA discoveries}{such as APA, PE-SCAn, ATA and ARA compare
+#'   different regions of their outputs.}
+#'   \item{IIT discoveries}{summarise their values by neighbours.}
+#' }
+#' 
+#' 
 #' @param discovery A \code{discovery} object as returned by GENOVA analysis functions.
-#' @param signal_size The width/height of the signal (e.g. a value of 3 will 
 #' @param ... further arguments passed to or from other methods.
 #' take the middle 3x3 matrix of the APA).
 #' 
@@ -400,7 +409,7 @@ quantify.ATA_discovery <- function(
 
 #' @rdname quantify
 #' @export
-quantify.ARA_discovery <- function(discovery, size = 3, shape = "ARA") {
+quantify.ARA_discovery <- function(discovery, size = 3, shape = "ARA", ...) {
   aggregate <- discovery$obsexp
   
   dim <- dim(aggregate)
@@ -428,7 +437,8 @@ quantify.ARA_discovery <- function(discovery, size = 3, shape = "ARA") {
   
   global <- data.frame(
     sample = expnames[as.vector(col(metrics))],
-    feature = as(rownames(metrics)[as.vector(row(metrics))], typeof(shape)),
+    feature = methods::as(rownames(metrics)[as.vector(row(metrics))], 
+                          typeof(shape)),
     value = as.vector(metrics)
   )
   global

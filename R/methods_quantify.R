@@ -184,6 +184,57 @@ quantify.APA_discovery <- function(
 
 #' @rdname quantify
 #' @export
+quantify.PESCAn_discovery <- function(
+  discovery, size = 5, 
+  metric = "median",
+  shape = "circle", IDX = NULL,
+  ...
+) {
+  
+  metric <- match.arg(metric, c("mean", "median"))
+  metric <- switch(
+    metric,
+    mean = mean.default,
+    median = median.default
+  )
+  
+  shape <- parse_shape_arg(
+    shape, size,
+    c("center_vs_quadrants", "center_vs_rest", "circle")
+  )
+  
+  # Normalize row values for grand median background
+  raw <- lapply(seq_along(discovery$signal_raw), function(i) {
+    bg <- median(discovery$shifted[, , i])
+    raw <- discovery$signal_raw[[i]]
+    raw[is.na(raw)] <- 0
+    raw[] <- raw / bg
+    raw
+  })
+  
+  out <- quantify.ARMLA(
+    aggregate = discovery$obsexp, 
+    raw = raw, 
+    expnames = expnames(discovery),
+    shape = shape,
+    IDX = IDX,
+    fun = metric,
+    ...
+  )
+  
+  if (length(out) == 2) {
+    names(out) <- c(names(out)[1], "per_interaction")
+  }
+  out <- lapply(out, function(x) {
+    x$foldchange <- NULL # Fold change from obs/exp over obs/exp is meaningless
+    x
+  })
+  
+  return(out)
+}
+
+#' @rdname quantify
+#' @export
 quantify.saddle_discovery <- function(discovery, ...){
   dat <- discovery$saddle
   

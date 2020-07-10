@@ -8,6 +8,99 @@
 #' @param signal_size The width/height of the signal (e.g. a value of 3 will 
 #' @param ... further arguments passed to or from other methods.
 #' take the middle 3x3 matrix of the APA).
+#' 
+#' @section Shapes:
+#' 
+#' The quantification of ARMLA discoveries require a shape to distinguish 
+#' regions to quantify.
+#' 
+#' \subsection{ARA and PESCAn}{
+#' APA and PESCAn require one of the following:
+#' \itemize{
+#'   \item{\code{"center_vs_quadrants"}}
+#'   \item{\code{"center_vs_rest"}}
+#'   \item{\code{"circle"}}
+#' }
+#' The \code{size} parameter determines the number of bins of the central 
+#' foreground.
+#' 
+#' In the illustrations below, red is considered foreground and blue is 
+#' considered background.
+#' 
+#' The \code{"center_vs_quadrants"} option does not include region directly
+#' horizontal or vertical of the centre as background.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-center-vs-quandrants.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-center-vs-quandrants.png}\out{\end{center}}
+#'   }
+#'
+#' The \code{"center_vs_rest"} option sees everything but the centre as background.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-center-vs-rest.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-center-vs-rest.png}\out{\end{center}}
+#'   }
+#' 
+#' The \code{"circle"} option is like \code{"center_vs_rest"} but rounds corners 
+#' of the central foreground. Note that for \code{size <= 3} these two options 
+#' are equivalent.
+#' 
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-circle.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-circle.png}\out{\end{center}}
+#'   }
+#' }
+#' 
+#' \subsection{ATA}{
+#' ATA requires one of the following:
+#' \itemize{
+#'   \item{\code{"insulation"}}
+#'   \item{\code{"cornerpeak"}}
+#'   \item{\code{"checker"}}
+#' }
+#' 
+#' In the illustrations below, red is considered foreground and blue is 
+#' considered background. The line indicates the diagonal.
+#' 
+#' The \code{"insulation"} option compares within-TAD contacts to between-TAD
+#' contacts.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-insulation.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-insulation.png}\out{\end{center}}
+#'   }
+#' 
+#' The \code{"cornerpeak"} option compares the intersection of boundaries versus
+#' within-TAD contacts.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-cornerpeak.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-cornerpeak.png}\out{\end{center}}
+#'   }
+#'   
+#' The \code{"checker"} option compares the within-TAD contacts to the 
+#' contacts between it's immediate neighbours.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-checker.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-checker.png}\out{\end{center}}
+#'   }
+#' }
+#'
 #' @export
 #' @examples 
 #' NULL
@@ -235,6 +328,47 @@ quantify.PESCAn_discovery <- function(
 
 #' @rdname quantify
 #' @export
+quantify.ATA_discovery <- function(
+  discovery, size = 3, 
+  metric = "median",
+  shape = "insulation", 
+  IDX = NULL,
+  ...
+) {
+  
+  metric <- match.arg(metric, c("mean", "median"))
+  metric <- switch(
+    metric,
+    mean = mean.default,
+    median = median.default
+  )
+  
+  padding <- attr(discovery, "padding")
+  padding <- if (is.null(padding)) 1 else padding
+  shape <- parse_shape_arg(
+    shape, padding,
+    c("insulation", "cornerpeak", "checker")
+  )
+  
+  out <- quantify.ARMLA(
+    aggregate = discovery$signal, 
+    raw = discovery$signal_raw, 
+    expnames = expnames(discovery),
+    shape = shape,
+    IDX = IDX,
+    fun = metric,
+    ...
+  )
+  
+  if (length(out) == 2) {
+    names(out) <- c(names(out)[1], "per_TAD")
+  }
+  
+  return(out)
+}
+
+#' @rdname quantify
+#' @export
 quantify.saddle_discovery <- function(discovery, ...){
   dat <- discovery$saddle
   
@@ -369,6 +503,9 @@ parse_shape_arg <- function(shape, size, valid) {
     center_vs_quadrants = shape_center_vs_quadrants(size),
     center_vs_rest = shape_center_vs_rest(size),
     circle = shape_circle(size),
+    insulation = shape_TAD_insulation(size),
+    cornerpeak = shape_TAD_cornerpeak(size),
+    checker = shape_TAD_checker(size),
     stop("Invalid shape argument.", call. = FALSE)
   )
   return(shape)
@@ -419,5 +556,63 @@ shape_circle <- function(size) {
     foreground <- dist < size
     
     return(list(foreground = foreground, background = !foreground))
+  }
+}
+
+shape_TAD_insulation <- function(padding) {
+  force(padding)
+  function(dim) {
+    borders <- cumsum(c(padding - 0.5, 1)) / (2 * padding) * dim[1]
+    borders <- round(borders)
+    
+    foreground <- background <- matrix(FALSE, dim[1], dim[2])
+    fg <- seq(borders[1] + 1, borders[2] - 1, by = 1)
+    foreground[fg, fg] <- TRUE
+    
+    bg <- c(seq(1, borders[1] - 1, by = 1), seq(borders[2] + 1, dim[1], by = 1))
+    background[bg, fg] <- TRUE
+    background[fg, bg] <- TRUE
+    
+    return(list(foreground = foreground, background = background))
+  }
+}
+
+shape_TAD_cornerpeak <- function(padding) {
+  force(padding)
+  function(dim) {
+    borders <- cumsum(c(padding - 0.5, 1)) / (2 * padding) * dim[1]
+    borders <- round(borders)
+    
+    corner <- expand.grid(borders[1] + c(-2:2), borders[2] + c(-2:2))
+    corner <- as.matrix(corner)
+    
+    foreground <- background <- matrix(FALSE, dim[1], dim[2])
+    bg <- seq(borders[1] + 2, borders[2] - 2, by = 1)
+    background[bg, bg] <- TRUE
+    
+    foreground[corner] <- TRUE
+    foreground[cbind(corner[, 2], corner[, 1])] <- TRUE
+    
+    return(list(foreground = foreground, background = background))
+  }
+}
+
+shape_TAD_checker <- function(padding) {
+  force(padding)
+  function(dim) {
+    borders <- cumsum(c(padding - 0.5, 1)) / (2 * padding) * dim[1]
+    borders <- round(borders)
+    
+    foreground <- background <- matrix(FALSE, dim[1], dim[2])
+    fg <- seq(borders[1] + 1, borders[2] - 1, by = 1)
+    foreground[fg, fg] <- TRUE
+    
+    begin <- seq(1, borders[1] - 1, by = 1)
+    end <- seq(borders[2] + 1, dim[1], by = 1)
+    
+    background[end, begin] <- TRUE
+    background[begin, end] <- TRUE
+    
+    return(list(foreground = foreground, background = background))
   }
 }

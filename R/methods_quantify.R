@@ -28,7 +28,106 @@ quantify.default <- function(discovery, ...) {
 }
 
 
-
+#' Standard quantification of ARMLA output.
+#' 
+#' This is a common interface for standard ARMLA quantifications. It is for
+#' internal use only. Specific methods should extract the relevant fields and
+#' feed it into this function. This is just documented so people who want to
+#' read to code have some context.
+#'
+#' @param aggregate The summarised output in a discovery object.
+#' @param raw The raw output in a discovery object.
+#' @param expnames A character with experiment names
+#' @param shape A function that when given the dimensions of 'aggregate' should
+#'   produce a list with 'foreground' and 'background' matrices matching those 
+#'   dimensions. See the 'shape_*' functions down this document.
+#' @param IDX The IDX of the original experiment. Just used when the rownames
+#'   of the raw data indicate bins instead of loci. This happens in for example
+#'   the extended loops APA.
+#' @param fun A summarising function that takes a numeric vector as input and
+#'   outputs a length 1 summary. Typically "mean" or "median".
+#' @param ... Just here for S3 method consistency and catch bad arguments. 
+#'   Doesn't do anything.
+#'
+#' @return A list with a per sample quantification and a per feature 
+#' quantification.
+#' 
+#' @noRd
+#' @examples \dontrun{
+#' # See quantify methods for APA/PESCAn/ATA for usage.
+#' }
+quantify.ARMLA <- function(
+  aggregate, 
+  raw = NULL, 
+  expnames = NULL,
+  shape = shape_center_vs_quadrants(3),
+  IDX = NULL,
+  fun = median,
+  ...
+) {
+  
+  dim <- dim(aggregate)
+  if (length(expnames) == 0) {
+    expnames <- paste0("exp", seq_len(tail(dim, 1)))
+  }
+  
+  shape <- shape(dim)
+  foreground <- shape$foreground
+  background <- shape$background
+  
+  # Split signal into samples
+  samples <- split(aggregate, slice.index(aggregate, 3))
+  # Calculate medians per sample
+  metrics  <- vapply(samples, function(x) {
+    c(fun(x[foreground]), fun(x[background]))
+  }, numeric(2))
+  # Format global sample stats
+  global <- data.frame(
+    sample = expnames,
+    foreground = metrics[1, ],
+    background = metrics[2, ],
+    foldchange = metrics[1, ] / metrics[2, ],
+    difference = metrics[1, ] - metrics[2, ]
+  )
+  
+  if (is.null(raw)) {
+    warning("No raw data found. Returning global summaries.")
+    return(list(per_sample = global))
+  }
+  
+  # Loop over experiments
+  local <- lapply(seq_along(raw), function(i) {
+    arr <- raw[[i]]
+    arr[is.na(arr)] <- 0
+    # Split sample into individual loops
+    loops <- split(arr, slice.index(arr, 1))
+    # Calculate medians per loops
+    metrics <- vapply(loops, function(x) {
+      c(fun(x[foreground], na.rm = TRUE), fun(x[background], na.rm = TRUE))
+    }, numeric(2))
+    # Format loop stats
+    loc <- dimnames(arr)[[1]]
+    loc <- if (is.null(loc)) seq_len(nrow(arr)) else loc
+    data.table(
+      sample = i,
+      loc = loc,
+      foreground = metrics[1, ],
+      background = metrics[2, ],
+      foldchange = metrics[1, ] / metrics[2, ],
+      difference = metrics[1, ] - metrics[2, ]
+    )
+  })
+  local <- rbindlist(local)
+  local$sample <- expnames[local$sample]
+  
+  # Format location
+  loc <- interpret_location_string(local$loc, IDX)
+  local$loc <- NULL
+  local <- cbind(local, loc)
+  local <- as.data.frame(local)
+  
+  return(list(per_sample = global, per_entry = local))
+}
 
 #' @rdname quantify
 #' @export

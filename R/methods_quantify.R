@@ -100,6 +100,37 @@
 #'   \out{\begin{center}}\figure{quant-checker.png}\out{\end{center}}
 #'   }
 #' }
+#' 
+#' \subsection{ARA}{
+#' ARA requires one of the following:
+#' \itemize{
+#'   \item{\code{"ARA"}}
+#'   \item{\code{"stripes"}}
+#' }
+#' The \code{size} argument controls the width of the stripes.
+#' 
+#' The \code{"ARA"} option reports about both 3' and 5' stripes and regions as
+#' well as the bins that span the locus. They are indicated in different colours 
+#' below.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-ARA.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-ARA.png}\out{\end{center}}
+#'   }
+#' 
+#' The \code{"stripes"} options reports the values and distances of the stripes.
+#' The 5' distances are encoded as negative, whereas 3' distances are positive.
+#' 
+#' \if{html}{
+#'   \out{<div style="text-align: center">}\figure{quant-stripes.png}{options: style="width:62px;max-width:100\%;"}\out{</div>}
+#'   }
+#' \if{latex}{
+#'   \out{\begin{center}}\figure{quant-stripes.png}\out{\end{center}}
+#'   }
+#' 
+#' }
 #'
 #' @export
 #' @examples 
@@ -369,6 +400,42 @@ quantify.ATA_discovery <- function(
 
 #' @rdname quantify
 #' @export
+quantify.ARA_discovery <- function(discovery, size = 3, shape = "ARA") {
+  aggregate <- discovery$obsexp
+  
+  dim <- dim(aggregate)
+  
+  expnames <- expnames(discovery)
+  if (length(expnames) == 0) {
+    expnames <- paste0("exp", seq_len(tail(dim, 1)))
+  }
+  
+  shape <- match.arg(shape, c("ARA", "stripes"))
+  shape <- switch(shape,
+                  ARA = shape_ARA(size),
+                  stripes = shape_stripes(size, resolution(discovery))
+  )
+  shape <- shape(dim)
+  
+  ncat <- unique(as.vector(shape))
+  ncat <- length(ncat[!is.na(ncat)])
+  
+  samples <- split(aggregate, slice.index(aggregate, 3))
+  
+  metrics <- vapply(samples, function(x) {
+    x <- vapply(split(x, shape), mean, numeric(1))
+  }, numeric(ncat))
+  
+  global <- data.frame(
+    sample = expnames[as.vector(col(metrics))],
+    feature = as(rownames(metrics)[as.vector(row(metrics))], typeof(shape)),
+    value = as.vector(metrics)
+  )
+  global
+}
+
+#' @rdname quantify
+#' @export
 quantify.saddle_discovery <- function(discovery, ...){
   dat <- discovery$saddle
   
@@ -614,5 +681,46 @@ shape_TAD_checker <- function(padding) {
     background[begin, end] <- TRUE
     
     return(list(foreground = foreground, background = background))
+  }
+}
+
+# Only works in ARA
+shape_ARA <- function(size) {
+  force(size)
+  function(dim) {
+    template <- matrix(NA_character_, dim[1], dim[2])
+    mid <- floor(dim[1] / 2) + 1 + c(-1, 1) * (size - 1)/2
+    mid <- seq.int(mid[1], mid[2], by = 1L)
+    
+    up <- seq(1, mid[1] - 1, by = 1)
+    down <- seq(tail(mid, 1) + 1, dim[1], by = 1)
+    
+    template[up, up] <- "5' Region"
+    template[up, mid] <- "5' Stripe"
+    template[up, down] <- "Span"
+    template[mid, down] <- "3' Stripe"
+    template[down, down] <- "3' Region"
+    template[row(template) >= col(template)] <- NA
+    return(template)
+  }
+}
+
+# Only works in ARA
+shape_stripes <- function(size, resolution) {
+  force(size)
+  force(resolution)
+  function(dim) {
+    template <- matrix(NA_integer_, dim[1], dim[2])
+    midpoint <- floor(dim[1] / 2) + 1
+    mid <- midpoint + c(-1, 1) * (size - 1)/2
+    mid <- seq.int(mid[1], mid[2], by = 1L)
+    
+    up <- seq(1, mid[1] - 1, by = 1)
+    down <- seq(tail(mid, 1) + 1, dim[1], by = 1)
+    
+    template[down, mid] <- down - midpoint
+    template <- t(template)
+    template[up, mid] <- up - midpoint
+    return(template * resolution) 
   }
 }

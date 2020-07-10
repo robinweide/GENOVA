@@ -193,11 +193,95 @@ check_compat_exp <- function(explist) {
   return(explist)
 }
 
-standardise_location <- function(chrom, start, end, 
-                                 check = TRUE, singular = TRUE) {
+
+
+# Equivalent to isTRUE fron R>3.5
+literalTRUE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
+
+GENOVA_THEME <- function() {
+  p = ggplot2::theme(panel.background = ggplot2::element_blank(),
+                     legend.key =  ggplot2::element_rect(fill = 'white'),
+                     strip.background = ggplot2::element_rect(fill = NA, colour = NA),
+                     panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
+                     text = ggplot2::element_text(color = 'black'),
+                     axis.text = ggplot2::element_text(colour = 'black'),
+                     strip.text = ggplot2::element_text(colour = 'black') )
+  return(p)
+}
+
+cache_chroms <- function(exp) {
+  first <- exp$IDX[, list(V4 = min(V4)), by = V1][order(V4)]
+  
+  chrom <- findInterval(exp$MAT$V1, first$V4)
+  cis <- findInterval(exp$MAT$V2, first$V4) == chrom
+  rle <- rle(paste0(chrom, "-", cis))
+  x <- as.data.table(tstrsplit(rle$values, "-"))
+  x <- x[, list(chrom = first$V1[as.integer(V1)],
+                cis = as.logical(V2),
+                lengths = rle$lengths)]
+  x[, ends := cumsum(x$lengths)]
+  x[, starts := x$ends - x$lengths + 1]
+}
+
+check_input <- function(x) {
+  cl <- sys.call(-1)
+  today <- format(Sys.Date(), "%d-%m") == "01-04"
+  if (today & !("antoni" %in% names(cl))) {
+    image(antoni, col = grDevices::grey.colors(255))
+  }
+  return(invisible(!today))
+}
+
+#' Standardising genomic location inputs
+#'
+#' The main raison d'etre for this function is to standardise genomic locations
+#' from user input to a data.frame with the names 'chrom', 'start', 'end'.
+#'
+#' @param chrom One of the following:
+#'  * A character with a chromosome name (e.g. "chr1")
+#'  * A data.frame with 'chrom', 'start', 'end' equivalent columns.
+#'  * A character with a complete locus (e.g. "chr1:1000-2000"). Handled by the 
+#'    interpret_location_function.
+#' @param start An integer
+#' @param end An integer
+#' @param check A logical of length 1. Should we check wether 'chrom' is
+#'   character, start is numeric and end is numeric and non contain NAs?
+#' @param singular A logical of length 1. Is the input expected to describe one 
+#'   and only one locus?
+#'
+#' @return A data.frame with the columns 'chrom', 'start' and 'end'
+#' @noRd
+#' @examples \dontrun{
+#' # Should handle single loci
+#' standardise_location("chr1:1000-2000")
+#' standardise_location(data.frame(x = "chr1", y = 1000, z = 2000))
+#' standardise_location("chr1", 1000, 2000)
+#' 
+#' # Should handle vectorised as well
+#' standardise_location(c("chr1:1000-2000", "chr2:3000-4000"))
+#' standardise_location(data.frame(x = c("chr1", "chr2"), 
+#'                                 y = c(1000, 3000), 
+#'                                z = c(2000, 4000)))
+#' standardise_location(c("chr1", "chr2"), c(1000, 3000), c(2000, 4000))
+#' 
+#' # If a single locus is expected, throw a warning when multiple are given
+#' standardise_location(c("chr1:1000-2000", "chr2:3000-4000"), singular = TRUE)
+#' }
+standardise_location <- function(chrom, start = NULL, end = NULL, 
+                                 check = TRUE, singular = FALSE) {
   if (is.atomic(chrom)) {
-    # chrom-start-end branch
-    out <- data.frame(chrom = chrom, start = start, end = end)
+    chrom <- as.character(chrom)
+    test <- strsplit(chrom, "\\:|\\-")
+    if (all(lengths(test) == 1)) {
+      # chrom-start-end branch
+      out <- data.frame(chrom = chrom, start = start, end = end)
+    } else {
+      # Likely "chr1:100-200" format branch
+      if (!all(lengths(test) == 3)) {
+        stop("Cannot interpret character location.", call. = FALSE)
+      }
+      out <- interpret_location_string(chrom, feature_id = FALSE)
+    }
   } else {
     # bed branch
     if (!inherits(chrom, "data.frame") | is.data.table(chrom)) {
@@ -243,30 +327,75 @@ standardise_location <- function(chrom, start, end,
   return(out)
 }
 
-# Equivalent to isTRUE fron R>3.5
-literalTRUE <- function(x) is.logical(x) && length(x) == 1L && !is.na(x) && x
-
-GENOVA_THEME <- function() {
-  p = ggplot2::theme(panel.background = ggplot2::element_blank(),
-                     legend.key =  ggplot2::element_rect(fill = 'white'),
-                     strip.background = ggplot2::element_rect(fill = NA, colour = NA),
-                     panel.border = ggplot2::element_rect(fill = NA, colour = 'black'),
-                     text = ggplot2::element_text(color = 'black'),
-                     axis.text = ggplot2::element_text(colour = 'black'),
-                     strip.text = ggplot2::element_text(colour = 'black') )
-  return(p)
-}
-
-cache_chroms <- function(exp) {
-  first <- exp$IDX[, list(V4 = min(V4)), by = V1][order(V4)]
+#' Interpreter for string locations
+#' 
+#' This tries to interpret locations given as strings
+#'
+#' @param location One of the following:
+#' * A character of locations, e.g. c("chr1:100-200", "chr2:200-300")
+#' * A character of paired locations, e.g. c("chr1:100-200;chr2:200-300")
+#' * A character of bin indices, e.g. "1111"
+#' * A character of paired bin indices, e.g. "1111,2222"
+#' @param IDX The IDX data.table in a contacts object for coupling bin indices
+#'   to locations. Should not apply for location characters.
+#' @param feature_id A logical of length 1. Should we attach IDs for unique 
+#'   locations?
+#'
+#' @return A data.frame with 'chrom', 'start' or 'end' columns. If paired 
+#' locations were given, these columns occur twice with "_up" and "_down" appended.
+#' @noRd
+#' @examples \dontrun{
+#' interpret_location_string(c("chr1:100-200", "chr2:200-300"))
+#' interpret_location_string(c("chr1:100-200;chr2:200-300"))
+#' interpret_location_string(c("1111", "2222"), IDX = exp$IDX)
+#' interpret_location_string(c("1111,2222"), IDX = exp$IDX)
+#' }
+interpret_location_string <- function(location, IDX = NULL, feature_id = TRUE) {
+  location <- as.character(location)
+  if (feature_id) {
+    fid <- match(location, unique(location))
+  }
   
-  chrom <- findInterval(exp$MAT$V1, first$V4)
-  cis <- findInterval(exp$MAT$V2, first$V4) == chrom
-  rle <- rle(paste0(chrom, "-", cis))
-  x <- as.data.table(tstrsplit(rle$values, "-"))
-  x <- x[, list(chrom = first$V1[as.integer(V1)],
-                cis = as.logical(V2),
-                lengths = rle$lengths)]
-  x[, ends := cumsum(x$lengths)]
-  x[, starts := x$ends - x$lengths + 1]
+  location <- tstrsplit(location, ";|,")
+  location <- lapply(location, function(str) {
+    str <- tstrsplit(str, "\\:|\\-")
+    if (length(str) == 3) {
+      # Assume bed-entry
+      df <- data.frame(
+        chrom = str[[1]],
+        start = as.integer(str[[2]]),
+        end   = as.integer(str[[3]])
+      )
+      return(df)
+    } else if (length(str) == 1) {
+      # Assume IDX index
+      if (is.null(IDX)) {
+        warning("No IDX found. Returning location as bins.")
+        df <- data.frame(location = as.integer(str[[1]]))
+        return(df)
+      } else {
+        str <- as.integer(str[[1]])
+        df <- as.data.frame(IDX[.(str), on = "V4"][, V4 := NULL])
+        colnames(df) <- c("chrom", "start", "end")
+      }
+      return(df)
+    } else {
+      warning("Cannot interpret location. Returning location as-is.")
+      df <- as.data.frame(str)
+      colnames(df) <- paste0("V", seq_len(ncol(df)))
+      return(df)
+    }
+  })
+  
+  if (length(location) == 2) {
+    # Assume paired-end locations
+    colnames(location[[1]]) <- paste0(colnames(location[[1]]), "_up")
+    colnames(location[[2]]) <- paste0(colnames(location[[2]]), "_down")
+  }
+  
+  location <- do.call(cbind, location)
+  if (feature_id) {
+    location <- cbind(location, feature_id = fid)
+  }
+  return(location)
 }

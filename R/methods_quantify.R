@@ -65,10 +65,16 @@ quantify.ARMLA <- function(
   fun = median,
   ...
 ) {
-  
+  if (!(is.array(aggregate) | is.matrix(aggregate))) {
+    stop("The aggregate should be an array.", call. = FALSE)
+  }
   dim <- dim(aggregate)
   if (length(expnames) == 0) {
     expnames <- paste0("exp", seq_len(tail(dim, 1)))
+  }
+  
+  if (!is.function(shape)) {
+    stop("The shape argument should be a function.", call. = FALSE)
   }
   
   shape <- shape(dim)
@@ -127,6 +133,53 @@ quantify.ARMLA <- function(
   local <- as.data.frame(local)
   
   return(list(per_sample = global, per_entry = local))
+}
+
+#' @rdname quantify
+#' @param size An \code{integer} of length one to determine the size of features
+#'   of interest in bins.
+#' @param metric Either \code{"median"} or \code{"mean"} to summarise features.
+#' @param shape A character of length 1 specifying what shape to use. See the 
+#'   section shapes.
+#' @param IDX The \code{IDX} part of a contacts object. Used only in converting 
+#'   features expressed in bins back to genomic space. This is rarely needed,
+#'   but is useful for APAs ran with extended loops where features aren't 1:1
+#'   traceable to the input.
+#' @export
+quantify.APA_discovery <- function(
+  discovery, size = 3, 
+  metric = "median",
+  shape = "center_vs_quadrants", IDX = NULL,
+  ...
+) {
+  
+  shape <- parse_shape_arg(
+    shape, size, 
+    c("center_vs_quadrants", "center_vs_rest", "circle")
+  )
+  
+  metric <- match.arg(metric, c("mean", "median"))
+  metric <- switch(
+    metric,
+    mean = mean.default,
+    median = median.default
+  )
+  
+  out <- quantify.ARMLA(
+    aggregate = discovery$signal, 
+    raw = discovery$signal_raw, 
+    expnames = expnames(discovery),
+    shape = shape,
+    IDX = IDX,
+    fun = metric,
+    ...
+  )
+  
+  if (length(out) == 2) {
+    names(out) <- c(names(out)[1], "per_loop")
+  }
+  
+  return(out)
 }
 
 #' @rdname quantify
@@ -250,4 +303,70 @@ quantify_old.APA_discovery <- function(discovery, signal_size = 3, ...) {
   bed$lfc <- out$lfc
   
   return(list('per_sample' = out_summarised, 'per_loop' = bed)) 
+}
+
+
+# Shapes ------------------------------------------------------------------
+
+parse_shape_arg <- function(shape, size, valid) {
+  if (is.function(shape)) {
+    return(shape)
+  }
+  shape <- match.arg(shape, valid)
+  shape <- switch(
+    shape,
+    center_vs_quadrants = shape_center_vs_quadrants(size),
+    center_vs_rest = shape_center_vs_rest(size),
+    circle = shape_circle(size),
+    stop("Invalid shape argument.", call. = FALSE)
+  )
+  return(shape)
+}
+
+
+
+shape_center_vs_quadrants <- function(size) {
+  force(size)
+  function(dim) {
+    # Select central rows / cols
+    mid <- floor(dim[1] / 2) + 1 + c(-1, 1) * (size - 1)/2
+    mid <- seq.int(mid[1], mid[2], by = 1L)
+    
+    # Set foreground/background
+    foreground <- background <- matrix(FALSE, dim[1], dim[2])
+    foreground[mid, mid] <- TRUE
+    background[-mid, -mid] <- TRUE
+    
+    return(list(foreground = foreground, background = background))
+  }
+}
+
+shape_center_vs_rest <- function(size) {
+  force(size)
+  function(dim) {
+    # Select central rows / cols
+    mid <- floor(dim[1] / 2) + 1 + c(-1, 1) * (size - 1)/2
+    mid <- seq.int(mid[1], mid[2], by = 1L)
+    
+    # Set foreground/background
+    foreground <- background <- matrix(FALSE, dim[1], dim[2])
+    foreground[mid, mid] <- TRUE
+    background <- !foreground
+    
+    return(list(foreground = foreground, background = background))
+  }
+}
+
+shape_circle <- function(size) {
+  force(size)
+  function(dim) {
+    size <- size / 2
+    mat <- matrix(FALSE, dim[1], dim[2])
+    mid <- (dim + 1)/2
+    dist <- sqrt((row(mat) - mid[1])^2 + (col(mat) - mid[2])^2)
+    
+    foreground <- dist < size
+    
+    return(list(foreground = foreground, background = !foreground))
+  }
 }

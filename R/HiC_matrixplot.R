@@ -579,6 +579,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' effect on the compartment-scores.
 #' @param fillNAtreshold Set the amount strength of out-lier correction for 
 #' fillNA.
+#' @param rasterise Set to true to use a bitmap raster instead of polygons.
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @section Resolution recommendation: A resolution in the ballpark of 
 #' \eqn{(\code{end} - \code{start}) / 500}.
@@ -618,13 +619,19 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            loops.type = "lower", tads.colour = "#1faee3", # direct complementary colour of mid-orange inferno
                            loops.radius = NULL, loops.colour = "#1faee3",
                            skipAnn = F, symmAnn = F,
-                           check.genome = T, smoothNA = F, fillNAtreshold = 2, antoni = F) {
+                           check.genome = T, smoothNA = F, fillNAtreshold = 2, 
+                           rasterise = FALSE,
+                           antoni = F) {
   if (is.null(loops.radius)) {
     loops.radius <- attr(exp1, "res") * 5
   }
   
   if (length(chip) < 3) {
     symmAnn <- T
+  }
+  
+  if (!check_input()) {
+    return(invisible())
   }
   
   # some error handling
@@ -745,8 +752,9 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       bezier_corrected_whiteRed
     }
     wr <- colorRampPalette(wr)
-    image(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
-          zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
+    image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
+          zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
+          useRaster = literalTRUE(rasterise))
   }
   ##############################################################################
   # plot exp1 and exp2
@@ -776,8 +784,9 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
         bezier_corrected_whiteRed
       }
       wr <- colorRampPalette(wr)
-      image(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
-            zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off))
+      image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
+            zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
+            useRaster = literalTRUE(rasterise))
     } else {
       mat1$z <- mat2$z - mat1$z
       # set cutoffs
@@ -792,7 +801,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       mat1$z[mat1$z < -cut.off] <- -cut.off
       
       bwr <- colorRampPalette(bezier_corrected_divergent)
-      image(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
+      image.default(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
     }
   }
   

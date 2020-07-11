@@ -23,7 +23,7 @@ of \code{x}.}
 axis. Default is to use the chromosome name as axis title.}
 
 \item{...}{
-  Arguments passed on to \code{\link[graphics:image.default]{graphics::image.default}}
+  Arguments passed on to \code{\link[graphics:image]{graphics::image.default}}
   \describe{
     \item{\code{xlim}}{ranges for the plotted \code{x} and \code{y} values,
     defaulting to the ranges of \code{x} and \code{y}.}

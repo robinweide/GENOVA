@@ -59,7 +59,7 @@ rep_mat_lookup <- function(explist, anchors, rel_pos, shift = 0,
 
   dnames <- format(rel_pos * attr(explist[[1]], "res"), trim = TRUE)
   rawnames <- if (is.null(rownames(anchors))) {
-    paste0(anchors[anch_id, 1], ",", anchors[anch_id, 2])
+    paste0(anchors[anch_id, 1], ";", anchors[anch_id, 2])
   } else {
     rownames(anchors)
   }

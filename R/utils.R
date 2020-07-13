@@ -355,8 +355,8 @@ interpret_location_string <- function(location, IDX = NULL, feature_id = TRUE) {
   if (feature_id) {
     fid <- match(location, unique(location))
   }
-  
-  location <- tstrsplit(location, ";|,")
+  location <- gsub(",|\\.", "", location)
+  location <- tstrsplit(location, ";")
   location <- lapply(location, function(str) {
     str <- tstrsplit(str, "\\:|\\-")
     if (length(str) == 3) {

@@ -370,7 +370,8 @@ interpret_location_string <- function(location, IDX = NULL, feature_id = TRUE) {
     } else if (length(str) == 1) {
       # Assume IDX index
       if (is.null(IDX)) {
-        warning("No IDX found. Returning location as bins.")
+        warning("No IDX found. Returning location as bins.", 
+                call. = FALSE)
         df <- data.frame(location = as.integer(str[[1]]))
         return(df)
       } else {
@@ -380,7 +381,8 @@ interpret_location_string <- function(location, IDX = NULL, feature_id = TRUE) {
       }
       return(df)
     } else {
-      warning("Cannot interpret location. Returning location as-is.")
+      warning("Cannot interpret location. Returning location as-is.", 
+              call. = FALSE)
       df <- as.data.frame(str)
       colnames(df) <- paste0("V", seq_len(ncol(df)))
       return(df)

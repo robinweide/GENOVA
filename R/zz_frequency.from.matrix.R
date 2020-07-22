@@ -15,6 +15,7 @@
 #' @param ... further arguments passed to or from other methods.
 #' @return A plot.
 #' @import data.table
+#' @noRd
 frequency.from.matrix <- function(experiment, chrom, start, end, window = 10e3, q.val = 0.95, cut.off = NULL, extraPadding = 1.75, ylim = c(0, 250), shinyAxis = T, ...) {
   # Check size: if less than 50 bins: makes no sense...
   resolution <- experiment$RES

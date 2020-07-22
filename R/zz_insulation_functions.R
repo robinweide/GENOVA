@@ -22,6 +22,7 @@
 #'                        window.size = 21)
 #' }
 #' @return A plot
+#' @noRd
 insulation_plot_single <- function(exp, chrom, start, end, 
                                    IS_discovery = NULL,
                                    colour_fun = NULL,
@@ -112,6 +113,7 @@ insulation_plot_single <- function(exp, chrom, start, end,
 #'                      window.size = 21)
 #' }
 #' @return A plot
+#' @noRd
 insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, window.size = 21, local = T, delta = F) {
   # make sure the resolutions are the same
   if (attr(exp1, "res") != attr(exp2, "res")) {
@@ -208,6 +210,7 @@ insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, 
 #' @param step Thesliding square step-size
 #' @param local Local or per-chromosome normalisation?
 #' @param zlim Zlims of the plot
+#' @noRd
 #' @return A plot
 #' @examples
 #' # Make an domainogram of a locus on chromosome 7 with windowsizes from 1 to 101.
@@ -297,6 +300,7 @@ delta.insulation.domainogram <- function(exp1, exp2, chrom, start, end, window.s
 #' @param ins.score Scores.
 #' @param rotate Rotate the polygon
 #' @return happiness
+#' @noRd
 insulation.polygon <- function(ins.score, rotate = F) {
   x <- c(ins.score[1, 1], ins.score[, 1], tail(ins.score[, 1], 1))
   y.up <- c(0, ifelse(ins.score[, 2] < 0, 0, ins.score[, 2]), 0)
@@ -323,6 +327,7 @@ insulation.polygon <- function(ins.score, rotate = F) {
 #' @param local Local or per-chromosome normalisation?
 #' @param diag.add Add values to diaginal
 #' @return A plot
+#' @noRd
 #' @examples
 #' # Get the insulation score with window-size 20 of a locus on chromosome 7.
 #' \dontrun{
@@ -358,6 +363,7 @@ insulation.score_old <- function(exp, window.size, chrom, start, end, diag.add =
 #' @param mat exp
 #' @param window.size The sliding square size
 #' @return happiness
+#' @noRd
 matrix.insulation <- function(mat, window.size) {
   m <- matrix(1, ncol = window.size, nrow = window.size)
   id <- which(m > 0, arr.ind = T)
@@ -386,6 +392,7 @@ matrix.insulation <- function(mat, window.size) {
 #' @param window.size The sliding square size
 #' @param chrom Chromosome to use
 #' @return DF with insulation score
+#' @noRd
 chromosome.wide.insulation <- function(exp, window.size, chrom) {
   max.pos <- max(exp$IDX[exp$IDX[["V1"]] == chrom, V3])
   window <- attr(exp, "res") * 1000
@@ -418,6 +425,7 @@ chromosome.wide.insulation <- function(exp, window.size, chrom) {
 #' @param verbose Should this function be chatty?
 #' @param normalize.genome Perform the log2(O/E) normalisation
 #' @return DF with insulation score
+#' @noRd
 #' @examples
 #' # Get the insulation score with window-size 25
 #' \dontrun{

@@ -26,13 +26,12 @@ pyramid_difference(exp1, exp2, chrom, start, end, colour = NULL, ...)
 object.}
 
 \item{chrom}{One of the following: \itemize{
-    \item{A \code{character} of length one indicating a chromosome name.}
-    \item{A 3-column, 1-row \code{data.frame} in BED-format.}
-    \item{A single \code{character} describing a locus in UCSC notation, e.g. 
-    \code{"chr1:30,000,000-40,000,000"}.}
-  } The latter two options automatically provide the \code{start} and 
-  \code{end} arguments too.
-A \code{character} of length one indicating a chromosome name.}
+  \item{A \code{character} of length one indicating a chromosome name.}
+  \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+  \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+  \code{"chr1:30,000,000-40,000,000"}.}
+} The latter two options automatically provide the \code{start} and 
+\code{end} arguments too.}
 
 \item{start, end}{A \code{numeric} of length one for the start and end positions in
 basepairs.}

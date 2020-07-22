@@ -17,7 +17,6 @@
 #'     \code{"chr1:30,000,000-40,000,000"}.}
 #'   } The latter two options automatically provide the \code{start} and 
 #'   \code{end} arguments too.
-#' A \code{character} of length one indicating a chromosome name.
 #' @param start,end A \code{numeric} of length one for the start and end positions in
 #'   basepairs.
 #' @param crop_x,crop_y A \code{numeric} of length two indicating positions in

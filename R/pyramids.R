@@ -8,8 +8,16 @@
 #'   y-axis indicates distance. \code{pyramid_difference()} does the same, but
 #'   first subtracts one sample from the other.
 #'
-#' @param exp,exp1,exp2 A GENOVA \code{contacts} or \code{contacts_matrix} object.
-#' @param chrom A \code{character} of length one indicating a chromosome name.
+#' @param exp,exp1,exp2 A GENOVA \code{contacts} or \code{contacts_matrix} 
+#'   object.
+#' @param chrom One of the following: \itemize{
+#'     \item{A \code{character} of length one indicating a chromosome name.}
+#'     \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+#'     \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+#'     \code{"chr1:30,000,000-40,000,000"}.}
+#'   } The latter two options automatically provide the \code{start} and 
+#'   \code{end} arguments too.
+#' A \code{character} of length one indicating a chromosome name.
 #' @param start,end A \code{numeric} of length one for the start and end positions in
 #'   basepairs.
 #' @param crop_x,crop_y A \code{numeric} of length two indicating positions in
@@ -30,7 +38,6 @@
 #'   \code{pyramid_difference()} or z-score normalised experiments.
 #'   }
 #' }  
-#'   Defaults to 
 #' @param display_yaxis A \code{logical} of length 1: should the y-axis be
 #'   displayed?
 #' @param edge Draw an edge around the pyramid data region. One of the 
@@ -50,6 +57,9 @@
 #'   \code{x} are the Hi-C values. Also, the \code{oob} parameter is replaced by
 #'   \code{scales::squish()}, the name is set by default to
 #'   \code{"Contacts"} and the \code{aesthetics} are ignored.
+#'   
+#' @note To combine multiples of pyramid plots, we recommend to use the 
+#'   \strong{patchwork} package available on CRAN.
 #'
 #' @return A \code{ggplot} object
 #' @export
@@ -78,7 +88,8 @@ pyramid.default <- function(exp, ...) {
 #' @export
 pyramid.contacts <- function(exp, chrom = "chr1", start = 0, end = 25e6, 
                              colour = NULL, ...) {
-  y <- select_subset(exp, chrom, start, end)
+  loc <- standardise_location(chrom, start, end)
+  y <- select_subset(exp, loc$chrom, loc$start, loc$end)
   if (attr(exp, "znorm")) {
     colour_scale <- .resolve_colour(colour, scale_fill_GENOVA_div,
                                     name = "Z-score", midpoint = 0)
@@ -129,8 +140,9 @@ pyramid.matrix <- function(exp, ...) {
 #' @rdname pyramid
 pyramid_difference <- function(exp1, exp2, chrom, 
                                start, end, colour = NULL, ...) {
-  a <- select_subset(exp1, chrom, start, end)
-  b <- select_subset(exp2, chrom, start, end)
+  loc <- standardise_location(chrom, start, end, singular = TRUE)
+  a <- select_subset(exp1, loc$chrom, loc$start, loc$end)
+  b <- select_subset(exp2, loc$chrom, loc$start, loc$end)
   a$z <- a$z - b$z
   
   colour_scale <- .resolve_colour(colour, scale_fill_GENOVA_div,

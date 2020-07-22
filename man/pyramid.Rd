@@ -22,9 +22,17 @@ pyramid(
 pyramid_difference(exp1, exp2, chrom, start, end, colour = NULL, ...)
 }
 \arguments{
-\item{exp, exp1, exp2}{A GENOVA \code{contacts} or \code{contacts_matrix} object.}
+\item{exp, exp1, exp2}{A GENOVA \code{contacts} or \code{contacts_matrix} 
+object.}
 
-\item{chrom}{A \code{character} of length one indicating a chromosome name.}
+\item{chrom}{One of the following: \itemize{
+    \item{A \code{character} of length one indicating a chromosome name.}
+    \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+    \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+    \code{"chr1:30,000,000-40,000,000"}.}
+  } The latter two options automatically provide the \code{start} and 
+  \code{end} arguments too.
+A \code{character} of length one indicating a chromosome name.}
 
 \item{start, end}{A \code{numeric} of length one for the start and end positions in
 basepairs.}
@@ -41,8 +49,7 @@ basepairs.}
   experiments or \code{\link[GENOVA]{scale_fill_GENOVA_div}()} for 
   \code{pyramid_difference()} or z-score normalised experiments.
   }
-}  
-  Defaults to}
+}}
 
 \item{crop_x, crop_y}{A \code{numeric} of length two indicating positions in
 basepairs of where to crop the x- and y-axis respectively. For the y-axis, this
@@ -82,6 +89,10 @@ Some \code{colour_scale} settings are adjusted. If no \code{limits}
   \code{x} are the Hi-C values. Also, the \code{oob} parameter is replaced by
   \code{scales::squish()}, the name is set by default to
   \code{"Contacts"} and the \code{aesthetics} are ignored.
+}
+\note{
+To combine multiples of pyramid plots, we recommend to use the 
+  \strong{patchwork} package available on CRAN.
 }
 \section{Annotations}{
  For annotations along the linear genome, see

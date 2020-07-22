@@ -94,3 +94,11 @@ Some \code{colour_scale} settings are adjusted. If no \code{limits}
 pyramid(exp, "chr2", 25e6, 30e6)
 }
 }
+\seealso{
+Other matrix plots: 
+\code{\link{compartment_matrixplot}()},
+\code{\link{hic_matrixplot}()},
+\code{\link{insulation_matrixplot}()},
+\code{\link{trans_matrixplot}()}
+}
+\concept{matrix plots}

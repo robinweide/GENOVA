@@ -53,6 +53,7 @@
 #'
 #' @return A \code{ggplot} object
 #' @export
+#' @family matrix plots
 #'
 #' @section Annotations: For annotations along the linear genome, see
 #'   \code{\link[GENOVA]{pyramidtracks}}. For annotations in the Hi-C map, see

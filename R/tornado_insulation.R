@@ -46,15 +46,15 @@
 #' @examples
 #' \dontrun{
 #' # Calculating insulation scores
-#' ins <- insulation_score(list(WT_20kb, KO_20kb), window = 25)
+#' ins <- tornado_insulation(list(WT_20kb, KO_20kb), window = 25)
 #'
 #' # Calling TADs from the insulation score
 #' tadlist <- call_TAD_insulation(ins)
 #'
 #' # Plotting a heatmap
-#' heatmap_insulation(ins, tadlist$WT_20kb)
+#' tornado_insulation(ins, tadlist$WT_20kb)
 #' }
-heatmap_insulation <- function(IS_discovery, 
+tornado_insulation <- function(IS_discovery, 
                                bed, bed_pos = "end", 
                                region_width = 1e6,
                                sort_bins = 11,
@@ -144,9 +144,8 @@ heatmap_insulation <- function(IS_discovery,
                                              oob = scales::squish)
     } else {
       g <- g +
-        ggplot2::scale_fill_gradient2(low = "#ff5c49", high = "#009bef",
-                                      name = "Insulation\nScore",
-                                      limits = colour_lim, oob = scales::squish)
+        scale_fill_GENOVA_div(name = "Insulation\nScore", midpoint = 0,
+                              limits = colour_lim, oob = scales::squish)
     }
   }
   if (mode %in% c("both", "profile")) {

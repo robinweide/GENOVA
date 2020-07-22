@@ -22,7 +22,6 @@
 #'                        window.size = 21)
 #' }
 #' @return A plot
-#' @export
 insulation_plot_single <- function(exp, chrom, start, end, 
                                    IS_discovery = NULL,
                                    colour_fun = NULL,
@@ -113,7 +112,6 @@ insulation_plot_single <- function(exp, chrom, start, end,
 #'                      window.size = 21)
 #' }
 #' @return A plot
-#' @export
 insulation.plot.dual <- function(exp1, exp2, chrom, start, end, cut.off = NULL, window.size = 21, local = T, delta = F) {
   # make sure the resolutions are the same
   if (attr(exp1, "res") != attr(exp2, "res")) {

@@ -20,9 +20,9 @@ trans_matrixplot(
 \arguments{
 \item{exp1}{A GENOVA \code{contacts} object.}
 
-\item{exp2}{A GENOVA \code{contacts} object compatible with \code{exp1} or
-\code{NULL}. If not \code{NULL} the \code{exp2} argument will be subtracted
-from the \code{exp1} data.}
+\item{exp2}{A GENOVA \code{contacts} object compatible with \code{exp1} 
+(optional) or \code{NULL}. If not \code{NULL} the \code{exp2} argument will 
+be subtracted from the \code{exp1} data.}
 
 \item{chrom_up, chrom_down}{One of the following: \itemize{
   \item{A \code{character} of length 1 giving the chromosome name of the 
@@ -54,6 +54,11 @@ No values are returned but a plot is outputted to the graphics
 This function plots a matrix of contacts data for the intersection of two
 regions. Using two regions on different chromosomes plots trans data.
 }
+\section{Resolution recommendation}{
+ A resolution in the ballpark of 
+  \code{(end - start) / 500}.
+}
+
 \examples{
 \dontrun{
 trans_matrixplot(exp, 
@@ -61,3 +66,11 @@ trans_matrixplot(exp,
                  chrom_down = "chr2:50,000,000-60,000,000")
 }
 }
+\seealso{
+Other matrix plots: 
+\code{\link{compartment_matrixplot}()},
+\code{\link{hic_matrixplot}()},
+\code{\link{insulation_matrixplot}()},
+\code{\link{pyramid}()}
+}
+\concept{matrix plots}

@@ -4,9 +4,9 @@
 #' regions. Using two regions on different chromosomes plots trans data.
 #'
 #' @param exp1 A GENOVA \code{contacts} object.
-#' @param exp2 A GENOVA \code{contacts} object compatible with \code{exp1} or
-#'   \code{NULL}. If not \code{NULL} the \code{exp2} argument will be subtracted
-#'   from the \code{exp1} data.
+#' @param exp2 A GENOVA \code{contacts} object compatible with \code{exp1} 
+#'   (optional) or \code{NULL}. If not \code{NULL} the \code{exp2} argument will 
+#'   be subtracted from the \code{exp1} data.
 #' @param chrom_up,chrom_down One of the following: \itemize{
 #'   \item{A \code{character} of length 1 giving the chromosome name of the 
 #'   region of interest}
@@ -24,10 +24,15 @@
 #'   limits.
 #' @param rasterise Set to \code{TRUE} to use a bitmap raster instead of 
 #'   polygons.
+#'   
+#' @section Resolution recommendation: A resolution in the ballpark of 
+#'   \code{(end - start) / 500}.
 #'
 #' @return No values are returned but a plot is outputted to the graphics 
 #'   device.
 #' @export
+#' 
+#' @family matrix plots
 #'
 #' @examples
 #' \dontrun{
@@ -59,13 +64,18 @@ trans_matrixplot <- function(
     )
     checks1 <- list(dim(dat$z), dat$x, dat$y, dat$chrom)
     checks2 <- list(dim(exp2$z), exp2$x, exp2$y, exp2$chrom)
-    if (!identical(checks1, check2)) {
+    if (!identical(checks1, checks2)) {
       stop("`exp1` and `exp2` should have identical resolution and indices.",
            call. = FALSE)
     }
     dat$z <- dat$z - exp2$z
     div_scale <- TRUE
+    if (is.null(colour_lim)) {
+      colour_lim <- max(abs(dat$z)) * c(-1, 1)
+    }
   }
+  
+  
   
   if (!is.null(colour_lim)) {
     if (length(colour_lim) == 2 && is.numeric(colour_lim)) {
@@ -74,20 +84,22 @@ trans_matrixplot <- function(
     } else {
       stop("The `colour_lim` argument should be numeric and of length 2.")
     }
+  } else {
+    colour_lim <- range(dat$z)
   }
   
   chroms <- dat$chrom
   dat$chrom <- NULL
   
   colours <- if (div_scale) {
-    GENOVA:::bezier_corrected_divergent
+    bezier_corrected_divergent
   } else {
-    GENOVA:::.choose_palette()
+    .choose_palette()
   }
   colours <- colorRampPalette(colours)
   
   image(dat, col = colours(255), axes = FALSE, ylim = rev(range(dat$y)),
-        useRaster = GENOVA:::literalTRUE(rasterise),
+        useRaster = literalTRUE(rasterise), zlim = colour_lim,
         xlab = chroms[[1]], ylab = chroms[[2]])
   
   box(lwd = 2)

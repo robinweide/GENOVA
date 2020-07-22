@@ -28,9 +28,6 @@ GENOVA \code{contacts} objects.}
 \item{start, end}{An \code{integer} of length 1 with a region's start and end 
 position in basepairs.}
 
-\item{end}{An \code{integer} of length 1 with a region's end position in
-basepairs.}
-
 \item{window_range}{An \code{integer} vector of length 2 noting the minimum
 and maximum size of the sliding square.}
 

@@ -14,8 +14,6 @@
 #'   \code{end} arguments too.
 #' @param start,end An \code{integer} of length 1 with a region's start and end 
 #'   position in basepairs.
-#' @param end An \code{integer} of length 1 with a region's end position in
-#'   basepairs.
 #' @param window_range An \code{integer} vector of length 2 noting the minimum
 #'   and maximum size of the sliding square.
 #' @param step An \code{integer} of length 1 with the step size for incrementing

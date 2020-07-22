@@ -54,3 +54,8 @@ subset.contacts <- function(x, chrom = NULL, start = 0, end = Inf, ...){
   
   out
 }
+
+
+is_contacts <- function(x) {
+  inherits(x, "contacts")
+}

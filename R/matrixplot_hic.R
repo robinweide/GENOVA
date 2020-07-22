@@ -589,7 +589,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param rasterise Set to true to use a bitmap raster instead of polygons.
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @section Resolution recommendation: A resolution in the ballpark of 
-#'   \code{(end - start) / 500},
+#'   \code{(end - start) / 500}.
 #' @note
 #' To plot genes, a gene-model data.frame must be made. This can be done via a
 #' multitude of ways (e.g. biomart, UCSC table browser). The resulting
@@ -599,6 +599,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' Alternatively, if you download the knowngene table from UCSC, you can
 #' directly use this table (with exons combined per row), by renaming
 #' exonStarts and exonEnds to exonStart and exonEnd.
+#' @family matrix plots
 #' @examples
 #' \dontrun{
 #' # plot two matrices of Hap-1 cells, including their respective loop-calls
@@ -617,7 +618,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' }
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
+hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            chip = list(NULL, NULL, NULL, NULL), inferno = NULL,
                            cexTicks = 1, chip.colour = "black", chip.yMax = NULL,
                            type = rep("triangle", 4), guessType = T,

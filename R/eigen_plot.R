@@ -191,7 +191,7 @@ switch.EV <- function(ev.data, chip, chrom) {
 #'
 #' # Plot a observed/expected cis-compartment plot of the q-arm of chromosome 14.
 #' cis.compartment.plot(exp = Hap1_WT_40kb, chrom = 'chr14', arm = 'q', cs.lim = 1.75, cut.off = 15, chip = H3K27ac_peaks, obs.exp = T)
-#' @export
+#' @noRd
 cis.compartment.plot <- function(exp1, exp2 = NULL, chrom, arm = "p", cut.off = NULL, obs.exp = F, invert = F, color.scheme = "fall", cs.lim = NULL, chip = NULL) {
   # exp1 = exp
 

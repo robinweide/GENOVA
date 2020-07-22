@@ -26,6 +26,7 @@
 #' @param leftNorm Normalise data on median on most upstream bin.
 #' @param verbose Should this function be chatty?
 #' @return A plot plus an (invisible) dataframe of the underlying matrix.
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Get the insulation score with window-size 25 of two experiments.

@@ -8,6 +8,7 @@
 #' @param end End position in bp.
 #' @param max.i Maximal size of flanking regions to calculate DI.
 #' @return A vector of DI-scores per Hi-C bin.
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # get the DI at the HOXC-locus in an experiment mapped to hg19

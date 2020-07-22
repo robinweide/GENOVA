@@ -13,6 +13,7 @@
 #' @param ... further arguments passed to or from other methods.
 #' @return A scatterplot.
 #' @import data.table
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # get scores for WT and WAPL data

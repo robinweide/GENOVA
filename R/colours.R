@@ -82,7 +82,7 @@
 #' \code{\link[=GENOVA_colour_scales]{scale_(colour|fill)_GENOVA_div}()}
 #' functions.
 #' 
-#' For visualisations in base R, such as \code{\link[GENOVA]{hic.matrixplot}()} 
+#' For visualisations in base R, such as \code{\link[GENOVA]{hic_matrixplot}()} 
 #' and \code{\link[GENOVA:GENOVA_image]{image()}},
 #' the \code{\link[grDevices]{colorRampPalette}()} 
 #' function is used.

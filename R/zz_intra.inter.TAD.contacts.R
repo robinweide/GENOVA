@@ -15,6 +15,7 @@
 #' @return \item{tad}{dataframe with TADs and the index used in the hic-df}
 #' @return \item{sampleName}{the sample name of the experiment-object}
 #' @import data.table
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # get scores for WT and WAPL data

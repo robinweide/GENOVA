@@ -5,11 +5,15 @@
 #'
 #' @param explist Either a single GENOVA \code{contacts} object or list of
 #'   GENOVA \code{contacts} objects.
-#' @param chrom A \code{character} of length 1 containing a chromosome name.
-#' @param start An \code{integer} of length 1 with a region's start position in
-#'   basepairs.
-#' @param end An \code{integer} of length 1 with a region's end position in
-#'   basepairs.
+#' @param chrom One of the following: \itemize{
+#'     \item{A \code{character} of length one indicating a chromosome name.}
+#'     \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+#'     \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+#'     \code{"chr1:30,000,000-40,000,000"}.}
+#'   } The latter two options automatically provide the \code{start} and 
+#'   \code{end} arguments too.
+#' @param start,end An \code{integer} of length 1 with a region's start and end 
+#'   position in basepairs.
 #' @param window_range An \code{integer} vector of length 2 noting the minimum
 #'   and maximum size of the sliding square.
 #' @param step An \code{integer} of length 1 with the step size for incrementing
@@ -38,6 +42,8 @@ insulation_domainogram <- function(
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
   
+  loc <- standardise_location(chrom, start, end, singular = TRUE)
+  
   # Setup experiments
   explist <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
@@ -52,7 +58,7 @@ insulation_domainogram <- function(
   windows <- seq(windows[1], windows[2], by = step)
   
   # Find ROI
-  bed <- cbind.data.frame(chrom, start, end)
+  bed <- cbind.data.frame(loc$chrom, loc$start, loc$end)
   bed <- sort(c(bed2idx(explist[[1]]$IDX, bed, "start"),
                 bed2idx(explist[[1]]$IDX, bed, "end")))
   pos_start <- explist[[1]]$IDX$V3[match(bed[1], explist[[1]]$IDX$V4)]
@@ -105,6 +111,6 @@ insulation_domainogram <- function(
             class = c("domainogram_discovery", "genomescore_discovery", 
                       "discovery"),
             package = "GENOVA",
-            chrom = chrom, resolution = res)
+            chrom = loc$chrom, resolution = res)
 }
 

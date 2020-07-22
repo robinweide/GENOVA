@@ -15,6 +15,7 @@
 #' @param ... further arguments passed to or from other methods.
 #' @return A dotplot
 #' @import data.table
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # get scores for WT and WAPL data

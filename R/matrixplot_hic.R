@@ -538,9 +538,16 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @author Elzo de Wit, \email{e.d.wit@nki.nl}
 #' @param exp1 The Hi-C experiment object: produced by construct.experiment().
 #' @param exp2 Optional: a Hi-C experiment object.
-#' @param chrom Chromosome of the region of interest
-#' @param start Start position of the region of interest
-#' @param end End position of the region of interest
+#' @param chrom Chromosome of the region of interest. Alternatively one of the 
+#'   following: \itemize{
+#'     \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+#'     \item{A single \code{character} describing a locus in UCSC notation,
+#'        e.g. \code{"chr1:30,000,000-35,000,000"}}
+#'   }
+#'   The latter two options automatically provide the \code{start} and 
+#'   \code{end} arguments too.
+#' @param start,end Start and end position of the region of interest. Ignored if
+#'   the \code{chrom} argument is a BED-format data.frame.
 #' @param cut.off The cut.off for the hic-matrix plot, in the diff option the
 #' negative of this is the lower bound
 #' @param chip A list of feature tracks, can be bed structure
@@ -577,12 +584,12 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param smoothNA Set to TRUE to perform a Nadaraya/Watson normalization. 
 #' This will try to eliminate white stripes: this is only cosmetic and has no 
 #' effect on the compartment-scores.
-#' @param fillNAtreshold Set the amount strength of out-lier correction for 
+#' @param fillNAtreshold Set the amount strength of outlier correction for 
 #' fillNA.
 #' @param rasterise Set to true to use a bitmap raster instead of polygons.
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @section Resolution recommendation: A resolution in the ballpark of 
-#' \eqn{(\code{end} - \code{start}) / 500}.
+#'   \code{(end - start) / 500}.
 #' @note
 #' To plot genes, a gene-model data.frame must be made. This can be done via a
 #' multitude of ways (e.g. biomart, UCSC table browser). The resulting
@@ -592,6 +599,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' Alternatively, if you download the knowngene table from UCSC, you can
 #' directly use this table (with exons combined per row), by renaming
 #' exonStarts and exonEnds to exonStart and exonEnd.
+#' @family matrix plots
 #' @examples
 #' \dontrun{
 #' # plot two matrices of Hap-1 cells, including their respective loop-calls
@@ -610,7 +618,7 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' }
 #' @return A matrix-plot
 #' @export
-hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
+hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            chip = list(NULL, NULL, NULL, NULL), inferno = NULL,
                            cexTicks = 1, chip.colour = "black", chip.yMax = NULL,
                            type = rep("triangle", 4), guessType = T,
@@ -629,6 +637,9 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   if (length(chip) < 3) {
     symmAnn <- T
   }
+  
+  loc <- standardise_location(chrom = chrom, start = start, end = end, 
+                              singular = TRUE)
   
   if (!check_input()) {
     return(invisible())
@@ -684,9 +695,9 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   # layout
   
   # get a matrix from the experiment
-  mat1 <- select_subset(exp1, chrom, start, end)
+  mat1 <- select_subset(exp1, loc$chrom, loc$start, loc$end)
   if (!is.null(exp2)) {
-    mat2 <- select_subset(exp2, chrom, start, end)
+    mat2 <- select_subset(exp2, loc$chrom, loc$start, loc$end)
   }
   
   
@@ -835,12 +846,13 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   
   # draw tads on the image plot
   if (!is.null(tads)) {
-    draw.tads(tads, chrom, tads.type = tads.type, tads.colour = tads.colour)
+    draw.tads(tads, loc$chrom, tads.type = tads.type, tads.colour = tads.colour)
   }
   
   # draw loops on the image plot
   if (!is.null(loops)) {
-    draw.loops(loops, chrom = chrom, start = start, end = end, type = loops.type, radius = loops.radius, col = loops.colour, lwd = 2)
+    draw.loops(loops, chrom = loc$chrom, start = loc$start, end = loc$end, 
+               type = loops.type, radius = loops.radius, col = loops.colour, lwd = 2)
   }
   
   # fill up empty elements
@@ -852,7 +864,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   if (!skipAnn) {
     
     # plot the features horizontal
-    features(mat1, chrom, genes,
+    features(mat1, loc$chrom, genes,
              chip1 = chip[[1]], chip2 = chip[[2]],
              autoCHIP = guessType, yMax = chip.yMax[1:2], col = chip.colour[1:2], type = type[1:2]
     )
@@ -870,7 +882,7 @@ hic.matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       chip.colour[3:4] <- chip.colour[1:2]
     }
     
-    features(mat1, chrom, genes, chip[[3]], chip[[4]],
+    features(mat1, loc$chrom, genes, chip[[3]], chip[[4]],
              autoCHIP = guessType, yMax = chip.yMax[3:4], col = chip.colour[3:4],
              type = type[3:4], rotate = T
     )

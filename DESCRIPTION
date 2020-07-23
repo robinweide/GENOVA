@@ -7,14 +7,14 @@ Authors@R: c(
   person("Elzo", "de Wit", email = "e.d.wit@nki.nl", role = "aut"))
 Description: GENOVA consist of a set of analysis- and visualisation-functions. These will help to discover valuable information buried deep in your HiC-matrices.
 Depends:
-    R (>= 3.5.0),
-    data.table
+    R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
     ggplot2 (>= 3.3.0),
-    scales (>= 1.1.1)
+    scales (>= 1.1.1),
+    data.table
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

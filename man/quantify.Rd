@@ -5,6 +5,7 @@
 \alias{quantify.default}
 \alias{quantify.APA_discovery}
 \alias{quantify.PESCAn_discovery}
+\alias{quantify.CSCAn_discovery}
 \alias{quantify.ATA_discovery}
 \alias{quantify.ARA_discovery}
 \alias{quantify.saddle_discovery}
@@ -23,6 +24,15 @@ quantify(discovery, ...)
 )
 
 \method{quantify}{PESCAn_discovery}(
+  discovery,
+  size = 5,
+  metric = "median",
+  shape = "circle",
+  IDX = NULL,
+  ...
+)
+
+\method{quantify}{CSCAn_discovery}(
   discovery,
   size = 5,
   metric = "median",
@@ -81,8 +91,8 @@ What exactly is to be quantified differs per \code{discovery} type.
 The quantification of ARMLA discoveries require a shape to distinguish 
 regions to quantify.
 
-\subsection{ARA and PESCAn}{
-APA and PESCAn require one of the following:
+\subsection{ARA, PESCAn and CSCAn}{
+APA, PESCAn and CSCAn require one of the following:
 \itemize{
   \item{\code{"center_vs_quadrants"}}
   \item{\code{"center_vs_rest"}}

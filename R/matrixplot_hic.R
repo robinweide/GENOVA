@@ -587,6 +587,8 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param fillNAtreshold Set the amount strength of outlier correction for 
 #' fillNA.
 #' @param rasterise Set to true to use a bitmap raster instead of polygons.
+#' @param addnames When the \code{coplot} argument is \code{"dual"}, display
+#'   names of the samples? (default: \code{TRUE})
 #' @param antoni Logical: plot an explorer of the microscopic world
 #' @section Resolution recommendation: A resolution in the ballpark of 
 #'   \code{(end - start) / 500}.
@@ -628,7 +630,7 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            loops.radius = NULL, loops.colour = "#1faee3",
                            skipAnn = F, symmAnn = F,
                            check.genome = T, smoothNA = F, fillNAtreshold = 2, 
-                           rasterise = FALSE,
+                           rasterise = FALSE, addnames = TRUE,
                            antoni = F) {
   if (is.null(loops.radius)) {
     loops.radius <- attr(exp1, "res") * 5
@@ -798,6 +800,13 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
             zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
             useRaster = literalTRUE(rasterise))
+      
+      expnames <- c(expnames(exp1), expnames(exp2))
+      if (length(expnames) > 1) {
+        txt <- seq(min(mat1$x), max(mat1$x), length.out = 20)[c(2, 19)]
+        text(x = rev(txt)[1], y = txt[1], labels = expnames[1], adj = c(1, 1))
+        text(x = rev(txt)[2], y = txt[2], labels = expnames[2], adj = c(0, 0))
+      }
     } else {
       mat1$z <- mat2$z - mat1$z
       # set cutoffs

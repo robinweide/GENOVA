@@ -23,8 +23,8 @@
 #' The quantification of ARMLA discoveries require a shape to distinguish 
 #' regions to quantify.
 #' 
-#' \subsection{ARA and PESCAn}{
-#' APA and PESCAn require one of the following:
+#' \subsection{ARA, PESCAn and CSCAn}{
+#' APA, PESCAn and CSCAn require one of the following:
 #' \itemize{
 #'   \item{\code{"center_vs_quadrants"}}
 #'   \item{\code{"center_vs_rest"}}
@@ -222,7 +222,7 @@ quantify.ARMLA <- function(
   }, numeric(2))
   # Format global sample stats
   global <- data.frame(
-    sample = expnames,
+    sample = dimnames(aggregate)[[3]],
     foreground = metrics[1, ],
     background = metrics[2, ],
     foldchange = metrics[1, ] / metrics[2, ],
@@ -368,6 +368,75 @@ quantify.PESCAn_discovery <- function(
 
 #' @rdname quantify
 #' @export
+quantify.CSCAn_discovery <- function(
+  discovery, size = 5,
+  metric = "median",
+  shape = "circle", IDX = NULL,
+  ...
+) {
+  metric <- match.arg(metric, c("mean", "median"))
+  metric <- switch(
+    metric,
+    mean = mean.default,
+    median = median.default
+  )
+  
+  shape <- parse_shape_arg(
+    shape, size,
+    c("center_vs_quadrants", "center_vs_rest", "circle")
+  )
+  
+  groups <- lapply(discovery$signal_raw, attr, "group")
+  
+  # Normalize row values for grand median background
+  raw <- lapply(seq_along(discovery$signal_raw), function(i) {
+    bg <- median(discovery$shifted[, , , i])
+    raw <- discovery$signal_raw[[i]]
+    raw[is.na(raw)] <- 0
+    raw[] <- raw / bg
+    raw
+  })
+  
+  agg <- discovery$obsexp
+  dnames <- dimnames(agg)
+  collapse <- CJ(dnames[[3]], dnames[[4]])
+  dnames[[3]] <- do.call(paste, 
+                         c(unname(as.list(collapse)),
+                           sep = "~&~"))
+  dim <- dim(agg)
+  dim(agg) <- c(dim[1], dim[2], prod(dim[3:4]))
+  dimnames(agg) <- dnames[1:3]
+  
+  out <- quantify.ARMLA(
+    aggregate = agg,
+    raw = raw,
+    expnames = expnames(discovery),
+    shape = shape,
+    IDX = IDX,
+    fun = metric,
+    ...
+  )
+  
+  if (length(out) == 2) {
+    names(out) <- c(names(out)[1], "per_interaction")
+  }
+  out <- lapply(out, function(x) {
+    x$foldchange <- NULL # Fold change for obsexp is pointless
+    x
+  })
+  sample <- out$per_sample$sample
+  sample <- tstrsplit(sample, "~&~")
+  out$per_sample$sample <- sample[[2]]
+  out$per_sample$group <- sample[[1]]
+  
+  groups <- attr(raw[[1]], "group")
+  out$per_interaction$group <- groups[out$per_interaction$feature_id]
+  
+  return(out)
+}
+
+#' @rdname quantify
+#' @export
 quantify.ATA_discovery <- function(
   discovery, size = 3, 
   metric = "median",
@@ -437,8 +506,8 @@ quantify.ARA_discovery <- function(discovery, size = 3, shape = "ARA", ...) {
   
   global <- data.frame(
     sample = expnames[as.vector(col(metrics))],
-    feature = methods::as(rownames(metrics)[as.vector(row(metrics))], 
-                          typeof(shape)),
+    feature = as(rownames(metrics)[as.vector(row(metrics))], 
+                 typeof(shape)),
     value = as.vector(metrics)
   )
   global

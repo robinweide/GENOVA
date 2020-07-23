@@ -721,9 +721,10 @@ visualise.CS_discovery <- function(discovery, contrast = NULL,
                                    ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
+  loc <- standardise_location(chr, start, end, singular = TRUE)
   df <- as.data.table(discovery$compart_scores)
-  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
-                df[["end"]] <= end)
+  ii <- which(df[["chrom"]] == loc$chrom & df[["start"]] >= loc$start & 
+                df[["end"]] <= loc$end)
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   
@@ -815,9 +816,10 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
                                    ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
+  loc <- standardise_location(chr, start, end, singular = TRUE)
   df <- as.data.table(discovery$insula_score)
-  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
-                df[["end"]] <= end)
+  ii <- which(df[["chrom"]] == loc$chrom & df[["start"]] >= loc$start & 
+                df[["end"]] <= loc$end)
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   
@@ -909,17 +911,15 @@ visualise.DI_discovery <-  function(discovery, contrast = NULL, chr = "chr1",
                                     ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
+  loc <- standardise_location(chr, start, end, singular = TRUE)
   df <- discovery$DI
-  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
-                df[["end"]] <= end)
+  ii <- which(df[["chrom"]] == loc$chrom & df[["start"]] >= loc$start & 
+                df[["end"]] <= loc$end)
   df <- df[ii,]
   expnames <- tail(colnames(df), -4)
   
   df <- cbind.data.frame(mid = (df[["start"]] + df[["end"]]/2),
                          df[, expnames])
-  
-  # df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
-  #                  tail(as.list(df, - 4)))
   
   yname <- "Directionality Index"
   

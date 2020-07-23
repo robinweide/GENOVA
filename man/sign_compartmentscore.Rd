@@ -28,7 +28,7 @@ the '\code{bed}' argument.}
 '\code{bedgraph}' correlations are weak or uncomputable.}
 
 \item{ref}{An \code{integer} of length 1 giving a sample index that can be
-used as a reference.}
+used as a reference. Set to \code{NULL} to sign every sample individually.}
 }
 \value{
 A \code{CS_discovery} object with \code{signed} attribute set to

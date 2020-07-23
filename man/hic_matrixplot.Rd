@@ -33,6 +33,7 @@ hic_matrixplot(
   smoothNA = F,
   fillNAtreshold = 2,
   rasterise = FALSE,
+  addnames = TRUE,
   antoni = F
 )
 }
@@ -114,6 +115,9 @@ effect on the compartment-scores.}
 fillNA.}
 
 \item{rasterise}{Set to true to use a bitmap raster instead of polygons.}
+
+\item{addnames}{When the \code{coplot} argument is \code{"dual"}, display
+names of the samples? (default: \code{TRUE})}
 
 \item{antoni}{Logical: plot an explorer of the microscopic world}
 }

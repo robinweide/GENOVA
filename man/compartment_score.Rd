@@ -23,7 +23,7 @@ containing scores correlated with active chromatin. Mutually exclusive with
 the '\code{bed}' argument.}
 
 \item{ref}{An \code{integer} of length 1 giving a sample index that can be
-used as a reference.}
+used as a reference. Set to \code{NULL} to sign every sample individually.}
 }
 \value{
 A \code{CS_discovery} object with 1 element.

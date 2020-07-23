@@ -8,7 +8,8 @@ sign_compartmentscore(
   CS_discovery,
   bed = NULL,
   bedgraph = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  ref = 1
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ the '\code{bed}' argument.}
 
 \item{verbose}{A \code{logical} of length 1. If \code{TRUE}, reports when
 '\code{bedgraph}' correlations are weak or uncomputable.}
+
+\item{ref}{An \code{integer} of length 1 giving a sample index that can be
+used as a reference.}
 }
 \value{
 A \code{CS_discovery} object with \code{signed} attribute set to

@@ -4,7 +4,7 @@
 \alias{compartment_score}
 \title{Compartment score}
 \usage{
-compartment_score(explist, ev = 1, bed = NULL, bedgraph = NULL)
+compartment_score(explist, ev = 1, bed = NULL, bedgraph = NULL, ref = 1)
 }
 \arguments{
 \item{explist}{Either a single GENOVA \code{contacts} object or list of
@@ -21,6 +21,9 @@ argument.}
 \item{bedgraph}{A \code{data.frame} with 4 columns in bedGraph format,
 containing scores correlated with active chromatin. Mutually exclusive with
 the '\code{bed}' argument.}
+
+\item{ref}{An \code{integer} of length 1 giving a sample index that can be
+used as a reference.}
 }
 \value{
 A \code{CS_discovery} object with 1 element.

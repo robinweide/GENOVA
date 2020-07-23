@@ -3,6 +3,7 @@
 #' @param mat A vector which needs to be resized.
 #' @param ndim Dimentions of the wanted matrix: can be obtained by dim(matrixOfChoice).
 #' @return A rescaled vector.
+#' @noRd
 resize.mat <- function(mat, ndim = dim(mat)) {
   # input object
   odim <- dim(mat)

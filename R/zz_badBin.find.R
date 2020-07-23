@@ -7,8 +7,8 @@
 #' @param getBed Produce a bed-like object.
 #' @param plotBad Plot some of the bad bins for visual inspection.
 #' @return A list containing a vector with the bad bin-id's (`badBins`). Optionally, it can output a bed-file (`bed`).
-#' @examples
 #' @noRd
+#' @examples
 #' \dontrun{
 #' # Identify and plot the bad bins
 #' bb_out <- badBin.find(experiment = WT_100kb, 

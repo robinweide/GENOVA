@@ -5,6 +5,7 @@
 #'
 #' @param loop.bed Path to bedpe file.
 #' @param header Does the file come with a header?
+#' @export
 #' @return A data.frame with the bedpe-values.
 read_bedpe <- function(loop.bed, header = T) {
   # Load bedpe of loops of interest
@@ -30,12 +31,12 @@ read_bedpe <- function(loop.bed, header = T) {
   # remove whitespaces
   chromosomeAvector <- gsub("[[:space:]]", "", chromosomeAvector)
   chromosomeBvector <- gsub("[[:space:]]", "", chromosomeBvector)
-  # # Check if chromosome entries have 'chr' or add.
-  # chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")] <- gsub(chromosomeAvector[!grepl(chromosomeAvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
-  # chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")] <- gsub(chromosomeBvector[!grepl(chromosomeBvector,pattern = "^chr")], pattern = '^', replacement = 'chr', perl = T)
+
   # Sort POS for each BED-entry
-  posAdf <- cbind(ifelse(LOI[, 2] < LOI[, 3], LOI[, 2], LOI[, 3]), ifelse(LOI[, 2] < LOI[, 3], LOI[, 3], LOI[, 2]))
-  posBdf <- cbind(ifelse(LOI[, 5] < LOI[, 6], LOI[, 5], LOI[, 6]), ifelse(LOI[, 5] < LOI[, 6], LOI[, 6], LOI[, 5]))
+  posAdf <- cbind(ifelse(LOI[, 2] < LOI[, 3], LOI[, 2], LOI[, 3]), 
+                  ifelse(LOI[, 2] < LOI[, 3], LOI[, 3], LOI[, 2]))
+  posBdf <- cbind(ifelse(LOI[, 5] < LOI[, 6], LOI[, 5], LOI[, 6]), 
+                  ifelse(LOI[, 5] < LOI[, 6], LOI[, 6], LOI[, 5]))
   # check if posA is indeed upstream of posB
   posAdf.Smaller <- na.omit(posAdf[posAdf[, 1] < posBdf[, 1], ])
   posBdf.Smaller <- na.omit(posAdf[posAdf[, 1] > posBdf[, 1], ])

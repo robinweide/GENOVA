@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 #' @import utils graphics stats grDevices
+#' @import methods
 NULL
 
 # data.table is generally careful to minimize the scope for namespace

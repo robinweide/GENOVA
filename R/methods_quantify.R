@@ -506,8 +506,8 @@ quantify.ARA_discovery <- function(discovery, size = 3, shape = "ARA", ...) {
   
   global <- data.frame(
     sample = expnames[as.vector(col(metrics))],
-    feature = methods::as(rownames(metrics)[as.vector(row(metrics))], 
-                          typeof(shape)),
+    feature = as(rownames(metrics)[as.vector(row(metrics))], 
+                 typeof(shape)),
     value = as.vector(metrics)
   )
   global

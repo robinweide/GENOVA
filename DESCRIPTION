@@ -14,7 +14,8 @@ LazyData: true
 Imports: 
     ggplot2 (>= 3.3.0),
     scales (>= 1.1.1),
-    data.table
+    data.table,
+    methods
 RoxygenNote: 7.1.1
 Suggests: 
     knitr,

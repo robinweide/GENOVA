@@ -589,9 +589,10 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
+  loc <- standardise_location(chr, start, end, singular = TRUE)
   df <- as.data.table(x$compart_scores)
-  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
-                df[["end"]] <= end)
+  ii <- which(df[["chrom"]] == loc$chrom & df[["start"]] >= loc$start & 
+                df[["end"]] <= loc$end)
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   dat <- as.matrix(df[, 5:ncol(df)])
@@ -626,9 +627,10 @@ plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
+  loc <- standardise_location(chr, start, end, singular = TRUE)
   df <- as.data.table(x$insula_score)
-  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
-                df[["end"]] <= end)
+  ii <- which(df[["chrom"]] == loc$chrom & df[["start"]] >= loc$start & 
+                df[["end"]] <= loc$end)
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   dat <- as.matrix(df[, 5:ncol(df)])
@@ -664,9 +666,10 @@ plot.DI_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
+  loc <- standardise_location(chr, start, end, singular = TRUE)
   df <- x$DI
-  ii <- which(df[["chrom"]] == chr & df[["start"]] >= start & 
-                df[["end"]] <= end)
+  ii <- which(df[["chrom"]] == loc$chrom & df[["start"]] >= loc$start & 
+                df[["end"]] <= loc$end)
   df <- df[ii,]
   expnames <- tail(colnames(df), -4)
   # df <- dcast(df, chrom + start + end + bin ~ experiment, value.var = "DI")

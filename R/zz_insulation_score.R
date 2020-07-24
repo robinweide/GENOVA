@@ -28,7 +28,7 @@
 #' @return An \code{IS_discovery} object containing the following slot: \describe{
 #'   \item{insula_score}{A \code{data.table} with genomic locations and
 #'   insulation scores for each element in the '\code{explist}' argument.}}
-#' @export
+#' @noRd
 #' 
 #' @section Resolution recommendation: 10kb-40kb
 #'
@@ -41,7 +41,7 @@
 #' \dontrun{
 #' iscore <- insulation_score(list(WT_20kb, KO_20kb), window = 20)
 #' }
-insulation_score <- function(explist, window = 30,
+insulation_score_old <- function(explist, window = 30, 
                              norm_to = c("chromosome", "genome", "none"),
                              norm_fun = log2overmedian) {
   norm_to <- match.arg(norm_to)
@@ -52,62 +52,65 @@ insulation_score <- function(explist, window = 30,
     }
   }
   
-  explist <- GENOVA:::check_compat_exp(explist)
-  expnames <- expnames(explist)
+  explist <- check_compat_exp(explist)
+  expnames <- if (is.null(names(explist))) {
+    vapply(explist, attr, character(1L), "samplename")
+  } else {
+    names(explist)
+  }
   nexp <- length(expnames)
+  cols <- vapply(explist, attr, character(1L), "colour")
   
   # Control data.table threads
   dt.cores <- data.table::getDTthreads()
   on.exit(data.table::setDTthreads(dt.cores))
   data.table::setDTthreads(1)
   
-  # Prepare bins
-  ext_window <- 2 * window
-  bins <- explist[[1]]$IDX$V4
-  outer_bins <- CJ(V1 = bins, V2 = (ext_window - 1):(window))
-  outer_bins <- outer_bins[, grp := V1 + V2 - window]
-  inner_bins <- outer_bins[, list(V1, V2 = V2 - window, grp)]
-  bins <- CJ(V1 = bins, V2 = 0:(ext_window - 1))
+  # Prepare grid
+  grid <- CJ(x = seq_len(window), y = seq_len(window))
+  grid[, y := y + window]
+  grid <- grid - 1 # when added to idx, re-base to 0
+  mode(grid$x) <- "integer"
+  mode(grid$y) <- "integer"
+  grix <- grid$x
+  griy <- grid$y
   
+  # Prep stuff
+  idx <- explist[[1]]$IDX[, head(V4, - window), by = V1]
+  setnames(idx, 1:2, c("V1", "V2"))
   
-  raw <- lapply(explist, function(xp) {
-    # Straighten diagonal
-    mat <- xp$MAT[V1 > V2 - (ext_window)]
-    mat[, V2 := V2 - V1]
-    setkeyv(mat, c("V1", 'V2'))
+  # Loop over chromosomes so that sorting doesn't take ages
+  chroms <- split(idx[, list(V2)], idx$V1)
+  insula <- lapply(chroms, function(indices) {
     
-    # Pre-calculate cumulative sums
-    mat <- mat[bins][is.na(V3), V3 := 0]
-    mat[, V3 := cumsum(V3), by = "V1"]
-    
-    # Calculate outer and inner partial sums
-    outer_sum <- mat[outer_bins, nomatch = NULL][, .(V2 = sum(V3)), keyby="grp"]
-    inner_sum <- mat[inner_bins, nomatch = NULL][, .(V3 = sum(V3)), keyby="grp"]
-    
-    # Calculate overall sum by subtracting the inners from the outers
-    sums <- outer_sum[inner_sum, list(grp, V2 = V2 - V3)]
-    sums
+    # Setup indices to look up
+    looper <- indices[, list(V1 = grix + .BY[[1]], V2 = griy + .BY[[1]]),
+                      by = list("id" = V2)]
+    setcolorder(looper, c(2,3,1))
+    setkey(looper, V1, V2)
+
+    # Grab insulation scores
+    ins <- vapply(explist, function(exp) {
+      exp$MAT[looper, list(id, V3)][, sum(V3, na.rm = T),  by = id][["V1"]]
+    }, numeric(nrow(indices)))
+    data.table(ins / nrow(grid))
   })
+
+  # Combine results from all chromosomes
+  insula <- rbindlist(insula)
+  setnames(insula, seq_len(ncol(insula)), expnames)
+  insula[["bin"]] <- idx[["V2"]]
   
-  # Combine samples
-  insula <- raw[[1]]
-  for(i in tail(seq_along(raw), -1)) {
-    insula <- merge.data.table(insula, raw[[i]], all = TRUE, by = "grp")
-  }
+  # Match to original bins
+  m <- insula[, match(bin + window - 1, explist[[1]]$IDX$V4)]
+  insula <- cbind(insula, explist[[1]]$IDX[m, list(V1, V2, V3, V4)])
+  insula <- insula[, -"bin", with = FALSE]
   
-  # Match to orginal bins
-  insula <- insula[explist[[1]]$IDX, on = c("grp" = "V4")]
-  setnames(insula, seq_len(ncol(insula)), 
-           new = c("bin", expnames, "chrom", "start", "end"))
-  setcolorder(insula, c((nexp + 2):ncol(insula), 1:(nexp + 1)))
+  # Format output
+  setcolorder(insula, c((nexp + 1):ncol(insula), 1:nexp))
+  setnames(insula, 1:4, c("chrom", "start", "end", "bin"))
   
-  # Delete faulty bins
-  antibin <- insula[, c(head(bin, 1) + c(0, seq_len(window - 1)), 
-                        tail(bin, 1) - c(0, seq_len(window - 1))),
-                    by = "chrom"]
-  insula <- insula[!antibin, on = c("bin" = "V1")]
-  
-  # Do normalisation
+  # Do log2 value over median normalisation
   if (norm_to == "chromosome") {
     for (i in expnames) {
       xp <- as.symbol(i)
@@ -118,56 +121,14 @@ insulation_score <- function(explist, window = 30,
       xp <- as.symbol(i)
       insula[, as.character(xp) := norm_fun(eval(xp))]
     }
-  } else {
-    # Take window averages instead of sums
-    for (i in expnames) {
-      xp <- as.symbol(i)
-      insula[, as.character(xp) := eval(xp) / (window ^ 2)]
-    }
   }
-  setkeyv(insula, "bin")
-  
+  insula <- as.data.frame(insula)
+
   # Format output
-  structure(list(insula_score = as.data.frame(insula)),
+  structure(list(insula_score = insula),
             package = "GENOVA",
-            colours = vapply(explist, attr, character(1L), "colour"),
+            colours = cols,
             class = c("IS_discovery", "genomescore_discovery", "discovery"),
             resolution = attr(explist[[1]], "resolution"),
             window = window)
-}
-
-#' Log 2 value over its median
-#'
-#' A small convenience function to calculate the log 2 of a value divided by the
-#' median of this set of values.
-#'
-#' @param x A \code{numeric} vector
-#'
-#' @return A \code{numeric} vector with the calculated values.
-#' 
-#' @details Ignores \code{NA} values in calculation of the median.
-#' @export
-#'
-#' @examples
-#' log2overmedian(runif(100))
-log2overmedian <- function(x) {
-  log2(x / median(x, na.rm = TRUE))
-}
-
-#' Log 2 value over its mean
-#'
-#' A small convenience function to calculate the log 2 of a value divided by the
-#' mean of this set of values.
-#'
-#' @param x A \code{numeric} vector
-#'
-#' @return A \code{numeric} vector with the calculated values.
-#' 
-#' @details Ignores \code{NA} values in calculation of the mean
-#' @export
-#'
-#' @examples
-#' log2overmean(runif(100))
-log2overmean <- function(x) {
-  log2(x / mean(x, na.rm = TRUE))
 }

@@ -35,6 +35,15 @@ GENOVA directly reads data from:
 - cooler
 - juicer
 
+## Installation
+
+You can install GENOVA from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("robinweide/GENOVA")
+```
+
 ## Note to long-time users
 Version 1.0 will contain a massive overhaul, which will result in breaking nearly every analysis. To provide legacy support, we made the [ye olde lighthouse](https://github.com/robinweide/GENOVA/releases/tag/v0.95) release. This can be installed with `devtools::install_github("robinweide/GENOVA@v0.95")`. Furthermore, if you have custom scripts based on the output of `construct.experiment()`, you can use v1 and set `legacy=TRUE` in `loadContacts()` to get a similar output. This, of course, also allows you to load .cooler and .hic files in pre-v1 versions :+1:.
 

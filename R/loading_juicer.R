@@ -8,7 +8,9 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
     stop('resolution is not found.\nAvailable resolutions are ',
          paste(rev(juicer_metadata[[2]]), collapse = ', '))
   }
-  juicer_metadata[[1]] = juicer_metadata[[1]][juicer_metadata[[1]]$chrom != 'All',]
+  validchrom <- !(grepl("all", juicer_metadata[[1]]$chrom, ignore.case = TRUE))
+  
+  juicer_metadata[[1]] = juicer_metadata[[1]][validchrom,]
 
   expandedChromosomes = as.data.frame(t(utils::combn(juicer_metadata[[1]]$chrom, m = 2)), stringsAsFactors = F)
   expandedChromosomes = rbind(as.data.frame(cbind(juicer_metadata[[1]]$chrom,juicer_metadata[[1]]$chrom)),

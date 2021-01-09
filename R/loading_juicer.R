@@ -1,5 +1,5 @@
 loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, balancing = T){
-
+  juicerPath <- normalizePath(juicerPath)
   # get metadata of juicer-file
   juicer_metadata = get_juicer_metadata(juicerPath)
 
@@ -25,12 +25,23 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
     juicer_in <- tryCatch(
       {
         try_require("strawr", "loadJuicer", "github")
-        strawr::straw(norm = strawNorm,
-                      fname =juicerPath,
-                      chr1loc =  ec[2],
-                      chr2loc =  ec[1],
-                      unit = 'BP',
-                      binsize = resolution)
+        
+        if("matrix" %in% names(as.list( args(strawr::straw) ))){ # check if straw-version has "matrix"-argument
+          strawr::straw(matrix = 'observed', 
+                        norm = strawNorm,
+                        fname =juicerPath,
+                        chr1loc =  ec[2],
+                        chr2loc =  ec[1],
+                        unit = 'BP',
+                        binsize = resolution)
+        } else {
+          strawr::straw(norm = strawNorm,
+                        fname =juicerPath,
+                        chr1loc =  ec[2],
+                        chr2loc =  ec[1],
+                        unit = 'BP',
+                        binsize = resolution)
+        }
       },error=function(cond) {
         
         return(NULL)

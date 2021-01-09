@@ -1,4 +1,7 @@
 loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, balancing = T){
+  
+  GENOVA:::try_require("strawr", "loadJuicer", "github")
+  
   juicerPath <- normalizePath(juicerPath)
   # get metadata of juicer-file
   juicer_metadata = get_juicer_metadata(juicerPath)
@@ -19,15 +22,13 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
   strawNorm = ifelse(balancing, 'KR', "NONE")
   
   juicerList = lapply(seq_len(nrow(expandedChromosomes)), function(eci){
-    
+ 
     ec = expandedChromosomes[eci,]
-
     juicer_in <- tryCatch(
       {
-        try_require("strawr", "loadJuicer", "github")
-        
+        out <- NULL
         if("matrix" %in% names(as.list( args(strawr::straw) ))){ # check if straw-version has "matrix"-argument
-          strawr::straw(matrix = 'observed', 
+          out <- strawr::straw(matrix = 'observed', 
                         norm = strawNorm,
                         fname =juicerPath,
                         chr1loc =  ec[2],
@@ -35,13 +36,14 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
                         unit = 'BP',
                         binsize = resolution)
         } else {
-          strawr::straw(norm = strawNorm,
+          out <- strawr::straw(norm = strawNorm,
                         fname =juicerPath,
                         chr1loc =  ec[2],
                         chr2loc =  ec[1],
                         unit = 'BP',
                         binsize = resolution)
         }
+        out
       },error=function(cond) {
         
         return(NULL)
@@ -69,14 +71,14 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
 
 
   juicer_data = data.table::rbindlist(juicerList)
-
+  rm(juicerList)
   # split into index and signal-files
   SA = splitJuicerData(juicer_data, resolution)
-
+  rm(juicer_data)
+  
   SIG = SA[[1]]
   ABS = SA[[2]]
-
-  
+  rm(SA)
   
   if (!is.null(scale_bp)) {
     

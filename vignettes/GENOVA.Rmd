@@ -1,5 +1,5 @@
 ---
-title: "GENOVA: explore the Hi-C's"
+title: "GENOVA: explore the Hi-Cs"
 author:
 - name: Robin H. van der Weide
   affiliation:
@@ -54,14 +54,14 @@ Function   | Resolution
 ---------- | ----------
 APA | 10kb-20kb
 ATA  | 10kb-40kb
-cisTotal.perChrom | 500kb-1Mb
-chromosomeMatrix | 500kb-1Mb
+cis_trans | 500kb-1Mb
+chromosome_matrix | 500kb-1Mb
 RCP | 40kb-500kb
-intra.inter.TAD.contacts | 20kb - 40kb 
+intra_inter_TAD | 20kb - 40kb 
 PE-SCAn | 20kb-40kb
-hic.matrixplot | $\frac{width\ in\ bp\ of\ window}{500}$ 
+hic_matrixplot | $\frac{width\ in\ bp\ of\ window}{500}$ 
 centromere.telomere.analysis | 40kb
-*.compartment.plot | 100kb
+Other matrixplots | 100kb
 : (\#tab:tableRES) Recommended resolutions. These will provide optimal resource/result tradeoffs.
 
 Experiment            | Contacts |  10kb  |  40kb  |  100kb  |  1Mb 
@@ -71,8 +71,8 @@ iPSC [@Krijger2016]   | 427.9M   | 3.1Gb  | 1.9Gb  |  1.0Gb  | 53.1MB
 : (\#tab:tableMEM) Memory footprints of objects loaded into R. 
 
 Several functions rely on centromere-information. You can add this in the form of a BED-like three-column data.frame when constructing the experiment-object ^[Please make sure that the chromosome-names match.]. If not present, the centromeres will be emperically identified by searching for the largest stretch of no coverage on a chromosome.
-```{r centromere, cache=T}
-centromeres = read.delim('../data/hg19_cytobandAcen.bed', 
+```{r centromere, cache=F}
+centromeres = read.delim('../data/symlinks/hg19_cytobandAcen.bed', 
                          sep = '\t', 
                          h = F, 
                          stringsAsFactors = F)
@@ -82,42 +82,56 @@ head(centromeres)
 ## construct.experiment
 Every Hi-C experiment will be stored in an experiment-object. This is done by invoking the `construct.experiment` function. Inside, several sanity checks will be performed, data is normalised to the total number of reads and scaled to a billion reads (the default value of the `BPscaling`-option). For this example, we are going to use the Hi-C maps of WT and $\Delta$WAPL Hap1 cells from Haarhuis et al. [-@Haarhuis2017]. Since the genome-wide analyses do not need very high-resolution data, we will construct both 10kb, 40kb and 1Mb resolution experiment-objects. 
 
-```{r CONSTRUCT, echo=T, warning=FALSE, error=F, results='hide', cache=T, cache.lazy=F}
-Hap1_WT_10kb <- load_contacts(signal_path = '../data/symlinks/WT_10000_iced.matrix', 
-                              indices_path = '../data/symlinks/WT_10000_abs.bed',  
-                              sample_name = "WT", 
-			                        colour = "black")
+```{r CONSTRUCT, echo=T, warning=FALSE, error=F, results='hide', cache=F, cache.lazy=F}
+Hap1_WT_10kb <- load_contacts(
+  signal_path = '../data/symlinks/WT_10000_iced.matrix', 
+  indices_path = '../data/symlinks/WT_10000_abs.bed',  
+  sample_name = "WT", 
+  colour = "black"
+)
 
-Hap1_WAPL_10kb <- load_contacts(signal_path = '../data/symlinks/WAPL_10000_iced.matrix', 
-                                indices_path = '../data/symlinks/WAPL_10000_abs.bed', 
-                                sample_name = "WAPL", 
-                                colour = "red")
+Hap1_WAPL_10kb <- load_contacts(
+  signal_path = '../data/symlinks/WAPL_10000_iced.matrix', 
+  indices_path = '../data/symlinks/WAPL_10000_abs.bed', 
+  sample_name = "WAPL", 
+  colour = "red"
+)
 
-Hap1_SCC4_10kb <- load_contacts(signal_path = '../data/symlinks/SCC4_10000_iced.matrix', 
-                                indices_path = '../data/symlinks/SCC4_10000_abs.bed', 
-                                sample_name = "SCC4", 
-                                colour = "green")
+Hap1_SCC4_10kb <- load_contacts(
+  signal_path = '../data/symlinks/SCC4_10000_iced.matrix', 
+  indices_path = '../data/symlinks/SCC4_10000_abs.bed', 
+  sample_name = "SCC4", 
+  colour = "green"
+)
 
-Hap1_WT_40kb <- load_contacts(signal_path = '../data/symlinks/WT_40000_iced.matrix', 
-                                indices_path = '../data/symlinks/WT_40000_abs.bed', 
-                                sample_name = "WT",  
-                                colour = "black")
+Hap1_WT_40kb <- load_contacts(
+  signal_path = '../data/symlinks/WT_40000_iced.matrix', 
+  indices_path = '../data/symlinks/WT_40000_abs.bed', 
+  sample_name = "WT",  
+  colour = "black"
+)
 
-Hap1_WAPL_40kb <- load_contacts(signal_path = '../data/symlinks/WAPL_40000_iced.matrix', 
-                                indices_path = '../data/symlinks/WAPL_40000_abs.bed', 
-                                sample_name = "WAPL", 
-                                colour = "red")
+Hap1_WAPL_40kb <- load_contacts(
+  signal_path = '../data/symlinks/WAPL_40000_iced.matrix', 
+  indices_path = '../data/symlinks/WAPL_40000_abs.bed', 
+  sample_name = "WAPL", 
+  colour = "red"
+)
 
-Hap1_WT_1MB <- load_contacts(signal_path = '../data/symlinks/WT_1000000_iced.matrix', 
-                                indices_path = '../data/symlinks/WT_1000000_abs.bed', 
-                                sample_name = "WT", centromeres = centromeres,
-                                colour = "black")
+Hap1_WT_1MB <- load_contacts(
+  signal_path = '../data/symlinks/WT_1000000_iced.matrix', 
+  indices_path = '../data/symlinks/WT_1000000_abs.bed', 
+  sample_name = "WT", centromeres = centromeres,
+  colour = "black"
+)
 
-Hap1_WAPL_1MB <- load_contacts(signal_path = '../data/symlinks/WAPL_1000000_iced.matrix', 
-                                indices_path = '../data/symlinks/WAPL_1000000_abs.bed', 
-                                sample_name = "WAPL", 
-                                centromeres = centromeres,
-                                colour = "red")
+Hap1_WAPL_1MB <- load_contacts(
+  signal_path = '../data/symlinks/WAPL_1000000_iced.matrix', 
+  indices_path = '../data/symlinks/WAPL_1000000_abs.bed', 
+  sample_name = "WAPL", 
+  centromeres = centromeres,
+  colour = "red"
+)
 ```
 
 
@@ -152,74 +166,76 @@ Hap1_WT_10kb_cooler <- load_contacts(signal_path = '../data/symlinks/WT.cooler',
 
 ```
 
+\pagebreak
+
 # Genome-wide analyses
 A good place to start your analyses are some functions on a genome-wide level. We can assess the quality of the library, identify translocations and generate contact probability (aka scaling or interaction decay plots).
 
 ## *Cis*-quantification
-Work by the group of Amos Tanay showed that the expected amount of intra-chromosomal contacts is the range of 90 to 93 percent [@Olivares-Chauvet2016]. Assuming that any extra inter-chromosomal contacts are due to debris/noise, the user might aspire to get the *cis*-percentages as close to 90% as possible. To compute the percentage of per-sample *cis*-contacts, we simply provide `cis_trans()` with the exp-object of interest. It will produce a boxplot of the percentages *cis* per sample (figure \@ref(fig:cis)). 
+Work by the group of Amos Tanay showed that the expected amount of intra-chromosomal contacts is the range of 90 to 93 percent [@Olivares-Chauvet2016]. Assuming that any extra inter-chromosomal contacts are due to debris/noise, the user might aspire to get the *cis*-percentages as close to 90% as possible. To compute the percentage of per-sample *cis*-contacts, we simply provide `cis_trans()` with the contacts-object of interest. The output can be used to make a barplot of the percentages *cis* per sample (figure \@ref(fig:cis)). 
 
-```{r cis, cache=T,fig.cap="Fraction of cis-contacts per sample. Red dotted line denote the percentage-range from Olivares et al..", fig.small = T}
+```{r cis, cache=F,fig.cap="Fraction of cis-contacts per sample. Red dotted line denote the percentage-range from Olivares et al..", fig.small = T}
 cisChrom_out <- cis_trans( list(Hap1_WT_1MB, Hap1_WAPL_1MB) )
 barplot(cisChrom_out$cis, names.arg = cisChrom_out$sample, ylim = c(0, 100) )
-abline(h = 90, col = 'red', lty = 3)
-abline(h = 93, col = 'red', lty = 3)
+abline(h = cisChrom_out$cis[1], col = 'red', lty = 3)
+abline(h = cisChrom_out$cis[2], col = 'red', lty = 3)
 ```
 
 The same function can also be ran on specific regions. For this example, we will compute the intra-arm percentages. Plotting this shows us that there are interesting differences between the amounts of intra-arm contacts in *cis*, which is can be attributed to the loss of TADs [@Haarhuis2017] (figure \@ref(fig:cis2)). 
-```{r cis2, cache=T,fig.cap="Fraction of cis-contacts per sample at the p-arms.", fig.small = T}
+```{r cis2, cache=F,fig.cap="Fraction of cis-contacts per sample at the p-arms.", fig.small = T}
 p_arms <- data.frame('chromosome' = centromeres[,1],
                      'start' = 0,
                      'end' = centromeres[,2])
 cisChrom_out <- cis_trans( list(Hap1_WT_10kb, Hap1_SCC4_10kb) , bed = p_arms)
-barplot(cisChrom_out$cis, names.arg = cisChrom_out$sample )
+barplot(cisChrom_out$cis, names.arg = cisChrom_out$sample, ylim = c(0, 100))
 abline(h = 90, col = 'red', lty = 3)
 abline(h = 93, col = 'red', lty = 3)
 ```
 
-## chromosome plots
-Hi-C has been shown to be a powerful data-source to detect chromosomal rearrangements [@Harewood2017]. To find possible translocations, we can plot the genome-wide enrichment of interactions between all combinations of chromosomes. The values in the matrix are $log10(observed/expected)$. The Hap1 cell line has two known translocations, which we can easily see in the resulting plot (figure \@ref(fig:chromMat1)). To narrow-in on this location, you could use the `trans.compartment.plot`-function (discussed below).
-```{r chromMat1, echo = F, message=FALSE, cache=T, fig.cap="Chromosome matrix. The two known translocations of Hap1 cells are easily identified (15-19 \\& 9-22).", fig.small = T}
-par(pty ='s')
-# Lets remove mitochondrial and Y-chromosomal contacts
-# You can also use chromsToUse to select specific chromosomes.
-chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"), cut.off = 2)
+\pagebreak
+
+## Chromosome plots
+Hi-C has been shown to be a powerful data-source to detect chromosomal rearrangements [@Harewood2017]. To find possible translocations, we can plot the genome-wide enrichment of interactions between all combinations of chromosomes. The values in the matrix are $log_2(observed/expected)$. The Hap1 cell line has two known translocations, which we can easily see in the resulting plot (figure \@ref(fig:chromMat1)). To narrow-in on this location, you could use the `trans.compartment.plot`-function (discussed below).
+```{r chromMat1, echo = F, message=FALSE, cache=F, fig.cap="Chromosome matrix. The two known translocations of Hap1 cells are easily identified (15-19 \\& 9-22).", fig.small = T}
+# An automatic attempt is made to exclude the Y-chromosome and 
+# mitochondrial genome
+# Inversely, you can change the `include_chr` argument to select specific
+# chromosomes
+chr_mat <- chromosome_matrix(Hap1_WAPL_1MB)
+visualise(chr_mat)
 ```
-```{r chromMat2, eval = F, message=FALSE, cache=T, fig.cap="Chromosome matrix. The two known translocations of Hap1 cells are easily identified (15-19 \\& 9-22).", fig.small = T}
-# Lets remove mitochondrial and Y-chromosomal contacts
-chromosomeMatrix(Hap1_WT_1MB, remove = c("chrM","chrY"))
-```
+
+\pagebreak
 
 ## RCP
-The Relative Contact Probability computes the contact probability as a function of genomic distance, as described in [@Lieberman-Aiden2009]. This can be computed for a specific set of chromosomes or genome-wide. To be able to ignore centromeric contacts (which have a abberant RCP), centromeric information is need. This is taken from the experiment-object or found emperically by comparing trans-interactions.
+The Relative Contact Probability (RCP) computes the contact probability as a function of genomic distance, as described in [@Lieberman-Aiden2009]. This can be computed for a specific set of chromosomes or genome-wide. To ignore centromeric contacts (which have a aberrant RCP), centromeric information is needed. This is taken from the experiment-object or found empirically by comparing trans-interactions.
 
-```{r doRCP, cache=T}
+```{r doRCP, cache=F}
 RCP_out <- RCP(explist = list(Hap1_WT_40kb, Hap1_WAPL_40kb), 
                chromsToUse = 'chr1')
 ```
 
-The user can decide to plot the RCP per chromosome. If the data is sparse, a LOESS-smooting could be convenient. It takes the color and name from the experiment-objects. If we look at the resulting plot, we can see that the $\Delta WAPL$ has more interactions in the $[\pm800kb, \pm2Mb]$ range (figure \@ref(fig:RCPPLOT1)). The sizes of TADs are fall into this range, so a next step could be to dive into the TAD-specific analyses (discussed below). Moreover, the $\Delta WAPL$ has less interactions in the far-*cis* range ($[10Mb, 100Mb]$): A- and B-compartments are often of these sizes, so a next step could be to look more into comparmentalisation with `cis.compartment.plot` or `trans.compartment.plot`, for example.
+The user can decide to plot the RCP per chromosome. If the data is sparse, a LOESS-smooting could be convenient. It takes the color and name from the experiment-objects. If we look at the resulting plot, we can see that the $\Delta WAPL$ has more interactions in the $[\pm\text{800kb}, \pm\text{2Mb}]$ range (figure \@ref(fig:RCPPLOT1)). The sizes of TADs are fall into this range, so a next step could be to dive into the TAD-specific analyses (discussed below). Moreover, the $\Delta WAPL$ has less interactions in the far-*cis* range ($[\pm\text{10Mb}, \pm\text{100Mb}]$): A- and B-compartments are often this size, so a next step could be to look more into compartmentalisation with `compartment_matrixplot` or `trans.compartment.plot`, for example.
 ```{r, echo=F}
 options(scipen = 1)
 ```
 
-```{r RCPPLOT1, cache=T, message=FALSE, fig.wide= T , fig.cap= "RCP. Every facet shows the RCP of one chromosome."}
-# Plot RCP: per-chromosome
-visualise(RCP_out, 
-          smooth = T) 
+```{r RCPPLOT1, cache=F, message=FALSE, fig.wide= T , fig.cap= "RCP. Every facet shows the RCP of one chromosome."}
+visualise(RCP_out)
 ```
 
-### differentials
-It is also possible to directly compare samples to one (like WT versus WAPL). For this, metric has to be set to `lfc` and contrast to 1 (figure \@ref(fig:RCPPLOT2)). The log-fold change of average probabilities are then plotted.
-```{r RCPPLOT2, message=FALSE,  cache=T, fig.small= T , fig.cap= "RCP in lfc-mode.", warning=FALSE}
+### Differentials
+We can directly compare samples to one another (for example WT versus WAPL). To plot this, the `metric` argument has to be set to `lfc` and `contrast` to 1, indicating the WT sample (figure \@ref(fig:RCPPLOT2)). This plots the log-fold change of average probabilities.
+```{r RCPPLOT2, message=FALSE,  cache=F, fig.small= T , fig.cap= "RCP in lfc-mode.", warning=FALSE}
 # Plot RCP: combined
 visualise(RCP_out, contrast = 1, metric = 'lfc')
 ```
 
-### regions
-But what if you want to compare the contact probabilities of specific regions, like Cohesin- or CTCF-bound regions? For this, we added the possibility to add a list of BED-data_frames to the `bedList`-argument. Under the hood, we perform a standard per-arm RCP (thus still enabling users to alse set the `chromsToUse`-parameter), whereafter we filter out Hi-C bins that do not have entries in the dataframe(s) of `bedList`. The same plot-function can be used: different BED-files will have different line-types. The fact that we use linetype for the `bedList` entries, allows us to still use multiple samples in `experimentList`, as shown in figure \@ref(fig:RCPBED). But if you only provide one experiment-object, we will use different line-colours of the different BEDs.
-```{r RCPBED, message=FALSE,  cache=T, fig.small= F , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP."}
-CTCF = read.delim('../data/symlinks/CTCF_WT_motifs.bed', h = F)
-SMC1 = read.delim('../data/symlinks/SMC1_WT_peaks.narrowPeak', h = F)
+### Regions
+But what if you want to compare the contact probabilities of specific regions, like Cohesin- or CTCF-bound regions? For this purpose, we added the possibility to add a `list` of BED-`data.frame`s to the `bedList`-argument. Under the hood, we perform a standard per-arm RCP (thus still enabling users to set the `chromsToUse`-parameter). Thereafter, we filter out Hi-C bins that do not have entries in the `data.frame`(s) of `bedList`. The same plot-function `visualise()` can be used.
+```{r RCPBED, message=FALSE,  cache=F, fig.small= F , fig.cap= "RCP with BEDs. We can also add BEDs as sites to compute the RCP."}
+CTCF = read.delim('../data/symlinks/CTCF_WT_motifs.bed', header = FALSE)
+SMC1 = read.delim('../data/symlinks/SMC1_WT_peaks.narrowPeak', header = FALSE)
 
 RCP_out = RCP(list(Hap1_WT_40kb, Hap1_WAPL_40kb),
               bedlist =  list("CTCF" = CTCF, 
@@ -230,16 +246,22 @@ visualise(RCP_out)
 visualise(RCP_out, contrast = 1, metric = 'lfc')
 ```
 
-## A- and B-compartments
-```{r saddle, message=FALSE, cache=T, warning=FALSE, fig.cap= "The compartment-scores on chromosome 17.", fig.width=8}
-H3K27acPeaks = read.delim('../data/symlinks/H3K27ac_WT.narrowPeak', h = F)
+\pagebreak
 
-CS_out = compartment_score(list(Hap1_WT_40kb, Hap1_WAPL_40kb), bed = H3K27acPeaks)
+## A- and B-compartments
+Dividing chromosomes into A- and B-compartments requires the calculation of a compartment score along with information about what parts of the genome are active. To infer which compartment is A (viewed as the active state) and which is B, we can add a BED-`data.frame` of ChIP-seq peaks from active histone marks (e.g. H3K27ac, H3K4me1). Below, we can use the `compartment_score()` function with H3K27ac peaks to distinguish the compartments. The compartment score uses the first eigenvector of an eigendecomposition on the distance-dependant observed/expected matrix to get an unsigned compartment score.  This score is then correlated to H3K27ac presence to yield signed compartment scores that can be interpreted as A compartments when positive and B compartments when negative.
+```{r saddle, message=FALSE, cache=F, warning=FALSE, fig.cap= "The compartment-scores on chromosome 17.", fig.width=8}
+H3K27acPeaks = read.delim('../data/symlinks/H3K27ac_WT.narrowPeak', 
+                          header = FALSE)
+
+CS_out = compartment_score(list(Hap1_WT_40kb, Hap1_WAPL_40kb), 
+                           bed = H3K27acPeaks)
 visualise(CS_out, chr = "chr17")
 ```
 
 ### Saddle-analyses
-```{r saddlePlot, message=FALSE,  fig.asp=.65, cache=T, warning=FALSE, fig.cap= "A saddle-plot: WAPL-knockout cells have less intra-compartment enrichment.", fig.width=8}
+To illustrate the self-preference of compartments, one can use the `saddle()` function to perform a compartment score 'quantile versus quantile' analysis. Every chromosome arm is divided into quantiles based on the compartment score, and distance dependent observed over expected is computed. Every combination of quantile bins is then averaged to produce the saddle analysis.
+```{r saddlePlot, message=FALSE,  fig.asp=.65, cache=F, warning=FALSE, fig.cap= "A saddle-plot: WAPL-knockout cells have less intra-compartment enrichment.", fig.width=8}
 saddle_out = saddle(list(Hap1_WT_40kb, Hap1_WAPL_40kb), 
                    CS_discovery = CS_out,
                    bins = 50)
@@ -248,83 +270,81 @@ visualise(saddle_out)
 ```
 
 ### Compartment-strength
-```{r saddleStrength, message=FALSE,  cache=T, warning=FALSE, fig.cap= "The per-arm compartment strength is at almost every arm lower in the WAPL knockout.", fig.small = T}
+The output of the saddle analysis gives a starting point for calculating the compartment strength, which gives a score for how much A-A and B-B interactions occur versus A-B interactions. The comparment strength can be calculated using the `quantify()` function on the output of the `saddle()` function.
+```{r saddleStrength, message=FALSE,  cache=F, warning=FALSE, fig.cap= "The per-arm compartment strength is at almost every arm lower in the WAPL knockout.", fig.small = T}
 CSS <- quantify(saddle_out)
 
 compared <- tidyr::spread(unique(CSS[,-c(3,4)]), key = 'exp', value = 'strength')
 
-plot(compared$WT, compared$WAPL, xlim = c(0,4), ylim = c(0,4), pch = 20)
-abline(a = 0, b = 1)
+with(compared, plot(WT, WAPL, xlim = c(0,4), ylim = c(0,4), pch = 20))
+abline(a = 0, b = 1, lty = 1)
 ```
+\pagebreak
 
 # Interaction plots
-GENOVA has serveral plotting-functions for genomic loci. *cis.compartment.plot* and *trans.compartment.plot* provide a easy way to plot whole chromosome arms, including compartmentalisation-score tracks. For more zomomed-in plots *hic.matrixplot* can be used. This function also allows rich annotation and between-experiment comparision possibilities. All functions try to guess the most appropriate color-scale limits, but finer control of this can be gotten by setting the `cut.off`-argument.
+GENOVA has several plotting-functions for genomic loci. `compartment_matrixplot()` and *trans.compartment.plot* provide a easy way to plot whole chromosome arms, including compartmentalisation-score tracks. For more zoomed-in plots, `hic_matrixplot()` can be used. This function also allows rich annotation and between-experiment comparison possibilities. All functions try to guess the most appropriate colour-scale limits, but finer control of this can be gotten by setting the `colour_lim`-argument.
 
 
-## *cis*-interactions 
-The compartmentalisation of the chromatin into A and B van already described in the orignial Hi-C paper [@Lieberman-Aiden2009]. Serval papers have discribed the loss of compartmentalisation when the Cohesin complex is stabalised [@Haarhuis2017,@Wutz2017,@Gassler2017]. To view this interesting level of chromatin organisation, we can use *cis.compartment.plot*. With this, we can plot one arm of a chromosome with the compartment-score plotted above. To infer which compartment is A (viewed as the active state) and which is B, we can add a BED-data.frame of ChIP-seq peaks from active histone marks (e.g. H3K27ac, H3K4me1). In figure \@ref(fig:CCP1) you can see the resulting plots, where you can see that the checkerboard-pattern in the matrix and the amplitude of the compartment-score are deminished in the WAPL-knockout.
-```{r CCP1, out.width='.49\\linewidth', fig.show='hold',fig.align='center', message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot: WT vs WAPL. Stabilised Cohesin-mediated loops by WAPL-knockout leads to loss of compartments.",dev = 'png', dpi=300,cache=T}
-H3K27ac_peaks = read.delim('../data/symlinks/H3K27ac_WT.narrowPeak', h = F)
-
-cis.compartment.plot(exp1 = Hap1_WT_40kb, 
-                     exp2 = Hap1_WAPL_40kb,
-                     chrom = 'chr14', 
-                     arm = 'q',
-                     cs.lim = 1.75, # max compartment-score
-                     cut.off = 15,
-                     chip = H3K27ac_peaks)
-
+## *Cis*-interactions 
+The compartmentalisation of the chromatin into A and B van already described in the original Hi-C paper [@Lieberman-Aiden2009]. Serval papers have described the loss of compartmentalisation when the Cohesin complex is stabalised [@Haarhuis2017,@Wutz2017,@Gassler2017]. To view this interesting level of chromatin organisation, we can use `compartment_matrixplot()`. This function can plot one arm of a chromosome with the compartment-score plotted above.  In figure \@ref(fig:CCP1) you can see the resulting plots, where you can see that the chequerboard-pattern in the matrix and the amplitude of the compartment-score are diminished in the WAPL-knockout.
+```{r CCP1, out.width='.49\\linewidth', fig.show='hold',fig.align='center', message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot: WT vs WAPL. Stabilised Cohesin-mediated loops by WAPL-knockout leads to loss of compartments.",dev = 'png', dpi=300,cache=F}
+compartment_matrixplot(
+  exp1 = Hap1_WT_40kb,
+  exp2 = Hap1_WAPL_40kb,
+  CS_discovery = CS_out,
+  chrom = "chr14", arm = "q",
+  colour_lim = c(0, 15)
+)
 ```
 
-The compartment-score is calculated by performing an eigenvector decomposition on the correlation-matrix of the expected over expected matrix. To view this O/E matrix, we can set the `obs.exp`-option to TRUE. This view gives a visually better view of the A- and B-compartments (figure \@ref(fig:CCP3)). 
-```{r CCP3, message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot. Observed over expected.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
-cis.compartment.plot(exp1 = Hap1_WT_40kb, 
-                     exp2 = Hap1_WAPL_40kb,
-                     chrom = 'chr20', 
-                     arm = 'q',
-                     cut.off = 1, 
-                     obs.exp = T,
-                     chip = H3K27ac_peaks)
+The compartment-score is calculated by performing an eigenvector decomposition on the correlation-matrix of the expected over expected matrix. To view this observed over expected matrix, we can set the `metric`-option to `"obsexp"`. Alternatively, we can set `metric = "correlation"` to view the Pearson correlation of the observed over expected matrix. These metrics gives a visually better indication of the A- and B-compartments (figure \@ref(fig:CCP3)). 
+```{r CCP3, message=FALSE , fig.asp=1,fig.cap= "Cis compartment plot. Observed over expected.",dev = 'png', dpi=300,cache=F, fig.retina=T, fig.small = T}
+
+compartment_matrixplot(
+  exp1 = Hap1_WT_40kb,
+  exp2 = Hap1_WAPL_40kb,
+  CS_discovery = CS_out,
+  chrom = "chr20", arm = "q",
+  metric = "obsexp"
+)
 ```
 
+\pagebreak
 
-
-## *trans*-interactions 
-As could be seen above, A-compartments interact more with other A-compartments and the same is true for B-compartments. However, is the same true for *trans*? The function `trans.compartment.plot` will allow the user to plot a trans-matrix (i.e. a matrix of the arms of two different chromosomes) along with the respective *cis* compartment-scores. This function could also be used to investigate chromosomsal translocations: the $9q;22q$ translocation can be clearly seen if we use this function, as in figure \@ref(fig:TCP).
-```{r TCP, message=FALSE , fig.asp=1,fig.cap= "Trans compartment plot. The t(9q;22q) translocation is easily identified.",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = T}
-
-trans.compartment.plot(exp = Hap1_WT_40kb, 
-                       chrom1 = 'chr9', 
-                       arm1 = 'q', 
-                       chrom2 = 'chr22', 
-                       arm2 = 'q', 
-                       cut.off = 10,
-                       chip = H3K27ac_peaks)
-
+## *Trans*-interactions 
+The function `trans_matrixplot()` will allow the user to plot a trans-matrix (i.e. a matrix of the arms of two different chromosomes). This function could also be used to investigate chromosomal translocations: the $\text{9q;22q}$ translocation can be clearly seen if we use this function, as in figure \@ref(fig:TCP).
+```{r TCP, message=FALSE , fig.asp=1,fig.cap= "Trans compartment plot. The t(9q;22q) translocation is easily identified.",dev = 'png', dpi=300,cache=F, fig.retina=T, fig.small = T}
+trans_matrixplot(
+  Hap1_WT_40kb,
+  chrom_up = "chr9", start_up = 100e6, end_up = 140e6,
+  chrom_down = "chr22", start_down = 16e6, end_down = 40e6,
+  colour_lim = c(0, 20)
+)
 ```
+\pagebreak
 
-## matrix plots
-To produce richly annotated zoomed-in (i.e. max 10Mb) plots of specific regions, we use the `hic.matrixplot` function. In this, we can use one or two experiment objects: two can be shown either in diff-mode (the difference between the two) or upper/lower triangle mode. TAD- and loop-annotations can be added, as well as bigwig- and bed-tracks. Moreover, genemodel-files can be added. In this section, we will build up to a final, fully annotated, matrix from a humble one-experiment plot (figure \@ref(fig:HMP1)).
-```{r HMP1, message=FALSE , fig.asp=1,fig.cap= "Hi-C matrixplot. Simplest example: one experiment, no annotation",dev = 'png', dpi=300,cache=T, fig.retina=T, fig.small = F}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+## Matrix plots
+To produce richly annotated zoomed-in (i.e. max 10Mb) plots of specific regions, we use the `hic_matrixplot()` function. In this, we can use one or two experiment objects: two can be shown either in diff-mode (the difference between the two) or upper/lower triangle mode. TAD- and loop-annotations can be added, as well as bigwig- and bed-tracks. Moreover, genemodel-files can be added. In this section, we will build up to a final, fully annotated, matrix from a humble one-experiment plot (figure \@ref(fig:HMP1)).
+```{r HMP1, message=FALSE , fig.asp=1,fig.cap= "Hi-C matrixplot. Simplest example: one experiment, no annotation",dev = 'png', dpi=300,cache=F, fig.retina=T, fig.small = F}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',
                start = 25e6,
                end=30e6, 
                cut.off = 50) # upper limit of contacts
 ```
 
-### two experiments
-Adding a second experiment will give us the option of `coplot`, which can be `dual` (default) or `diff`. The first shows exp1 in the upper triangle and exp2 in the lower Exp1 is subtracked from exp2 in `diff`-mode: red is therefore more contacts in exp2 and blue denotes more contacts in exp1 (figure \@ref(fig:HMPdiff1)).
-```{r HMPdiff1, out.width='.49\\linewidth', fig.show='hold',fig.align='center',  message=FALSE , fig.asp=1,fig.cap= "Hi-C matrixplot with two experiments: dual vs diff mode. The extended loops in the WAPL knockout are easily seen at around 28Mb in the lower triangle in dual-mode (left panel) and as red points in diff-mode (right panel).",cache=T, fig.retina=T, dev = 'png', dpi=300,fig.wide = T}
+### Two experiments
+Adding a second experiment will give us the option of `coplot`, which can be `dual` (default) or `diff`. The left plot shows the WT sample in the upper triangle and KO sample in the lower. In the right plot, the KO sample is subtracted from the WT in `diff`-mode: red is therefore more contacts in the KO and blue denotes more contacts in the WT (figure \@ref(fig:HMPdiff1)).
+```{r HMPdiff1, out.width='.49\\linewidth', fig.show='hold',fig.align='center',  message=FALSE , fig.asp=1,fig.cap= "Hi-C matrixplot with two experiments: dual vs diff mode. The extended loops in the WAPL knockout are easily seen at around 28Mb in the lower triangle in dual-mode (left panel) and as red points in diff-mode (right panel).",cache=F, fig.retina=T, dev = 'png', dpi=300,fig.wide = T}
 
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                exp2 = Hap1_WAPL_10kb,
                chrom = 'chr7',
                start = 25e6,
                end=30e6, 
                cut.off = 50) # upper limit of contacts
 
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                exp2 = Hap1_WAPL_10kb,
                coplot = 'diff',
                chrom = 'chr7',
@@ -333,17 +353,19 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                cut.off = 25) 
 ```
 
+\pagebreak
+
 ### TADs and loops
-It can be very usefull to annotate the matrix with the postions of TADs and loops: take, for example, the situation where these structures are altered in a knockout for example. We are going to use the TAD- and loop-calls of WT Hap1 20-kb matrices from Haarhuis et al. [-@Haarhuis2017], generated with HiCseg [@Levy-Leduc2014].
+It can be very useful to annotate the matrix with the positions of TADs and loops: take, for example, the situation where these structures are altered in a knockout for example. We are going to use the TAD- and loop-calls of WT Hap1 20-kb matrices from Haarhuis et al. [-@Haarhuis2017], generated with HiCseg [@Levy-Leduc2014].
 
 Lets load some TAD- and loop-annotations:
-```{r loadLOOP_mp, cache=T}
-WT_TADs = read.delim('../data/symlinks/WT_hicseg_TADs.bed', h = F)
+```{r loadLOOP_mp, cache=F}
+WT_TADs  = read.delim('../data/symlinks/WT_hicseg_TADs.bed', h = F)
 WT_Loops = read.delim('../data/symlinks/WT_HICCUPS.bedpe', h = F, skip = 1)
 sanborn2015_Loops = read.delim('../data/symlinks/GSE74072_Hap1_HiCCUPS_looplist.txt.gz')
 ```
 
-```{r fixLOOP_mp, echo = F, cache=T}
+```{r fixLOOP_mp, echo = F, cache=F}
 WT_Loops$V1 = gsub(pattern = "^", replacement = "chr", x = WT_Loops$V1) 
 WT_Loops$V4 = gsub(pattern = "^", replacement = "chr", x = WT_Loops$V4)
 WT_TADs = WT_TADs[!WT_TADs$V3 < WT_TADs$V2,] 
@@ -351,26 +373,28 @@ sanborn2015_Loops[,1] = gsub(sanborn2015_Loops[,1], pattern = "^", replacement =
 sanborn2015_Loops[,4] = gsub(sanborn2015_Loops[,4], pattern = "^", replacement = "chr")
 ```
 
-Add them to the plot by using the `tad`- and `loops`-arguments. Both can be plotted in one or both of the traingles and colored as whished (figure \@ref(fig:HMPtadloop)). Since loops are very small in a hic-matrixplot, they will be fully overlapped by the loop-annotations. To overcome this, we expand the annotations with a fixed bp using `loops.resize`. This will lead to a more box-like annotation surrounding the loop. 
-```{r HMPtadloop, out.width='.49\\linewidth', fig.show='hold',fig.align='center', fig.wide = T, message=FALSE , fig.cap= "Hi-C matrixplot: TAD- and loop-annotations from Haarhuis et al. (2017).",cache=T,fig.asp=1, dev = 'png', dpi=300}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+Add them to the plot by using the `tad`- and `loops`-arguments. Both can be plotted in one or both of the triangles and coloured as deemed appropriate (figure \@ref(fig:HMPtadloop)). Since loops are very small in a hic-matrixplot, they will be fully overlapped by the loop-annotations. To overcome this, we expand the annotations with a fixed distance in basepairs using `loops.resize`. This will draw a circle around the loop location. 
+```{r HMPtadloop, out.width='.49\\linewidth', fig.show='hold',fig.align='center', fig.wide = T, message=FALSE , fig.cap= "Hi-C matrixplot: TAD- and loop-annotations from Haarhuis et al. (2017).",cache=F,fig.asp=1, dev = 'png', dpi=300}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',
                start = 25e6,
                end=30e6, 
                loops = WT_Loops, # see APA
-               loops.colour = 'blue', # purple loops
+               loops.colour = 'blue', # blue loops
                loops.type = 'upper', # only plot in upper triangle
                loops.radius = 20e3, # expand for visibility
                tads = WT_TADs, # see ATA
                tads.type = 'lower', # only plot in lower triangle
-               tads.colour = '#ffd92f', # green TAD-borders
+               tads.colour = 'limegreen', # green TAD-borders
                cut.off = 25) # upper limit of contacts
 
 ```
 
+\pagebreak
+
 ### BigWigs and BEDs
-Manipulation of CTCF-binding sites can result in loss or gain of loops and/or TADs [@DeWit2015a]. If one is interested in the effects of a knockout on the binding of a protein in combination with changes in interaction frequencies, adding ChIP-seq signal or -peaks to the matrix can be very helpfull. Two tracks above and two tracks to the left can be added. These can be either BED-like data.frames or the paths the .bw files. For example, lets load a BED6-file (chrom, start, end, name, score, and strand ^[https://genome.ucsc.edu/FAQ/FAQformat.html]) of CTCF-motifs under CTCF-ChIP peaks. The argument `type` can be set to either *triangle* or *rectangle*: triangle is nice to use if you want to look at the orientation of the BED-entries (figure \@ref(fig:HMPchip)). If you only have a three column BED, then the autput will allways be *rectangle*.
-```{r CTCF, cache=T}
+Manipulation of CTCF-binding sites can result in loss or gain of loops and/or TADs [@DeWit2015a]. If you are interested in the effects of a knockout on the binding of a protein in combination with changes in interaction frequencies, adding ChIP-seq signal or -peaks to the matrix can be helpful. You can add up to two tracks above and two tracks to the left. These can be either BED-like `data.frame`s or the paths to the `.bw` files. For example, let's load a BED6-file (chrom, start, end, name, score, and strand ^[https://genome.ucsc.edu/FAQ/FAQformat.html]) of CTCF-motifs under CTCF-ChIP peaks. The argument `type` can be set to either *triangle* or *rectangle*. The triangle is nice to use if you want to look at the orientation of the BED-entries (figure \@ref(fig:HMPchip)). If you only have a three column BED, then the output will always be *rectangle*.
+```{r CTCF, cache=F}
 CTCF = read.delim('../data/symlinks/CTCF_WT_motifs.bed', h = F)
 SMC1 = read.delim('../data/symlinks/SMC1_WT_peaks.narrowPeak', h = F)
 ```
@@ -387,11 +411,11 @@ library(devtools)
 install_github(repo ='bigwrig', username =  'jayhesselberth')
 ```
 
-```{r HMPchip, message=T , fig.cap= "Hi-C matrixplot: ChIPseq. A BED-file of CTCF-sites is plotted at the top and a coverage-track of SMC1 ChIP-seq is plotted beneath this. The symmAnn-option leads to the same tracks being plotted on the left.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+```{r HMPchip, message=T , fig.cap= "Hi-C matrixplot: ChIPseq. A BED-file of CTCF-sites is plotted at the top and a coverage-track of SMC1 ChIP-seq is plotted beneath this. The symmAnn-option leads to the same tracks being plotted on the left.",cache=F,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',  start = 26.75e6,  end=28.5e6, 
                loops = WT_Loops, # see APA
-               loops.colour = '#998ec3', # purple loops
+               loops.colour = 'purple', # purple loops
                loops.type = 'upper', # only plot in upper triangle
                loops.radius = 20e3, # expand for visibility
                type = 'triangle',
@@ -401,8 +425,10 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                cut.off = 65) # upper limit of contacts
 ```
 
+\pagebreak
+
 ### Genes
-[@Dixon2012] showed that housekeeping-genes are enriched in the vincinity of TAD-borders. Another interesting question could be wheter differentially expressed genes are also found near TAD-borders or binding sites of specific proteins when studying a knockout. These type of questions can be tackled by adding the appropiate gene-models to `hic.matrixplot`. To do this, we make use of the data.fame, where each row is an exon from a gene. There are several ways to get this. One of the easiest is to use biomart to get exon-coordinates. This can be done with the biomaRt-package or via the web-based service. For this example, we downloaded data of all exons from the Ensembl biomart and plotted both the BED-file and the genes (figure \@ref(fig:HMPchipGene)).
+[@Dixon2012] showed that housekeeping-genes are enriched in the vicinity of TAD-borders. Another interesting question could be whether differentially expressed genes are also found near TAD-borders or binding sites of specific proteins when studying a knockout. These type of questions can be tackled by adding the appropriate gene-models to `hic_matrixplot()`. To do this, we use a `data.fame`, where each row is an exon of a gene. There are several ways to get this, and one of the easier ways is to use biomart to get exon-coordinates. You could use the biomaRt-package or the web-based service. For this example, we downloaded data of all exons from the Ensembl biomart and plotted both the BED-file and the genes (figure \@ref(fig:HMPchipGene)).
 ```{r biomart}
 # features downloaded:
 ## Gene stable ID & Transcript stable ID & Chromosome/scaffold name &
@@ -416,7 +442,7 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 #                         pattern = '^',
 #                         replacement = 'chr') 
 # martExport$strand = ifelse(martExport$strand == 1, '+',"-") # 1/-1 to +/-
-load('../data/martExport.Rdata')
+load('../data/symlinks/martExport.Rdata')
 ```
 
 ```{r, echo =F }
@@ -426,19 +452,21 @@ knitr::kable(
 ```
 
 
-```{r HMPchipGene, message=FALSE , cache=T, fig.cap= "Hi-C matrixplot: genes.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+```{r HMPchipGene, message=FALSE , cache=F, fig.cap= "Hi-C matrixplot: genes.",fig.asp=1, dev = 'png', dpi=300,fig.small = F}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',  start = 26.75e6,  end=28.5e6, 
                genes = martExport,
                cut.off = 65) # upper limit of contacts
 
 ```
 
-### Everthing together
-Finally, we can combine all these options in one. This may be complete overkill, but it could be quite handy. In this example, we can see that most TAD-borders and loop-anchors have clear SMC1- and CTCF-signal (figure \@ref(fig:HMPall)). Both these are expected to be found at these locations according to the *chromatin extrusion model*. Moreover, we can also see that the CTCF-orientation of the upstream and downstream loop-anchor are forward and reverse, resp. This *convergent rule* is a known feature of loops [@DeWit2015]. 
+\pagebreak
 
-```{r HMPall, message=FALSE , fig.cap= "Hi-C matrixplot: a complex case. Loops and TADs are annotated within the Hi-C matrix. On the top annotation-bar, we have plotted the ChIP-seq signal and peaks of SMC1. On the left annotation-bar are the ChIP-seq signal and peaks (with orientiation) of CTCF. Genes are plotted on both annotation-bars.",cache=T,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+### Everthing together
+Finally, we can combine all these options in one. This might put too much information in a single plot, but it can be quite handy. In this example, we can see that most TAD-borders and loop-anchors have clear SMC1- and CTCF-signal (figure \@ref(fig:HMPall)). Both these are expected to be found at these locations according to the *chromatin extrusion model*. Moreover, we can also see that the CTCF-orientation of the upstream and downstream loop-anchor are forward and reverse, respectively. This *convergent rule* is a known feature of loops [@DeWit2015]. 
+
+```{r HMPall, message=FALSE , fig.cap= "Hi-C matrixplot: a complex case. Loops and TADs are annotated within the Hi-C matrix. On the top annotation-bar, we have plotted the ChIP-seq signal and peaks of SMC1. On the left annotation-bar are the ChIP-seq signal and peaks (with orientiation) of CTCF. Genes are plotted on both annotation-bars.",cache=F,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',
                start = 25e6,
                end=28.5e6, 
@@ -458,29 +486,89 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                cut.off = 50) # upper limit of contacts
 ```    
 
+\pagebreak
+
+## Pyramid plots
+
+In GENOVA, 'pyramid plots' are plots of a region in the Hi-C interaction map rotated at an 45 degree angle (figure \@ref(fig:pyramidBasic)). This rotation coincides the diagonal with the x-axis, and the y-direction indicates distance from the diagonal.
+
+```{r, pyramidBasic, fig.cap= "A pyramid plot, showing a rotated Hi-C interaction map.",cache=F, dev = 'png', dpi=300}
+pyramid(exp = Hap1_WT_10kb,
+        chrom = 'chr7',
+        start = 25e6,
+        end=28.5e6,
+        colour = c(0, 50))
+```
+
+Pyramid plots can be cropped in the x-and y-direction to make them more space efficient (figure \@ref(fig:pyramidRect)).
+
+```{r, pyramidRect, fig.cap= "A cropped pyramid no longer looks like a pyramid.",cache=F, dev = 'png', dpi=300}
+pyramid(exp = Hap1_WT_10kb,
+        chrom = 'chr7',
+        start = 25e6,
+        end=28.5e6,
+        crop_x = c(26e6, 27.5e6), # cropping in x direction uses locations
+        crop_y = c(0, 2e6), # cropping in y direction uses distance
+        colour = c(0, 50))
+```
+
+For comparing two different samples with pyramid plots, there are two options. The first option is to use `pyramid_difference()`, which works very similar to `pyramid()`, but takes two samples instead of one \@ref(fig:pyramidDiff)). 
+
+```{r, pyramidDiff, fig.cap= "A pyramid plot showing the difference between two samples.",cache=F, dev = 'png', dpi=300}
+pyramid_difference(
+  Hap1_WT_10kb,
+  Hap1_WAPL_10kb,
+  chrom = "chr7", start = 25e6, end = 28.5e6
+)
+```
+
+The alternative option is to stack the plots together using plot composition. Because `pyramid()` is based on the ggplot2 package, we can use the patchwork plot composition package to stack two (or more) plots \@ref(fig:pyramidPatch)).
+
+```{r, pyramidPatch, fig.cap= "Using the patchwork package to stack pyramid plots.",cache=F, dev = 'png', dpi=300}
+library(patchwork)
+
+wt_pyramid <- pyramid(
+  Hap1_WT_10kb,
+  chr = "chr7", start = 25e6, end = 28.5e6,
+  crop_y = c(0, 1.5e6),
+  colour = c(0, 50)
+) + ggplot2::ggtitle("Wildtype")
+
+ko_pyramid <- pyramid(
+  Hap1_WAPL_10kb,
+  chr = "chr7", start = 25e6, end = 28.5e6,
+  crop_y = c(0, 1.5e6),
+  colour = c(0, 50)
+) + ggplot2::ggtitle("WAPL KO")
+
+ko_pyramid / wt_pyramid + plot_layout(guides = "collect")
+```
+\pagebreak
+
 # TADs
-Topologically Associated Domains (TADs) are $\pm.8-2Mb$ regions, which are seen as triangles in the matrix: regions that have more interactions within than outside. GENOVA has a repetoire of functions to generate and analyse TADs. Fist, we will use the insulation score to call TADs and compare the strength of TAD-borders between samples. Next, we will explore `ATA` to analyse aggegrates of TADs. Finally, wil investigate wheter TADs interact with their neighbouring TADs.
+Topologically Associated Domains (TADs) are $\pm0.8-2\text{Mb}$ regions, which are seen as triangles in the matrix: regions that have more interactions within than outside. GENOVA has a repertoire of functions to generate and analyse TADs. Fist, we will use the insulation score to call TADs and compare the strength of TAD-borders between samples. Next, we will explore `ATA()` to analyse aggregates of TADs. Finally, we'll investigate whether TADs interact with their neighbouring TADs.
 
 ## Insulation
-To estimate the strength of TAD-borders, we can look at the insulation-score [@Crane2015]. At a TAD-border, this score reaches a local minimum: the lower the score, the stronger the insulation. We can generate this for a specific sliding-window size with `insulation_score`. The choice of window-size is quite tricky, since smaller will be sensitive to very local effect (i.e. mapping-errors, loops), while too big windows will lead a an underrepresentation. Luckily, we can generate a domainogram of a range of window-sizes for a specific genomic region with `insulation.domainogram`.
+To estimate the strength of TAD-borders, we can look at the insulation-score [@Crane2015]. At a TAD-border, this score reaches a local minimum: the lower the score, the stronger the insulation. We can generate this for a specific sliding-window size with `insulation_score()`. The choice of window-size is quite tricky, since smaller windows will be sensitive to very local effects (i.e. mapping-errors, loops), while too big windows will lead a an under-representation. Luckily, we can generate a domainogram of a range of window-sizes for a specific genomic region with `insulation_domainogram`.
 
 ### Domainogram
 To make a domainogram, we simply choose our experiment and our region of interest. The window-size is directly proportional to the amount of Hi-C bins.
 
-```{r domainogram, message=FALSE , dev = 'png', dpi=300, fig.asp=.3, cache=T, fig.retina=T,fig.small = F, fig.cap= "Insulation domainogram. Insulation-hotspots can be identified in red, which are regions with a very negative score."}
-ID <- insulation_domainogram(Hap1_WT_10kb,
-                       'chr7', 
-                       25.5e6,
-                       30e6, 
-                       window_range = c(1, 101),
-                       step = 2)
-
-
+```{r domainogram, message=FALSE , dev = 'png', dpi=300, fig.asp=.3, cache=F, fig.retina=T,fig.small = F, fig.cap= "Insulation domainogram. Insulation-hotspots can be identified in red, which are regions with a very negative score."}
+ID <- insulation_domainogram(
+  Hap1_WT_10kb,
+  chrom = 'chr7', 
+  start = 25e6,
+  end   = 29e6, 
+  window_range = c(1, 101),
+  step = 2
+)
+visualise(ID)
 ```
 
-A nice feature of hic.matrixplot is that if you use it without plotting anything on the sides (i.e. genes and/or ChIP-tracks), you can insert other plots. This allows us to plot the domainogram directly under the matrix, making it very easy to compare the insulation with the actual data (figure \@ref(fig:domainogram2)).
-```{r domainogram2, message=FALSE , fig.asp=1,fig.cap= "Insulation domainogram with Hi-C matrix. The insulation-hotspots are the sites where HiC-seg has called a TAD-border.",cache=T, fig.retina=T, dev = 'png', dpi=300,fig.small = F}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+A nice feature of `hic_matrixplot()` is that if you use it without plotting anything on the sides (i.e. genes and/or ChIP-tracks), you can insert other plots. This allows us to plot the domainogram directly under the matrix, making it very easy to compare the insulation with the actual data (figure \@ref(fig:domainogram2)).
+```{r domainogram2, message=FALSE , fig.asp=1,fig.cap= "Insulation domainogram with Hi-C matrix. The insulation-hotspots are the sites where HiC-seg has called a TAD-border.",cache=F, fig.retina=T, dev = 'png', dpi=300,fig.small = F}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',
                start = 25e6,
                end=29e6, 
@@ -489,31 +577,39 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
                tads.colour = '#91cf60', # green TAD-borders
                cut.off = 25, # upper limit of contacts
                skipAnn = T) # skip the outside annotation
-plot(ID)
+plot(ID, minimalist = TRUE)
 ```
 
+\pagebreak
+
 ### Computing the insulation score
-To get the genome-wide insulation score in .bedgraph-format ^[BED3 + signal column], we provide the `genome.wide.insulation` with an experiment-object and the window-size of choice. As can be seen in the domainogram above, at $W=25$ we will catch the majority of the hotspots, while limiting the amount of noise. The `visualise()`-function can show both the insulation-scores and the difference between them.
-```{r generateINS, cache=T}
-Hap1_10kb_insulation = insulation_score(list(Hap1_WT_10kb, Hap1_SCC4_10kb),
-                                           window = 25)
-visualise(Hap1_10kb_insulation, chr = 'chr7', start = 25e6, end=29e6, contrast = 1)
+To get the genome-wide insulation score in .bedgraph-format ^[BED3 + signal column], we provide the `insulation_score()` function, that takes a contacts-object and the window-size of choice. As can be seen in the domainogram above, at $W=25$ we will catch the majority of the hotspots, while limiting the amount of noise. The `visualise()`-function can show both the insulation-scores and the difference between them.
+```{r generateINS, cache=F}
+Hap1_10kb_insulation <- insulation_score(
+  list(Hap1_WT_10kb, Hap1_SCC4_10kb),
+  window = 25
+)
+visualise(Hap1_10kb_insulation, 
+          chr = 'chr7', start = 25e6, end=29e6, 
+          contrast = 1)
 ```
 
 ### Insulation-heatmap
 We can align the border-strength of TADs in multiple samples to a specific BED-file, to compare *"borderness"* of feature. For example, let's use the TAD-borders from [@Haarhuis2017]. In figure \@ref(fig:INSalign) we can see that the average signal drops at the border (which is to be expected) and that this is a genome-wide feature, as we see in the heatmap.
-```{r INSalign, message=FALSE , fig.asp=1,fig.cap= "Insulation heatmap. The upper panel shows the average score. Each row is a TAD-border in the lower panel.",cache=T, fig.retina=T, dev = 'png', dpi=300,fig.small = T}
-heatmap_insulation(Hap1_10kb_insulation, bed = CTCF, bed_pos = 'center')
+```{r INSalign, message=FALSE , fig.asp=1,fig.cap= "Insulation heatmap. The upper panel shows the average score. Each row is a TAD-border in the lower panel.",cache=F, fig.retina=T, dev = 'png', dpi=300,fig.small = T}
+tornado_insulation(Hap1_10kb_insulation, bed = CTCF, bed_pos = 'center')
 ```
+
+\pagebreak
 
 ## Call TADs
 The `insulation`-discovery object can also be used to call TADs.
-```{r callTAD, cache=T, cache.lazy=F}
+```{r callTAD, cache=F, cache.lazy=F}
 TADcalls <- call_TAD_insulation(Hap1_10kb_insulation)
 ```
 
-```{r plotTADCALLS, cache=T, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."}
-hic.matrixplot(exp1 = Hap1_WT_10kb,
+```{r plotTADCALLS, cache=F, echo = T, fig.asp=1, dev = 'png', dpi=300, fig.cap="TADs called within GENOVA."}
+hic_matrixplot(exp1 = Hap1_WT_10kb,
                exp2 = Hap1_SCC4_10kb,
                chrom = 'chr7',
                start = 24e6,
@@ -524,24 +620,35 @@ hic.matrixplot(exp1 = Hap1_WT_10kb,
 cut.off = 25) # upper limit of contacts
 ```
 
+\pagebreak
+
 ## ATA
-```{r ATA, cache=T}
-ATA_Hap1_WTcalls   <- ATA(list("WT" = Hap1_WT_10kb,
-                               'WAPL' = Hap1_WAPL_10kb),
-                          bed = TADcalls$WT) 
+
+TADs can be investigated globally by aggregating Hi-C matrix around TADs. In aggregate TAD analyses (ATA), because TADs have different sizes, they are rescaled to a uniform size and then the result is averaged across the genome.
+
+```{r ATA, cache=F}
+ATA_Hap1_WTcalls <- ATA(list("WT" = Hap1_WT_10kb,
+                             'WAPL' = Hap1_WAPL_10kb),
+                        bed = TADcalls$WT) 
 ```
 
-We can use `visualise` to plot the ATA-results.
+We can use `visualise()` to plot the ATA-results.
 
-```{r ATAplot, message=FALSE , dev = 'png', dpi=300,fig.cap= "ATA. In the WAPL-knockout, we see a decrease of contacts within the TAD, but an increase at the corner.",cache=T}
+```{r ATAplot, message=FALSE , dev = 'png', dpi=300,fig.cap= "ATA. In the WAPL-knockout, we see a decrease of contacts within the TAD, but an increase at the corner.",cache=F}
 visualise(ATA_Hap1_WTcalls, 
           colour_lim = c(0,50),
           colour_lim_contrast = c(-5,5), 
+          metric = "diff",
           focus = 1) # which entry to use as comparison
 ```
 
+\pagebreak
+
 ## TAD+N
-```{r ii, cache=T}
+
+A TAD+N analysis computes the interaction density within TADs and their 1,2,...,N neighbours. This can be used to compare whether TADs in two samples interact differently with their neighbouring TADs.
+
+```{r ii, cache=F}
 TAD_N_WT   <- intra_inter_TAD(list("WT" = Hap1_WT_10kb,
                                    'WAPL' = Hap1_WAPL_10kb),
                               tad_bed = TADcalls$WT, 
@@ -549,16 +656,19 @@ TAD_N_WT   <- intra_inter_TAD(list("WT" = Hap1_WT_10kb,
 ```
 
 We can compute the enrichment of contacts between TADs with the `visualise()`-function. 
-```{r iiDIFF, message=FALSE , fig.cap= "Differential TAD-analysis. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=T, fig.retina=T}
+```{r iiDIFF, message=FALSE , fig.cap= "Differential TAD-analysis. Experiment 2 (WAPL) has more interactions between neighbouring TADs compared to wild type.",dev = 'png', dpi=300, cache=F, fig.retina=T}
 visualise(TAD_N_WT, geom = 'jitter')
 visualise(TAD_N_WT, geom = 'violin')
 ```
 
+\pagebreak
+
 # Loops
-For this section, we are using both the called and the extended loops from Haarhuis et al. [-@Haarhuis2017]. These are the anchor-combinations of the merged loop-calls of WT Hap1 5-, 10- and 20-kb matrices, generated with HICCUPS [@Rao2014].
-```{r loadLOOP, cache=T}
+For this section, we are using both the called primary and the extended loops from Haarhuis et al. [-@Haarhuis2017]. The primary loops are the anchor-combinations of the merged loop-calls of WT Hap1 5-, 10- and 20-kb matrices, generated with HICCUPS [@Rao2014]. The extended loops are called by taking the primary loops and taking combinations of 5' and 3' anchor locations that are larger than the input loops, up to some distance.
+```{r loadLOOP, cache=F}
+# Anchors are defined as a matrix with two columns of bin IDs
 WT_Loops_extended = anchors_extendedloops(Hap1_WT_10kb$IDX, 
-                                          res = 10e3, 
+                                          res = resolution(Hap1_WT_10kb), 
                                           bedpe = WT_Loops)
 ```
 
@@ -566,9 +676,9 @@ WT_Loops_extended = anchors_extendedloops(Hap1_WT_10kb$IDX,
 options(scipen = 1e9)
 ```
 
-```{r fixLOOP, echo = F, cache=T, warning=FALSE}
+```{r fixLOOP, echo = F, cache=F, warning=FALSE}
 knitr::kable(
-  head(WT_Loops_extended, 5), caption = "Anchor-combinations of anchors_extendedLoops"
+  head(as.data.frame(WT_Loops_extended), 5), caption = "Anchor-combinations of anchors_extendedLoops"
 )
 ```
 
@@ -577,99 +687,90 @@ options(scipen = 1)
 ```
 
 ## APA
-Explain smalltreshold
-```{r APArun, cache=T}
+Aggregate peak analysis (APA) looks up small portions of the Hi-C matrix from a twodimensional set of locations, such as loops. These are then aggregated to get a genome wide impression of the loops.
+```{r APArun, cache=F}
 APA_Hap1_WT  <- APA(list("WT" = Hap1_WT_10kb,
                           'WAPL' = Hap1_WAPL_10kb),
-                          bedpe = WT_Loops)
+                    dist_thres = c(200e3, Inf),
+                    bedpe = WT_Loops)
 
 APA_Hap1_WT_extended <- APA(list("WT" = Hap1_WT_10kb,
                                'WAPL' = Hap1_WAPL_10kb),
                             bedpe = WT_Loops,
+                            dist_thres = c(200e3, Inf),
                             anchors = WT_Loops_extended)
 ```
 
-
-We can use `visualise.APA.ggplot` to combine the APA-results. 
-```{r APAplot, message=FALSE , fig.cap= "APA. In the WAPL-knockout, we see an increase of contacts at the loop.",cache=T, fig.retina=T}
+Once again, we can use `visualise()` to make plots of the APA results.
+```{r APAplot, message=FALSE , fig.cap= "APA. In the WAPL-knockout, we see an increase of contacts at the loop.",cache=F, fig.retina=T}
 visualise(APA_Hap1_WT,
-          title = "Hap1 Hi-C vs loops", 
-          zTop = c(0,9.5), # set the zlims of the upper row
-          zBottom = c(-5,5),
-          focus = 1) # which item in APAlist to use as comparison
+          title = "Hap1 Hi-C WT vs WAPL-KO loops", 
+          colour_lim = c(0, 40), # set the colour limits of the upper row
+          colour_lim_contrast = c(-5, 5),
+          metric = "diff",
+          contrast = 1) # Compare against 1st sample in APA_Hap1_WT
 
 visualise(APA_Hap1_WT_extended,
-          title = "Hap1 Hi-C vs extended loops", 
-          zTop = c(0,9.5), # set the zlims of the upper row
-          zBottom = c(-5,5),focus = 1) # which item in APAlist to use as comparison
+          title = "Hap1 Hi-C WT vs WAPL-KO extended loops", 
+          colour_lim = c(0, 8), # set the colour limits of the upper row
+          colour_lim_contrast = c(-4, 4),
+          metric = "diff",
+          contrast = 1) # Compare against 1st sample in APA_Hap1_WT_extended
 ```
 
-To get some basic statistics on the output(s) of APA-run(s), we use `quantify()`. This function averages the region surrounding the center of each loop, where a region is defined as a square of $pixWidth \times pixWith$.
-```{r quantAPA, message=FALSE , fig.cap= "With quantifyAPA In the WAPL-knockout, we see an increase of contacts at the loop.",cache=T, fig.retina=T}
+To get some basic statistics on the output(s) of APA-run(s), we use `quantify()`. This function averages the region surrounding the center of each loop, where a region is defined as a square of $\text{pixel width} \times \text{pixel width}$.
+```{r quantAPA, message=FALSE , fig.cap= "With quantifyAPA In the WAPL-knockout, we see an increase of contacts at the loop.",cache=F, fig.retina=T}
 quantifyAPA_out <-  quantify(APA_Hap1_WT)
 quantifyAPA_out_extended <-  quantify(APA_Hap1_WT_extended)
 
-# barplot(quantifyAPA_out$per_sample$contrast_lfc, ylim = c(0, 2))
-# barplot(quantifyAPA_out_extended$per_sample$contrast_lfc, ylim = c(0, 2))
-
-# pot boxplot with base-R (ggplot2 would be also easy)
-boxplot(split(quantifyAPA_out_extended$per_loop$lfc, f = quantifyAPA_out_extended$per_loop$sample_name), 
-        col = c('darkgrey', 'red'), outline = F, ylab = 'pixel enrichment extended loops')
+# plot boxplot with base-R (ggplot2 would be also easy)
+boxplot(split(quantifyAPA_out_extended$per_loop$foldchange, 
+              f = quantifyAPA_out_extended$per_loop$sample), 
+        col = c('red', 'darkgrey'), outline = F, 
+        ylab = 'pixel enrichment extended loops')
 ```
+
+\pagebreak
 
 # Far-cis interactions
 ## PE-SCAn
-Some regulatory features, like super-enhancers come together in 3D-space. To test this, we implemented PE-SCAn. Here, the enrichment of interaction-frequency of all pairwise combinations of given regions is computed. The background is generated by shifting all regions by a fxed distance (1Mb: can be changed with the `shift`-argument).
-```{r SE1, cache=T}
+Some regulatory features, like super-enhancers come together in 3D-space. To test this, we implemented PE-SCAn. Here, the enrichment of interaction-frequency of all pairwise combinations of given regions is computed. The background is generated by shifting all regions by a fixed distance (1Mb: can be changed with the `shift`-argument).
+```{r SE1, cache=F}
 superEnhancers = read.delim('../data/symlinks/superEnhancers.txt',
-                            h = F, 
+                            header = FALSE, 
                             comment.char = "#")
 ```
 
-```{r, echo =F , cache=T}
+```{r, echo =F , cache=F}
 knitr::kable(
   head(superEnhancers[,1:6], 5), caption = "A data.frame holding the output of homer's findPeaks -style super."
 )
 ```
 
-The baisc visualisation is comparable to ATA and APA: the first row shows the enrichment of all included samples, while the bottom row shows the difference.
-```{r PESCAn, message=FALSE , fig.cap= "PE-SCAn. There is a pairwise enrichment of contacts between Superenhancers, compared to shifted regions in the WT.",cache=T, fig.retina=T, fig.small = T}
+The standard visualisation is comparable to ATA and APA: the first row shows the enrichment of all included samples, while the bottom row shows the difference.
+```{r PESCAn, message=FALSE , fig.cap= "PE-SCAn. There is a pairwise enrichment of contacts between Superenhancers, compared to shifted regions in the WT.",cache=F, fig.retina=T, fig.small = T}
 WT_PE_OUT = PESCAn(list(Hap1_WT_40kb, Hap1_WAPL_40kb), bed = superEnhancers[,2:4])
 visualise(WT_PE_OUT)
 ```
 
 Another way of looking at the PE-SCAn results, is to make a perspective plot. Here, the enrichment is encoded as the z-axis.
-```{r pePERS, message=FALSE , fig.cap= "PE-SCAn perspective plot.",cache=T, fig.retina=T}
+```{r pePERS, message=FALSE , fig.cap= "PE-SCAn perspective plot.",cache=F, fig.retina=T}
 RES = 40e3 # resolution of the Hi-C
 
-persp(list(x = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # x-ticks (MB)
-           y = seq(-1*(RES*10),(RES*10), length.out = 21)/1e6, # y-ticks (MB)
-           z = WT_PE_OUT$obsexp[,,'WAPL']), # PE-SCAn out
-      phi = 25, # colatitude 
-      theta = 40, # rotation
-      col="#92c5de", # color of the surface
-      shade=0.4, # how much shading 
-      xlab="", 
-      ylab="", 
-      zlab="",
-      cex.axis = .6,
-      ticktype="detailed", 
-      border=NA, 
-      zlim = c(min(c(WT_PE_OUT$obsexp)), 
-               max(c(WT_PE_OUT$obsexp))))
+persp(WT_PE_OUT, border = NA,
+      cex.axis = 0.6, cex.lab = 0.6)
 ```
+
+\pagebreak
 
 ## centromere.telomere.analysis
 
-`centromere.telomere.analysis` 
-
-`draw.centromere.telomere` 
 We saw a enriched signal between chromosomes 15 and 19. We can wh
-```{r cent1, cache=T, eval=F}
+```{r cent1, cache=F, eval=F}
 out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
 draw.centromere.telomere(out1519)
 ```
-```{r cent2, cache=T, echo = F, fig.cap='Centromere-telomere plot of chromosomes 15 and 19.'}
+```{r cent2, cache=F, echo = F, fig.cap='Centromere-telomere plot of chromosomes 15 and 19.'}
 par(pty ='s')
 out1519 = centromere.telomere.analysis(Hap1_WT_40kb, chrom.vec = c('chr15', 'chr19'))
 draw.centromere.telomere(out1519)
@@ -681,6 +782,7 @@ draw.centromere.telomere(out1519)
 Please post questions, comments and rants on [our github issue tracker](https://github.com/robinweide/GENOVA/issues).
 
 # Session info
+
 ```{r sesh, echo = F}
 sessionInfo()
 ````

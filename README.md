@@ -14,7 +14,7 @@ version](https://img.shields.io/badge/R%3E%3D-3.4.4-succes.svg)](https://cran.r-
 ![GitHub tag (latest by
 date)](https://img.shields.io/github/v/tag/robinweide/GENOVA?color=succes)
 
-*Explore the Hi-C’s\!*
+*Explore the Hi-Cs\!*
 
 The increase in interest for Hi-C methods in the chromatin community has
 led to a need for more user-friendly and powerful analysis methods. The

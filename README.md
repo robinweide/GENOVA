@@ -1,3 +1,4 @@
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # GENOVA <img src="vignettes/logo_GENOVA.png" align="right" alt="" width="200" />
@@ -9,11 +10,11 @@ Status](https://travis-ci.org/robinweide/GENOVA.svg?branch=dev)](https://travis-
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![minimal R
-version](https://img.shields.io/badge/R%3E%3D-3.5.0-succes.svg)](https://cran.r-project.org/)
+version](https://img.shields.io/badge/R%3E%3D-3.4.4-succes.svg)](https://cran.r-project.org/)
 ![GitHub tag (latest by
 date)](https://img.shields.io/github/v/tag/robinweide/GENOVA?color=succes)
 
-*Explore the Hi-C’s\!*
+*Explore the Hi-Cs\!*
 
 The increase in interest for Hi-C methods in the chromatin community has
 led to a need for more user-friendly and powerful analysis methods. The
@@ -34,6 +35,15 @@ GENOVA directly reads data from:
   - HiC-pro
   - cooler
   - juicer
+
+## Installation
+
+You can install GENOVA from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("robinweide/GENOVA")
+```
 
 ## Note to long-time users
 
@@ -59,7 +69,7 @@ please use the
 ## Code of conduct
 
 Please note that this project is released with a [Contributor Code of
-Conduct](CODE_OF_CONDUCT.md). By participating in this project
+Conduct](.github/CODE_OF_CONDUCT.md). By participating in this project
 you agree to abide by its terms.
 
 -----

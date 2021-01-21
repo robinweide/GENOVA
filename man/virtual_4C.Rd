@@ -10,8 +10,11 @@ virtual_4C(explist, viewpoint, xlim = NULL)
 \item{explist}{Either a single GENOVA \code{contacts} object or list of
 GENOVA \code{contacts}.}
 
-\item{viewpoint}{The viewpoint: will take the middle Hi-C bin if it spans
-mulitple bins.}
+\item{viewpoint}{A viewpoint location. One of the following: \itemize{
+  \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+  \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+  \code{"chr1:30,000,000-40,000,000"}.}
+}}
 
 \item{xlim}{A vector of two with the flanking basepairs up- and downstream of
 the viewpoint, resp.}

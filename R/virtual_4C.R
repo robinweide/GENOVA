@@ -4,14 +4,19 @@
 #'
 #' @param explist Either a single GENOVA \code{contacts} object or list of
 #'   GENOVA \code{contacts}.
-#' @param viewpoint The viewpoint: will take the middle Hi-C bin if it spans
-#'   mulitple bins.
+#'   
+#' @param viewpoint A viewpoint location. One of the following: \itemize{
+#'     \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+#'     \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+#'     \code{"chr1:30,000,000-40,000,000"}.}
+#'   }
 #' @param xlim A vector of two with the flanking basepairs up- and downstream of
 #'   the viewpoint, resp.
 #' @return A virtual4C_discovery object.
 #' @export
 virtual_4C <- function(explist, viewpoint, xlim = NULL){
 
+  viewpoint <- standardise_location(viewpoint, singular = TRUE)
   explist  <- check_compat_exp(explist)
   expnames <- if (is.null(names(explist))) {
     vapply(explist, attr, character(1L), "samplename")

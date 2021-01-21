@@ -9,6 +9,7 @@
 #' @param gw_insulation The result of \code{genome.wide.insulation} with window.size = 25.
 #' @param BEDcolor Color of items in the resulting BEDPE-file
 #' @return A BEDPE-df
+#' @noRd
 #' @examples
 #' \dontrun{
 #' # Get the insulation score with window-size 25 and store in the INSULATION-slot.

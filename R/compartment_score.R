@@ -58,7 +58,8 @@
 #' # Signing the scores
 #' cs <- sign_compartmentscore(cs, bed = H3K4me1_peaks)
 #' }
-compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
+compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL,
+                              ref = 1) {
   
   explist <- check_compat_exp(explist)
   
@@ -184,6 +185,8 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
 #'   the '\code{bed}' argument.
 #' @param verbose A \code{logical} of length 1. If \code{TRUE}, reports when
 #'   '\code{bedgraph}' correlations are weak or uncomputable.
+#' @param ref An \code{integer} of length 1 giving a sample index that can be
+#'   used as a reference. Set to \code{NULL} to sign every sample individually.
 #'
 #' @details Signing compartment scores is necessary to have the compartment
 #'   scores correspond to A and B compartments.
@@ -210,7 +213,8 @@ compartment_score <- function(explist, ev = 1, bed = NULL, bedgraph = NULL) {
 sign_compartmentscore <- function(CS_discovery,
                                   bed = NULL,
                                   bedgraph = NULL,
-                                  verbose = FALSE) {
+                                  verbose = FALSE,
+                                  ref = 1) {
   # Checks
   if (!inherits(CS_discovery, "CS_discovery")) {
     stop(paste0("'sign_compartmentscore()' only works with 'CS_discovery'",
@@ -234,6 +238,10 @@ sign_compartmentscore <- function(CS_discovery,
   idx <- CS[, list(chrom, start, end, bin)]
   names(idx) <- paste0("V", 1:4)
   
+  if (is.null(ref)) {
+    ref <- seq_along(expnames)
+  }
+  
   if (!is.null(bed)) {
     # Count bed entries per bin
     bed_idx <- table(GENOVA::bed2idx(idx, bed))
@@ -249,7 +257,7 @@ sign_compartmentscore <- function(CS_discovery,
     split <- lapply(split, function(chrpart) {
       count <- chrpart[["bedcount"]]
       # Per experiment, decide to flip
-      chrpart[, expnames] <- lapply(chrpart[, expnames, drop = FALSE], 
+      chrpart[, expnames[ref]] <- lapply(chrpart[, expnames[ref], drop = FALSE], 
                                     function(score) {
         up <- score > 0 & !is.na(score)
         down <- score < 0 & !is.na(score)
@@ -286,7 +294,8 @@ sign_compartmentscore <- function(CS_discovery,
     # Loop over arms
     split <- split(part, part$part, drop = TRUE)
     split <- lapply(split, function(chrpart) {
-      chrpart[, expnames] <- lapply(chrpart[, expnames], function(score) {
+      chrpart[, expnames[ref]] <- lapply(chrpart[, expnames[ref]], 
+                                         function(score) {
         # Compute correlation
         cor <- suppressWarnings(cor(score, chrpart$graph, method = "spearman"))
         if (is.na(cor) & verbose) {
@@ -306,6 +315,17 @@ sign_compartmentscore <- function(CS_discovery,
     })
   } else {
     stop("Some unknown error has occurred", call. = FALSE)
+  }
+  
+  if (length(ref) == 1 && length(expnames) > 1) {
+    split <- lapply(split, function(chrpart) {
+      refval <- chrpart[[expnames[ref]]]
+      chrpart[expnames[-ref]] <- lapply(chrpart[expnames[-ref]], function(val) {
+        cor <- suppressWarnings(cor(val, refval))
+        return(val * sign(cor))
+      })
+      chrpart
+    })
   }
   
   # Merge data together

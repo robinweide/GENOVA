@@ -17,13 +17,16 @@ insulation_domainogram(
 \item{explist}{Either a single GENOVA \code{contacts} object or list of
 GENOVA \code{contacts} objects.}
 
-\item{chrom}{A \code{character} of length 1 containing a chromosome name.}
+\item{chrom}{One of the following: \itemize{
+  \item{A \code{character} of length one indicating a chromosome name.}
+  \item{A 3-column, 1-row \code{data.frame} in BED-format.}
+  \item{A single \code{character} describing a locus in UCSC notation, e.g. 
+  \code{"chr1:30,000,000-40,000,000"}.}
+} The latter two options automatically provide the \code{start} and 
+\code{end} arguments too.}
 
-\item{start}{An \code{integer} of length 1 with a region's start position in
-basepairs.}
-
-\item{end}{An \code{integer} of length 1 with a region's end position in
-basepairs.}
+\item{start, end}{An \code{integer} of length 1 with a region's start and end 
+position in basepairs.}
 
 \item{window_range}{An \code{integer} vector of length 2 noting the minimum
 and maximum size of the sliding square.}

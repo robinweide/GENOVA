@@ -5,6 +5,7 @@
 #' @param mat Output of chromosomeMatrix
 #' @param color.fun Optional color-function
 #' @param z.max Adjust the maximum value of the color-scale
+#' @noRd
 #' @return A plot of the matrix
 chrom.comparison.plot <- function(mat, color.fun = NULL, z.max = NULL) {
   if (is.null(color.fun)) {

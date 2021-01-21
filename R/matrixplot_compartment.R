@@ -139,31 +139,30 @@ compartment_matrixplot <- function(
     par(mar = c(0,0,0,0))
     plot.new()
     par(mar = c(3, rep(0.2, 3)))
-    plot(
-      x = comp_dat[, eval(as.symbol(expnames[2]))],
-      y = comp_dat$end,
-      col = attr(exp2, "colour"),
-      type = 'l',
-      ylim = rev(loclim), xlim = rev(complim), 
-      xaxs = "i", yaxs = "i", xaxt = "n", yaxt = "n", bty = "n"
-    )
+    
+    cs.lim <- max(complim)
+    x.pos <- comp_dat$end
+    y.pos <- comp_dat[, eval(as.symbol(expnames[2]))]
+    graphics::plot(y.pos, x.pos, yaxs = "i", type = "n", axes = F, xlim = rev(range(compbreaks)), ylim = loclim)
+    ab.polygon(x.pos, y.pos, rotate = T)
+
     axis(1, compbreaks, compbreaks, cex.axis = 1)
   } else {
     lay <- matrix(1:2, 2)
     layout(lay, widths = 1, heights = c(0.2, 1), respect = TRUE)
   }
   
-  par(mar = c(rep(0.2, 3), 3))
-  plot(
-    x = comp_dat$end,
-    y = comp_dat[, eval(as.symbol(expnames[1]))],
-    col = attr(exp1, "colour"),
-    type = 'l',
-    xlim = loclim, ylim = complim,
-    xaxs = "i", yaxs = "i", xaxt = "n", yaxt = "n", bty = "n"
-  )
+  par(mar = c(rep(0, 3), 3))
+  
+  cs.lim <- max(complim)
+  x.pos <- comp_dat$end
+  y.pos <- comp_dat[, eval(as.symbol(expnames[1]))]
+  graphics::plot(x.pos, y.pos, xaxs = "i", type = "n", xaxt = "n", axes = F, xlim = loclim, ylim = (range(compbreaks)))
+  ab.polygon(x.pos, y.pos, rotate = F)
+  
   axis(2, compbreaks, compbreaks, cex.axis = 1, las = 1)
   par(mar = c(3, 0.2, 0.2, 3))
+  ####
   
   if (div_scale) {
     colours <- bezier_corrected_divergent
@@ -207,5 +206,17 @@ compartment_matrixplot <- function(
 
 }
 
-
+ab.polygon <- function(x.pos, y.pos, rotate = F) {
+  x <- c(x.pos[1], x.pos, utils::tail(x.pos, 1))
+  y.up <- c(0, ifelse(y.pos < 0, 0, y.pos), 0)
+  y.down <- c(0, ifelse(y.pos > 0, 0, y.pos), 0)
+  
+  if (rotate) {
+    graphics::polygon(y.up, x, col = grDevices::rgb(1, 0, 0, 0.8), border = NA)
+    graphics::polygon(y.down, x, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
+  } else {
+    graphics::polygon(x, y.up, col = grDevices::rgb(1, 0, 0, 0.8), border = NA)
+    graphics::polygon(x, y.down, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
+  }
+}
 

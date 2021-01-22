@@ -68,8 +68,11 @@ saddle <- function(explist, CS_discovery, bins = 10L,
   # Check argument compatability
   if (all(expnames_list == discnames) && !is.null(expnames_list)) {
     expnames <- expnames_list
-  } else if (all(expnames_exp == discnames)) {
-    expnames <- expnames_exp
+  } else if (all(expnames_exp %in% discnames) && 
+             all(discnames %in% expnames_exp)) {
+    order <- match(expnames_exp, discnames)
+    explist <- explist[order]
+    expnames <- expnames_exp[order]
   } else {
     stop("The samples in 'explist' should match samples in the 'CS_discovery'.")
   }

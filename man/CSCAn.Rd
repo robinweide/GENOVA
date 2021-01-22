@@ -14,7 +14,8 @@ CSCAn(
   outlier_filter = c(0, 1),
   min_compare = 10,
   anchors = NULL,
-  raw = TRUE
+  raw = TRUE,
+  group_direction = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,11 @@ indices and uses this argument instead. See
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
 summary matrices be returned in the output? Should be \code{TRUE} if the
 intention is to use the \code{quantify} function.}
+
+\item{group_direction}{A \code{logical} of length 1 which when \code{TRUE}
+will mirror groups for anchors, where the left anchor location is larger
+than the right anchor location. Left and right refer to the \code{bedlist}
+elements that generate combinations.}
 }
 \value{
 An \code{CSCAn_discovery} object containing the following slots, 

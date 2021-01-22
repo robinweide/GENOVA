@@ -81,8 +81,13 @@ compartment_matrixplot <- function(
   }
   explist <- check_compat_exp(explist)
   expnames <- expnames(explist)
-  expdat <- lapply(explist, select_subset, 
-                   chrom = chr$V1, start = chr$V2, end = chr$V3)
+  expdat <- lapply(explist, function(xp) {
+    dat <- select_subset(xp, chrom = chr$V1, start = chr$V2, end = chr$V3)
+    seq <- seq(chr$V2, chr$V3 + resolution(xp), by = resolution(xp))
+    dat$x <- seq[seq_along(dat$x)]
+    dat$y <- seq[seq_along(dat$y)]
+    return(dat)
+  })
   
   if (is.null(CS_discovery)) {
     cs_data <- lapply(explist, subset, chrom = chr$V1,

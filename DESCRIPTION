@@ -24,7 +24,8 @@ Suggests:
     RhpcBLASctl,
     RCurl,
     strawr (>= 0.0.1),
-    rhdf5 (>= 2.30.0)
+    rhdf5 (>= 2.30.0),
+    pkgfilecache
 VignetteBuilder: knitr
 Remotes: rnabioco/RcppLibBigWig,
    aidenlab/straw/R,

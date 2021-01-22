@@ -105,7 +105,7 @@ compartment_matrixplot <- function(
       means <- vapply(split(mat[keep], id[keep]), mean, numeric(1))
       mat[keep] <- mat[keep] / means[id[keep]] 
       mat[!keep] <- 1
-      xp$z <- mat
+      xp$z <- log2(mat)
       return(xp)
     })
     div_scale <- TRUE
@@ -116,7 +116,7 @@ compartment_matrixplot <- function(
       return(xp)
     })
   }
-
+  
   if (length(expdat) == 1) {
     expdat <- expdat[[1]]
   } else {
@@ -145,7 +145,7 @@ compartment_matrixplot <- function(
     y.pos <- comp_dat[, eval(as.symbol(expnames[2]))]
     graphics::plot(y.pos, x.pos, yaxs = "i", type = "n", axes = F, xlim = rev(range(compbreaks)), ylim = loclim)
     ab.polygon(x.pos, y.pos, rotate = T)
-
+    
     axis(1, compbreaks, compbreaks, cex.axis = 1)
   } else {
     lay <- matrix(1:2, 2)
@@ -165,7 +165,12 @@ compartment_matrixplot <- function(
   ####
   
   if (div_scale) {
-    colours <- bezier_corrected_divergent
+    if( metric == 'obsexp'){
+      colours <- c("blue", "red")
+    } else {
+      colours <- bezier_corrected_divergent
+    }
+
   } else {
     colours <- .choose_palette()
   }
@@ -203,7 +208,7 @@ compartment_matrixplot <- function(
     text(x = rev(txt)[1], y = txt[1], labels = expnames[1], adj = c(1, 1))
     text(x = rev(txt)[2], y = txt[2], labels = expnames[2], adj = c(0, 0))
   }
-
+  
 }
 
 ab.polygon <- function(x.pos, y.pos, rotate = F) {
@@ -219,4 +224,3 @@ ab.polygon <- function(x.pos, y.pos, rotate = F) {
     graphics::polygon(x, y.down, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
   }
 }
-

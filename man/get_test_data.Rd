@@ -24,8 +24,8 @@ Retrieves a test \code{contacts} object from a local cache at either 40k or
 \details{
 The data originates from wildtype Hap1 cells from the Haarhuis
   \emph{et al}. (2017) publication. The full data is available in raw fastq
-  files or valid pair files at GEO accession available from GEO: GSE95014.The
-  data was mapped against the 'hg19' reference genome using HiC-Pro v2.7.7.
+  files or valid pair files at GEO accession GSE95014. The data were mapped
+  against the 'hg19' reference genome using HiC-Pro v2.7.7.
 
   The test data only needs to be downloaded only once as it is stored in a
   local cache. The local cache can be cleared using the

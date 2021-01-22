@@ -12,6 +12,8 @@
 #' @param metric One of the follow: \describe{
 #'   \item{\code{"contacts"}}{Displays contacts.}
 #'   \item{\code{"obsexp"}}{Displays observed over expected by distance.}
+#'   \item{\code{"log2obsexp"}}{Displays the log 2 observed over expected by 
+#'   distance.}
 #'   \item{\code{"correlation"}}{Displays Pearson correlation for the observed
 #'     over expected by distance.}
 #' }
@@ -48,10 +50,11 @@ compartment_matrixplot <- function(
   chrom, arm = "p",
   colour_lim = NULL,
   rasterise = FALSE,
-  metric = c("contacts", "obsexp", "correlation"),
+  metric = c("contacts", "obsexp", "log2obsexp", "correlation"),
   ...
 ) {
-  metric <- match.arg(metric, c("contacts", "obsexp", "correlation"))
+  metric <- match.arg(metric, c("contacts", "obsexp", "log2obsexp", 
+                                "correlation"))
   if (!(chrom %in% exp1$CENTROMERES$chrom)) {
     stop("No centromere information found for this chromosome.",
          call. = FALSE)
@@ -105,10 +108,16 @@ compartment_matrixplot <- function(
       means <- vapply(split(mat[keep], id[keep]), mean, numeric(1))
       mat[keep] <- mat[keep] / means[id[keep]] 
       mat[!keep] <- 1
-      xp$z <- log2(mat)
+      xp$z <- mat
       return(xp)
     })
     div_scale <- TRUE
+  }
+  if (metric == "log2obsexp") {
+    expdat <- lapply(expdat, function(xp) {
+      xp$z <- log2(xp$z)
+      return(xp)
+    })
   }
   if (metric == "correlation") {
     expdat <- lapply(expdat, function(xp) {
@@ -162,11 +171,11 @@ compartment_matrixplot <- function(
   
   axis(2, compbreaks, compbreaks, cex.axis = 1, las = 1)
   par(mar = c(3, 0.2, 0.2, 3))
-  ####
-  
+
   if (div_scale) {
-    if( metric == 'obsexp'){
-      colours <- c("blue", "red")
+    if( metric == 'log2obsexp'){
+      colours <- bezier_corrected_divergent
+      # colours <- c("blue", "red")
     } else {
       colours <- bezier_corrected_divergent
     }
@@ -184,6 +193,10 @@ compartment_matrixplot <- function(
       obsexp = {
         q <- quantile(nondiag, c(0.01, 0.99), na.rm = TRUE)
         (max(abs(q - 1)) * c(-1, 1)) + 1
+      },
+      log2obsexp = {
+        q <- quantile(nondiag, c(0.01, 0.99), na.rm = TRUE)
+        (max(abs(q)) * c(-1, 1))
       },
       correlation = c(-1, 1)
     )

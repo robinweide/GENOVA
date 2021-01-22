@@ -12,7 +12,7 @@ compartment_matrixplot(
   arm = "p",
   colour_lim = NULL,
   rasterise = FALSE,
-  metric = c("contacts", "obsexp", "correlation"),
+  metric = c("contacts", "obsexp", "log2obsexp", "correlation"),
   ...
 )
 }
@@ -42,6 +42,8 @@ polygons.}
 \item{metric}{One of the follow: \describe{
   \item{\code{"contacts"}}{Displays contacts.}
   \item{\code{"obsexp"}}{Displays observed over expected by distance.}
+  \item{\code{"log2obsexp"}}{Displays the log 2 observed over expected by 
+  distance.}
   \item{\code{"correlation"}}{Displays Pearson correlation for the observed
     over expected by distance.}
 }}

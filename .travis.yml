@@ -1,5 +1,14 @@
+before_install:
+  - sudo apt-get install -y libcurl4-openssl-dev
+  - sudo apt-get install -y libxml2-dev
+  - sudo apt-get install -y libgsl0-dev
+
 # Use R language
 language: r
+r_build_args: "--no-build-vignettes"
+r_check_args: "--no-vignettes"
 
-# Set one of you dependencies from github
-r_github_packages: rnabioco/RcppLibBigWig
+bioc_packages:
+  - BiocStyle
+
+warnings_are_errors: false

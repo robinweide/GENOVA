@@ -16,12 +16,15 @@ Plot the log2-ratio of the relative interaction frequencies.
 The ratio is calculated over the median of the matrix.
 }
 \examples{
+\dontrun{
 # Get a scaled matric of the interchomosomal interactions between 15 and 19
-out1519 = centromere.telomere.analysis(WT_40kb,
-                                       chrom.vec = c('chr15', 'chr19'))
+out1519 <- centromere.telomere.analysis(WT_40kb,
+  chrom.vec = c("chr15", "chr19")
+)
 
 # Plot the results
 draw.centromere.telomere(out1519)
+}
 }
 \author{
 Elzo de Wit, \email{e.d.wit@nki.nl}

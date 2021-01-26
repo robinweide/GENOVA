@@ -185,6 +185,10 @@ load_contacts = function(signal_path,
   ##############################################################################
   ########################################################## remove empty chroms
   ##############################################################################
+  index$V1 <- as.vector(index$V1) #fix array issues
+  index$V2 <- as.vector(index$V2) #fix array issues
+  index$V3 <- as.vector(index$V3) #fix array issues
+  
   chromRLE = rle(index$V1)
   CS = cumsum(c(1,chromRLE$lengths))
   

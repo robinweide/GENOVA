@@ -73,6 +73,7 @@ load_contacts = function(signal_path,
   inputType = switch(tools::file_ext(tolower(signal_path)), 
                      'matrix' = 'hicpro',
                      'cooler' = 'cooler',
+                     'cool'   = 'cooler',
                      'hic'    = 'juicer')
   
   if(inputType == 'juicer'){juicerPath = signal_path}

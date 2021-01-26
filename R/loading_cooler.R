@@ -30,6 +30,12 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
   } else {
     ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
                                                   name = bins_name))
+    if(!'weight' %in% colnames(ABS)) {
+      balancing = F
+      warning('No weights-column found: cannot balance matrix!')
+      ABS$weight <- NA
+    }
+    
     ABS <- ABS[, c("chrom", "start", "end",  "weight" ), with = F]
     ABS$bin = 1:nrow(ABS)
     SIG = data.table::as.data.table(rhdf5::h5read(file = cooler,

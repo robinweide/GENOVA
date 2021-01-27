@@ -17,6 +17,17 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
     }
     ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
                                                   name = paste0("/resolutions/",resolution, "/", bins_name)))
+    
+    if('KR' %in% colnames(ABS)) {
+      ABS$weight <- 1/ABS$KR
+    }
+    
+    if(!'weight' %in% colnames(ABS)) {
+      balancing = F
+      warning('No weights-column found: cannot balance matrix!')
+      ABS$weight <- NA
+    }
+    
     ABS <- ABS[, c("chrom", "start", "end",  "weight" ), with = F]
     ABS$bin = 1:nrow(ABS)
     
@@ -30,6 +41,10 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
   } else {
     ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
                                                   name = bins_name))
+    if('KR' %in% colnames(ABS)) {
+      ABS$weight <- 1/ABS$KR
+    }
+    
     if(!'weight' %in% colnames(ABS)) {
       balancing = F
       warning('No weights-column found: cannot balance matrix!')
@@ -42,7 +57,7 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
                                                   name = pixels_name))
     
   }
-
+  
   rhdf5::h5closeAll()
   
   colnames(SIG) = paste0('V', 1:3)
@@ -55,7 +70,7 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
   
   ABS$weight = NULL
   colnames(ABS) = paste0('V', 1:4)
-
+  
   if (!is.null(scale_bp)) {
     
     if(scale_cis){

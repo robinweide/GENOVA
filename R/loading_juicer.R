@@ -1,6 +1,6 @@
 loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, balancing = T){
   
-  GENOVA:::try_require("strawr", "loadJuicer", "github")
+  try_require("strawr", "loadJuicer", "github")
   
   juicerPath <- normalizePath(juicerPath)
   # get metadata of juicer-file

@@ -459,6 +459,10 @@ ARA <- function(explist, bed, shift = 1e6,
 #'   the \code{size_bp} is also \code{NULL}. \code{size_bp} is an alternative
 #'   parametrisation for the lookup regions, expressed in basepairs.
 #'   \code{size_bp} is not used when the argument \code{size_bin} is set.
+#' @param group_direction A \code{logical} of length 1 which when \code{TRUE}
+#'   will mirror groups for anchors, where the left anchor location is larger
+#'   than the right anchor location. Left and right refer to the \code{bedlist}
+#'   elements that generate combinations.
 #'
 #' @return An \code{CSCAn_discovery} object containing the following slots, 
 #'   wherein \code{i} is the number of combinations between the \code{bedlist} 
@@ -502,7 +506,8 @@ CSCAn <- function(explist, bedlist, shift = 1e6L,
                   size_bin = NULL, size_bp = NULL,
                   outlier_filter = c(0, 1),
                   min_compare = 10,
-                  anchors = NULL, raw = TRUE) {
+                  anchors = NULL, raw = TRUE,
+                  group_direction = FALSE) {
   explist <- check_compat_exp(explist)
   
   if (!missing(bedlist)) {
@@ -531,7 +536,8 @@ CSCAn <- function(explist, bedlist, shift = 1e6L,
     anchors <- anchors_CSCAn(
       explist[[1]]$IDX, attr(explist[[1]], "res"),
       bedlist, dist_thres,
-      min_compare = min_compare
+      min_compare = min_compare,
+      group_direction = group_direction
     )
   }
   

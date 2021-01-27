@@ -7,11 +7,14 @@
 #'   \code{\link[GENOVA]{compartment_score}} function. When \code{NULL}, the
 #'   compartment score will be calculated on the fly for this arm only.
 #' @param chrom A \code{character} of length 1 with a chromosome name.
-#' @param arm Either \code{"p"} or \code{"q"} denoting the chromosome arm of 
-#'   which to display the data from.
+#' @param arm Either \code{"p"}, \code{"q"} or \code{"all"}, denoting the 
+#'   chromosome arm of which to display the data from. \code{"all"} displays
+#'   the whole chromosome.
 #' @param metric One of the follow: \describe{
 #'   \item{\code{"contacts"}}{Displays contacts.}
 #'   \item{\code{"obsexp"}}{Displays observed over expected by distance.}
+#'   \item{\code{"log2obsexp"}}{Displays the log 2 observed over expected by 
+#'   distance.}
 #'   \item{\code{"correlation"}}{Displays Pearson correlation for the observed
 #'     over expected by distance.}
 #' }
@@ -48,28 +51,38 @@ compartment_matrixplot <- function(
   chrom, arm = "p",
   colour_lim = NULL,
   rasterise = FALSE,
-  metric = c("contacts", "obsexp", "correlation"),
+  metric = c("contacts", "obsexp", "log2obsexp", "correlation"),
   ...
 ) {
-  metric <- match.arg(metric, c("contacts", "obsexp", "correlation"))
-  if (!(chrom %in% exp1$CENTROMERES$chrom)) {
+  metric <- match.arg(metric, c("contacts", "obsexp", "log2obsexp", 
+                                "correlation"))
+  if (arm != "all" && !(chrom %in% exp1$CENTROMERES$chrom)) {
     stop("No centromere information found for this chromosome.",
          call. = FALSE)
   }
   
   # Finding arm definitions
-  centro <- exp1$CENTROMERES$chrom == chrom
-  centro <- exp1$CENTROMERES[centro]
   chr <- exp1$IDX[V1 == chrom]
-  if (arm == "p") {
-    chr <- chr[V4 < centro$start]
+  if (arm != "all") {
+    centro <- exp1$CENTROMERES$chrom == chrom
+    centro <- exp1$CENTROMERES[centro]
+    if (arm == "p") {
+      chr <- chr[V4 < centro$start]
+    } else {
+      chr <- chr[V4 > centro$end]
+    }
+    if (nrow(chr) < 10 || (tail(chr$V3, 1) - head(chr$V2, 1) < 1e6)) {
+      stop('No `', arm, '` arm found. Try the other, or "all" option.')
+    }
   } else {
-    chr <- chr[V4 > centro$end]
-  }
-  if ((tail(chr$V3, 1) - head(chr$V2, 1) < 1e6) | nrow(chr) < 10) {
-    stop("No `", arm, "` found. Try the other")
+    # Dummy centromere information
+    centro <- data.table(chrom = chr$V1[1],
+                         start = -1,
+                         end = -1,
+                         key = c("chrom", "start", "end"))
   }
   chr <- chr[, list(V1 = V1[1], V2 = V2[2], V3 = tail(V3, 1))]
+
   
   if (is_contacts(exp2)) {
     explist <- list(exp1, exp2)
@@ -78,8 +91,13 @@ compartment_matrixplot <- function(
   }
   explist <- check_compat_exp(explist)
   expnames <- expnames(explist)
-  expdat <- lapply(explist, select_subset, 
-                   chrom = chr$V1, start = chr$V2, end = chr$V3)
+  expdat <- lapply(explist, function(xp) {
+    dat <- select_subset(xp, chrom = chr$V1, start = chr$V2, end = chr$V3)
+    seq <- seq(chr$V2, chr$V3 + resolution(xp), by = resolution(xp))
+    dat$x <- seq[seq_along(dat$x)]
+    dat$y <- seq[seq_along(dat$y)]
+    return(dat)
+  })
   
   if (is.null(CS_discovery)) {
     cs_data <- lapply(explist, subset, chrom = chr$V1,
@@ -110,13 +128,19 @@ compartment_matrixplot <- function(
     })
     div_scale <- TRUE
   }
+  if (metric == "log2obsexp") {
+    expdat <- lapply(expdat, function(xp) {
+      xp$z <- log2(xp$z)
+      return(xp)
+    })
+  }
   if (metric == "correlation") {
     expdat <- lapply(expdat, function(xp) {
       xp$z <- suppressWarnings(cor(xp$z))
       return(xp)
     })
   }
-
+  
   if (length(expdat) == 1) {
     expdat <- expdat[[1]]
   } else {
@@ -139,34 +163,38 @@ compartment_matrixplot <- function(
     par(mar = c(0,0,0,0))
     plot.new()
     par(mar = c(3, rep(0.2, 3)))
-    plot(
-      x = comp_dat[, eval(as.symbol(expnames[2]))],
-      y = comp_dat$end,
-      col = attr(exp2, "colour"),
-      type = 'l',
-      ylim = rev(loclim), xlim = rev(complim), 
-      xaxs = "i", yaxs = "i", xaxt = "n", yaxt = "n", bty = "n"
-    )
+    
+    cs.lim <- max(complim)
+    x.pos <- comp_dat$end
+    y.pos <- comp_dat[, eval(as.symbol(expnames[2]))]
+    graphics::plot(y.pos, x.pos, yaxs = "i", type = "n", axes = F, xlim = rev(range(compbreaks)), ylim = loclim)
+    ab.polygon(x.pos, y.pos, rotate = T)
+    
     axis(1, compbreaks, compbreaks, cex.axis = 1)
   } else {
     lay <- matrix(1:2, 2)
     layout(lay, widths = 1, heights = c(0.2, 1), respect = TRUE)
   }
   
-  par(mar = c(rep(0.2, 3), 3))
-  plot(
-    x = comp_dat$end,
-    y = comp_dat[, eval(as.symbol(expnames[1]))],
-    col = attr(exp1, "colour"),
-    type = 'l',
-    xlim = loclim, ylim = complim,
-    xaxs = "i", yaxs = "i", xaxt = "n", yaxt = "n", bty = "n"
-  )
+  par(mar = c(rep(0, 3), 3))
+  
+  cs.lim <- max(complim)
+  x.pos <- comp_dat$end
+  y.pos <- comp_dat[, eval(as.symbol(expnames[1]))]
+  graphics::plot(x.pos, y.pos, xaxs = "i", type = "n", xaxt = "n", axes = F, xlim = loclim, ylim = (range(compbreaks)))
+  ab.polygon(x.pos, y.pos, rotate = F)
+  
   axis(2, compbreaks, compbreaks, cex.axis = 1, las = 1)
   par(mar = c(3, 0.2, 0.2, 3))
-  
+
   if (div_scale) {
-    colours <- bezier_corrected_divergent
+    if( metric == 'log2obsexp'){
+      colours <- bezier_corrected_divergent
+      # colours <- c("blue", "red")
+    } else {
+      colours <- bezier_corrected_divergent
+    }
+
   } else {
     colours <- .choose_palette()
   }
@@ -180,6 +208,10 @@ compartment_matrixplot <- function(
       obsexp = {
         q <- quantile(nondiag, c(0.01, 0.99), na.rm = TRUE)
         (max(abs(q - 1)) * c(-1, 1)) + 1
+      },
+      log2obsexp = {
+        q <- quantile(nondiag, c(0.01, 0.99), na.rm = TRUE)
+        (max(abs(q)) * c(-1, 1))
       },
       correlation = c(-1, 1)
     )
@@ -204,8 +236,19 @@ compartment_matrixplot <- function(
     text(x = rev(txt)[1], y = txt[1], labels = expnames[1], adj = c(1, 1))
     text(x = rev(txt)[2], y = txt[2], labels = expnames[2], adj = c(0, 0))
   }
-
+  
 }
 
-
-
+ab.polygon <- function(x.pos, y.pos, rotate = F) {
+  x <- c(x.pos[1], x.pos, utils::tail(x.pos, 1))
+  y.up <- c(0, ifelse(y.pos < 0, 0, y.pos), 0)
+  y.down <- c(0, ifelse(y.pos > 0, 0, y.pos), 0)
+  
+  if (rotate) {
+    graphics::polygon(y.up, x, col = grDevices::rgb(1, 0, 0, 0.8), border = NA)
+    graphics::polygon(y.down, x, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
+  } else {
+    graphics::polygon(x, y.up, col = grDevices::rgb(1, 0, 0, 0.8), border = NA)
+    graphics::polygon(x, y.down, col = grDevices::rgb(0, 0, 1, 0.8), border = NA)
+  }
+}

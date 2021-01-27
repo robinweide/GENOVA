@@ -41,17 +41,17 @@
 #' attributes for a Hi-C matrix of a given sample at a given resolution.
 #' @export
 load_contacts = function(signal_path, 
-                        indices_path = NULL,
-                        resolution = 10e3,
-                        sample_name = NULL,
-                        centromeres = NULL,
-                        colour = NULL,
-                        z_norm = FALSE,
-                        scale_bp = 1e9,
-                        scale_cis = FALSE,
-                        balancing = TRUE,
-                        legacy = FALSE,
-                        verbose = TRUE){
+                         indices_path = NULL,
+                         resolution = 10e3,
+                         sample_name = NULL,
+                         centromeres = NULL,
+                         colour = NULL,
+                         z_norm = FALSE,
+                         scale_bp = 1e9,
+                         scale_cis = FALSE,
+                         balancing = TRUE,
+                         legacy = FALSE,
+                         verbose = TRUE){
   
   # Control data.table threads
   dt.cores <- data.table::getDTthreads()
@@ -59,7 +59,9 @@ load_contacts = function(signal_path,
   data.table::setDTthreads(1)
   
   if(is.null(sample_name)){
-    stop('Please give a valid sample_name.')
+    
+    sample_name = basename(signal_path)
+    
   }
   doJuicer = F
   doCooler = F
@@ -73,6 +75,8 @@ load_contacts = function(signal_path,
   inputType = switch(tools::file_ext(tolower(signal_path)), 
                      'matrix' = 'hicpro',
                      'cooler' = 'cooler',
+                     'cool' = 'cooler',
+                     'mcool' = 'cooler',
                      'hic'    = 'juicer')
   
   if(inputType == 'juicer'){juicerPath = signal_path}
@@ -81,14 +85,14 @@ load_contacts = function(signal_path,
   if(!is.null(juicerPath)){
     ##################################################################### juicer
     
-
+    
     
     if(grepl(juicerPath ,pattern = '^http')){
       stop('signal_path starts with http, but the current version does not support it.')
       # signal_path points to an URL!
-     if(unname(RCurl::url.exists(signal_path, .header = T)[7] == "404")){
-       stop('signal_path starts with http, but url is not found (404).')
-     }
+      if(unname(RCurl::url.exists(signal_path, .header = T)[7] == "404")){
+        stop('signal_path starts with http, but url is not found (404).')
+      }
       
     } else if(!file.exists(juicerPath)){
       stop("juicerPath doesn't point to an existing .hic-file.")
@@ -98,7 +102,7 @@ load_contacts = function(signal_path,
     try_require('strawr', "load_contacts", source = 'github')
     
     doJuicer = T
-
+    
     
   } else if(!is.null(coolerPath)){
     ##################################################################### cooler
@@ -125,7 +129,7 @@ load_contacts = function(signal_path,
     }
     
     doHiCpro = T
-
+    
   } else {
     stop('please provide either .matrix/indices_path, a .cooler or a .hic.')
   }
@@ -145,7 +149,7 @@ load_contacts = function(signal_path,
   }
   
   if(doCooler){
-    sig_ind = loadCooler(coolerPath, scale_bp = scale_bp,balancing = balancing, scale_cis = scale_cis)
+    sig_ind = loadCooler(coolerPath, scale_bp = scale_bp,balancing = balancing, scale_cis = scale_cis, resolution = resolution)
     balanced = balancing
   }
   
@@ -277,13 +281,13 @@ loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
     
     F1 = findInterval(SIG$V1, chromRange$first)
     F2 = findInterval(SIG$V2, chromRange$first)
-
+    
     SIG$V3 <- scale_bp * SIG$V3 / sum(SIG[ifelse(F1 == F2, T, F), 3])
     
   } else {
     SIG <- read.hicpro.matrix(signal_path, scale_bp = scale_bp)
   }
-
+  
   return(list(SIG, ABS))
 }
 
@@ -295,7 +299,7 @@ zscore_hic = function(SIG, ABS){
   V3         <- NULL
   C1         <- NULL
   C2         <- NULL
-
+  
   chromRLE = rle(ABS$V1)
   
   CS = cumsum(c(1,chromRLE$lengths))
@@ -368,4 +372,3 @@ read.hicpro.matrix <- function(file, scale_bp = 1e9) {
   }
   return(data)
 }
-

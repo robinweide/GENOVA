@@ -12,7 +12,7 @@ compartment_matrixplot(
   arm = "p",
   colour_lim = NULL,
   rasterise = FALSE,
-  metric = c("contacts", "obsexp", "correlation"),
+  metric = c("contacts", "obsexp", "log2obsexp", "correlation"),
   ...
 )
 }
@@ -29,8 +29,9 @@ compartment score will be calculated on the fly for this arm only.}
 
 \item{chrom}{A \code{character} of length 1 with a chromosome name.}
 
-\item{arm}{Either \code{"p"} or \code{"q"} denoting the chromosome arm of 
-which to display the data from.}
+\item{arm}{Either \code{"p"}, \code{"q"} or \code{"all"}, denoting the 
+chromosome arm of which to display the data from. \code{"all"} displays
+the whole chromosome.}
 
 \item{colour_lim}{A \code{numeric} of length two giving the minimum and 
 maximum values in contact values. Out of bounds values will be set to the
@@ -42,6 +43,8 @@ polygons.}
 \item{metric}{One of the follow: \describe{
   \item{\code{"contacts"}}{Displays contacts.}
   \item{\code{"obsexp"}}{Displays observed over expected by distance.}
+  \item{\code{"log2obsexp"}}{Displays the log 2 observed over expected by 
+  distance.}
   \item{\code{"correlation"}}{Displays Pearson correlation for the observed
     over expected by distance.}
 }}

@@ -7,8 +7,9 @@
 #'   \code{\link[GENOVA]{compartment_score}} function. When \code{NULL}, the
 #'   compartment score will be calculated on the fly for this arm only.
 #' @param chrom A \code{character} of length 1 with a chromosome name.
-#' @param arm Either \code{"p"} or \code{"q"} denoting the chromosome arm of 
-#'   which to display the data from.
+#' @param arm Either \code{"p"}, \code{"q"} or \code{"all"}, denoting the 
+#'   chromosome arm of which to display the data from. \code{"all"} displays
+#'   the whole chromosome.
 #' @param metric One of the follow: \describe{
 #'   \item{\code{"contacts"}}{Displays contacts.}
 #'   \item{\code{"obsexp"}}{Displays observed over expected by distance.}
@@ -55,24 +56,33 @@ compartment_matrixplot <- function(
 ) {
   metric <- match.arg(metric, c("contacts", "obsexp", "log2obsexp", 
                                 "correlation"))
-  if (!(chrom %in% exp1$CENTROMERES$chrom)) {
+  if (arm != "all" && !(chrom %in% exp1$CENTROMERES$chrom)) {
     stop("No centromere information found for this chromosome.",
          call. = FALSE)
   }
   
   # Finding arm definitions
-  centro <- exp1$CENTROMERES$chrom == chrom
-  centro <- exp1$CENTROMERES[centro]
   chr <- exp1$IDX[V1 == chrom]
-  if (arm == "p") {
-    chr <- chr[V4 < centro$start]
+  if (arm != "all") {
+    centro <- exp1$CENTROMERES$chrom == chrom
+    centro <- exp1$CENTROMERES[centro]
+    if (arm == "p") {
+      chr <- chr[V4 < centro$start]
+    } else {
+      chr <- chr[V4 > centro$end]
+    }
+    if (nrow(chr) < 10 || (tail(chr$V3, 1) - head(chr$V2, 1) < 1e6)) {
+      stop('No `', arm, '` arm found. Try the other, or "all" option.')
+    }
   } else {
-    chr <- chr[V4 > centro$end]
-  }
-  if ((tail(chr$V3, 1) - head(chr$V2, 1) < 1e6) | nrow(chr) < 10) {
-    stop("No `", arm, "` found. Try the other")
+    # Dummy centromere information
+    centro <- data.table(chrom = chr$V1[1],
+                         start = -1,
+                         end = -1,
+                         key = c("chrom", "start", "end"))
   }
   chr <- chr[, list(V1 = V1[1], V2 = V2[2], V3 = tail(V3, 1))]
+
   
   if (is_contacts(exp2)) {
     explist <- list(exp1, exp2)

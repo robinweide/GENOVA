@@ -29,7 +29,7 @@ print.contacts <- function(x, ...) {
                     " chromosomes have been removed.\n")
   zscore <- paste0("The data have ", if (!attr(x, "znorm")) {"not"},
                    " been Z-score normalised.\n")
-  centros <- if (is.null(x$CENTROMERES)) {
+  centros <- if (is.null(x$CENTROMERES) || all(x$CENTROMERES$start == -1)) {
     paste0("- CENTROMERES:\tNo centromere information.\n")
   } else {
     paste0("- CENTROMERES:\tLocations of ", nrow(x$CENTROMERES), " centromeres.\n")

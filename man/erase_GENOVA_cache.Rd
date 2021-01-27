@@ -11,7 +11,7 @@ erase_GENOVA_cache()
 }
 \description{
 GENOVA can download test data with the
-\code{\link[GENOVA]{get_test_data()}()} function. This function undoes that
+\code{\link[GENOVA]{get_test_data}()} function. This function undoes that
 by deleting the files in the local cache. Test data can then be re-downloaded
 using the \code{get_test_data(..., download = TRUE)} function.
 }

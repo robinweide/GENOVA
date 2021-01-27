@@ -66,6 +66,12 @@ so please read that first. If there are still unanswered questions,
 please use the
 [issue-tracker](https://github.com/robinweide/GENOVA/issues).
 
+## Publication
+
+Please see our preprint on bioRxiv: [Hi-C Analysis with GENOVA: a case
+study with cohesin
+variants](https://www.biorxiv.org/content/early/2021/01/24/2021.01.22.427620).
+
 ## Code of conduct
 
 Please note that this project is released with a [Contributor Code of

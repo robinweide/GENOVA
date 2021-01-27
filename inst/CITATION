@@ -1,0 +1,22 @@
+citHeader("To cite GENOVA in publications use:")
+
+citEntry(
+  entry     = "Article",
+  title     = "Hi-C Analyses with GENOVA: a case study with cohesin variants",
+  author    = c(person("Robin H.", "van der Weide", role = c("aut", "cre")),
+                person("Teun", "van den Brand", role = "aut"),
+                person("Judith H.I.", "Haarhuis", role = "aut"),
+                person("Hans", "Teunissen", role = "aut"),
+                person("Benjamin", "Rowland", role = "aut"),
+                person("Elzo", "de Wit", role = "aut")),
+  journal   = "bioRxiv",
+  publisher = "Cold Spring Harbor Laboratory",
+  year      = "2021",
+  doi       = "10.1101/2021.01.22.427620",
+  url       = "https://www.biorxiv.org/content/early/2021/01/24/2021.01.22.427620",
+  textVersion = paste(
+   "Van der Weide et al. (2021)",
+   "Hi-C Analysis with GENOVA: a case study with cohesin variants.",
+   "bioRxiv"
+  )
+)

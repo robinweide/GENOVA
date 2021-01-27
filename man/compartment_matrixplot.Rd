@@ -29,8 +29,9 @@ compartment score will be calculated on the fly for this arm only.}
 
 \item{chrom}{A \code{character} of length 1 with a chromosome name.}
 
-\item{arm}{Either \code{"p"} or \code{"q"} denoting the chromosome arm of 
-which to display the data from.}
+\item{arm}{Either \code{"p"}, \code{"q"} or \code{"all"}, denoting the 
+chromosome arm of which to display the data from. \code{"all"} displays
+the whole chromosome.}
 
 \item{colour_lim}{A \code{numeric} of length two giving the minimum and 
 maximum values in contact values. Out of bounds values will be set to the

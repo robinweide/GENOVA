@@ -60,6 +60,10 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
   
   rhdf5::h5closeAll()
   
+  # handle nan and NA in ABS$weigth
+  ABS$weight[is.nan(ABS$weight)] <- 0
+  ABS$weight[is.na(ABS$weight)] <- 0
+  
   colnames(SIG) = paste0('V', 1:3)
   SIG[,1] = SIG[,1] + 1
   SIG[,2] = SIG[,2] + 1

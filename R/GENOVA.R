@@ -94,6 +94,8 @@ utils::globalVariables(c('.',
                          'chrom_x',
                          'chrom_y',
                          'chr', 
+                         'grp',
+                         'error',
                          'bin',
                          'binned'))
 

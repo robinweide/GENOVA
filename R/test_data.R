@@ -46,7 +46,7 @@ get_test_data <- function(res, download = FALSE) {
   
   path <- get_GENOVA_data_filepath(res, mustWork = FALSE)
   if (!file.exists(path)) {
-    if (GENOVA:::literalTRUE(download)) {
+    if (literalTRUE(download)) {
       check <- download_GENOVA_data()
       path <- get_GENOVA_data_filepath(res, mustWork = TRUE)
     } else {
@@ -66,7 +66,7 @@ get_test_data <- function(res, download = FALSE) {
 #' Erase cache.
 #'
 #' GENOVA can download test data with the
-#' \code{\link[GENOVA]{get_test_data()}()} function. This function undoes that
+#' \code{\link[GENOVA]{get_test_data}()} function. This function undoes that
 #' by deleting the files in the local cache. Test data can then be re-downloaded
 #' using the \code{get_test_data(..., download = TRUE)} function.
 #'
@@ -76,7 +76,7 @@ get_test_data <- function(res, download = FALSE) {
 #' @examples
 #' NULL
 erase_GENOVA_cache <- function() {
-  GENOVA:::try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
+  try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
   pkg_info <- pkgfilecache::get_pkg_info("GENOVA")
   erased <- pkgfilecache::erase_file_cache(pkg_info)
   return(erased)
@@ -84,7 +84,7 @@ erase_GENOVA_cache <- function() {
 
 
 download_GENOVA_data <- function() {
-  GENOVA:::try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
+  try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
   
   pkg_info <- pkgfilecache::get_pkg_info("GENOVA")
   
@@ -111,14 +111,14 @@ download_GENOVA_data <- function() {
 }
 
 list_GENOVA_data <- function() {
-  GENOVA:::try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
+  try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
   pkg_info <- pkgfilecache::get_pkg_info("GENOVA")
   available <- pkgfilecache::list_available(pkg_info)
   return(available)
 }
 
 get_GENOVA_data_filepath <- function(filename, mustWork = TRUE) {
-  GENOVA:::try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
+  try_require("pkgfilecache", "download_GENOVA_data", "CRAN")
   pkg_info <- pkgfilecache::get_pkg_info("GENOVA")
   path <- pkgfilecache::get_filepath(pkg_info, filename, mustWork = mustWork)
   return(path)

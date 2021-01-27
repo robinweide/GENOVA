@@ -52,7 +52,7 @@ insulation_score <- function(explist, window = 30,
     }
   }
   
-  explist <- GENOVA:::check_compat_exp(explist)
+  explist <- check_compat_exp(explist)
   expnames <- expnames(explist)
   nexp <- length(expnames)
   

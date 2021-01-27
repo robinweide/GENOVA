@@ -50,6 +50,9 @@ Version 1.0 will contain a massive overhaul, which will result in breaking nearl
 ## Support
 We have provided a quite lengthy [vignette](https://github.com/robinweide/GENOVA/blob/master/vignettes/GENOVA_vignette.pdf), so please read that first. If there are still unanswered questions, please use the [issue-tracker](https://github.com/robinweide/GENOVA/issues).
 
+## Publication
+Please see our preprint on bioRxiv: [Hi-C Analysis with GENOVA: a case study with cohesin variants](https://www.biorxiv.org/content/early/2021/01/24/2021.01.22.427620).
+
 
 ## Code of conduct
 

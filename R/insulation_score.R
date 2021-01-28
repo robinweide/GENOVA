@@ -92,6 +92,7 @@ insulation_score <- function(explist, window = 30,
   # Combine samples
   insula <- raw[[1]]
   for(i in tail(seq_along(raw), -1)) {
+    setnames(raw[[i]], 2, paste0("V2_", i))
     insula <- merge.data.table(insula, raw[[i]], all = TRUE, by = "grp")
   }
   

@@ -28,13 +28,19 @@ load_contacts(
 
 \item{sample_name}{The name of the sample.}
 
-\item{centromeres}{A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.}
+\item{centromeres}{One of the following: \itemize{
+ \item \code{NULL} (default) for empirically estimating centromeres by 
+ searching for the largest stretch of empty bins.
+ \item A \code{data.frame} with three columns per chromosome:
+ chromosome name, start-position and end-positions of centromeric regions.
+ \item \code{FALSE} to set no centromere information.
+}}
 
 \item{colour}{colour associated with sample.}
 
 \item{z_norm}{Normalise the matrices per-chromosome with a Z-score.}
 
-\item{scale_bp}{Scale contacts to have agenome-wide sum of `scale_bp` reads (default: 1e9). Set to NULL to skip this.}
+\item{scale_bp}{Scale contacts to have genome-wide sum of `scale_bp` reads (default: 1e9). Set to NULL to skip this.}
 
 \item{scale_cis}{Only scale with cis-contacts.}
 

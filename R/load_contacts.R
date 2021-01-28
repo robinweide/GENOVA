@@ -6,11 +6,17 @@
 #' @param indices_path Full path the HiC-pro-like index-file. Required when `signal_path` is \*.matrix.
 #' @param resolution Set the desired resolution of the matrix when using juicer-data.
 #' @param sample_name The name of the sample.
-#' @param centromeres A data.frame with three columns per chromosome: chromosome name, start-position and end-position of the centromeric region.
+#' @param centromeres One of the following: \itemize{
+#'  \item \code{NULL} (default) for empirically estimating centromeres by 
+#'  searching for the largest stretch of empty bins.
+#'  \item A \code{data.frame} with three columns per chromosome:
+#'  chromosome name, start-position and end-positions of centromeric regions.
+#'  \item \code{FALSE} to set no centromere information.
+#' }
 #' @param colour colour associated with sample.
 #' @param z_norm Normalise the matrices per-chromosome with a Z-score.
 #' @param balancing TRUE (default) will perform matrix balancing for .cooler and KR for.hic.
-#' @param scale_bp Scale contacts to have agenome-wide sum of `scale_bp` reads (default: 1e9). Set to NULL to skip this.
+#' @param scale_bp Scale contacts to have genome-wide sum of `scale_bp` reads (default: 1e9). Set to NULL to skip this.
 #' @param scale_cis Only scale with cis-contacts.
 #' @param legacy Get a pre-v1 object (mimics the output of construct.experiment.)
 #' @param verbose Do you want updates during the construction?
@@ -214,7 +220,20 @@ load_contacts = function(signal_path,
   ##############################################################################
   
   if (!is.null(centromeres)) {
-    centromeres <- clean_centromeres(centromeres, index)
+    if (inherits(centromeres, "data.frame")) {
+      centromeres <- clean_centromeres(centromeres, index)
+    } else if (is.logical(centromeres) && # Literal check for literal FALSE
+               length(centromeres) == 1 && 
+               !centromeres) {
+      centromeres <- data.table(
+        chrom = unique(index[[1]]),
+        start = -1,
+        end = -1
+      )
+    } else {
+      stop(paste0("Don't know how to interpret `", typeof(centromeres), "` as",
+                  "centromeres"), call. = FALSE)
+    }
   } else {
     centromeres <- find_centromeres(signal, index)
   }

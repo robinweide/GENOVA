@@ -294,23 +294,25 @@ sign_compartmentscore <- function(CS_discovery,
     # Loop over arms
     split <- split(part, part$part, drop = TRUE)
     split <- lapply(split, function(chrpart) {
-      chrpart[, expnames[ref]] <- lapply(chrpart[, expnames[ref]], 
-                                         function(score) {
-        # Compute correlation
-        cor <- suppressWarnings(cor(score, chrpart$graph, method = "spearman"))
-        if (is.na(cor) & verbose) {
-          message(paste0("No correlation could be computed for '", 
-                         chrpart$chrom[1], "'."))
-          return(score)
-        }
-        if (abs(cor) < 0.25 & verbose) {
-          message(paste0("The correlation with 'bedgraph' on '", 
-                         chrpart$chrom[1], "' was found to be less than ",
-                         "|0.25|."))
-        }
-        # Flip if correlation is negative
-        return(score * sign(cor))
-      })
+      chrpart[, expnames[ref]] <- lapply(
+        chrpart[, expnames[ref], drop = FALSE], 
+        function(score) {
+          # Compute correlation
+          cor <- suppressWarnings(cor(score, chrpart$graph, 
+                                      method = "spearman"))
+          if (is.na(cor) & verbose) {
+            message(paste0("No correlation could be computed for '", 
+                           chrpart$chrom[1], "'."))
+            return(score)
+          }
+          if (abs(cor) < 0.25 & verbose) {
+            message(paste0("The correlation with 'bedgraph' on '", 
+                           chrpart$chrom[1], "' was found to be less than ",
+                           "|0.25|."))
+          }
+          # Flip if correlation is negative
+          return(score * sign(cor))
+        })
       return(chrpart)
     })
   } else {

@@ -13,10 +13,16 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
                          function(x){ x <- gsub("/resolutions/","", x)  })
     cooler_res <- as.numeric(unique(cooler_res[!grepl('/',cooler_res)]))
     if(!resolution %in% cooler_res){
-      stop('Cool file does not include a resolution of ', resolution,".\nAvailable resolutions are: ", paste0(cooler_res, collapse = ", "))
+      stop('Cool file does not include a resolution of ', 
+           format(resolution, scientific = FALSE),
+           ".\nAvailable resolutions are: ", 
+           paste0(cooler_res, collapse = ", "))
     }
-    ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
-                                                  name = paste0("/resolutions/",resolution, "/", bins_name)))
+    ABS = data.table::as.data.table(
+      rhdf5::h5read(file = cooler,
+                    name = paste0("/resolutions/",
+                                  format(resolution, scientific = FALSE), 
+                                  "/", bins_name)))
     
     if('KR' %in% colnames(ABS)) {
       ABS$weight <- 1/ABS$KR
@@ -36,8 +42,11 @@ loadCooler = function(cooler, balancing = T, scale_bp = NULL, scale_cis = F, res
       balancing = F
       warning('No balancing is done due to missing weights.')
     }
-    SIG = data.table::as.data.table(rhdf5::h5read(file = cooler,
-                                                  name = paste0("/resolutions/",resolution, "/", pixels_name)))
+    SIG = data.table::as.data.table(
+      rhdf5::h5read(file = cooler,
+                    name = paste0("/resolutions/",
+                                  format(resolution, scientific = FALSE), 
+                                  "/", pixels_name)))
   } else {
     ABS = data.table::as.data.table(rhdf5::h5read(file = cooler,
                                                   name = bins_name))

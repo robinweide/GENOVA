@@ -823,13 +823,14 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   
-  df <- data.frame(mid = (df[["start"]] + df[["end"]])/2,
+  df <- data.table(mid = df[["start"]] + df[["end"]]/2,
                    df[, ..expnames])
+
   showcontrast <- !is.null(contrast) && 
     (length(expnames) > 1L || literalTRUE(show_single_contrast))
   
   if (showcontrast) {
-    cdf <- as.matrix(df[,expnames])
+    cdf <- as.matrix(df[,..expnames])
     cdf <- cdf - cdf[, contrast]
     cdf <- cbind.data.frame(mid = df$mid, cdf)
   } else {
@@ -840,7 +841,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   
   # Melt df
   df <- data.frame(mid = rep(df$mid, length(expnames)),
-                   score = unlist(df[2:ncol(df)]),
+                   score = unlist(as.list(df)[2:ncol(df)]),
                    exp = rep(expnames, each = nrow(df)))
   
   if (showcontrast) {

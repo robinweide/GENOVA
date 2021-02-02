@@ -190,6 +190,12 @@ check_compat_exp <- function(explist) {
     }
   }
   
+  # Check names
+  if (anyDuplicated(expnames(explist))) {
+    warning(paste0("There are duplicate names for samples. ",
+                   "This might have unforeseen consequences."))
+  }
+  
   return(explist)
 }
 

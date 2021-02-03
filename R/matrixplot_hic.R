@@ -378,40 +378,25 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
 
 plot.bw <- function(file, chrom, start, end, y1, y2, col,
                     yMax = NULL, rotate = F) {
+
+  d <- import_bigwig(file, chrom, start, end)
   
-  # leave here in case something changes
-  # official call but don't need it
-  # d <- read_bigwig( file, chrom=chrom, start=start, end=end)
-  # d <- as.data.frame(d)
-  
-  try_require("bigwrig", "plot.bw", "github")
-  
-  d <- bigwrig::read_bigwig_impl(file, chrom = chrom, start = start, end = end)
-  
-  # to speed up plotting we are going to collapse the same consecutive
-  # values
-  i <- which(diff(d[, 4]) != 0) # select points where the consecutive values differ
-  # select the middle of a set of consecutive values
-  sel <- floor(c(0, head(i, -1)) + i) / 2
-  d <- d[sel, ]
-  
-  
-  max.val <- max(d[, 4])
-  d[, 4] <- as.numeric(d[, 4])
+  max.val <- max(d$y)
   
   if (!is.null(yMax)) {
-    d[d[, 4] > yMax, ] <- yMax
+    d[, y := pmin(y, yMax)]
     max.val <- yMax
   } else {
     message("chip.yMax not given for a .bw-track: yMax is ", max.val)
   }
-  
+
   y.range <- abs(y1 - y2)
-  y.val <- y.range * d[, 4] / max.val
+  y.val <- y.range * d$y / max.val
+  d[, y := (y / max.val) * y.range]
   if (rotate) {
-    segments(y1, d[, 2], y1 + y.val, d[, 2], col = col)
+    polygon(d$y, d$x, col = col)
   } else {
-    segments(d[, 2], y1, d[, 2], y1 + y.val, col = col)
+    polygon(d$x, d$y, col = col)
   }
 }
 

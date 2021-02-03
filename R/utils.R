@@ -401,3 +401,19 @@ interpret_location_string <- function(location, IDX = NULL, feature_id = TRUE) {
   }
   return(location)
 }
+
+import_bigwig <- function(file, chr, start, end) {
+  try_require("rtracklayer", "import_bigwig", "Bioconductor")
+  loc <- IRanges::IRangesList(IRanges::IRanges(start, end))
+  names(loc) <- chr
+  im <- rtracklayer::import(file, selection = loc,
+                            as = "RleList")[[chr]]
+  im <- data.table(len  = im@lengths, val = im@values)
+  im[, end := cumsum(len)]
+  im[, start := end - len + 1]
+  x <- integer(nrow(im) * 2)
+  x[c(TRUE, FALSE)] <- im$start
+  x[c(FALSE, TRUE)] <- im$end
+  x <- pmax(pmin(x, end), start)
+  data.table(x = x, y = rep(im$val, each = 2))
+}

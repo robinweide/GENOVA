@@ -72,7 +72,7 @@ iPSC [@Krijger2016]   | 427.9M   | 3.1Gb  | 1.9Gb  |  1.0Gb  | 53.1MB
 
 Several functions rely on centromere-information. You can add this in the form of a BED-like three-column data.frame when constructing the experiment-object ^[Please make sure that the chromosome-names match.]. If not present, the centromeres will be emperically identified by searching for the largest stretch of no coverage on a chromosome.
 ```{r centromere, cache=F}
-centromeres = read.delim('../data/symlinks/hg19_cytobandAcen.bed', 
+centromeres = read.delim('../data/symlinks/../hg19_cytobandAcen.bed', 
                          sep = '\t', 
                          h = F, 
                          stringsAsFactors = F)
@@ -305,7 +305,7 @@ compartment_matrixplot(
   exp2 = Hap1_WAPL_40kb,
   CS_discovery = CS_out,
   chrom = "chr20", arm = "q",
-  metric = "obsexp"
+  metric = "log2obsexp"
 )
 ```
 
@@ -405,13 +405,11 @@ knitr::kable(
 )
 ```
 
-Moreover, we can use a bigwig (.bw) file to plot a track. For this example, we are using a SMC1 ChIP-seq track from [@Haarhuis2017]. We need the `bigwrig` package, which is easily installed from github using `devtools::install_github()`. The `yMax` argument is handy if you want to compare bigwig-tracks: it lets you set the y-axis maximum.
-```{r bigwrig, eval=F, echo = F}
-library(devtools)
-install_github(repo ='bigwrig', username =  'jayhesselberth')
-```
+Moreover, we can use a bigwig (.bw) file to plot a track. For this example, we are using a SMC1 ChIP-seq track from [@Haarhuis2017]. We load the bigwig data with the `rtracklayer` package that is available from Bioconductor. The `yMax` argument is handy if you want to compare bigwig-tracks: it lets you set the y-axis maximum.
 
 ```{r HMPchip, message=T , fig.cap= "Hi-C matrixplot: ChIPseq. A BED-file of CTCF-sites is plotted at the top and a coverage-track of SMC1 ChIP-seq is plotted beneath this. The symmAnn-option leads to the same tracks being plotted on the left.",cache=F,fig.asp=1, dev = 'png', dpi=300,fig.small = F}
+requireNamespace("rtracklayer", quietly = TRUE)
+
 hic_matrixplot(exp1 = Hap1_WT_10kb,
                chrom = 'chr7',  start = 26.75e6,  end=28.5e6, 
                loops = WT_Loops, # see APA
@@ -442,7 +440,7 @@ hic_matrixplot(exp1 = Hap1_WT_10kb,
 #                         pattern = '^',
 #                         replacement = 'chr') 
 # martExport$strand = ifelse(martExport$strand == 1, '+',"-") # 1/-1 to +/-
-load('../data/symlinks/martExport.Rdata')
+load('../data/symlinks/../martExport.Rdata')
 ```
 
 ```{r, echo =F }
@@ -755,8 +753,6 @@ visualise(WT_PE_OUT)
 
 Another way of looking at the PE-SCAn results, is to make a perspective plot. Here, the enrichment is encoded as the z-axis.
 ```{r pePERS, message=FALSE , fig.cap= "PE-SCAn perspective plot.",cache=F, fig.retina=T}
-RES = 40e3 # resolution of the Hi-C
-
 persp(WT_PE_OUT, border = NA,
       cex.axis = 0.6, cex.lab = 0.6)
 ```

@@ -30,6 +30,6 @@ Suggests:
     pkgfilecache
 VignetteBuilder: knitr
 Remotes: aidenlab/straw/R,
-   bioc::release/rhdf5
-   bioc::release/rtracklayer
+   bioc::release/rhdf5,
+   bioc::release/rtracklayer,
    bioc::release/IRanges

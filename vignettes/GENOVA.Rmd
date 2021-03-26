@@ -36,7 +36,7 @@ knitr::opts_chunk$set(
 knitr::opts_chunk$set(fig.pos = 'h')
 ```
 
-# Loading data
+# Getting started
 
 ```{r setup, echo=T, warning=FALSE, error=F, results='hide'}
 # devtools::install_github("robinweide/GENOVA", ref = 'dev')
@@ -44,10 +44,10 @@ library(GENOVA)
 ```
 
 
-## Data structures of input
+## Input data
 GENOVA expects two input files: the signal- and the index-file. Signal-files have three columns (bin1, bin2, contactCount) and index-files have four (chromosome, start, end, bin). These are the default output of the Hi-C mapping pipeline HiC-Pro [@Servant2015], where they are called \*.matrix and \*.bed. The files are expected to be genome-wide and may be corrected with ICE-normalisation.
 
-## Recommended resolutions
+### Recommended resolutions
 To ensure computational strain and time is kept to a minimum, we recommend different resolutions for different functions (table \@ref(tab:tableRES)). More experienced users are free to deviate, while keeping in mind that these datasets are quite memory-heavy (table \@ref(tab:tableMEM)). 
 
 Function   | Resolution
@@ -79,7 +79,9 @@ centromeres = read.delim('../data/symlinks/../hg19_cytobandAcen.bed',
 head(centromeres)
 ```
 
-## construct.experiment
+
+
+### Loading data
 Every Hi-C experiment will be stored in an experiment-object. This is done by invoking the `construct.experiment` function. Inside, several sanity checks will be performed, data is normalised to the total number of reads and scaled to a billion reads (the default value of the `BPscaling`-option). For this example, we are going to use the Hi-C maps of WT and $\Delta$WAPL Hap1 cells from Haarhuis et al. [-@Haarhuis2017]. Since the genome-wide analyses do not need very high-resolution data, we will construct both 10kb, 40kb and 1Mb resolution experiment-objects. 
 
 ```{r CONSTRUCT, echo=T, warning=FALSE, error=F, results='hide', cache=F, cache.lazy=F}
@@ -148,7 +150,24 @@ as.data.frame(
   [-1])
 ```
 
-## Juicebox & cooler
+\pagebreak
+
+### Quickstart
+If you want to take GENOVA for a spin or compare outputs, we have included some optional test data at 40k and 150k resolution of just two smaller human chromosomes. You can find more details about the data itself in the `?get_test_data` documentation. The `get_test_data()` function downloads and caches a pre-loaded contacts object that can be used in subsequent analysis. Below we'll demonstrate how to get the test data and directly use it in plotting.
+
+```{r, testdata, out.width='.25\\linewidth', fig.show='hold',fig.align='center',  message=FALSE , fig.asp=1,fig.cap= "Jotting down a quick plot of the test data.",cache=F, fig.retina=T, dev = 'png', dpi=300,fig.wide = T}
+test_exp <- get_test_data("40k", download = TRUE)
+
+hic_matrixplot(
+  test_exp,
+  chrom = "chr21", start = 20e6, end = 30e6,
+  cut.off = 500
+)
+```
+
+To clear the local cache of test data, you can use the `erase_GENOVA_cache()` function. If you want to use the test data after erasing the cache, you'd need to re-download the data.
+
+### Juicebox & cooler
 Both `.hic` and `.cooler` files can be loaded from version 1 onwards. The same `load_contacts()` function can be used, which will automatically determine the file-type based on the extention. 
 
 ```{r J2G, eval=FALSE, highlight=FALSE}

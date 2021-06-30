@@ -13,6 +13,7 @@ compartment_matrixplot(
   colour_lim = NULL,
   rasterise = FALSE,
   metric = c("contacts", "obsexp", "log2obsexp", "correlation"),
+  colour_bar = FALSE,
   ...
 )
 }
@@ -48,6 +49,9 @@ polygons.}
   \item{\code{"correlation"}}{Displays Pearson correlation for the observed
     over expected by distance.}
 }}
+
+\item{colour_bar}{A \code{logical} of length 1, indicating whether a
+colour-bar legend should be drawn at the right.}
 
 \item{...}{Arguments passed to the \code{\link[GENOVA]{compartment_score}}
 function.}

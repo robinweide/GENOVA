@@ -572,6 +572,8 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param fillNAtreshold Set the amount strength of outlier correction for 
 #' fillNA.
 #' @param rasterise Set to true to use a bitmap raster instead of polygons.
+#' @param colour_bar A \code{logical} of length 1, indicating whether a
+#'   colour-bar legend should be drawn at the right.
 #' @param addnames When the \code{coplot} argument is \code{"dual"}, display
 #'   names of the samples? (default: \code{TRUE})
 #' @param antoni Logical: plot an explorer of the microscopic world
@@ -616,7 +618,8 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end,
                            loops.radius = NULL, loops.colour = "#1faee3",
                            skipAnn = F, symmAnn = F,
                            check.genome = T, smoothNA = F, fillNAtreshold = 2, 
-                           rasterise = FALSE, addnames = TRUE,
+                           rasterise = FALSE, addnames = TRUE, cut.off = NULL,
+                           colour_bar = FALSE,
                            antoni = F) {
   if (is.null(loops.radius)) {
     loops.radius <- attr(exp1, "res") * 5
@@ -684,6 +687,9 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end,
   lay[1, ] <- 2
   lay[, 1] <- 3
   lay[1, 1] <- 4
+  if (colour_bar) {
+    lay <- cbind(lay, c(5, rep(6, nrow(lay) - 1)))
+  }
   layout(lay)
   par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
   # layout
@@ -900,4 +906,23 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end,
              type = type[3:4], rotate = T
     )
   }
+  if (colour_bar) {
+    plot.new()
+    par(plt = c(0, 0.2, 0.03, 0.97))
+    # If difference is extremely small, let it be at least something to 
+    # prevent zero-range bug
+    if (diff(colour_lim) < 1000 * .Machine$double.eps) {
+      colour_lim <- c(-10, 10) * .Machine$double.eps
+    }
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], 
+                         length.out = 255)))
+    image(1, m[1,], m, col = wr(255), xaxt = "n", yaxt = "n",
+          xlab = "", ylab = "")
+    title <- "Contacts"
+    title <- if (!is.null(exp2) && coplot != "dual") "Difference" else title
+    title <- if (ZnormScale) "Z-score" else title
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    mtext(title, side = 4, line = 2.5)
+  }
+  
 }

@@ -27,6 +27,8 @@
 #'   
 #' @section Resolution recommendation: A resolution in the ballpark of 
 #'   \code{(end - start) / 500}.
+#' @param colour_bar A \code{logical} of length 1, indicating whether a
+#'   colour-bar legend should be drawn at the right.
 #'
 #' @return No values are returned but a plot is outputted to the graphics 
 #'   device.
@@ -97,6 +99,11 @@ trans_matrixplot <- function(
     .choose_palette()
   }
   colours <- colorRampPalette(colours)
+  if (colour_bar) {
+    lay <- matrix(c(1,2), 1, 2)
+    layout(lay, widths = c(1, 0.2))
+  }
+  
   
   image(dat, col = colours(255), axes = FALSE, ylim = rev(range(dat$y)),
         useRaster = literalTRUE(rasterise), zlim = colour_lim,
@@ -135,6 +142,23 @@ trans_matrixplot <- function(
     labels = region * ifelse(mult == 10e6, 10, 1), 
     lwd = 2, cex.axis = 1
   )
+  
+  if (colour_bar) {
+    par(plt = c(0, 0.25, 0.15, 0.85))
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
+    image(1, m[1,], m, col = colours(255), xaxt = "n", yaxt = "n",
+          xlab = "", ylab = "")
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    title <- "Contacts"
+    if (div_scale) {
+      if (is.null(exp2)) {
+        title <- "Z-score"
+      } else {
+        title <- "Difference"
+      }
+    }
+    mtext(title, side = 4, line = 2.5)
+  }
 }
 
 

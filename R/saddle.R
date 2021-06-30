@@ -108,7 +108,9 @@ saddle <- function(explist, CS_discovery, bins = 10L,
   scores[, part := inverse.rle(attr(CS_discovery, "partitioning"))]
   # Remove centromeres and NAs
   scores <- scores[!endsWith(part, "centro")]
-  scores <- scores[!is.na(eval(as.symbol(expnames[1]))), ]
+  for (i in expnames) {
+    scores <- scores[!is.na(eval(as.symbol(i))), ]
+  }
   # Remove chromosomes with less than #bins scores
   use_chrom <- scores[, length(start), by = part]
   use_chrom <- use_chrom[["part"]][use_chrom[["V1"]] > bins]

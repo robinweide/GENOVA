@@ -533,8 +533,8 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #'   \code{end} arguments too.
 #' @param start,end Start and end position of the region of interest. Ignored if
 #'   the \code{chrom} argument is a BED-format data.frame.
-#' @param cut.off The cut.off for the hic-matrix plot, in the diff option the
-#' negative of this is the lower bound
+#' @param colour_lim,cut.off A \code{numeric} of length 2 for the lower and 
+#'   upper colour limits of the hic-matrix plot. \code{cut.off}: older syntax.
 #' @param chip A list of feature tracks, can be bed structure
 #' (i.e. data frames) or a path to bigwig file (i.e. character variable),
 #' maximum length of 4. Placement is inner-top, outer-top, outer-left,
@@ -600,12 +600,13 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #'   loops.colour = c("blue", "green"),
 #'   loops.type = c("upper", "lower"),
 #'   loops.resize = c(20e3, 20e3), # expand for visibility
-#'   cut.off = 25
+#'   colour_lim = c(0, 25)
 #' ) # upper limit of contacts
 #' }
 #' @return A matrix-plot
 #' @export
-hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
+hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, 
+                           colour_lim = NULL,
                            chip = list(NULL, NULL, NULL, NULL), inferno = NULL,
                            cexTicks = 1, chip.colour = "black", chip.yMax = NULL,
                            type = rep("triangle", 4), guessType = T,
@@ -623,6 +624,12 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   
   if (length(chip) < 3) {
     symmAnn <- T
+  }
+  
+  if (!is.null(colour_lim)) {
+    if (length(colour_lim) != 2 || !is.numeric(colour_lim)) {
+      stop("The `colour_lim` argument should be a numeric of length 2.")
+    }
   }
   
   loc <- standardise_location(chrom = chrom, start = start, end = end, 
@@ -729,16 +736,19 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   } else if (is.null(exp2)) {
     
     # set cutoffs
-    if (is.null(cut.off)) {
-      cut.off <- max(quantile(abs(mat1$z), .99))
-      message(
-        "No cut.off was given: using 99% percentile: ",
-        round(cut.off), "."
-      )
+    if (is.null(colour_lim)) {
+      base <- if (ZnormScale) c(-1, 1) else c(0, 1)
+      if (!is.null(cut.off)) {
+        colour_lim <- base * cut.off
+      } else {
+        colour_lim <- base * max(quantile(abs(mat1$z), 0.99))
+        message(
+          "No colour limits were given: using 99% percentile: ",
+          round(colour_lim[2]), "."
+        )
+      }
     }
-    mat1$z[mat1$z > cut.off] <- cut.off
-    mat1$z[mat1$z < -cut.off] <- -cut.off
-    
+    mat1$z[] <- pmax(pmin(mat1$z, colour_lim[2]), colour_lim[1])
     
     wr <- if (ZnormScale) {
       bezier_corrected_divergent
@@ -751,8 +761,8 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     }
     wr <- colorRampPalette(wr)
     image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
-          zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
-          useRaster = literalTRUE(rasterise))
+                  zlim = colour_lim,
+                  useRaster = literalTRUE(rasterise))
   }
   ##############################################################################
   # plot exp1 and exp2
@@ -762,15 +772,19 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       mat1$z[upper.tri(mat1$z)] <- mat2$z[upper.tri(mat2$z)]
       
       # set cutoffs
-      if (is.null(cut.off)) {
-        cut.off <- max(quantile(abs(mat1$z), .99))
-        message(
-          "No cut.off was given: using 99% percentile: ",
-          round(cut.off), "."
-        )
+      if (is.null(colour_lim)) {
+        base <- if (ZnormScale) c(-1, 1) else c(0, 1)
+        if (!is.null(cut.off)) {
+          colour_lim <- base * cut.off
+        } else {
+          colour_lim <- base * max(quantile(abs(mat1$z), 0.99))
+          message(
+            "No colour limits were given: using 99% percentile: ",
+            round(colour_lim[2]), "."
+          )
+        }
       }
-      mat1$z[mat1$z > cut.off] <- cut.off
-      mat1$z[mat1$z < -cut.off] <- -cut.off
+      mat1$z[] <- pmax(pmin(mat1$z, colour_lim[2]), colour_lim[1])
       
       wr <- if (ZnormScale) {
         bezier_corrected_divergent
@@ -783,7 +797,7 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       }
       wr <- colorRampPalette(wr)
       image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
-            zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
+            zlim = colour_lim,
             useRaster = literalTRUE(rasterise))
       
       expnames <- c(expnames(exp1), expnames(exp2))
@@ -795,18 +809,23 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     } else {
       mat1$z <- mat2$z - mat1$z
       # set cutoffs
-      if (is.null(cut.off)) {
-        cut.off <- max(quantile(abs(mat1$z), .99))
-        message(
-          "No cut.off was given: using 99% percentile: ",
-          round(cut.off), "."
-        )
+      if (is.null(colour_lim)) {
+        base <- c(-1, 1)
+        if (!is.null(cut.off)) {
+          colour_lim <- base * cut.off
+        } else {
+          colour_lim <- base * max(quantile(abs(mat1$z), 0.99))
+          message(
+            "No colour limits were given: using 99% percentile: ",
+            round(colour_lim[2]), "."
+          )
+        }
       }
-      mat1$z[mat1$z > cut.off] <- cut.off
-      mat1$z[mat1$z < -cut.off] <- -cut.off
+      mat1$z[] <- pmax(pmin(mat1$z, colour_lim[2]), colour_lim[1])
       
-      bwr <- colorRampPalette(bezier_corrected_divergent)
-      image.default(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
+      wr <- colorRampPalette(bezier_corrected_divergent)
+      image.default(mat1, col = wr(500), axes = F, ylim = rev(range(mat1$x)), 
+                    zlim = colour_lim)
     }
   }
   

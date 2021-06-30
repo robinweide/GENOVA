@@ -16,6 +16,7 @@ tornado_insulation(
   colours = NULL,
   profile_fun = mean,
   custom_fill_scale = NULL,
+  profile_ylim = NULL,
   title = NULL
 )
 }
@@ -24,7 +25,8 @@ tornado_insulation(
 \code{insulation_score()}.}
 
 \item{bed}{A \code{data.frame} with 3 columns in BED format, containing
-genomic locations for which the insulation score is taken.}
+genomic locations for which the insulation score is taken. Alternatively,
+a \code{list} of such \code{data.frame}.}
 
 \item{bed_pos}{A \code{character} vector of length 1 containing either
 \code{"start"}, \code{"end"} or \code{"center"} indicating what position of
@@ -56,6 +58,9 @@ Should return 1 value per call.}
 family of functions to use as the heatmap's scale. If this argument is not
 \code{NULL}, it overrides the '\code{colour_lim}' and '\code{colour}'
 arguments.}
+
+\item{profile_ylim}{A \code{numeric} of length 2 indicating limits for the
+y-axis in the profile part.}
 
 \item{title}{A \code{character} or \code{expression} of length 1 to use as
 text for the plot title.}

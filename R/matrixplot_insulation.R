@@ -60,7 +60,7 @@ insulation_matrixplot <- function(
   colour_lim = NULL, rasterise = FALSE,
   colour_bar = FALSE
 ) {
-  opar <- par
+  opar <- par(no.readonly = TRUE)
   on.exit(par(opar))
   
   loc <- standardise_location(chrom, start, end, singular = TRUE)

@@ -48,6 +48,8 @@ trans_matrixplot <- function(
   chrom_down, start_down, end_down,
   colour_lim = NULL, rasterise = FALSE
 ) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   dat <- select_arbitrary(
     exp1,
     chrom_up, start_up, end_up,

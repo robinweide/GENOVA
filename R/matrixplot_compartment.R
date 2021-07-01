@@ -57,6 +57,8 @@ compartment_matrixplot <- function(
   colour_bar = FALSE,
   ...
 ) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   metric <- match.arg(metric, c("contacts", "obsexp", "log2obsexp", 
                                 "correlation"))
   if (arm != "all" && !(chrom %in% exp1$CENTROMERES$chrom)) {

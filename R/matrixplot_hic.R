@@ -621,6 +621,8 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end,
                            rasterise = FALSE, addnames = TRUE, cut.off = NULL,
                            colour_bar = FALSE,
                            antoni = F) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   if (is.null(loops.radius)) {
     loops.radius <- attr(exp1, "res") * 5
   }

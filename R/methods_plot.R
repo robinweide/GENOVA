@@ -57,6 +57,8 @@ plot.APA_discovery <- function(
   colour_lim_contrast = NULL,
   ...
 ) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
@@ -157,6 +159,8 @@ plot.CSCAn_discovery <- function(
   colour_lim = NULL,
   ...
 ) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
   
@@ -261,7 +265,8 @@ plot.PESCAn_discovery <- function(
   colour_lim_contrast = NULL,
   ...
 ) {
-  
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
   
@@ -364,7 +369,8 @@ plot.ATA_discovery <- function(
   colour_lim_contrast = NULL,
   ...
 ) {
-  
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
   
@@ -487,7 +493,8 @@ plot.ARA_discovery <- function(
   colour_lim_contrast = NULL,
   ...
 ) {
-  
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
   
@@ -587,6 +594,8 @@ plot.ARA_discovery <- function(
 #' @export
 plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   loc <- standardise_location(chr, start, end, singular = TRUE)
@@ -625,6 +634,8 @@ plot.CS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
 #' @export
 plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   loc <- standardise_location(chr, start, end, singular = TRUE)
@@ -664,6 +675,8 @@ plot.IS_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
 #' @export
 plot.DI_discovery <- function(x, chr = "chr1", start = NULL, end = NULL,
                               contrast = NULL, ...) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   start <- if (is.null(start)) -Inf else start
   end <- if (is.null(end)) Inf else end
   loc <- standardise_location(chr, start, end, singular = TRUE)
@@ -715,7 +728,8 @@ plot.saddle_discovery <- function(
   colour_lim_contrast = NULL,
   ...
 ) {
-  
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 3))
   
@@ -827,6 +841,10 @@ plot.domainogram_discovery <- function(
   ...
 ) {
   minimalist <- literalTRUE(minimalist)
+  if (minimalist) {
+    opar <- par(no.readonly = TRUE)
+    on.exit(par(opar))
+  }
   x <- x$scores
   if (minimalist) {
     x <- x[, 1:3]
@@ -922,6 +940,8 @@ plot.domainogram_discovery <- function(
 #' @export
 plot.RCP_discovery <- function(x, contrast = 1, 
                                metric = c("smooth"), ...) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   metric <- match.arg(metric, c("smooth", "both", "lfc"))
   
   nregion <- length(unique(x$smooth$region))
@@ -946,6 +966,8 @@ plot.RCP_discovery <- function(x, contrast = 1,
 #' @rdname plot_discovery
 #' @export
 plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   
   par(mar = c(1, 1, 1, 1))
   par(oma = c(4, 4, 1, 1))
@@ -1067,6 +1089,8 @@ plot.virtual4C_discovery <- function(x, censor_vp = TRUE, ...) {
 plot.IIT_discovery <- function(x, contrast = 1, censor_contrast = TRUE, 
                                geom = c("boxplot", "point"),
                                ...) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   geom <- match.arg(geom)
   dat <- as.data.table(x$results)
   cols <- attr(x, "colours")

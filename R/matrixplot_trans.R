@@ -46,7 +46,8 @@ trans_matrixplot <- function(
   exp1, exp2 = NULL,
   chrom_up, start_up, end_up,
   chrom_down, start_down, end_down,
-  colour_lim = NULL, rasterise = FALSE
+  colour_lim = NULL, rasterise = FALSE,
+  colour_bar = FALSE
 ) {
   opar <- par(no.readonly = TRUE)
   on.exit(par(opar))

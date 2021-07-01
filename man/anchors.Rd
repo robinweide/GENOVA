@@ -39,7 +39,7 @@ anchors_APA(
 
 anchors_ATA(IDX, bed, dist_thres = c(225000, Inf), padding = 1)
 
-anchors_ARA(IDX, bed)
+anchors_ARA(IDX, bed, strand = NULL)
 
 anchors_extendedloops(IDX, res, bedpe, dist_thres = c(30000, 3e+06))
 }
@@ -83,6 +83,10 @@ giving the start positions of the second coordinate. \item An
 
 \item{padding}{A \code{numeric} of length 1 to determine the padding around
 TADs, expressed in TAD widths. \emph{ATA only}.}
+
+\item{strand}{A \code{character} of the length \code{nrow(bed)}. Overrules
+an attempt to infer strand from \code{start > end} information. 
+\emph{ARA only}.}
 }
 \value{
 A \code{anchors} object with two colums in \code{matrix} format.

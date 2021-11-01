@@ -9,14 +9,16 @@ citEntry(
                 person("Hans", "Teunissen", role = "aut"),
                 person("Benjamin", "Rowland", role = "aut"),
                 person("Elzo", "de Wit", role = "aut")),
-  journal   = "bioRxiv",
-  publisher = "Cold Spring Harbor Laboratory",
+  journal   = "NAR Genomics and Bioinformatics",
+  publisher = "Oxford University Press",
   year      = "2021",
-  doi       = "10.1101/2021.01.22.427620",
-  url       = "https://www.biorxiv.org/content/early/2021/01/24/2021.01.22.427620",
+  volume    = "3",
+  number    = "2",
+  doi       = "10.1093/nargab/lqab040",
+  url       = "https://doi.org/10.1093/nargab/lqab040",
   textVersion = paste(
    "Van der Weide et al. (2021)",
    "Hi-C Analysis with GENOVA: a case study with cohesin variants.",
-   "bioRxiv"
+   "NAR Genomics and Bioinformatics"
   )
 )

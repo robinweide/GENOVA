@@ -10,3 +10,6 @@ CODE_OF_CONDUCT.md
 README.rmd
 changelog.md
 temp
+^data/symlinks$
+^vignettes/GENOVA_vignette\.pdf$
+^vignettes$

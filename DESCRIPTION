@@ -1,6 +1,6 @@
 Package: GENOVA
 Title: GENOVA: expore the Hi-C
-Version: 1.0.0
+Version: 1.0.0.9000
 Authors@R: c(
   person("Robin H.", "van der Weide", email = "r.vd.weide@nki.nl", role = c("aut", "cre")),
   person("Teun", "van den Brand", email = "t.vd.brand@nki.nl", role = "aut"),
@@ -25,8 +25,11 @@ Suggests:
     RCurl,
     strawr (>= 0.0.1),
     rhdf5 (>= 2.30.0),
+    rtracklayer,
+    IRanges,
     pkgfilecache
 VignetteBuilder: knitr
-Remotes: rnabioco/RcppLibBigWig,
-   aidenlab/straw/R,
-   bioc::release/rhdf5
+Remotes: aidenlab/straw/R,
+   bioc::release/rhdf5,
+   bioc::release/rtracklayer,
+   bioc::release/IRanges

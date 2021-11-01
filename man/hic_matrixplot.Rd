@@ -10,7 +10,7 @@ hic_matrixplot(
   chrom,
   start,
   end,
-  cut.off = NULL,
+  colour_lim = NULL,
   chip = list(NULL, NULL, NULL, NULL),
   inferno = NULL,
   cexTicks = 1,
@@ -34,6 +34,8 @@ hic_matrixplot(
   fillNAtreshold = 2,
   rasterise = FALSE,
   addnames = TRUE,
+  cut.off = NULL,
+  colour_bar = FALSE,
   antoni = F
 )
 }
@@ -54,8 +56,8 @@ The latter two options automatically provide the \code{start} and
 \item{start, end}{Start and end position of the region of interest. Ignored if
 the \code{chrom} argument is a BED-format data.frame.}
 
-\item{cut.off}{The cut.off for the hic-matrix plot, in the diff option the
-negative of this is the lower bound}
+\item{colour_lim, cut.off}{A \code{numeric} of length 2 for the lower and 
+upper colour limits of the hic-matrix plot. \code{cut.off}: older syntax.}
 
 \item{chip}{A list of feature tracks, can be bed structure
 (i.e. data frames) or a path to bigwig file (i.e. character variable),
@@ -119,6 +121,9 @@ fillNA.}
 \item{addnames}{When the \code{coplot} argument is \code{"dual"}, display
 names of the samples? (default: \code{TRUE})}
 
+\item{colour_bar}{A \code{logical} of length 1, indicating whether a
+colour-bar legend should be drawn at the right.}
+
 \item{antoni}{Logical: plot an explorer of the microscopic world}
 }
 \value{
@@ -155,7 +160,7 @@ hic.matrixplot(
   loops.colour = c("blue", "green"),
   loops.type = c("upper", "lower"),
   loops.resize = c(20e3, 20e3), # expand for visibility
-  cut.off = 25
+  colour_lim = c(0, 25)
 ) # upper limit of contacts
 }
 }

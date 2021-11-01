@@ -24,6 +24,8 @@
 #'   nearest limits.
 #' @param rasterise Set to \code{TRUE} to use a bitmap raster instead of 
 #'   polygons. 
+#' @param colour_bar A \code{logical} of length 1, indicating whether a
+#'   colour-bar legend should be drawn at the right.
 #'   
 #' @details The 'on-the-fly' calculation of the insulation score uses the 
 #'  default settings. Therefore, if for example the window size is to be 
@@ -55,9 +57,10 @@ insulation_matrixplot <- function(
   exp1, exp2 = NULL, 
   IS_discovery = NULL,
   chrom, start, end,
-  colour_lim = NULL, rasterise = FALSE
+  colour_lim = NULL, rasterise = FALSE,
+  colour_bar = FALSE
 ) {
-  opar <- par
+  opar <- par(no.readonly = TRUE)
   on.exit(par(opar))
   
   loc <- standardise_location(chrom, start, end, singular = TRUE)
@@ -104,7 +107,12 @@ insulation_matrixplot <- function(
   # Setup layout
   if (length(explist) == 2) {
     lay <- matrix(1:4, 2)
-    layout(lay, widths = c(0.2, 1), heights = c(0.2, 1), respect = TRUE)
+    if (colour_bar) {
+      layout(cbind(lay, c(5,6)), widths = c(0.2, 1, 0.2), 
+             heights = c(0.2, 1), respect = TRUE)
+    } else {
+      layout(lay, widths = c(0.2, 1), heights = c(0.2, 1), respect = TRUE)
+    }
     par(mar = c(0,0,0,0))
     plot.new()
     par(mar = c(3, rep(0.2, 3)))
@@ -119,7 +127,12 @@ insulation_matrixplot <- function(
     axis(1, insbreaks, insbreaks, cex.axis = 1)
   } else {
     lay <- matrix(1:2, 2)
-    layout(lay, widths = 1, heights = c(0.2, 1), respect = TRUE)
+    if (colour_bar) {
+      layout(cbind(lay, 3:4), 
+             widths = c(1, 0.2), heights = c(0.2, 1), respect = TRUE)
+    } else {
+      layout(lay, widths = 1, heights = c(0.2, 1), respect = TRUE)
+    }
   }
   par(mar = c(rep(0.2, 3), 3))
   plot(
@@ -160,7 +173,15 @@ insulation_matrixplot <- function(
     text(x = rev(txt)[2], y = txt[2], labels = expnames[2], adj = c(0, 0))
   }
   
-  
+  if (colour_bar) {
+    plot.new()
+    par(plt = c(0, 0.25, 0.1, 0.95))
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
+    image(1, m[1,], m, col = colours(255), xaxt = "n", yaxt = "n",
+          xlab = "", ylab = "")
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    mtext("Contacts", side = 4, line = 2.5)
+  }
 }
 
 

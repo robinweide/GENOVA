@@ -5,7 +5,7 @@
 \alias{antoni}
 \title{Antoni}
 \format{
-An object of class \code{matrix} with 350 rows and 350 columns.
+An object of class \code{matrix} (inherits from \code{array}) with 350 rows and 350 columns.
 }
 \usage{
 antoni

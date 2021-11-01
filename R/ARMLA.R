@@ -334,6 +334,8 @@ ATA <- function(explist, bed,
 #'   the \code{size_bp} is also \code{NULL}. \code{size_bp} is an alternative
 #'   parametrisation for the lookup regions, expressed in basepairs.
 #'   \code{size_bp} is not used when the argument \code{size_bin} is set.
+#' @param strand A \code{character} of the length \code{nrow(bed)}. Overrules
+#'   an attempt to infer strand from \code{start > end} information.
 #' 
 #' @return An \code{ARA_discovery} object containing the following slots:
 #'   \describe{ \item{obsexp}{An \code{array} with the dimensions
@@ -390,7 +392,8 @@ ATA <- function(explist, bed,
 ARA <- function(explist, bed, shift = 1e6,
                 size_bin = NULL, size_bp = NULL,
                 outlier_filter = c(0, 1),
-                anchors = NULL, raw = TRUE) {
+                anchors = NULL, raw = TRUE,
+                strand = NULL) {
 
   # Verify experiment compatability
   explist <- check_compat_exp(explist)
@@ -404,7 +407,7 @@ ARA <- function(explist, bed, shift = 1e6,
   if (is.null(anchors)) {
     anchors <- anchors_ARA(
       explist[[1]]$IDX,
-      bed
+      bed, strand = strand
     )
   }
 

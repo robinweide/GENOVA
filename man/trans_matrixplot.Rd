@@ -14,7 +14,8 @@ trans_matrixplot(
   start_down,
   end_down,
   colour_lim = NULL,
-  rasterise = FALSE
+  rasterise = FALSE,
+  colour_bar = FALSE
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ limits.}
 
 \item{rasterise}{Set to \code{TRUE} to use a bitmap raster instead of 
 polygons.}
+
+\item{colour_bar}{A \code{logical} of length 1, indicating whether a
+colour-bar legend should be drawn at the right.}
 }
 \value{
 No values are returned but a plot is outputted to the graphics 

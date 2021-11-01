@@ -12,7 +12,8 @@ ARA(
   size_bp = NULL,
   outlier_filter = c(0, 1),
   anchors = NULL,
-  raw = TRUE
+  raw = TRUE,
+  strand = NULL
 )
 }
 \arguments{
@@ -50,6 +51,9 @@ indices and uses this argument instead. See
 \item{raw}{A \code{logical} of length 1: should the raw array underlying the
 summary matrices be returned in the output? Should be \code{TRUE} if the
 intention is to use the \code{quantify} function.}
+
+\item{strand}{A \code{character} of the length \code{nrow(bed)}. Overrules
+an attempt to infer strand from \code{start > end} information.}
 }
 \value{
 An \code{ARA_discovery} object containing the following slots:

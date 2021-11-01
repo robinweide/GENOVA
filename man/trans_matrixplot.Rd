@@ -14,7 +14,8 @@ trans_matrixplot(
   start_down,
   end_down,
   colour_lim = NULL,
-  rasterise = FALSE
+  rasterise = FALSE,
+  colour_bar = FALSE
 )
 }
 \arguments{

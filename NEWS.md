@@ -17,6 +17,7 @@
   throw errors (#246).
 - In `load_contacts()`, you can now set `centromeres = FALSE` to signal that
   the data doesn't contain centromeres (#241).
+- Fixed a balancing bug in .hic file loading (#225).
 
 # GENOVA v1.0 27-01-2021 (The Cartographer)
 

@@ -823,7 +823,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   
-  df <- data.table(mid = df[["start"]] + df[["end"]]/2,
+  df <- data.table(mid = (df[["start"]] + df[["end"]])/2,
                    df[, ..expnames])
 
   showcontrast <- !is.null(contrast) && 

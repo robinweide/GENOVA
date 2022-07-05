@@ -112,7 +112,7 @@ compartment_matrixplot <- function(
   }
   
   if (!all(expnames %in% expnames(CS_discovery))) {
-    stop("Sample names in the `IS_discovery` do not match contacts object(s).",
+    stop("Sample names in the `CS_discovery` do not match contacts object(s).",
          call. = FALSE)
   }
   comp_dat <- as.data.table(CS_discovery$compart_scores)

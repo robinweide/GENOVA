@@ -158,7 +158,7 @@ compartment_matrixplot <- function(
   loclim <- c(chr$V2, chr$V3)
   locbreaks <- scales::breaks_pretty()(loclim)
   complim <- lapply(expnames, function(i){comp_dat[, eval(as.symbol(i))]})
-  complim <- range(do.call(c, complim))
+  complim <- range(do.call(c, complim), na.rm = TRUE)
   complim <- scales::expand_range(complim, 0.1)
   compbreaks <- scales::breaks_width(1)(complim)
   
@@ -177,7 +177,10 @@ compartment_matrixplot <- function(
     cs.lim <- max(complim)
     x.pos <- comp_dat$end
     y.pos <- comp_dat[, eval(as.symbol(expnames[2]))]
-    graphics::plot(y.pos, x.pos, yaxs = "i", type = "n", axes = F, xlim = rev(range(compbreaks)), ylim = loclim)
+    graphics::plot(
+      y.pos, x.pos, yaxs = "i", type = "n", axes = F, 
+      xlim = rev(range(compbreaks), na.rm = TRUE), ylim = loclim
+    )
     ab.polygon(x.pos, y.pos, rotate = T)
     
     axis(1, compbreaks, compbreaks, cex.axis = 1)

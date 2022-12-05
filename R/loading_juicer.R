@@ -19,7 +19,12 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
   expandedChromosomes = rbind(as.data.frame(cbind(juicer_metadata[[1]]$chrom,juicer_metadata[[1]]$chrom)),
                               expandedChromosomes)
   expandedChromosomes = apply(expandedChromosomes, 2, as.character)
-  strawNorm = ifelse(balancing, 'KR', "NONE")
+  
+  if (!is.logical(balancing)) {
+    balancing <- balancing %in% c("KR", "T", "TRUE")
+  }
+  
+  strawNorm = ifelse(balancing[1], 'KR', "NONE")
   
   juicerList = lapply(seq_len(nrow(expandedChromosomes)), function(eci){
  

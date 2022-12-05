@@ -360,15 +360,22 @@ visualise.CSCAn_discovery <- function(discovery, mode = c("obsexp", "signal"),
   df$Var2 <- as.integer(df$Var2)
   
   g <- ggplot2::ggplot(df, ggplot2::aes(Var1, Var2, fill = value)) +
-    ggplot2::geom_raster() +
-    ggplot2::facet_grid(left ~ Var4 + right, switch = "y")
+    ggplot2::geom_raster()
+  
+  if (all(c("left", "right") %in% names(df))) {
+    g <- g + ggplot2::facet_grid(left ~ Var4 + right, switch = "y")
+  } else if ("Var4" %in% names(df)) {
+    g <- g + ggplot2::facet_grid(~ Var4, switch = "y")
+  }
   
   if (raw) {
     return(g)
   }
 
-  panel_spac <- c(rep(5.5, length(unique(df$right)) - 1L))
-  panel_spac <- c(panel_spac, rep(c(11, panel_spac), length(unique(df$Var4)) - 1))
+  panel_spac <- c(rep(5.5, pmax(length(unique(df$right)) - 1L, 0)))
+  panel_spac <- c(panel_spac, rep(c(11, panel_spac), 
+                                  pmax(length(unique(df$Var4)) - 1, 0)))
+  panel_spac <- if (length(panel_spac)) panel_spac else 5.5
   panel_spac <- ggplot2::unit(panel_spac, "points")
   
   fillscale <- if (hasobsexp) {
@@ -823,7 +830,7 @@ visualise.IS_discovery <- function(discovery, contrast = NULL, chr = "chr1",
   df <- df[ii,]
   expnames <- colnames(df)[5:ncol(df)]
   
-  df <- data.table(mid = df[["start"]] + df[["end"]]/2,
+  df <- data.table(mid = (df[["start"]] + df[["end"]])/2,
                    df[, ..expnames])
 
   showcontrast <- !is.null(contrast) && 

@@ -153,7 +153,7 @@ compartment_matrixplot <- function(
   loclim <- c(chr$V2, chr$V3)
   locbreaks <- scales::breaks_pretty()(loclim)
   complim <- lapply(expnames, function(i){comp_dat[, eval(as.symbol(i))]})
-  complim <- range(do.call(c, complim))
+  complim <- range(do.call(c, complim), na.rm = TRUE)
   complim <- scales::expand_range(complim, 0.1)
   compbreaks <- scales::breaks_width(1)(complim)
   
@@ -241,6 +241,7 @@ compartment_matrixplot <- function(
 
 ab.polygon <- function(x.pos, y.pos, rotate = F) {
   x <- c(x.pos[1], x.pos, utils::tail(x.pos, 1))
+  y.pos[is.na(y.pos)] <- 0
   y.up <- c(0, ifelse(y.pos < 0, 0, y.pos), 0)
   y.down <- c(0, ifelse(y.pos > 0, 0, y.pos), 0)
   

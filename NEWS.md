@@ -1,5 +1,6 @@
 # GENOVA (development version)
 
+- Fixed a misplacement of `na.rm` in `compartment_matrixplot()` (#328)
 - The `tornado_insulation()` function now accepts a list of bed-like data.frames 
   (#266).
 - Exposed the `strand` argument in `ARA()`, making it easier to do strand aware

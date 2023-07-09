@@ -1,8 +1,31 @@
+# GENOVA (development version)
+
+- Fixed a misplacement of `na.rm` in `compartment_matrixplot()` (#328)
+- The `tornado_insulation()` function now accepts a list of bed-like data.frames 
+  (#266).
+- Exposed the `strand` argument in `ARA()`, making it easier to do strand aware
+  ARAs (#268)
+- Renamed `cut.off` to `colour_lim` and allow `c(minimum, maximum)` 
+  specification, rather than `cut.off = maximum` in `hic_matrixplot()` (#260).
+- Added a `colour_bar` legend option in `*_matrixplot()` family (#260).
+- The `par()` options now reset to original state after calling `*_matrixplot()`
+  family of functions.
+- Fixed a bug with `NA`s in `saddle()` (#263).
+- Removed {bigwrig} as a dependency in favour of Bioconductor's {rtracklayer}.
+- Fixed a bug wherein the correct resolution couldn't be found in `.mcool` files
+  due to scientific formatting of large numbers (#248, #249).
+- Fixed a bug in `insulation_score()` wherein formatting of sample names could
+  throw errors (#246).
+- In `load_contacts()`, you can now set `centromeres = FALSE` to signal that
+  the data doesn't contain centromeres (#241).
+- Fixed a balancing bug in .hic file loading (#225).
+
 # GENOVA v1.0 27-01-2021 (The Cartographer)
 
 This version marks a large refactoring of the code base in an effort to increase
 consistency. However, it also breaks a lot of old code. It is the version that
-was used during submission of the [GENOVA publication](https://doi.org/10.1093/nargab/lqab040).
+was used during submission of the 
+[GENOVA publication](https://doi.org/10.1093/nargab/lqab040).
 
 ## Data representation
 

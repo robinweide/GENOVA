@@ -18,6 +18,8 @@
 #'   \item{\code{"correlation"}}{Displays Pearson correlation for the observed
 #'     over expected by distance.}
 #' }
+#' @param colour_bar A \code{logical} of length 1, indicating whether a
+#'   colour-bar legend should be drawn at the right.
 #' @param ... Arguments passed to the \code{\link[GENOVA]{compartment_score}}
 #'   function.
 #' 
@@ -52,8 +54,11 @@ compartment_matrixplot <- function(
   colour_lim = NULL,
   rasterise = FALSE,
   metric = c("contacts", "obsexp", "log2obsexp", "correlation"),
+  colour_bar = FALSE,
   ...
 ) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   metric <- match.arg(metric, c("contacts", "obsexp", "log2obsexp", 
                                 "correlation"))
   if (arm != "all" && !(chrom %in% exp1$CENTROMERES$chrom)) {
@@ -107,7 +112,7 @@ compartment_matrixplot <- function(
   }
   
   if (!all(expnames %in% expnames(CS_discovery))) {
-    stop("Sample names in the `IS_discovery` do not match contacts object(s).",
+    stop("Sample names in the `CS_discovery` do not match contacts object(s).",
          call. = FALSE)
   }
   comp_dat <- as.data.table(CS_discovery$compart_scores)
@@ -159,7 +164,12 @@ compartment_matrixplot <- function(
   
   if (length(explist) == 2) {
     lay <- matrix(1:4, 2)
-    layout(lay, widths = c(0.2, 1), heights = c(0.2, 1), respect = TRUE)
+    if (colour_bar) {
+      layout(cbind(lay, c(5,6)), widths = c(0.2, 1, 0.2), 
+             heights = c(0.2, 1), respect = TRUE)
+    } else {
+      layout(lay, widths = c(0.2, 1), heights = c(0.2, 1), respect = TRUE)
+    }
     par(mar = c(0,0,0,0))
     plot.new()
     par(mar = c(3, rep(0.2, 3)))
@@ -167,13 +177,21 @@ compartment_matrixplot <- function(
     cs.lim <- max(complim)
     x.pos <- comp_dat$end
     y.pos <- comp_dat[, eval(as.symbol(expnames[2]))]
-    graphics::plot(y.pos, x.pos, yaxs = "i", type = "n", axes = F, xlim = rev(range(compbreaks)), ylim = loclim)
+    graphics::plot(
+      y.pos, x.pos, yaxs = "i", type = "n", axes = F, 
+      xlim = rev(range(compbreaks), na.rm = TRUE), ylim = loclim
+    )
     ab.polygon(x.pos, y.pos, rotate = T)
     
     axis(1, compbreaks, compbreaks, cex.axis = 1)
   } else {
     lay <- matrix(1:2, 2)
-    layout(lay, widths = 1, heights = c(0.2, 1), respect = TRUE)
+    if (colour_bar) {
+      layout(cbind(lay, 3:4), 
+             widths = c(1, 0.2), heights = c(0.2, 1), respect = TRUE)
+    } else {
+      layout(lay, widths = 1, heights = c(0.2, 1), respect = TRUE)
+    }
   }
   
   par(mar = c(rep(0, 3), 3))
@@ -237,6 +255,22 @@ compartment_matrixplot <- function(
     text(x = rev(txt)[2], y = txt[2], labels = expnames[2], adj = c(0, 0))
   }
   
+  if (colour_bar) {
+    plot.new()
+    par(plt = c(0, 0.25, 0.1, 0.95))
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], length.out = 255)))
+    image(1, m[1,], m, col = colours(255), xaxt = "n", yaxt = "n",
+          xlab = "", ylab = "")
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    title <- switch(
+      metric, 
+      log2obsexp = expression("Log"[2]*" Observed / Expected"),
+      obsexp = "Observed / Expected",
+      correlation = "Pearson Correlation",
+      "Contacts"
+    )
+    mtext(title, side = 4, line = 2.5)
+  }
 }
 
 ab.polygon <- function(x.pos, y.pos, rotate = F) {

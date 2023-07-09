@@ -41,6 +41,9 @@
 #'   will mirror groups for anchors where the left anchor location is larger 
 #'   than the right anchor location. Left and right refer to bedlist elements 
 #'   generating combinations. \emph{CSCAn only}.
+#' @param strand A \code{character} of the length \code{nrow(bed)}. Overrules
+#'   an attempt to infer strand from \code{start > end} information. 
+#'   \emph{ARA only}.
 #'
 #' @return A \code{anchors} object with two colums in \code{matrix} format.
 #'
@@ -460,7 +463,7 @@ anchors_ATA <- function(IDX, bed,
 
 #' @rdname anchors
 #' @export
-anchors_ARA <- function(IDX, bed) {
+anchors_ARA <- function(IDX, bed, strand = NULL) {
   if (!inherits(bed, "data.frame")) {
     bed <- as.data.frame(bed)[, 1:3]
   }
@@ -472,7 +475,15 @@ anchors_ARA <- function(IDX, bed) {
   rownames(idx) <- names_from_bed(bed[!is_dup,])
 
   # Attach direction if necessary
-  f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "+", "-"))
+  if (is.null(strand)) {
+    f <- rle(ifelse(bed[!is_dup, 2] < bed[!is_dup, 3], "+", "-"))
+  } else {
+    if (length(strand) != nrow(bed)) {
+      stop(paste0("Attempting to calculate stranded ARA anchors, but strand ",
+                  "information is not of the same length as BED rows."))
+    }
+    f <- rle(ifelse(strand[!is_dup] == "-", "-", "+"))
+  }
 
   class(idx) <- c("anchors", "matrix")
   attr(idx, "type") <- "ARA"

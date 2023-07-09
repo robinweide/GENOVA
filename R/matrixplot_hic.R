@@ -378,40 +378,25 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
 
 plot.bw <- function(file, chrom, start, end, y1, y2, col,
                     yMax = NULL, rotate = F) {
+
+  d <- import_bigwig(file, chrom, start, end)
   
-  # leave here in case something changes
-  # official call but don't need it
-  # d <- read_bigwig( file, chrom=chrom, start=start, end=end)
-  # d <- as.data.frame(d)
-  
-  try_require("bigwrig", "plot.bw", "github")
-  
-  d <- bigwrig::read_bigwig_impl(file, chrom = chrom, start = start, end = end)
-  
-  # to speed up plotting we are going to collapse the same consecutive
-  # values
-  i <- which(diff(d[, 4]) != 0) # select points where the consecutive values differ
-  # select the middle of a set of consecutive values
-  sel <- floor(c(0, head(i, -1)) + i) / 2
-  d <- d[sel, ]
-  
-  
-  max.val <- max(d[, 4])
-  d[, 4] <- as.numeric(d[, 4])
+  max.val <- max(d$y)
   
   if (!is.null(yMax)) {
-    d[d[, 4] > yMax, ] <- yMax
+    d[, y := pmin(y, yMax)]
     max.val <- yMax
   } else {
     message("chip.yMax not given for a .bw-track: yMax is ", max.val)
   }
-  
+
   y.range <- abs(y1 - y2)
-  y.val <- y.range * d[, 4] / max.val
+  y.val <- y.range * d$y / max.val
+  d[, y := (y / max.val) * y.range]
   if (rotate) {
-    segments(y1, d[, 2], y1 + y.val, d[, 2], col = col)
+    polygon(d$y, d$x, col = col)
   } else {
-    segments(d[, 2], y1, d[, 2], y1 + y.val, col = col)
+    polygon(d$x, d$y, col = col)
   }
 }
 
@@ -548,8 +533,8 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #'   \code{end} arguments too.
 #' @param start,end Start and end position of the region of interest. Ignored if
 #'   the \code{chrom} argument is a BED-format data.frame.
-#' @param cut.off The cut.off for the hic-matrix plot, in the diff option the
-#' negative of this is the lower bound
+#' @param colour_lim,cut.off A \code{numeric} of length 2 for the lower and 
+#'   upper colour limits of the hic-matrix plot. \code{cut.off}: older syntax.
 #' @param chip A list of feature tracks, can be bed structure
 #' (i.e. data frames) or a path to bigwig file (i.e. character variable),
 #' maximum length of 4. Placement is inner-top, outer-top, outer-left,
@@ -587,6 +572,8 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #' @param fillNAtreshold Set the amount strength of outlier correction for 
 #' fillNA.
 #' @param rasterise Set to true to use a bitmap raster instead of polygons.
+#' @param colour_bar A \code{logical} of length 1, indicating whether a
+#'   colour-bar legend should be drawn at the right.
 #' @param addnames When the \code{coplot} argument is \code{"dual"}, display
 #'   names of the samples? (default: \code{TRUE})
 #' @param antoni Logical: plot an explorer of the microscopic world
@@ -615,12 +602,13 @@ draw.loops <- function(loops, chrom, start, end, radius = 1e5, col = "black", lw
 #'   loops.colour = c("blue", "green"),
 #'   loops.type = c("upper", "lower"),
 #'   loops.resize = c(20e3, 20e3), # expand for visibility
-#'   cut.off = 25
+#'   colour_lim = c(0, 25)
 #' ) # upper limit of contacts
 #' }
 #' @return A matrix-plot
 #' @export
-hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
+hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, 
+                           colour_lim = NULL,
                            chip = list(NULL, NULL, NULL, NULL), inferno = NULL,
                            cexTicks = 1, chip.colour = "black", chip.yMax = NULL,
                            type = rep("triangle", 4), guessType = T,
@@ -630,14 +618,23 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
                            loops.radius = NULL, loops.colour = "#1faee3",
                            skipAnn = F, symmAnn = F,
                            check.genome = T, smoothNA = F, fillNAtreshold = 2, 
-                           rasterise = FALSE, addnames = TRUE,
+                           rasterise = FALSE, addnames = TRUE, cut.off = NULL,
+                           colour_bar = FALSE,
                            antoni = F) {
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
   if (is.null(loops.radius)) {
     loops.radius <- attr(exp1, "res") * 5
   }
   
   if (length(chip) < 3) {
     symmAnn <- T
+  }
+  
+  if (!is.null(colour_lim)) {
+    if (length(colour_lim) != 2 || !is.numeric(colour_lim)) {
+      stop("The `colour_lim` argument should be a numeric of length 2.")
+    }
   }
   
   loc <- standardise_location(chrom = chrom, start = start, end = end, 
@@ -692,6 +689,9 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   lay[1, ] <- 2
   lay[, 1] <- 3
   lay[1, 1] <- 4
+  if (colour_bar) {
+    lay <- cbind(lay, c(5, rep(6, nrow(lay) - 1)))
+  }
   layout(lay)
   par(mar = rep(1, 4), xaxs = "i", yaxs = "i")
   # layout
@@ -744,16 +744,19 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
   } else if (is.null(exp2)) {
     
     # set cutoffs
-    if (is.null(cut.off)) {
-      cut.off <- max(quantile(abs(mat1$z), .99))
-      message(
-        "No cut.off was given: using 99% percentile: ",
-        round(cut.off), "."
-      )
+    if (is.null(colour_lim)) {
+      base <- if (ZnormScale) c(-1, 1) else c(0, 1)
+      if (!is.null(cut.off)) {
+        colour_lim <- base * cut.off
+      } else {
+        colour_lim <- base * max(quantile(abs(mat1$z), 0.99))
+        message(
+          "No colour limits were given: using 99% percentile: ",
+          round(colour_lim[2]), "."
+        )
+      }
     }
-    mat1$z[mat1$z > cut.off] <- cut.off
-    mat1$z[mat1$z < -cut.off] <- -cut.off
-    
+    mat1$z[] <- pmax(pmin(mat1$z, colour_lim[2]), colour_lim[1])
     
     wr <- if (ZnormScale) {
       bezier_corrected_divergent
@@ -766,8 +769,8 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     }
     wr <- colorRampPalette(wr)
     image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)),
-          zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
-          useRaster = literalTRUE(rasterise))
+                  zlim = colour_lim,
+                  useRaster = literalTRUE(rasterise))
   }
   ##############################################################################
   # plot exp1 and exp2
@@ -777,15 +780,19 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       mat1$z[upper.tri(mat1$z)] <- mat2$z[upper.tri(mat2$z)]
       
       # set cutoffs
-      if (is.null(cut.off)) {
-        cut.off <- max(quantile(abs(mat1$z), .99))
-        message(
-          "No cut.off was given: using 99% percentile: ",
-          round(cut.off), "."
-        )
+      if (is.null(colour_lim)) {
+        base <- if (ZnormScale) c(-1, 1) else c(0, 1)
+        if (!is.null(cut.off)) {
+          colour_lim <- base * cut.off
+        } else {
+          colour_lim <- base * max(quantile(abs(mat1$z), 0.99))
+          message(
+            "No colour limits were given: using 99% percentile: ",
+            round(colour_lim[2]), "."
+          )
+        }
       }
-      mat1$z[mat1$z > cut.off] <- cut.off
-      mat1$z[mat1$z < -cut.off] <- -cut.off
+      mat1$z[] <- pmax(pmin(mat1$z, colour_lim[2]), colour_lim[1])
       
       wr <- if (ZnormScale) {
         bezier_corrected_divergent
@@ -798,7 +805,7 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
       }
       wr <- colorRampPalette(wr)
       image.default(mat1, col = wr(1e4), axes = FALSE, ylim = rev(range(mat1$x)), 
-            zlim = c(ifelse(ZnormScale, -cut.off, 0), cut.off),
+            zlim = colour_lim,
             useRaster = literalTRUE(rasterise))
       
       expnames <- c(expnames(exp1), expnames(exp2))
@@ -810,18 +817,23 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
     } else {
       mat1$z <- mat2$z - mat1$z
       # set cutoffs
-      if (is.null(cut.off)) {
-        cut.off <- max(quantile(abs(mat1$z), .99))
-        message(
-          "No cut.off was given: using 99% percentile: ",
-          round(cut.off), "."
-        )
+      if (is.null(colour_lim)) {
+        base <- c(-1, 1)
+        if (!is.null(cut.off)) {
+          colour_lim <- base * cut.off
+        } else {
+          colour_lim <- base * max(quantile(abs(mat1$z), 0.99))
+          message(
+            "No colour limits were given: using 99% percentile: ",
+            round(colour_lim[2]), "."
+          )
+        }
       }
-      mat1$z[mat1$z > cut.off] <- cut.off
-      mat1$z[mat1$z < -cut.off] <- -cut.off
+      mat1$z[] <- pmax(pmin(mat1$z, colour_lim[2]), colour_lim[1])
       
-      bwr <- colorRampPalette(bezier_corrected_divergent)
-      image.default(mat1, col = bwr(500), axes = F, ylim = rev(range(mat1$x)), zlim = c(-cut.off, cut.off))
+      wr <- colorRampPalette(bezier_corrected_divergent)
+      image.default(mat1, col = wr(500), axes = F, ylim = rev(range(mat1$x)), 
+                    zlim = colour_lim)
     }
   }
   
@@ -896,4 +908,23 @@ hic_matrixplot <- function(exp1, exp2 = NULL, chrom, start, end, cut.off = NULL,
              type = type[3:4], rotate = T
     )
   }
+  if (colour_bar) {
+    plot.new()
+    par(plt = c(0, 0.2, 0.03, 0.97))
+    # If difference is extremely small, let it be at least something to 
+    # prevent zero-range bug
+    if (diff(colour_lim) < 1000 * .Machine$double.eps) {
+      colour_lim <- c(-10, 10) * .Machine$double.eps
+    }
+    m <- t(as.matrix(seq(colour_lim[1], colour_lim[2], 
+                         length.out = 255)))
+    image(1, m[1,], m, col = wr(255), xaxt = "n", yaxt = "n",
+          xlab = "", ylab = "")
+    title <- "Contacts"
+    title <- if (!is.null(exp2) && coplot != "dual") "Difference" else title
+    title <- if (ZnormScale) "Z-score" else title
+    axis(side = 4, lwd = 0, lwd.ticks = 1, lend = 1)
+    mtext(title, side = 4, line = 2.5)
+  }
+  
 }

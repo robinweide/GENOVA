@@ -23,13 +23,12 @@ Suggests:
     HiCseg,
     RhpcBLASctl,
     RCurl,
-    strawr (>= 0.0.1),
+    strawr (>= 0.0.9),
     rhdf5 (>= 2.30.0),
     rtracklayer,
     IRanges,
     pkgfilecache
 VignetteBuilder: knitr
-Remotes: aidenlab/straw/R,
-   bioc::release/rhdf5,
+Remotes: bioc::release/rhdf5,
    bioc::release/rtracklayer,
    bioc::release/IRanges

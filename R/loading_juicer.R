@@ -1,24 +1,31 @@
 loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, balancing = T){
-  
+
   try_require("strawr", "loadJuicer", "github")
+  if (utils::packageVersion("strawr") < "0.0.9") {
+    stop("Loading `*.hic` files requires the {strawr} package version 0.0.9+.")
+  }
   
   juicerPath <- normalizePath(juicerPath)
-  # get metadata of juicer-file
-  juicer_metadata = get_juicer_metadata(juicerPath)
-
-  # check if resolution is found!
-  if(!any(resolution == juicer_metadata[[2]])){
-    stop('resolution is not found.\nAvailable resolutions are ',
-         paste(rev(juicer_metadata[[2]]), collapse = ', '))
-  }
-  validchrom <- !(grepl("all", juicer_metadata[[1]]$chrom, ignore.case = TRUE))
   
-  juicer_metadata[[1]] = juicer_metadata[[1]][validchrom,]
+  # get metadata of juicer-file
+  resolutions <- strawr::readHicBpResolutions(juicerPath)
+  chromosomes <- strawr::readHicChroms(juicerPath)
 
-  expandedChromosomes = as.data.frame(t(utils::combn(juicer_metadata[[1]]$chrom, m = 2)), stringsAsFactors = F)
-  expandedChromosomes = rbind(as.data.frame(cbind(juicer_metadata[[1]]$chrom,juicer_metadata[[1]]$chrom)),
-                              expandedChromosomes)
-  expandedChromosomes = apply(expandedChromosomes, 2, as.character)
+  # check if desired resolution is found!
+  if(!any(resolution == resolutions)){
+    stop('resolution is not found.\nAvailable resolutions are ',
+         paste(rev(resolutions), collapse = ', '))
+  }
+  validchrom <- !(grepl("all", chromosomes$name, ignore.case = TRUE))
+  
+  chromosomes <- chromosomes[validchrom, , drop = FALSE]
+  
+  combinations <- matrix(1, nrow = nrow(chromosomes), ncol = nrow(chromosomes))
+  combinations[upper.tri(combinations)] <- NA
+  combinations <- data.table(
+    V1 = chromosomes$name[col(combinations)[!is.na(combinations)]],
+    V2 = chromosomes$name[row(combinations)[!is.na(combinations)]]
+  )
   
   if (!is.logical(balancing)) {
     balancing <- balancing %in% c("KR", "T", "TRUE")
@@ -26,13 +33,13 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
   
   strawNorm = ifelse(balancing[1], 'KR', "NONE")
   
-  juicerList = lapply(seq_len(nrow(expandedChromosomes)), function(eci){
+  juicerList = lapply(seq_len(nrow(combinations)), function(eci){
  
-    ec = expandedChromosomes[eci,]
+    ec = unlist(unclass(combinations[eci,]))
     juicer_in <- tryCatch(
       {
         out <- NULL
-        if("matrix" %in% names(as.list( args(strawr::straw) ))){ # check if straw-version has "matrix"-argument
+        if("matrix" %in% names(formals(strawr::straw))){ # check if straw-version has "matrix"-argument
           out <- strawr::straw(matrix = 'observed', 
                         norm = strawNorm,
                         fname =juicerPath,
@@ -50,32 +57,36 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
         }
         out
       },error=function(cond) {
-        
+        warning(c(
+          paste0("Failed to retrieve combination of ", ec[1], 
+                 " and ", ec[2], ".\n"),
+          cond$message
+        ), call. = FALSE)
         return(NULL)
       })
     
+    if (is.null(juicer_in)) {
+      return(NULL)
+    }
+    
     # remove NaN
-    if(!is.null(juicer_in)){
-      juicer_in = juicer_in[!is.nan(juicer_in[,3]),]
-      if(nrow(juicer_in) == 0){
-        juicer_in = NULL
-      }
+    juicer_in = juicer_in[!is.nan(juicer_in[,3]), , drop = FALSE]
+    if (nrow(juicer_in) == 0) {
+      juicer_in = NULL
     }
     
     # decorate
-    if(!is.null(juicer_in)){
-      
-      juicer_in$chrom_x = ec[1]
-      juicer_in$chrom_y = ec[2]
-      
-      juicer_in = juicer_in[, c(4,1,5,2,3)]
-    }
+    juicer_in$chrom_x = ec[1]
+    juicer_in$chrom_y = ec[2]
+    juicer_in = juicer_in[, c(4,1,5,2,3)]
     juicer_in
-    
   })
 
-
   juicer_data = data.table::rbindlist(juicerList)
+  if (nrow(juicer_data) < 1) {
+    stop(paste0("Failed to read file: ", juicerPath))
+  }
+  
   rm(juicerList)
   # split into index and signal-files
   SA = splitJuicerData(juicer_data, resolution)
@@ -102,70 +113,9 @@ loadJuicer = function(juicerPath, resolution, scale_bp = 1e9, scale_cis = F, bal
     }
     
   }
-  
 
   return(list(SIG, ABS))
-
 }
-
-
-
-get_juicer_metadata = function(juicerPath){
-  file2read = file(juicerPath, "rb")
-  number_of_integers_in_file = 125
-  
-  # check if magicstring is there
-  magic_string = readBin(file2read, character(), n = 1, size = 3)
-  if(magic_string != 'HIC'){
-    stop('magic sting comparison failed. Check the .hic file!')
-  }
-  
-  hic_version = readBin(file2read, integer(), n = 1, size = 4)
-  
-  master_index = readBin(file2read, integer(), n = 1, size = 8)
-  
-  genome = readBin(file2read, character())
-  
-  n_attributes = readBin(file2read, integer(), n = 1, size = 4)
-  
-  if (n_attributes > 0) {
-    block <- 256*4
-    found <- 0
-    # Find key-value pairs for each attribute by searching 
-    # for string terminators (raw == 0)
-    while (found < n_attributes * 2) {
-      r <- readBin(file2read, "raw", block)
-      if (length(w <- head(which(r == 0), 1))) {
-        found <- found + 1
-        # Rewind to previous terminator
-        seek(file2read, -(block - w), origin = "current")
-      }
-    }
-  }
-  
-  n_chrs <- readBin(file2read, integer(), n = 1, size = 4)
-  
-  
-  chrom_name_length <- lapply(seq_len(n_chrs), function(x){
-    chrom <- readBin(file2read, character(), size = 1)
-    len <- readBin(file2read, integer(), n = 1)
-    data.frame(chrom = chrom, len = len, stringsAsFactors = FALSE)
-  })
-  chrom_name_length <- do.call(rbind, chrom_name_length)
-  # chrom_name_length = data.table::rbindlist(chrom_name_length)
-  
-  n_BP_Res  = readBin(file2read, integer(), n = 1, size = 4)
-  
-  
-  resolutions = sapply(1:n_BP_Res, function(x){
-    readBin(file2read, integer(), n = 1)
-  })
-  
-  close(file2read)
-  
-  return(list(chrom_name_length, resolutions))
-}
-
 
 splitJuicerData = function(juicer_data, resolution){
 

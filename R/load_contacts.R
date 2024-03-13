@@ -307,6 +307,14 @@ loadHiCpro = function(signal_path, indices_path, scale_bp, scale_cis){
     SIG <- read.hicpro.matrix(signal_path, scale_bp = scale_bp)
   }
   
+  # Protect against iced bug that forgot to add 1 to index
+  if (min(SIG$V1, na.rm = TRUE) == 0) {
+    if (!(min(ABS$V4, na.rm = TRUE) == 0)) {
+      SIG[, V1 := V1 + 1L]
+      SIG[, V2 := V2 + 1L]
+    }
+  }
+  
   return(list(SIG, ABS))
 }
 

@@ -179,7 +179,7 @@ compartment_matrixplot <- function(
     y.pos <- comp_dat[, eval(as.symbol(expnames[2]))]
     graphics::plot(
       y.pos, x.pos, yaxs = "i", type = "n", axes = F, 
-      xlim = rev(range(compbreaks), na.rm = TRUE), ylim = loclim
+      xlim = rev(range(compbreaks, na.rm = TRUE)), ylim = loclim
     )
     ab.polygon(x.pos, y.pos, rotate = T)
     
@@ -275,6 +275,7 @@ compartment_matrixplot <- function(
 
 ab.polygon <- function(x.pos, y.pos, rotate = F) {
   x <- c(x.pos[1], x.pos, utils::tail(x.pos, 1))
+  y.pos[is.na(y.pos)] <- 0
   y.up <- c(0, ifelse(y.pos < 0, 0, y.pos), 0)
   y.down <- c(0, ifelse(y.pos > 0, 0, y.pos), 0)
   

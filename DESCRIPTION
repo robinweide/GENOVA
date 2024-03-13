@@ -23,7 +23,7 @@ Suggests:
     HiCseg,
     RhpcBLASctl,
     RCurl,
-    strawr (>= 0.0.1),
+    strawr (>= 0.0.9),
     rhdf5 (>= 2.30.0),
     rtracklayer,
     IRanges,

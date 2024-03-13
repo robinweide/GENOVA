@@ -13,7 +13,7 @@ RCP(
 )
 }
 \arguments{
-\item{explist}{List of  GENOVA contacts-objects from `loadContacts()`.}
+\item{explist}{List of  GENOVA contacts-objects from `load_contacts()`.}
 
 \item{bedlist}{A named list of BED-like dataframes of the regions of interest.}
 

@@ -224,6 +224,12 @@ pyramid_difference <- function(exp1, exp2, chrom,
       labels = list(x = location[[1]], y = "distance", fill = "contacts")
     ), class = c("ggpyramid", "gg", "ggplot")
   )
+  template <- ggplot()
+  missing <- names(template)[!names(template) %in% names(p)]
+  if (length(missing) > 0) {
+    p[missing] <- template[missing]
+  }
+
   p <- p + edge
   
   # Tweak plot

@@ -210,11 +210,12 @@ pyramid_difference <- function(exp1, exp2, chrom,
   triangle <- .remap_layer_aes(triangle, "fill", "altfill")
 
   # Setup main plot
+  template <- ggplot2::ggplot()
   p <- structure(
     list(
       data = ggplot2::waiver(),
       layers = list(triangle),
-      scales = ggplot2::ggplot()$scales,
+      scales = template$scales,
       mapping = ggplot2::aes(),
       theme = list(),
       coordinates = ggplot2::coord_cartesian(default = TRUE, clip = "off"),
@@ -224,7 +225,7 @@ pyramid_difference <- function(exp1, exp2, chrom,
       labels = list(x = location[[1]], y = "distance", fill = "contacts")
     ), class = c("ggpyramid", "gg", "ggplot")
   )
-  template <- ggplot()
+  
   missing <- names(template)[!names(template) %in% names(p)]
   if (length(missing) > 0) {
     p[missing] <- template[missing]

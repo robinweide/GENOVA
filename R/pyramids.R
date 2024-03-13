@@ -525,6 +525,7 @@ add_loops <- function(bedpe, colour = "#1faee3", shape = 1, ...) {
 #' @rdname pyramidannotations
 #' @usage NULL
 #' @keywords internal
+#' @importFrom ggplot2 ggplot_add
 ggplot_add.mark_layer <- function(object, plot, object_name) {
   lay <- object$layer
   

@@ -29,7 +29,6 @@ Suggests:
     IRanges,
     pkgfilecache
 VignetteBuilder: knitr
-Remotes: aidenlab/straw/R,
-   bioc::release/rhdf5,
+Remotes: bioc::release/rhdf5,
    bioc::release/rtracklayer,
    bioc::release/IRanges

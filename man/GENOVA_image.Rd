@@ -25,17 +25,16 @@ axis. Default is to use the chromosome name as axis title.}
 \item{...}{
   Arguments passed on to \code{\link[graphics:image]{graphics::image.default}}
   \describe{
-    \item{\code{xlim}}{ranges for the plotted \code{x} and \code{y} values,
-    defaulting to the ranges of \code{x} and \code{y}.}
-    \item{\code{ylim}}{ranges for the plotted \code{x} and \code{y} values,
+    \item{\code{xlim,ylim}}{ranges for the plotted \code{x} and \code{y} values,
     defaulting to the ranges of \code{x} and \code{y}.}
     \item{\code{add}}{logical; if \code{TRUE}, add to current plot (and disregard
     the following four arguments).  This is rarely useful because
     \code{image} \sQuote{paints} over existing graphics.}
-    \item{\code{xaxs}}{style of x and y axis.  The default \code{"i"} is
+    \item{\code{xaxs,yaxs}}{style of x and y axis.  The default \code{"i"} is
     appropriate for images.  See \code{\link[graphics]{par}}.}
-    \item{\code{yaxs}}{style of x and y axis.  The default \code{"i"} is
-    appropriate for images.  See \code{\link[graphics]{par}}.}
+    \item{\code{xlab,ylab}}{each a character string giving the labels for the x and
+    y axis.  Default to the \sQuote{call names} of \code{x} or \code{y}, or to
+    \code{""} if these were unspecified.}
     \item{\code{breaks}}{a set of finite numeric breakpoints for the colours:
     must have one more breakpoint than colour and be in increasing
     order.  Unsorted vectors will be sorted, with a warning.}

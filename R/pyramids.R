@@ -210,11 +210,12 @@ pyramid_difference <- function(exp1, exp2, chrom,
   triangle <- .remap_layer_aes(triangle, "fill", "altfill")
 
   # Setup main plot
+  template <- ggplot2::ggplot()
   p <- structure(
     list(
       data = ggplot2::waiver(),
       layers = list(triangle),
-      scales = ggplot2::ggplot()$scales,
+      scales = template$scales,
       mapping = ggplot2::aes(),
       theme = list(),
       coordinates = ggplot2::coord_cartesian(default = TRUE, clip = "off"),
@@ -224,6 +225,12 @@ pyramid_difference <- function(exp1, exp2, chrom,
       labels = list(x = location[[1]], y = "distance", fill = "contacts")
     ), class = c("ggpyramid", "gg", "ggplot")
   )
+  
+  missing <- names(template)[!names(template) %in% names(p)]
+  if (length(missing) > 0) {
+    p[missing] <- template[missing]
+  }
+
   p <- p + edge
   
   # Tweak plot
@@ -518,6 +525,7 @@ add_loops <- function(bedpe, colour = "#1faee3", shape = 1, ...) {
 #' @rdname pyramidannotations
 #' @usage NULL
 #' @keywords internal
+#' @importFrom ggplot2 ggplot_add
 ggplot_add.mark_layer <- function(object, plot, object_name) {
   lay <- object$layer
   

@@ -16,7 +16,7 @@ Imports:
     scales (>= 1.1.1),
     data.table,
     methods
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.1
 Suggests: 
     knitr,
     rmarkdown,
@@ -29,7 +29,6 @@ Suggests:
     IRanges,
     pkgfilecache
 VignetteBuilder: knitr
-Remotes: aidenlab/straw/R,
-   bioc::release/rhdf5,
+Remotes: bioc::release/rhdf5,
    bioc::release/rtracklayer,
    bioc::release/IRanges

@@ -67,6 +67,7 @@ insulation_score <- function(explist, window = 30,
   outer_bins <- CJ(V1 = bins, V2 = (ext_window - 1):(window))
   outer_bins <- outer_bins[, grp := V1 + V2 - window]
   inner_bins <- outer_bins[, list(V1, V2 = V2 - window, grp)]
+  setkeyv(inner_bins, c("V1", "V2"))
   bins <- CJ(V1 = bins, V2 = 0:(ext_window - 1))
   
   

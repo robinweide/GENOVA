@@ -318,30 +318,36 @@ describe_ <- function(x, text = "", name = NULL) {
   UseMethod("describe_")
 }
 
+#' @export
 describe_.array <- function(x, text = "", name = NULL) {
  paste0(" - ", name, ":\tAn ", paste0(dim(x), collapse = " x "), 
                  " array ", text, ".\n")
 }
 
+#' @export
 describe_.matrix <- function(x, text = "", name = NULL) {
   paste0(" - ", name, ":\tA ", paste0(dim(x), collapse = " x "),
          " matrix ", text, ".\n")
 }
 
+#' @export
 describe_.list <- function(x, text = "", name = NULL) {
   paste0(" - ", name, ":\tA list of length ", length(x), " ", text, ".\n")
 }
 
+#' @export
 describe_.data.frame <- function(x, text = "", name = NULL) {
   paste0(" - ", name, ":\tA ", paste0(dim(x), collapse = " x "),
          " data.frame ", text, ".\n")
 }
 
+#' @export
 describe_.data.table <- function(x, text = "", name = NULL) {
   paste0(" - ", name, ":\tA ", paste0(dim(x), collapse = " x "),
          " data.table ", text, ".\n")
 }
 
+#' @export
 describe_.discovery <- function(x, text = "", name = NULL) {
   myclass <- class(x)[[1]]
   expnames <- expnames(x)

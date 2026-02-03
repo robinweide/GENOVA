@@ -189,8 +189,8 @@ quantify.default <- function(discovery, ...) {
 #' @examples \dontrun{
 #' # See quantify methods for APA/PESCAn/ATA for usage.
 #' }
-quantify.ARMLA <- function(
-  aggregate, 
+quantify_ARMLA <- function(
+  discovery, 
   raw = NULL, 
   expnames = NULL,
   shape = shape_center_vs_quadrants(3),
@@ -198,10 +198,10 @@ quantify.ARMLA <- function(
   fun = median,
   ...
 ) {
-  if (!(is.array(aggregate) | is.matrix(aggregate))) {
+  if (!(is.array(discovery) | is.matrix(discovery))) {
     stop("The aggregate should be an array.", call. = FALSE)
   }
-  dim <- dim(aggregate)
+  dim <- dim(discovery)
   if (length(expnames) == 0) {
     expnames <- paste0("exp", seq_len(tail(dim, 1)))
   }
@@ -215,14 +215,14 @@ quantify.ARMLA <- function(
   background <- shape$background
   
   # Split signal into samples
-  samples <- split(aggregate, slice.index(aggregate, 3))
+  samples <- split(discovery, slice.index(discovery, 3))
   # Calculate medians per sample
   metrics  <- vapply(samples, function(x) {
     c(fun(x[foreground]), fun(x[background]))
   }, numeric(2))
   # Format global sample stats
   global <- data.frame(
-    sample = dimnames(aggregate)[[3]],
+    sample = dimnames(discovery)[[3]],
     foreground = metrics[1, ],
     background = metrics[2, ],
     foldchange = metrics[1, ] / metrics[2, ],
@@ -298,7 +298,7 @@ quantify.APA_discovery <- function(
     median = median.default
   )
   
-  out <- quantify.ARMLA(
+  out <- quantify_ARMLA(
     aggregate = discovery$signal, 
     raw = discovery$signal_raw, 
     expnames = expnames(discovery),
@@ -345,7 +345,7 @@ quantify.PESCAn_discovery <- function(
     raw
   })
   
-  out <- quantify.ARMLA(
+  out <- quantify_ARMLA(
     aggregate = discovery$obsexp, 
     raw = raw, 
     expnames = expnames(discovery),
@@ -407,7 +407,7 @@ quantify.CSCAn_discovery <- function(
   dim(agg) <- c(dim[1], dim[2], prod(dim[3:4]))
   dimnames(agg) <- dnames[1:3]
   
-  out <- quantify.ARMLA(
+  out <- quantify_ARMLA(
     aggregate = agg,
     raw = raw,
     expnames = expnames(discovery),
@@ -459,7 +459,7 @@ quantify.ATA_discovery <- function(
     c("insulation", "cornerpeak", "checker")
   )
   
-  out <- quantify.ARMLA(
+  out <- quantify_ARMLA(
     aggregate = discovery$signal, 
     raw = discovery$signal_raw, 
     expnames = expnames(discovery),

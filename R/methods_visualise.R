@@ -108,7 +108,7 @@ visualise.default <- function(discovery, contrast, raw, title,
 # Common elements ---------------------------------------------------------
 
 # Common ancestor for aggregate repeated matrix lookup analysis plots
-visualise.ARMLA <- function(discovery, contrast = 1,
+visualise_ARMLA <- function(discovery, contrast = 1,
                             metric = c("diff", "lfc"),
                             raw = FALSE, altfillscale, 
                             show_single_contrast = FALSE,
@@ -286,7 +286,7 @@ visualise.APA_discovery <- function(discovery, contrast = 1,
   )
 
   # Get a default plot
-  g <- visualise.ARMLA(
+  g <- visualise_ARMLA(
     discovery = discovery,
     contrast = contrast,
     metric = metric, raw = raw,
@@ -469,7 +469,7 @@ visualise.PESCAn_discovery <- function(discovery, contrast = 1,
   )
 
   # Get a default plot
-  g <- visualise.ARMLA(
+  g <- visualise_ARMLA(
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,
@@ -548,7 +548,7 @@ visualise.ATA_discovery <- function(discovery, contrast = 1,
   )
 
   # Get a default plot
-  g <- visualise.ARMLA(
+  g <- visualise_ARMLA(
     discovery = discovery,
     contrast = contrast,
     metric = metric, raw = raw,
@@ -645,7 +645,7 @@ visualise.ARA_discovery <- function(discovery, contrast = 1,
   )
 
   # Get a default plot
-  g <- visualise.ARMLA(
+  g <- visualise_ARMLA(
     discovery = res,
     contrast = contrast,
     metric = metric, raw = raw,

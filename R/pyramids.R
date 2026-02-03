@@ -210,20 +210,14 @@ pyramid_difference <- function(exp1, exp2, chrom,
   triangle <- .remap_layer_aes(triangle, "fill", "altfill")
 
   # Setup main plot
-  p <- structure(
-    list(
-      data = ggplot2::waiver(),
-      layers = list(triangle),
-      scales = ggplot2::ggplot()$scales,
-      mapping = ggplot2::aes(),
-      theme = list(),
-      coordinates = ggplot2::coord_cartesian(default = TRUE, clip = "off"),
-      facet = facet_pyramid(ggplot2::vars(facet), col_size = 2 * asp_ratio),
-      plot_env = parent.frame(),
-      location = location,
-      labels = list(x = location[[1]], y = "distance", fill = "contacts")
-    ), class = c("ggpyramid", "gg", "ggplot")
-  )
+  p <- ggplot2::ggplot() +
+    ggplot2::coord_cartesian(default = TRUE, clip = "off") +
+    facet_pyramid(ggplot2::vars(facet), col_size = 2 * asp_ratio) +
+    ggplot2::labs(x = location[[1]], y = "distance") +
+    triangle
+  p$location <- location
+  class(p) <- union("ggpyramid", class(p))
+
   p <- p + edge
   
   # Tweak plot

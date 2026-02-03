@@ -127,7 +127,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
   # Merge
   out <- lapply(slots, function(i) {
     slot <- lapply(discos, `[[`, i)
-    if (class(slot[[1]]) == "array") {
+    if (is.array(slot[[1]])) {
 
       # Check dimensions
       dims <- lapply(slot, dim)
@@ -153,7 +153,7 @@ bundle.ARMLA_discovery <- function(..., collapse = "_") {
       dnames <- dnames[[1]]
       # Set dimnames
       dimnames(new) <- c(head(dnames, -1), list(expnames))
-    } else if (class(slot[[1]]) == "list") {
+    } else if (is.list(slot[[1]])) {
 
       # Resolve potential naming conflicts
       dnames <- lapply(slot, names)

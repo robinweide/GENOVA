@@ -99,5 +99,9 @@ utils::globalVariables(c('.',
                          'grp',
                          'error',
                          'bin',
-                         'binned'))
+                         'binned',
+                         'KR',
+                         'bin1_id',
+                         'bin2_id',
+                         'count'))
 

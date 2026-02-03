@@ -226,7 +226,7 @@ engine_flipping <- function(MAT, anchors, rel_pos) {
 #' It looks up square parts of unequal size around the diagonal of a single Hi-C
 #' experiment and resizes these to a single size.
 #'
-#' @param ICE The Hi-C matrix slot of a GENOVA experiment object.
+#' @param MAT The Hi-C matrix slot of a GENOVA experiment object.
 #' @param anchors A \code{matrix} with two columns containing pre-computed
 #'   indices between which a square is looked up.
 #' @param rel_pos A \code{integer} sequence ranging from \code{[0-n]} wherein

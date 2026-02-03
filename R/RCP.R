@@ -1,11 +1,13 @@
 
+#' @title
 #' Relative Contact Probabilities
 #'
+#' @description
 #' Produce a dataframe with the probabilities of contacts in a set of distance-bins.
 #' Bins are created on a log scale, which leads to equal amounts of datapoints per bin.
 #'
 #' @author Robin H. van der Weide, \email{r.vd.weide@nki.nl}
-#' @param explist List of  GENOVA contacts-objects from `loadContacts()`.
+#' @param explist List of  GENOVA contacts-objects from `load_contacts()`.
 #' @param bedlist A named list of BED-like dataframes of the regions of interest. 
 #' @param chromsToUse A vector containing the chromosome-names of interest. 
 #' @param maxDistance The maximal distance to calculate RCPs for.

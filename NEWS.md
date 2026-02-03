@@ -1,5 +1,7 @@
 # GENOVA (development version)
 
+- Hotfix for compatibility with ggplot2 3.5.0 (#347).
+- Registered S3 methods for adding pyramid annotation (#314).
 - Fixed a misplacement of `na.rm` in `compartment_matrixplot()` (#328)
 - The `tornado_insulation()` function now accepts a list of bed-like data.frames 
   (#266).

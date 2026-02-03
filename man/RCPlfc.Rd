@@ -2,9 +2,7 @@
 % Please edit documentation in R/RCP.R
 \name{RCPlfc}
 \alias{RCPlfc}
-\title{RCP log2 foldchange
-
- RAW RCP in, lfc out}
+\title{RCP log2 foldchange}
 \usage{
 RCPlfc(dt, contrast, breaks)
 }
@@ -19,8 +17,6 @@ RCPlfc(dt, contrast, breaks)
 a data.table with the log2 fold changes compared to the `contrast`.
 }
 \description{
-RCP log2 foldchange
-
- RAW RCP in, lfc out
+RAW RCP in, lfc out
 }
 \keyword{internal}

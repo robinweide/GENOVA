@@ -66,7 +66,7 @@ draw_exon <- function(genes, chrom, y.pos, width, rotate = F) {
   }
 }
 
-plot.triangle <- function(bed, chrom, y1, y2, start, end, rotate = F) {
+plot_triangle <- function(bed, chrom, y1, y2, start, end, rotate = F) {
   y.scale <- abs(y1 - y2) / 0.15
   x.wid <- (end - start) * 0.012 * y.scale
   
@@ -139,7 +139,7 @@ plot.triangle <- function(bed, chrom, y1, y2, start, end, rotate = F) {
   }
 }
 
-plot.rectangle <- function(bed, chrom, y1, y2, start, end, col, rotate = F) {
+plot_rectangle <- function(bed, chrom, y1, y2, start, end, col, rotate = F) {
   sel.bed <- bed[bed[, 1] == chrom & bed[, 2] < end & bed[, 3] > start, ]
   if (nrow(sel.bed) > 0) {
     if (rotate) {
@@ -149,12 +149,6 @@ plot.rectangle <- function(bed, chrom, y1, y2, start, end, col, rotate = F) {
     }
   }
 }
-
-plot.genes <- function(genes, chrom, start, end, y.pos, rotate = F) {
-  draw_exon(genes, chrom = chrom, y.pos = y.pos, width = 0.05, rotate = rotate)
-}
-
-
 
 features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
                      chip2 = NULL, autoCHIP = T, rotate = F,
@@ -265,27 +259,27 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
       # +
       tmp_step <- (y.values$chip1.y2 - y.values$chip1.y1) / 2
       tmp_step <- tmp_step * 0.9
-      blabla <- plot.triangle(chip1[chip1[, 6] == "+", ],
+      blabla <- plot_triangle(chip1[chip1[, 6] == "+", ],
                               chrom = chrom,
                               y1 = y.values$chip1.y1,
                               y2 = y.values$chip1.y1 + tmp_step,
                               start = min(mat1$x), end = max(mat1$x), rotate = rotate
       )
       # -
-      blabla <- plot.triangle(chip1[chip1[, 6] == "-", ],
+      blabla <- plot_triangle(chip1[chip1[, 6] == "-", ],
                               chrom = chrom,
                               y1 = y.values$chip1.y2 - tmp_step,
                               y2 = y.values$chip1.y2, start = min(mat1$x),
                               end = max(mat1$x), rotate = rotate
       )
       # # other
-      blabla <- plot.rectangle(chip1[chip1[, 6] != "-" & chip1[, 6] != "+", ],
+      blabla <- plot_rectangle(chip1[chip1[, 6] != "-" & chip1[, 6] != "+", ],
                                chrom = chrom, y1 = y.values$chip1.y1,
                                y2 = y.values$chip1.y2, start = min(mat1$x),
                                end = max(mat1$x), col = col[1], rotate = rotate
       )
     } else if (type[1] == "rectangle") {
-      blabla <- plot.rectangle(chip1,
+      blabla <- plot_rectangle(chip1,
                                chrom = chrom, y1 = y.values$chip1.y1,
                                y2 = y.values$chip1.y2, start = min(mat1$x),
                                end = max(mat1$x), col = col[1], rotate = rotate
@@ -293,7 +287,7 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
     }
   } else if (typeof(chip1) == "character") { # BW!
     
-    blabla <- suppressWarnings(plot.bw(chip1, chrom, min(mat1$x),
+    blabla <- suppressWarnings(plot_bw(chip1, chrom, min(mat1$x),
                                        max(mat1$x), y.values$chip1.y1,
                                        y.values$chip1.y2,
                                        col = col[1],
@@ -316,27 +310,27 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
       # +
       tmp_step <- (y.values$chip2.y2 - y.values$chip2.y1) / 2
       tmp_step <- tmp_step * 0.9
-      blabla <- plot.triangle(chip2[chip2[, 6] == "+", ],
+      blabla <- plot_triangle(chip2[chip2[, 6] == "+", ],
                               chrom = chrom,
                               y1 = y.values$chip2.y1,
                               y2 = y.values$chip2.y1 + tmp_step,
                               start = min(mat1$x), end = max(mat1$x), rotate = rotate
       )
       # -
-      blabla <- plot.triangle(chip2[chip2[, 6] == "-", ],
+      blabla <- plot_triangle(chip2[chip2[, 6] == "-", ],
                               chrom = chrom,
                               y1 = y.values$chip2.y2 - tmp_step,
                               y2 = y.values$chip2.y2, start = min(mat1$x),
                               end = max(mat1$x), rotate = rotate
       )
       # # other
-      blabla <- plot.rectangle(chip2[chip2[, 6] != "-" & chip2[, 6] != "+", ],
+      blabla <- plot_rectangle(chip2[chip2[, 6] != "-" & chip2[, 6] != "+", ],
                                chrom = chrom, y1 = y.values$chip2.y1,
                                y2 = y.values$chip2.y2, start = min(mat1$x),
                                end = max(mat1$x), col = col[2], rotate = rotate
       )
     } else if (type[2] == "rectangle") {
-      blabla <- plot.rectangle(chip2,
+      blabla <- plot_rectangle(chip2,
                                chrom = chrom, y1 = y.values$chip2.y1,
                                y2 = y.values$chip2.y2, start = min(mat1$x),
                                end = max(mat1$x), col = col[2], rotate = rotate
@@ -344,7 +338,7 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
     }
   } else if (typeof(chip2) == "character") { # BW!
     
-    blabla <- suppressWarnings(plot.bw(chip2, chrom, min(mat1$x), max(mat1$x),
+    blabla <- suppressWarnings(plot_bw(chip2, chrom, min(mat1$x), max(mat1$x),
                                        y.values$chip2.y1, y.values$chip2.y2,
                                        col = col[2], rotate = rotate,
                                        yMax = yMax[2]
@@ -354,10 +348,15 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
   
   # - plot outer track c(0.9,1.2) -> genes
   
+  plot.genes <- function(genes, chrom, start, end, y.pos, rotate = F) {
+    
+  }
+  
   
   if (!is.null(genes)) {
-    blabla <- plot.genes(genes, chrom, min(mat1$x), max(mat1$x),
-                         y.pos = y.values$gene.pos, rotate = rotate
+    blabla <- draw_exon(
+      genes, chrom = chrom, y.pos = y.values$gene.pos, 
+      width = 0.05, rotate = FALSE
     )
   }
   
@@ -376,7 +375,7 @@ features <- function(mat1, chrom, yMax = NULL, genes = NULL, chip1 = NULL,
 
 
 
-plot.bw <- function(file, chrom, start, end, y1, y2, col,
+plot_bw <- function(file, chrom, start, end, y1, y2, col,
                     yMax = NULL, rotate = F) {
 
   d <- import_bigwig(file, chrom, start, end)

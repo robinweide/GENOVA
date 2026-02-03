@@ -316,7 +316,8 @@ RCPbed = function(explist, bedlist, chromsToUse){
 #' @keywords internal
 #' @title RCP log2 foldchange
 #' 
-#'  RAW RCP in, lfc out
+#' @description
+#' RAW RCP in, lfc out
 #'
 #' @param dt a data.table of rcp
 #' @param contrast the name of the contrast-sample
